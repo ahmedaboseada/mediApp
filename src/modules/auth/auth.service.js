@@ -4,7 +4,7 @@ import { eventEmitter } from "../../utils/sendEmail-events/index.js";
 import jwt from "jsonwebtoken";
 export const registerService = async (req, res) => {
     try {
-        const { username, email, password, confirmPassword, phoneNumber = "", gender = "" } = req.body;
+        const { username, email, password, confirmPassword, phoneNumber = "", gender = "male" } = req.body;
         const secure_url = await req.file?.cloudinaryUrl;
 
         const existingUser = await userModel.findOne({
