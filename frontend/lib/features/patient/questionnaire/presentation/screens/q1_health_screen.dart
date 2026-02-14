@@ -6,7 +6,6 @@ import 'package:medi/features/patient/questionnaire/presentation/cubit/cubit/que
 import 'package:medi/features/patient/questionnaire/presentation/widgets/onboarding_progress.dart';
 import 'package:medi/features/patient/questionnaire/presentation/widgets/q_text_field_bool.dart';
 import 'package:medi/features/patient/questionnaire/presentation/widgets/q_text_fileld.dart';
-import 'package:multi_dropdown/multi_dropdown.dart';
 
 class Q1HealthScreen extends StatelessWidget {
   const Q1HealthScreen({super.key});

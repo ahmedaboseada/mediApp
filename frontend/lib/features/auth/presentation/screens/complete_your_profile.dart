@@ -11,9 +11,10 @@ import 'package:medi/features/auth/presentation/widgets/gender_field.dart';
 import 'package:medi/features/auth/presentation/widgets/phone_field.dart';
 
 class CompleteYourProfileScreen extends StatelessWidget {
-   CompleteYourProfileScreen({super.key, this.userModel});
+  CompleteYourProfileScreen({super.key, this.userModel});
   final UserModel? userModel;
   String? selectedImage;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,12 +26,12 @@ class CompleteYourProfileScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Complete Your Profile',
+                AppStrings.completeYourProfile,
                 style: AppStyles.screenTitle,
                 textAlign: TextAlign.center,
               ),
               Text(
-                'Please Fill your personal information below',
+                AppStrings.fillPersonalInformation,
                 style: AppStyles.subtitleText,
                 textAlign: TextAlign.center,
               ),
@@ -42,19 +43,17 @@ class CompleteYourProfileScreen extends StatelessWidget {
                 ),
               ),
               SizedBox(height: AppSizes.h24),
-                         PhoneField(),
-        
+              const PhoneField(),
               SizedBox(height: AppSizes.h24),
-                          DatePickerField(),
-        
+              const DatePickerField(),
               SizedBox(height: AppSizes.h24),
-              GenderField(),
+              const GenderField(),
               SizedBox(height: AppSizes.h32),
               BlocBuilder<ProfileFormCubit, ProfileFormState>(
                 buildWhen: (p, c) => p.isValid != c.isValid,
                 builder: (context, state) {
                   return PrimaryButton(
-                    text: 'Complete Profile',
+                    text: AppStrings.completeProfileButton,
                     onPressed: state.isValid
                         ? () {
                             context.go(AppRouter.profileCompletedScreen);

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/core/utils/app_them.dart';
+import 'package:medi/features/doctor/features/home/presentation/screens/main_layout.dart';
 
 void main() {
   setupServiceLocator();
@@ -18,10 +19,12 @@ class medi extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
+       
         return MaterialApp.router(
           theme: lightTheme,
           //ThemeData(scaffoldBackgroundColor: Color(0xFFF5F7FB)), new login suignup pages
           debugShowCheckedModeBanner: false,
+          
           routerConfig: AppRouter.router,
         );
       },

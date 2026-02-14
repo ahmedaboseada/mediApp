@@ -18,4 +18,8 @@ class AppAssets {
   static const String avatar3 = '${path}person3.png';
   static const String lineEdit = '${path}line_edit.svg';
   static const String calendar = '${path}calendar.svg';
+  static const String chats = '${path}chats.svg';
+  static const String profile = '${path}profile.svg';
+  static const String docs = '${path}docs.svg';
+  static const String home = '${path}home.svg';
 }

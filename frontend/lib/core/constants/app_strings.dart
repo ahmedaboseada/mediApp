@@ -119,4 +119,36 @@ class AppStrings {
   static const String invitationSent = "Invitation Sent!";
   static const String invitationSentMessage =
       "We’ve sent an invite to to email@example.com\n Once they accept, you can manage their\n medications.";
-}
+  // Complete Profile Screen
+  static const String completeYourProfile = "Complete Your Profile";
+  static const String fillPersonalInformation =
+      "Please Fill your personal information below";
+  static const String completeProfileButton = "Complete Profile";
+
+  // Doctor Complete Profile Screen
+  static const String specialization = "Specialization*";
+  static const String specializationHint = "Cardiology";
+  static const String clinicHospitalName = "Clinic / Hospital Name";
+  static const String clinicHospitalHint = "Info";
+  static const String medicalLicenseNumber = "Medical License Number";
+  static const String medicalLicenseHint = "MD123456";
+  static const String gender = "Gender*";
+  static const String genderHint = "Select";
+  static const String male = "Male";
+  static const String female = "Female";
+  static const String other = "Other";
+  static const String phoneNumber = "Phone Number*";
+  static const String phoneNumberHint = "Enter Phone Number";
+  static const String next = "Next";
+
+  // Button Text
+  static const String continueText = "Continue";
+  static const String saveChanges = "Save Changes";
+  static const String cancel = "Cancel";
+  static const String done = "Done";
+  static const String save = "Save";
+
+  // Validation Messages
+  static const String fieldRequired = "This field is required";
+  static const String pleaseSelectGender = "Please select a gender";
+  static const String pleaseEnterPhoneNumber = "Please enter phone number";}

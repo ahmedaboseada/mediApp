@@ -43,9 +43,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
           Text(widget.hintText!, style: AppStyles.fieldLabel50014),
         SizedBox(height: AppSizes.h6),
         TextFormField(
-          onTapOutside: (_) {
-            FocusScope.of(context).unfocus();
-          },
+          // onTapOutside: (_) {
+          //   FocusScope.of(context).unfocus();
+          // },
 
           textInputAction: TextInputAction.next,
           autofillHints: widget.autofillHints,

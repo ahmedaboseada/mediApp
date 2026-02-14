@@ -6,7 +6,6 @@ import 'package:medi/features/auth/presentation/cubit/log_out/log_out_cubit.dart
 import 'package:medi/features/patient/questionnaire/constants/constants.dart';
 import 'package:medi/features/patient/questionnaire/presentation/widgets/multi_select_field.dart';
 import 'package:multi_dropdown/multi_dropdown.dart';
-import 'package:multiselect/multiselect.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});

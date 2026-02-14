@@ -32,6 +32,7 @@ class AppSizes {
   static double get h8 => 8.h;
   static double get h10 => 10.h;
   static double get h12 => 12.h;
+  static double get h14 => 14.h;
   static double get h16 => 16.h;
   static double get h18 => 18.h;
   static double get h20 => 20.h;
@@ -66,6 +67,7 @@ class AppSizes {
   static double get r16 => 16.r;
   static double get r20 => 20.r;
   static double get r24 => 24.r;
+  static double get r28 => 28.r;
   static double get r32 => 32.r;
   static double get r80 => 80.r;
   static double get r200 => 200.r;

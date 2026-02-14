@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:medi/core/constants/app_sizes.dart';
 import 'package:medi/core/core.dart';
 
 class Role extends StatelessWidget {

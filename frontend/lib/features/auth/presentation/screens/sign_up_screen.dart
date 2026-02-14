@@ -23,6 +23,9 @@ class SignUpScreen extends StatelessWidget {
   final ValueNotifier<bool> _agreeToTerms = ValueNotifier(false);
 
   void _handleSignUp(BuildContext context) {
+    if (role == UserRole.doctor){
+      context.go(AppRouter.doctorCompleteProfile);
+    }
     if (!_formKey.currentState!.validate()) return;
     if (!_agreeToTerms.value) {
       context.showSafeSnackBar(AppStrings.agreeToTermsMessage);
@@ -48,7 +51,9 @@ class SignUpScreen extends StatelessWidget {
             if (state is RegisterSuccess) {
               context.showSafeSnackBar(state.message);
               context.safeGo(
-                AppRouter.otpScreen,
+                role == UserRole.patient
+                    ? AppRouter.completeProfile
+                    : AppRouter.doctorOtpScreen,
                 extra: _emailController.text.trim(),
               );
             } else if (state is RegisterFailure) {
