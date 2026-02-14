@@ -1,0 +1,105 @@
+import 'package:medi/core/constants/app_strings.dart';
+
+extension AppValidators on String? {
+  String? validateRequired(String message) {
+    if (this == null || this!.isEmpty) {
+      return message;
+    }
+    return null;
+  }
+
+  String? validateAge() {
+    if (this == null || this!.isEmpty) {
+      return AppStrings.ageEmpty;
+    }
+    final age = int.tryParse(this!);
+    if (age == null || age < 0 || age > 120) {
+      return AppStrings.ageInvalid;
+    }
+    return null;
+  }
+
+  String? validateEmail() {
+    if (this == null || this!.isEmpty) {
+      return AppStrings.emailEmpty;
+    }
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w]{2,4}$').hasMatch(this!)) {
+      return AppStrings.emailInvalid;
+    }
+    return null;
+  }
+
+  String? validatePassword() {
+    if (this == null || this!.isEmpty) {
+      return AppStrings.passwordEmpty;
+    }
+    if (this!.length < 6) {
+      return AppStrings.passwordTooShort;
+    }
+    return null;
+  }
+
+  String? validateConfirmPassword(String password) {
+    if (this == null || this!.isEmpty) {
+      return AppStrings.confirmPasswordEmpty;
+    }
+    if (this != password) {
+      return AppStrings.passwordsDoNotMatch;
+    }
+    return null;
+  }
+
+  String? validateFirstName() {
+    if (this == null || this!.isEmpty) {
+      return AppStrings.firstNameEmpty;
+    }
+    if (this!.length < 2) {
+      return AppStrings.firstNameTooShort;
+    }
+    return null;
+  }
+
+  String? validateLastName() {
+    if (this == null || this!.isEmpty) {
+      return AppStrings.lastNameEmpty;
+    }
+    if (this!.length < 2) {
+      return AppStrings.lastNameTooShort;
+    }
+    return null;
+  }
+
+  String? validatePhone() {
+    if (this == null || this!.isEmpty) {
+      return AppStrings.phoneEmpty;
+    }
+    if (!RegExp(r'^01[0125][0-9]{8}$').hasMatch(this!)) {
+      return AppStrings.phoneInvalid;
+    }
+    return null;
+  }
+
+  String? descriptionValidator(value) {
+    if (value == null || value.trim().isEmpty) {
+      return AppStrings.pleaseDescribeYourMaterialCase;
+    }
+    return null;
+  }
+
+  String? whatsAppNumberValidator(value) {
+    if (value == null || value.trim().isEmpty) {
+      return "WhatsApp number is required";
+    }
+    if (!RegExp(r'^[0-9]{11}$').hasMatch(value)) {
+      return "Enter a valid 11-digit number";
+    }
+    return null;
+  }
+
+  String? locationValidator(value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Please enter your location";
+    }
+    return null;
+  }
+}
