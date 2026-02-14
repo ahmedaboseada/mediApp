@@ -20,7 +20,7 @@ class medi extends StatelessWidget {
       builder: (context, child) {
         return MaterialApp.router(
           theme: lightTheme,
-          //ThemeData(scaffoldBackgroundColor: Color(0xFFF5F7FB)), test
+          //ThemeData(scaffoldBackgroundColor: Color(0xFFF5F7FB)), new login suignup pages
           debugShowCheckedModeBanner: false,
           routerConfig: AppRouter.router,
         );
