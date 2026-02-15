@@ -46,7 +46,6 @@ class _CustomTextFieldState extends State<CustomTextField> {
           // onTapOutside: (_) {
           //   FocusScope.of(context).unfocus();
           // },
-
           textInputAction: TextInputAction.next,
           autofillHints: widget.autofillHints,
           readOnly: widget.readOnly,

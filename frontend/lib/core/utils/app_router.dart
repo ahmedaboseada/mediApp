@@ -18,6 +18,7 @@ import 'package:medi/features/auth/presentation/screens/profile_completed.dart';
 import 'package:medi/features/auth/presentation/screens/set_password_screen.dart';
 import 'package:medi/features/auth/presentation/screens/sign_up_screen.dart';
 import 'package:medi/features/auth/presentation/screens/sing_in_screen.dart';
+import 'package:medi/features/doctor/features/complete_profile/presentation/screens/allow_location_screen.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/doctor_complete_profile.dart';
 import 'package:medi/features/patient/home/presentation/screens/home_screen.dart';
 import 'package:medi/features/patient/questionnaire/presentation/cubit/cubit/questinnaire_cubit.dart';
@@ -56,6 +57,7 @@ class AppRouter {
   static const String doctorSignUpScreen = '/signUp/doctor';
   static const String doctorOtpScreen = '/doctorOtp';
   static const String doctorCompleteProfile = '/doctor/completeProfile';
+  static const String allowLocationScreen = '/doctor/allowLocation';
 
 
   // ========== DEPRECATED ==========
@@ -166,13 +168,16 @@ class AppRouter {
         GoRoute(
           path: doctorCompleteProfile,
           builder: (context, state) {
-            return 
-            //BlocProvider(
-             // create: (context) => CompleteProfileCubit(getIt<AuthRepoImpl>()),
-               const DoctorCompleteProfile()
-            ;
+            return BlocProvider(
+              create: (context) => ProfileFormCubit(),
+              child: DoctorCompleteProfile(),
+            );
+           
           },
         ),
+        GoRoute(
+          path: allowLocationScreen, 
+          builder: (context, state) => const AllowLocationScreen(),),
 
       // ========== SHARED AUTH ROUTES ==========
     

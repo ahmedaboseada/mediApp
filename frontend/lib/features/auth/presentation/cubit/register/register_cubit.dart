@@ -15,7 +15,6 @@ class RegisterCubit extends Cubit<RegisterState> {
     required String firstName,
     required String lastName,
     required UserRole role,
-
   }) async {
     emit(RegisterLoading());
     final result = await authRepo.signUpWithEmailAndPassword(

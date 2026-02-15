@@ -51,7 +51,7 @@ class CircularAvatar extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: SvgPicture.asset(
-              height:AppSizes.h18,
+              height: AppSizes.h18,
               width: AppSizes.w18,
               AppAssets.lineEdit,
               fit: BoxFit.scaleDown,

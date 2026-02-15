@@ -3,10 +3,9 @@
 // import 'package:flutter_svg/flutter_svg.dart';
 // import 'package:medi/core/constants/app_assets.dart';
 
-
 // class HomePage extends StatefulWidget {
 //   const HomePage({super.key});
-  
+
 //   @override
 //   State<HomePage> createState() => _HomePageState();
 // }
@@ -61,7 +60,7 @@
 //               decoration: BoxDecoration(
 //                 color: Colors.white.withOpacity(.85),
 //                 borderRadius: BorderRadius.circular(40),
-                
+
 //               ),
 //               child: Row(
 //                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -97,7 +96,7 @@
 //         ),
 //         child: Row(
 //           children: [
-           
+
 //                 AnimatedScale(
 //                   duration: const Duration(milliseconds: 300),
 //                   scale: isSelected ? 1.1 : 1,
@@ -110,8 +109,7 @@
 //                     ):null,
 //                   ),
 //                 ),
-              
-            
+
 //             AnimatedSwitcher(
 //               duration: const Duration(milliseconds: 250),
 //               child: isSelected
@@ -165,14 +163,14 @@ class _MainLayoutView extends StatelessWidget {
       body: BlocBuilder<HomeNavCubit, HomeTab>(
         builder: (context, tab) {
           return switch (tab) {
-            HomeTab.home =>  HomeScreen(),
+            HomeTab.home => HomeScreen(),
             HomeTab.doctor => const PatientScreen(),
             HomeTab.chat => const ChatScreen(),
             HomeTab.profile => const ProfileScreen(),
           };
         },
       ),
-      bottomNavigationBar:  AdvancedBottomNavBar(),
+      bottomNavigationBar: AdvancedBottomNavBar(),
     );
   }
 }

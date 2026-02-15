@@ -10,11 +10,7 @@ class InvitationSentScreen extends StatelessWidget {
       body: Column(
         children: [
           Image.asset(AppAssets.completeProfile),
-          Text(
-            AppStrings.invitationSent,
-            style: AppStyles.screenTitle,
-          ),
-          
+          Text(AppStrings.invitationSent, style: AppStyles.screenTitle),
         ],
       ),
     );

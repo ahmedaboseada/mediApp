@@ -79,4 +79,6 @@ class AppStyles {
     fontWeight: FontWeight.w700,
     color: AppColors.primary,
   );
+
+
 }

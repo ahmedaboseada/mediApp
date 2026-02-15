@@ -19,12 +19,11 @@ class medi extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
-       
         return MaterialApp.router(
           theme: lightTheme,
           //ThemeData(scaffoldBackgroundColor: Color(0xFFF5F7FB)), new login suignup pages
           debugShowCheckedModeBanner: false,
-          
+
           routerConfig: AppRouter.router,
         );
       },

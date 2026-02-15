@@ -167,9 +167,9 @@ class _SignInScreenState extends State<SignInScreen> {
                           if (widget.role == UserRole.doctor) {
                             context.go(AppRouter.doctorSignUpScreen);
                           } else {
-                          context.go(AppRouter.signUpScreen);
-                        }
-                        }
+                            context.go(AppRouter.signUpScreen);
+                          }
+                        },
                       ),
                     ],
                   ),

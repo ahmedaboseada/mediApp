@@ -25,7 +25,9 @@ class AuthRepoImpl implements AuthRepo {
     required UserRole role,
   }) async {
     try {
-      final endpoint = role == UserRole.patient ? '/api/auth/login' : '/api/auth/login/doctor';
+      final endpoint = role == UserRole.patient
+          ? '/api/auth/login'
+          : '/api/auth/login/doctor';
       final Response response = await apiService.post(endpoint, {
         'email': email,
         'password': password,
@@ -118,11 +120,10 @@ class AuthRepoImpl implements AuthRepo {
         // 'firstName': firstName,
         // 'lastName': lastName,
       };
-      final endpoint = role == UserRole.patient ? 'register' : '/api/auth/register/doctor';
-      final Response response = await apiService.post(
-        endpoint,
-        data,
-      );
+      final endpoint = role == UserRole.patient
+          ? 'register'
+          : '/api/auth/register/doctor';
+      final Response response = await apiService.post(endpoint, data);
       log(response.toString());
 
       final registerResponse = RegisterResponse.fromJson(response.data);

@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medi/core/core.dart';
 
 class PrimaryButton extends StatelessWidget {
-  const PrimaryButton( {
+  const PrimaryButton({
     super.key,
     this.backgroundColor = AppColors.primary,
     this.textColor = Colors.white,

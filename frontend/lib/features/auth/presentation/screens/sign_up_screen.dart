@@ -23,7 +23,7 @@ class SignUpScreen extends StatelessWidget {
   final ValueNotifier<bool> _agreeToTerms = ValueNotifier(false);
 
   void _handleSignUp(BuildContext context) {
-    if (role == UserRole.doctor){
+    if (role == UserRole.doctor) {
       context.go(AppRouter.doctorCompleteProfile);
     }
     if (!_formKey.currentState!.validate()) return;
@@ -126,7 +126,7 @@ class SignUpScreen extends StatelessWidget {
                       validator: (value) => value.validateEmail(),
                     ),
                     SizedBox(height: AppSizes.h20),
-                     CustomTextField(
+                    CustomTextField(
                       autofillHints: const [AutofillHints.password],
                       hintText: AppStrings.passwordHint,
                       controller: _passwordController,
@@ -145,7 +145,7 @@ class SignUpScreen extends StatelessWidget {
                         _passwordController.text,
                       ),
                     ),
-                   
+
                     ValueListenableBuilder<bool>(
                       valueListenable: _agreeToTerms,
                       builder: (context, value, _) {
@@ -193,7 +193,11 @@ class SignUpScreen extends StatelessWidget {
                           ),
                         ),
                         TextButton(
-                          onPressed: () => context.pop(),
+                          onPressed: () => context.go(
+                            role == UserRole.patient
+                                ? AppRouter.patientLogin
+                                : AppRouter.doctorLogin,
+                          ),
                           child: Text(
                             AppStrings.signIn,
                             style: TextStyle(

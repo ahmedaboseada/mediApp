@@ -34,10 +34,9 @@ class _DatePickerFieldState extends State<DatePickerField> {
   void initState() {
     super.initState();
     dateController = TextEditingController(
-      text:
-          widget.initialDate != null
-              ? DateFormat('dd/MM/yyyy').format(widget.initialDate!)
-              : '',
+      text: widget.initialDate != null
+          ? DateFormat('dd/MM/yyyy').format(widget.initialDate!)
+          : '',
     );
   }
 
@@ -49,37 +48,36 @@ class _DatePickerFieldState extends State<DatePickerField> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Year of birth', style:  AppStyles.fieldLabel50014),
+          Text('Year of birth', style: AppStyles.fieldLabel50014),
           SizedBox(height: AppSizes.h8),
           TextField(
             controller: dateController,
             readOnly: true,
-             decoration: InputDecoration(
-            filled: true,
-            fillColor: AppColors.surfaceColor,
-             hintText: 'DD/MM/YYYY',
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: AppColors.surfaceColor,
+              hintText: 'DD/MM/YYYY',
 
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppSizes.r10),
-              borderSide: BorderSide(color: AppColors.borderColor),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppSizes.r10),
-              borderSide: BorderSide(color: AppColors.borderColor),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppSizes.r10),
-              borderSide: BorderSide(color: AppColors.focusedBorderColor),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppSizes.r10),
-              borderSide: BorderSide(color: AppColors.errorBorderColor),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppSizes.r10),
-              borderSide: BorderSide(color: AppColors.errorBorderColor),
-            ),
-          
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSizes.r10),
+                borderSide: BorderSide(color: AppColors.borderColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSizes.r10),
+                borderSide: BorderSide(color: AppColors.borderColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSizes.r10),
+                borderSide: BorderSide(color: AppColors.focusedBorderColor),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSizes.r10),
+                borderSide: BorderSide(color: AppColors.errorBorderColor),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSizes.r10),
+                borderSide: BorderSide(color: AppColors.errorBorderColor),
+              ),
 
               suffixIcon: IconButton(
                 onPressed: () {
@@ -94,9 +92,9 @@ class _DatePickerFieldState extends State<DatePickerField> {
                     AppColors.primaryDark,
                     BlendMode.srcIn,
                   ),
+                ),
               ),
             ),
-             )
           ),
         ],
       ),

@@ -20,8 +20,7 @@ class AdvancedBottomNavBar extends StatelessWidget {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 0, sigmaY: 0),
             child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(.85),
                 borderRadius: BorderRadius.circular(40),
@@ -29,9 +28,7 @@ class AdvancedBottomNavBar extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: HomeTab.values
-                    .map(
-                      (tab) => _NavItem(tab: tab, currentTab: currentTab),
-                    )
+                    .map((tab) => _NavItem(tab: tab, currentTab: currentTab))
                     .toList(),
               ),
             ),
@@ -46,10 +43,7 @@ class _NavItem extends StatelessWidget {
   final HomeTab tab;
   final HomeTab currentTab;
 
-  const _NavItem({
-    required this.tab,
-    required this.currentTab,
-  });
+  const _NavItem({required this.tab, required this.currentTab});
 
   @override
   Widget build(BuildContext context) {
@@ -84,10 +78,7 @@ class _NavItem extends StatelessWidget {
                 icon,
                 height: 22,
                 colorFilter: isSelected
-                    ? const ColorFilter.mode(
-                        Colors.white,
-                        BlendMode.srcIn,
-                      )
+                    ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
                     : null,
               ),
             ),

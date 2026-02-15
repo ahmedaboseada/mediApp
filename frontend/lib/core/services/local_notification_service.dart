@@ -21,6 +21,7 @@ class LocalNotificationService {
   //   // You can customize the notification further by adding more parameters
   // }
 }
+
 //1.set up
 //2.basic notification
 //3. repeat notification

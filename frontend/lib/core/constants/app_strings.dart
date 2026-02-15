@@ -151,4 +151,13 @@ class AppStrings {
   // Validation Messages
   static const String fieldRequired = "This field is required";
   static const String pleaseSelectGender = "Please select a gender";
-  static const String pleaseEnterPhoneNumber = "Please enter phone number";}
+  static const String pleaseEnterPhoneNumber = "Please enter phone number";
+
+  // Allow Location Screen
+  static const String clinicLocationTitle =
+      "What is Your Clinic or Hospital\nLocation?";
+  static const String clinicLocationSubtitle =
+      "We need to know your current location\nto provide it to your patients";
+  static const String allowLocationAccess = "Allow Location Access";
+  static const String enterLocationManually = "Enter Location Manually";
+}

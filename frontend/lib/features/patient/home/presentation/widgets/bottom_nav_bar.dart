@@ -22,10 +22,7 @@ class AdvancedBottomNavBar extends StatelessWidget {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
             child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 10,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(.85),
                 borderRadius: BorderRadius.circular(40),
@@ -35,7 +32,7 @@ class AdvancedBottomNavBar extends StatelessWidget {
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
-                 ],
+                ],
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -119,7 +116,7 @@ class AdvancedBottomNavBar extends StatelessWidget {
                       ),
                     )
                   : const SizedBox.shrink(),
-            )
+            ),
           ],
         ),
       ),

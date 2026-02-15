@@ -8,8 +8,7 @@ part 'sigin_state.dart';
 class SiginCubit extends Cubit<SiginState> {
   SiginCubit(this.authRepo) : super(SiginInitial());
   final AuthRepo authRepo;
-  Future<void> signin(String email, String password ,   UserRole role,
-) async {
+  Future<void> signin(String email, String password, UserRole role) async {
     emit(SiginLoading());
     var result = await authRepo.signInWithEmailAndPassword(
       email: email,
@@ -17,7 +16,7 @@ class SiginCubit extends Cubit<SiginState> {
       role: role,
     );
     result.fold((failure) => emit(SiginFailure(failure.message)), (tokens) {
-      emit(SiginSuccess( role));
+      emit(SiginSuccess(role));
     });
   }
 
