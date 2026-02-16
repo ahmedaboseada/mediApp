@@ -9,11 +9,13 @@ class QTextField extends StatelessWidget {
     required this.items,
     required this.label,
     this.singleSelect = false,
+    this.hint,
   });
   final Function(List<String>) onSelectionChange;
   final List<DropdownItem<String>> items;
   final String label;
   final bool singleSelect;
+  final String? hint;
   @override
   Widget build(BuildContext context) {
     return Column(

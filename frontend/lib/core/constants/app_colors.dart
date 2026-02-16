@@ -11,8 +11,9 @@ class AppColors {
   static const Color borderColor = Color(0xFFE1E3E5);
   static const Color focusedBorderColor = Color(0xFF2178F3);
   static const Color errorBorderColor = Color(0xFFEF4444);
-
+  static const Color cardBorderColor = Color(0xFFE1E3E5);
   // Text colors
+
   static const Color primaryText = Color(0xFF1F2937);
   static const Color secondaryText = Color(0xFF5F6C75);
   static const Color tertiaryText = Color(0xFF999999);

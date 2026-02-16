@@ -10,7 +10,7 @@ class CustomTextField extends StatefulWidget {
     this.keyboardType,
     this.isPassword = false,
     this.readOnly = false,
-    this.autofillHints,
+    this.autofillHints, 
   });
 
   final String? hintText;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 
 class AllowLocationScreen extends StatelessWidget {
@@ -55,6 +56,7 @@ class AllowLocationScreen extends StatelessWidget {
               PrimaryButton(
                 text: AppStrings.allowLocationAccess,
                 onPressed: () {
+                  context.go(AppRouter.mainLayout);
                   // TODO: Implement location permission request
                 },
               ),

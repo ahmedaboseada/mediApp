@@ -79,6 +79,9 @@ class AppStyles {
     fontWeight: FontWeight.w700,
     color: AppColors.primary,
   );
-
-
+  static TextStyle cardtitle40016 = TextStyle(
+    fontSize: AppSizes.sp16,
+    fontWeight: FontWeight.w400,
+    color: AppColors.primaryText,
+  );
 }

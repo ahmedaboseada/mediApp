@@ -20,6 +20,9 @@ import 'package:medi/features/auth/presentation/screens/sign_up_screen.dart';
 import 'package:medi/features/auth/presentation/screens/sing_in_screen.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/allow_location_screen.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/doctor_complete_profile.dart';
+import 'package:medi/features/doctor/features/home/presentation/screens/main_layout.dart';
+import 'package:medi/features/doctor/features/settings/presentation/controller/cubit/schedule_cubit.dart';
+import 'package:medi/features/doctor/features/settings/presentation/screens/schedule_availability_screen.dart';
 import 'package:medi/features/patient/home/presentation/screens/home_screen.dart';
 import 'package:medi/features/patient/questionnaire/presentation/cubit/cubit/questinnaire_cubit.dart';
 import 'package:medi/features/patient/questionnaire/presentation/screens/caregiver_form_screen.dart';
@@ -58,7 +61,8 @@ class AppRouter {
   static const String doctorOtpScreen = '/doctorOtp';
   static const String doctorCompleteProfile = '/doctor/completeProfile';
   static const String allowLocationScreen = '/doctor/allowLocation';
-
+  static const String mainLayout = '/doctor/mainLayout';
+  static const String availabilityScreen = '/doctor/availability';
 
   // ========== DEPRECATED ==========
   static const String emailLoginScreen = '/emailLogin';
@@ -106,7 +110,7 @@ class AppRouter {
           );
         },
       ),
-        GoRoute(
+      GoRoute(
         path: completeProfile,
         builder: (context, state) {
           return BlocProvider(
@@ -165,22 +169,32 @@ class AppRouter {
           );
         },
       ),
-        GoRoute(
-          path: doctorCompleteProfile,
-          builder: (context, state) {
-            return BlocProvider(
-              create: (context) => ProfileFormCubit(),
-              child: DoctorCompleteProfile(),
-            );
-           
-          },
+      GoRoute(
+        path: doctorCompleteProfile,
+        builder: (context, state) {
+          return BlocProvider(
+            create: (context) => ProfileFormCubit(),
+            child: DoctorCompleteProfile(),
+          );
+        },
+      ),
+      GoRoute(
+        path: allowLocationScreen,
+        builder: (context, state) => const AllowLocationScreen(),
+      ),
+      GoRoute(
+        path: mainLayout,
+        builder: (context, state) => const MainLayout(),
+      ),
+      GoRoute(
+        path: availabilityScreen,
+        builder: (context, state) => BlocProvider(
+          create: (context) => ScheduleCubit(),
+          child: const ScheduleAvailabilityScreen(),
         ),
-        GoRoute(
-          path: allowLocationScreen, 
-          builder: (context, state) => const AllowLocationScreen(),),
+      ),
 
       // ========== SHARED AUTH ROUTES ==========
-    
       GoRoute(
         path: otpScreen,
         builder: (context, state) {
