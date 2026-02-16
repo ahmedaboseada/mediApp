@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/core/utils/safe_go_router.dart';
 import 'package:medi/features/auth/presentation/cubit/register/register_cubit.dart';
-import 'package:medi/features/auth/presentation/widgets/custom_text_field.dart';
+import 'package:medi/core/widgets/custom_text_field.dart';
 import 'package:medi/features/auth/presentation/widgets/divider_with_text.dart';
 import 'package:medi/features/auth/presentation/widgets/social_login_buttons.dart';
 import 'package:medi/features/auth/presentation/widgets/terms_conditions_checkbox.dart';
@@ -104,6 +104,7 @@ class SignUpScreen extends StatelessWidget {
                             hintText: AppStrings.firstNameHint,
                             controller: _nameController,
                             validator: (value) => value.validateFirstName(),
+                            label: AppStrings.firstNameHint,
                           ),
                         ),
                         SizedBox(width: AppSizes.w16),
@@ -113,6 +114,7 @@ class SignUpScreen extends StatelessWidget {
                             hintText: AppStrings.lastNameHint,
                             controller: _lastNameController,
                             validator: (value) => value.validateLastName(),
+                            label: AppStrings.lastNameHint, 
                           ),
                         ),
                       ],
@@ -124,6 +126,7 @@ class SignUpScreen extends StatelessWidget {
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) => value.validateEmail(),
+                      label: AppStrings.emailHint,
                     ),
                     SizedBox(height: AppSizes.h20),
                     CustomTextField(
@@ -132,6 +135,7 @@ class SignUpScreen extends StatelessWidget {
                       controller: _passwordController,
                       isPassword: true,
                       validator: (value) => value.validatePassword(),
+                      label: AppStrings.passwordHint,
                     ),
 
                     SizedBox(height: AppSizes.h20),
@@ -144,6 +148,7 @@ class SignUpScreen extends StatelessWidget {
                       validator: (value) => value.validateConfirmPassword(
                         _passwordController.text,
                       ),
+                      label: AppStrings.confirmPasswordHint,
                     ),
 
                     ValueListenableBuilder<bool>(

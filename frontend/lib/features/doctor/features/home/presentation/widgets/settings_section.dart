@@ -25,7 +25,23 @@ class SettingsSection extends StatelessWidget {
             },
           ),
           SettingsTile(title: 'Payout & Withdrawal', onTap: () {}),
-          SettingsTile(title: 'Account Information', onTap: () {}),
+          SettingsTile(
+            title: 'Account Information',
+            onTap: () {
+              context.push(AppRouter.accountInformationScreen);
+            },
+          ),
+
+          //  SettingsTile(title: 'Notifications', onTap: () {}),
+          //  SettingsTile(title: 'Language', onTap: () {}),
+          //  SettingsTile(title: 'Help & Support', onTap: () {}),
+          //  SettingsTile(title: 'Terms & Conditions', onTap: () {}),
+          //  SettingsTile(title: 'About Us', onTap: () {}),
+          //  SettingsTile(title: 'Invite Friends', onTap: () {}),
+          //  SettingsTile(title: 'Feedback', onTap: () {}),
+          //  SettingsTile(title: 'Delete Account', onTap: () {}),
+          //  SettingsTile(title: 'Logout', onTap: () {}),
+          //  SettingsTile(title: 'Dark Mode', onTap: () {}),
           SettingsTile(title: 'Security & Privacy', onTap: () {}),
         ],
       ),

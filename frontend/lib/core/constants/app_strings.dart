@@ -9,6 +9,7 @@ class AppStrings {
 
   //sign in screen
   static const String emailHint = "Email";
+  static const String emailAddressLabel = "Email Address";
   static const String passwordHint = "Password";
   static const String confirmPasswordHint = "Confirm password";
   static const String welcomeBack = "Welcome back, you've been missed";

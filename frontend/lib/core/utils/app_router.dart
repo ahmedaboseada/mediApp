@@ -22,6 +22,7 @@ import 'package:medi/features/doctor/features/complete_profile/presentation/scre
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/doctor_complete_profile.dart';
 import 'package:medi/features/doctor/features/home/presentation/screens/main_layout.dart';
 import 'package:medi/features/doctor/features/settings/presentation/controller/cubit/schedule_cubit.dart';
+import 'package:medi/features/doctor/features/settings/presentation/screens/account_information_screen.dart';
 import 'package:medi/features/doctor/features/settings/presentation/screens/schedule_availability_screen.dart';
 import 'package:medi/features/patient/home/presentation/screens/home_screen.dart';
 import 'package:medi/features/patient/questionnaire/presentation/cubit/cubit/questinnaire_cubit.dart';
@@ -63,13 +64,14 @@ class AppRouter {
   static const String allowLocationScreen = '/doctor/allowLocation';
   static const String mainLayout = '/doctor/mainLayout';
   static const String availabilityScreen = '/doctor/availability';
+  static const String accountInformationScreen = '/doctor/accountInformation';
 
   // ========== DEPRECATED ==========
   static const String emailLoginScreen = '/emailLogin';
   static const String phoneLoginScreen = '/phoneLogin';
 
   static final router = GoRouter(
-    initialLocation: '/',
+    initialLocation: mainLayout,
     routes: [
       // ========== SHARED/SPLASH ROUTES ==========
       GoRoute(
@@ -192,6 +194,10 @@ class AppRouter {
           create: (context) => ScheduleCubit(),
           child: const ScheduleAvailabilityScreen(),
         ),
+      ),
+      GoRoute(
+        path: accountInformationScreen,
+        builder: (context, state) => AccountInformationScreen(),
       ),
 
       // ========== SHARED AUTH ROUTES ==========

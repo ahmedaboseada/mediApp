@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/core/utils/safe_go_router.dart';
 import 'package:medi/features/auth/presentation/cubit/forget_password/forget_password_cubit.dart';
-import '../widgets/custom_text_field.dart';
+import '../../../../core/widgets/custom_text_field.dart';
 
 class ForgetPasswordScreen extends StatelessWidget {
   ForgetPasswordScreen({super.key});
@@ -68,6 +68,7 @@ class ForgetPasswordScreen extends StatelessWidget {
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) => value.validateEmail(),
+                      label: AppStrings.emailHint,
                     ),
                     SizedBox(height: AppSizes.h32),
 

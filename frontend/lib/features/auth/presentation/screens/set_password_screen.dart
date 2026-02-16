@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/core/utils/safe_go_router.dart';
 import 'package:medi/features/auth/presentation/cubit/reset_password/reset_password_cubit.dart';
-import 'package:medi/features/auth/presentation/widgets/custom_text_field.dart';
+import 'package:medi/core/widgets/custom_text_field.dart';
 
 class SetPasswordScreen extends StatelessWidget {
   SetPasswordScreen({super.key});
@@ -80,6 +80,7 @@ class SetPasswordScreen extends StatelessWidget {
                     hintText: AppStrings.passwordHint,
                     isPassword: true,
                     validator: (v) => v.validatePassword(),
+                    label: AppStrings.passwordHint,
                   ),
                   SizedBox(height: AppSizes.h16),
 
@@ -90,6 +91,7 @@ class SetPasswordScreen extends StatelessWidget {
                     isPassword: true,
                     validator: (v) =>
                         v.validateConfirmPassword(_passwordController.text),
+                    label: AppStrings.confirmPasswordHint,
                   ),
 
                   SizedBox(height: AppSizes.h34),

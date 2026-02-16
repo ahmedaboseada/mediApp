@@ -11,8 +11,10 @@ class CustomTextField extends StatefulWidget {
     this.isPassword = false,
     this.readOnly = false,
     this.autofillHints, 
+    required this.label,
   });
 
+  final String label;
   final String? hintText;
   final TextEditingController? controller;
   final String? Function(String?)? validator;

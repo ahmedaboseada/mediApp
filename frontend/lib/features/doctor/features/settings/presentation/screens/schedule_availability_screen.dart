@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/core/widgets/custom_drop_down.dart';
-import 'package:medi/features/auth/presentation/widgets/custom_text_field.dart';
+import 'package:medi/core/widgets/custom_text_field.dart';
 import 'package:medi/features/doctor/constants/constants.dart';
 import 'package:medi/features/doctor/features/settings/presentation/widgets/working_days_widget.dart';
 import 'package:medi/features/patient/questionnaire/presentation/widgets/q_text_fileld.dart';
@@ -44,7 +44,9 @@ class ScheduleAvailabilityScreen extends StatelessWidget {
                     SizedBox(height: AppSizes.h24),
                     Text(
                       'Working Days',
-                      style: AppStyles.bodyText.copyWith(fontSize: AppSizes.sp16),
+                      style: AppStyles.bodyText.copyWith(
+                        fontSize: AppSizes.sp16,
+                      ),
                     ),
                     Text(
                       'Select the days you\'re available for appointments',
@@ -66,7 +68,7 @@ class ScheduleAvailabilityScreen extends StatelessWidget {
                       label: 'What are your working hours?',
                       hint: 'Select Time',
                       items: DoctorConstants().workingHours,
-          
+
                       onSelectionChange: (List<String> p1) {
                         print(p1);
                       },
@@ -79,10 +81,10 @@ class ScheduleAvailabilityScreen extends StatelessWidget {
                       items: DoctorConstants().appointmentsTypes,
                       label: 'What type of appointments do you offer?',
                     ),
-                     SizedBox(height: AppSizes.h16),
+                    SizedBox(height: AppSizes.h16),
                     CustomTextField(
                       hintText: 'Max patients per day',
-                      keyboardType: TextInputType.number,
+                      keyboardType: TextInputType.number, label: 'Max patients per day',
                     ),
                     SizedBox(height: AppSizes.h24),
                     PrimaryButton(

@@ -6,9 +6,9 @@ import 'package:medi/core/widgets/circular_avatar.dart';
 import 'package:medi/features/auth/data/models/user_model.dart';
 import 'package:medi/features/auth/presentation/cubit/complete_profile/complete_profile_cubit.dart';
 import 'package:medi/features/auth/presentation/cubit/complete_profile/complete_profile_state.dart';
-import 'package:medi/features/auth/presentation/widgets/custom_text_field.dart';
-import 'package:medi/features/auth/presentation/widgets/gender_field.dart';
-import 'package:medi/features/auth/presentation/widgets/phone_field.dart';
+import 'package:medi/core/widgets/custom_text_field.dart';
+import 'package:medi/core/widgets/gender_field.dart';
+import 'package:medi/core/widgets/phone_field.dart';
 import 'package:medi/features/doctor/constants/constants.dart';
 import 'package:medi/features/patient/questionnaire/presentation/widgets/q_text_fileld.dart';
 
@@ -58,9 +58,9 @@ class DoctorCompleteProfile extends StatelessWidget {
                   label: "Specialization",
                 ),
                 SizedBox(height: AppSizes.h24),
-                CustomTextField(hintText: AppStrings.clinicHospitalName),
+                CustomTextField(hintText: AppStrings.clinicHospitalName, label: AppStrings.clinicHospitalName),
                 SizedBox(height: AppSizes.h24),
-                CustomTextField(hintText: AppStrings.medicalLicenseNumber),
+                CustomTextField(hintText: AppStrings.medicalLicenseNumber, label: AppStrings.medicalLicenseNumber),
                 SizedBox(height: AppSizes.h24),
                 const GenderField(),
                 SizedBox(height: AppSizes.h24),

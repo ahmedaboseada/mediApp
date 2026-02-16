@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/auth/presentation/widgets/custom_text_field.dart';
+import 'package:medi/core/widgets/custom_text_field.dart';
 import 'package:medi/features/patient/questionnaire/presentation/widgets/q_text_fileld.dart';
 import 'package:multi_dropdown/multi_dropdown.dart';
 
@@ -59,7 +59,7 @@ class CaregiverFormScreen extends StatelessWidget {
                 CustomTextField(
                   hintText: 'Name',
                   controller: _nameController,
-                  validator: (value) => value.validateFirstName(),
+                  validator: (value) => value.validateFirstName(), label: 'Name',
                 ),
                 SizedBox(height: AppSizes.h24),
                 // Relationship QTextField
@@ -78,7 +78,7 @@ class CaregiverFormScreen extends StatelessWidget {
                   hintText: 'Email',
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  validator: (value) => value.validateEmail(),
+                  validator: (value) => value.validateEmail(), label: 'Email',
                 ),
                 SizedBox(height: AppSizes.h16),
                 // Invitation message

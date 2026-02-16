@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/core/utils/safe_go_router.dart';
 import 'package:medi/features/auth/presentation/cubit/signin/sigin_cubit.dart';
-import 'package:medi/features/auth/presentation/widgets/custom_text_field.dart';
+import 'package:medi/core/widgets/custom_text_field.dart';
 import 'package:medi/features/auth/presentation/widgets/divider_with_text.dart';
 import 'package:medi/features/auth/presentation/widgets/forgot_password_button.dart';
 import 'package:medi/features/auth/presentation/widgets/sign_up_link.dart';
@@ -95,6 +95,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         validator: (value) => value?.validateEmail(),
+                        label: AppStrings.emailHint,
                       ),
                       SizedBox(height: AppSizes.h16),
 
@@ -105,6 +106,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         controller: _passwordController,
                         isPassword: true,
                         validator: (value) => value?.validatePassword(),
+                        label: AppStrings.passwordHint,
                       ),
                       SizedBox(height: AppSizes.h16),
 
