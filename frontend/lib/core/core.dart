@@ -20,6 +20,14 @@ export 'utils/service_locator.dart';
 
 // Widgets
 export 'widgets/primary_button.dart';
+export 'widgets/custom_app_bar.dart';
+export 'widgets/custom_text_field.dart';
+export 'widgets/custom_drop_down.dart';
+export 'widgets/gender_field.dart';
+export 'widgets/phone_field.dart';
+export 'widgets/circular_avatar.dart';
+export 'widgets/date_picker_field.dart';
+export 'widgets/custom_toggle_switch.dart';
 
 // Enums
 export 'enums/user_role.dart';

@@ -84,4 +84,29 @@ class AppStyles {
     fontWeight: FontWeight.w400,
     color: AppColors.primaryText,
   );
+
+  // Payout & Withdrawal Screen Styles
+  static TextStyle balanceLabel1800Secondary = TextStyle(
+    fontSize: AppSizes.sp18,
+    fontWeight: FontWeight.w500,
+    color: AppColors.secondaryText,
+  );
+
+  static TextStyle balanceAmount20700Primary = TextStyle(
+    fontSize: AppSizes.sp20,
+    fontWeight: FontWeight.w700,
+    color: AppColors.primary,
+  );
+
+  static TextStyle balanceSubtitle14400Tertiary = TextStyle(
+    fontSize: AppSizes.sp14,
+    fontWeight: FontWeight.w400,
+    color: AppColors.tertiaryText,
+  );
+
+  static TextStyle cardTitle18700Primary = TextStyle(
+    fontSize: AppSizes.sp18,
+    fontWeight: FontWeight.w700,
+    color: AppColors.primaryText,
+  );
 }

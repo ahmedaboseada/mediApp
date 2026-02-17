@@ -2,13 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/core/widgets/circular_avatar.dart';
 import 'package:medi/features/auth/data/models/user_model.dart';
 import 'package:medi/features/auth/presentation/cubit/complete_profile/complete_profile_cubit.dart';
 import 'package:medi/features/auth/presentation/cubit/complete_profile/complete_profile_state.dart';
-import 'package:medi/core/widgets/data_picker_field.dart';
-import 'package:medi/core/widgets/gender_field.dart';
-import 'package:medi/core/widgets/phone_field.dart';
 
 class CompleteYourProfileScreen extends StatelessWidget {
   CompleteYourProfileScreen({super.key, this.userModel});

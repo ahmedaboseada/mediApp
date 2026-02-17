@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/core/widgets/custom_app_bar.dart';
-import 'package:medi/core/widgets/custom_text_field.dart';
-import 'package:medi/core/widgets/gender_field.dart';
-import 'package:medi/core/widgets/phone_field.dart';
 import 'package:medi/features/doctor/constants/constants.dart';
 import 'package:medi/features/patient/questionnaire/presentation/widgets/q_text_fileld.dart';
 
@@ -23,16 +19,12 @@ class AccountInformationScreen extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.all(AppSizes.w16),
             child: Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSizes.r40),
-              ),
-              elevation: 0,
-              color: AppColors.whiteText,
               child: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(
                   horizontal: AppSizes.w16,
                   vertical: AppSizes.h16,
                 ),
+
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -101,6 +93,15 @@ class AccountInformationScreen extends StatelessWidget {
                       ),
                       SizedBox(height: AppSizes.h24),
                       const GenderField(),
+                      SizedBox(height: AppSizes.h24),
+                      PrimaryButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            // Process the data
+                          }
+                        },
+                        text: 'Save ',
+                      ),
                     ],
                   ),
                 ),

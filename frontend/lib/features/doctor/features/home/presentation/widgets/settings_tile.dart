@@ -11,7 +11,7 @@ class SettingsTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: EdgeInsets.symmetric(
-        horizontal: AppSizes.h24,
+        // horizontal: AppSizes.h24,
         vertical: 0,
       ),
       title: Text(title, style: AppStyles.cardtitle40016),

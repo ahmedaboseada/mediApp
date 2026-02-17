@@ -35,4 +35,7 @@ class AppColors {
   static const Color info = Color(0xFF3B82F6);
   //divider color
   static const Color dividerColor = Color(0xFF999999);
+
+  // Container backgrounds
+  static const Color balanceContainerBackground = Color(0xFFF8FAFC);
 }

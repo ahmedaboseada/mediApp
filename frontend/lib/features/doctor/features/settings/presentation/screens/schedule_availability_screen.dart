@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/core/widgets/custom_drop_down.dart';
-import 'package:medi/core/widgets/custom_text_field.dart';
 import 'package:medi/features/doctor/constants/constants.dart';
 import 'package:medi/features/doctor/features/settings/presentation/widgets/working_days_widget.dart';
 import 'package:medi/features/patient/questionnaire/presentation/widgets/q_text_fileld.dart';
@@ -24,11 +22,6 @@ class ScheduleAvailabilityScreen extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.all(AppSizes.w16),
             child: Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSizes.r40),
-              ),
-              elevation: 0,
-              color: AppColors.whiteText,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
@@ -84,7 +77,8 @@ class ScheduleAvailabilityScreen extends StatelessWidget {
                     SizedBox(height: AppSizes.h16),
                     CustomTextField(
                       hintText: 'Max patients per day',
-                      keyboardType: TextInputType.number, label: 'Max patients per day',
+                      keyboardType: TextInputType.number,
+                      label: 'Max patients per day',
                     ),
                     SizedBox(height: AppSizes.h24),
                     PrimaryButton(
@@ -93,6 +87,7 @@ class ScheduleAvailabilityScreen extends StatelessWidget {
                       },
                       text: 'Save',
                     ),
+                    SizedBox(height: AppSizes.h24),
                   ],
                 ),
               ),

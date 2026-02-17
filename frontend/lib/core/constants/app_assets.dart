@@ -22,4 +22,7 @@ class AppAssets {
   static const String profile = '${path}profile.svg';
   static const String docs = '${path}docs.svg';
   static const String home = '${path}home.svg';
+  static const String dollar = '${path}dollar.svg';
+  static const String notification = '${path}notification.svg';
+  static const String settings = '${path}settings.svg';
 }

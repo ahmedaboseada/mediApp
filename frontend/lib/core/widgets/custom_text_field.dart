@@ -10,7 +10,7 @@ class CustomTextField extends StatefulWidget {
     this.keyboardType,
     this.isPassword = false,
     this.readOnly = false,
-    this.autofillHints, 
+    this.autofillHints,
     required this.label,
   });
 
@@ -41,8 +41,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (widget.hintText != null)
-          Text(widget.hintText!, style: AppStyles.fieldLabel50014),
+        Text(widget.label, style: AppStyles.fieldLabel50014),
         SizedBox(height: AppSizes.h6),
         TextFormField(
           // onTapOutside: (_) {

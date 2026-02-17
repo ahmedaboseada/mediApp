@@ -161,4 +161,8 @@ class AppStrings {
       "We need to know your current location\nto provide it to your patients";
   static const String allowLocationAccess = "Allow Location Access";
   static const String enterLocationManually = "Enter Location Manually";
+
+  // Payout & Withdrawal
+  static const String currentBalance = "Current Balance";
+  static const String availableForWithdrawal = "Available for withdrawal";
 }

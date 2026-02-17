@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/core/utils/safe_go_router.dart';
 import 'package:medi/features/auth/presentation/cubit/register/register_cubit.dart';
-import 'package:medi/core/widgets/custom_text_field.dart';
 import 'package:medi/features/auth/presentation/widgets/divider_with_text.dart';
 import 'package:medi/features/auth/presentation/widgets/social_login_buttons.dart';
 import 'package:medi/features/auth/presentation/widgets/terms_conditions_checkbox.dart';
@@ -114,7 +113,7 @@ class SignUpScreen extends StatelessWidget {
                             hintText: AppStrings.lastNameHint,
                             controller: _lastNameController,
                             validator: (value) => value.validateLastName(),
-                            label: AppStrings.lastNameHint, 
+                            label: AppStrings.lastNameHint,
                           ),
                         ),
                       ],

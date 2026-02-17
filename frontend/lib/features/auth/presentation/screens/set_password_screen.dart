@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/core/utils/safe_go_router.dart';
 import 'package:medi/features/auth/presentation/cubit/reset_password/reset_password_cubit.dart';
-import 'package:medi/core/widgets/custom_text_field.dart';
 
 class SetPasswordScreen extends StatelessWidget {
   SetPasswordScreen({super.key});
