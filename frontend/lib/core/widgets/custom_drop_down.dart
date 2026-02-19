@@ -22,7 +22,7 @@ class CustomDropdown extends StatelessWidget {
       children: [
         Text(
           label,
-          style: AppStyles.fieldLabel50014.copyWith(fontSize: AppSizes.sp14),
+          style: AppStyles.black14500.copyWith(fontSize: AppSizes.sp14),
         ),
         SizedBox(height: AppSizes.h6),
         DropdownButtonFormField<String>(
@@ -34,7 +34,7 @@ class CustomDropdown extends StatelessWidget {
             filled: true,
             fillColor: AppColors.surfaceColor,
             hintText: hint,
-            hintStyle: AppStyles.fieldLabel50014.copyWith(
+            hintStyle: AppStyles.black14500.copyWith(
               color: AppColors.secondaryText,
             ),
             border: OutlineInputBorder(

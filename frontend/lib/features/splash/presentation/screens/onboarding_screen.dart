@@ -60,7 +60,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     onPressed: () => context.go(AppRouter.homeScreen),
                     child: Text(
                       'Skip',
-                      style: AppStyles.splashSubtitleText60016,
+                      style: AppStyles.white16600,
                     ),
                   ),
                 ),
@@ -82,13 +82,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             Text(
                               _pages[index]['title']!,
                               textAlign: TextAlign.center,
-                              style: AppStyles.onboardingTitle,
+                              style: AppStyles.white24700,
                             ),
                             SizedBox(height: AppSizes.h16),
                             Text(
                               _pages[index]['subtitle']!,
                               textAlign: TextAlign.center,
-                              style: AppStyles.onboardingSubtitle,
+                              style: AppStyles.white14500,
                             ),
                             SizedBox(height: AppSizes.h40),
 

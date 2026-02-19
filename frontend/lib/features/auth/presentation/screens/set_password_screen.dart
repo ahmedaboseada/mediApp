@@ -64,11 +64,11 @@ class SetPasswordScreen extends StatelessWidget {
                     AppAssets.updatePassword,
                     height: AppSizes.h200,
                   ),
-                  Text(AppStrings.updatePassword, style: AppStyles.screenTitle),
+                  Text(AppStrings.updatePassword, style: AppStyles.black24700),
                   SizedBox(height: AppSizes.h12),
                   Text(
                     AppStrings.newPasswordMessage,
-                    style: AppStyles.subtitleText,
+                    style: AppStyles.tertiary14500,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 24),

@@ -14,7 +14,7 @@ class SettingsTile extends StatelessWidget {
         // horizontal: AppSizes.h24,
         vertical: 0,
       ),
-      title: Text(title, style: AppStyles.cardtitle40016),
+      title: Text(title, style: AppStyles.black40016),
       trailing: Icon(
         Icons.arrow_forward_ios,
         size: AppSizes.h16,

@@ -31,7 +31,7 @@ class PayoutWithdrawalScreen extends StatelessWidget {
                         children: [
                           Text(
                             'Payout & Withdrawal',
-                            style: AppStyles.cardTitle18700Primary,
+                            style: AppStyles.primary18700,
                           ),
                           SizedBox(height: AppSizes.h24),
                           BalanceContainer(balance: '\$2,500.00'),

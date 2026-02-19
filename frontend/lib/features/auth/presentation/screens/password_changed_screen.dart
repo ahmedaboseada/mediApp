@@ -20,12 +20,12 @@ class PasswordChangedScreen extends StatelessWidget {
             SizedBox(height: AppSizes.h24),
             Text(
               'Password Changed!',
-              style: AppStyles.screenTitle,
+              style: AppStyles.black24700,
               textAlign: TextAlign.center,
             ),
             Text(
               'Your password has been changed\n successfully.',
-              style: AppStyles.subtitleText.copyWith(fontSize: AppSizes.sp18),
+              style: AppStyles.tertiary14500.copyWith(fontSize: AppSizes.sp18),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: AppSizes.h32),

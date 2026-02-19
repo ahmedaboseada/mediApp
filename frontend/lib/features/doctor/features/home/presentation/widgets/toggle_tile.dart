@@ -20,9 +20,9 @@ class ToggleTile extends StatelessWidget {
     return ListTile(
       minTileHeight: 16,
       contentPadding: EdgeInsets.zero,
-      title: Text(title, style: AppStyles.fieldLabel50014),
+      title: Text(title, style: AppStyles.black14500),
       subtitle: subtitle != null
-          ? Text(subtitle!, style: AppStyles.dividerText40012)
+          ? Text(subtitle!, style: AppStyles.tertiary40012)
           : null,
       trailing: CustomToggleSwitch(value: value, onChanged: onChanged),
     );

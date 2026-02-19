@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/patient/questionnaire/presentation/widgets/q_text_fileld.dart';
+import 'package:medi/core/widgets/q_text_fileld.dart';
 import 'package:multi_dropdown/multi_dropdown.dart';
 
 class CaregiverFormScreen extends StatelessWidget {
@@ -43,14 +43,14 @@ class CaregiverFormScreen extends StatelessWidget {
                 // Title
                 Text(
                   AppStrings.addSomeoneYouCareFor,
-                  style: AppStyles.screenTitle,
+                  style: AppStyles.black24700,
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: AppSizes.h8),
                 // Subtitle
                 Text(
                   AppStrings.createProfileForSomeoneYouCareFor,
-                  style: AppStyles.subtitleText,
+                  style: AppStyles.tertiary14500,
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: AppSizes.h40),
@@ -85,7 +85,7 @@ class CaregiverFormScreen extends StatelessWidget {
                 // Invitation message
                 Text(
                   AppStrings.invitationToJoinCareCircle,
-                  style: AppStyles.subtitleText,
+                  style: AppStyles.tertiary14500,
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: AppSizes.h32),

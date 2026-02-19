@@ -37,7 +37,7 @@ class _NotificationSectionState extends State<NotificationSection> {
                 SizedBox(width: AppSizes.w8),
                 Text(
                   'Notification Preferences',
-                  style: AppStyles.fieldLabel50014.copyWith(
+                  style: AppStyles.black14500.copyWith(
                     fontSize: AppSizes.sp18,
                   ),
                 ),

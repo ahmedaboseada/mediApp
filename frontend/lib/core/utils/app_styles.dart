@@ -5,14 +5,14 @@ import 'package:medi/core/constants/app_sizes.dart';
 
 class AppStyles {
   // Screen & Section Titles
-  static TextStyle screenTitle = TextStyle(
+  static TextStyle black24700 = TextStyle(
     fontSize: AppSizes.sp24,
     fontWeight: FontWeight.w700,
     color: AppColors.primaryText,
   );
 
   // Body Text Styles
-  static TextStyle subtitleText = TextStyle(
+  static TextStyle tertiary14500 = TextStyle(
     fontSize: AppSizes.sp14,
     fontWeight: FontWeight.w500,
     color: AppColors.tertiaryText,
@@ -23,88 +23,88 @@ class AppStyles {
     color: AppColors.whiteText,
   );
 
-  static TextStyle bodyText = TextStyle(
+  static TextStyle black14400 = TextStyle(
     fontSize: AppSizes.sp14,
     fontWeight: FontWeight.w400,
     color: AppColors.primaryText,
   );
 
   // Form & Input Labels
-  static TextStyle assistiveLabel = TextStyle(
+  static TextStyle black10600 = TextStyle(
     fontSize: AppSizes.sp10,
     fontWeight: FontWeight.w600,
     color: AppColors.primaryText,
   );
 
-  static TextStyle fieldLabel50014 = TextStyle(
+  static TextStyle black14500 = TextStyle(
     fontSize: AppSizes.sp14,
     fontWeight: FontWeight.w500,
     color: AppColors.primaryText,
   );
 
-  static TextStyle buttonLabel = TextStyle(
+  static TextStyle black14600 = TextStyle(
     fontSize: AppSizes.sp14,
     fontWeight: FontWeight.w600,
     color: AppColors.primaryText,
   );
-  static TextStyle onboardingTitle = TextStyle(
+  static TextStyle white24700 = TextStyle(
     fontSize: AppSizes.sp24,
     fontWeight: FontWeight.w700,
     color: AppColors.whiteText,
   );
-  static TextStyle onboardingSubtitle = TextStyle(
+  static TextStyle white14500 = TextStyle(
     fontSize: AppSizes.sp14,
     fontWeight: FontWeight.w500,
     color: AppColors.whiteText,
   );
 
   // Supporting Text
-  static final TextStyle supportingText = TextStyle(
+  static final TextStyle primaryDark12400 = TextStyle(
     fontSize: AppSizes.sp12,
     color: AppColors.primaryDark,
     fontWeight: FontWeight.w400,
   );
-  static TextStyle dividerText40012 = TextStyle(
+  static TextStyle tertiary40012 = TextStyle(
     fontSize: AppSizes.sp12,
     fontWeight: FontWeight.w400,
     color: AppColors.tertiaryText,
   );
-  static TextStyle splashSubtitleText60016 = TextStyle(
+  static TextStyle white16600 = TextStyle(
     fontSize: AppSizes.sp16,
     fontWeight: FontWeight.w600,
     color: AppColors.whiteText,
   );
-  static TextStyle cardTitle70024 = TextStyle(
+  static TextStyle primary70024 = TextStyle(
     fontSize: AppSizes.sp24,
     fontWeight: FontWeight.w700,
     color: AppColors.primary,
   );
-  static TextStyle cardtitle40016 = TextStyle(
+  static TextStyle black40016 = TextStyle(
     fontSize: AppSizes.sp16,
     fontWeight: FontWeight.w400,
     color: AppColors.primaryText,
   );
 
   // Payout & Withdrawal Screen Styles
-  static TextStyle balanceLabel1800Secondary = TextStyle(
+  static TextStyle secondary18500 = TextStyle(
     fontSize: AppSizes.sp18,
     fontWeight: FontWeight.w500,
     color: AppColors.secondaryText,
   );
 
-  static TextStyle balanceAmount20700Primary = TextStyle(
+  static TextStyle primary20700 = TextStyle(
     fontSize: AppSizes.sp20,
     fontWeight: FontWeight.w700,
     color: AppColors.primary,
   );
 
-  static TextStyle balanceSubtitle14400Tertiary = TextStyle(
+  static TextStyle tertiary14400 = TextStyle(
     fontSize: AppSizes.sp14,
     fontWeight: FontWeight.w400,
     color: AppColors.tertiaryText,
   );
 
-  static TextStyle cardTitle18700Primary = TextStyle(
+  static TextStyle primary18700 = TextStyle(
     fontSize: AppSizes.sp18,
     fontWeight: FontWeight.w700,
     color: AppColors.primaryText,

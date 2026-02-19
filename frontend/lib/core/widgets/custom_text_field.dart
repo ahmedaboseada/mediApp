@@ -41,7 +41,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(widget.label, style: AppStyles.fieldLabel50014),
+        Text(widget.label, style: AppStyles.black14500),
         SizedBox(height: AppSizes.h6),
         TextFormField(
           // onTapOutside: (_) {
@@ -55,7 +55,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           keyboardType: widget.keyboardType,
           obscuringCharacter: '*',
           obscureText: widget.isPassword ? _obscure : false,
-          style: AppStyles.fieldLabel50014.copyWith(
+          style: AppStyles.black14500.copyWith(
             color: AppColors.secondaryText,
           ),
           decoration: InputDecoration(

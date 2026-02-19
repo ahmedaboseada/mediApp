@@ -48,7 +48,7 @@ class _DatePickerFieldState extends State<DatePickerField> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Year of birth', style: AppStyles.fieldLabel50014),
+          Text('Year of birth', style: AppStyles.black14500),
           SizedBox(height: AppSizes.h8),
           TextField(
             controller: dateController,

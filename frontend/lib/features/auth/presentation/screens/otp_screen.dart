@@ -55,11 +55,11 @@ class OtpScreen extends StatelessWidget {
 
                     SizedBox(height: AppSizes.h24),
 
-                    Text(AppStrings.verifyOtp, style: AppStyles.screenTitle),
+                    Text(AppStrings.verifyOtp, style: AppStyles.black24700),
                     SizedBox(height: AppSizes.h8),
                     Text(
                       '${AppStrings.enterOtpSent} $email',
-                      style: AppStyles.subtitleText,
+                      style: AppStyles.tertiary14500,
                     ),
 
                     SizedBox(height: AppSizes.h40),

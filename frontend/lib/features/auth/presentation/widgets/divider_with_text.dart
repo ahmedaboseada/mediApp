@@ -14,7 +14,7 @@ class DividerWithText extends StatelessWidget {
           Expanded(child: Divider(color: AppColors.dividerColor, thickness: 1)),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: AppSizes.w12),
-            child: Text(text, style: AppStyles.dividerText40012),
+            child: Text(text, style: AppStyles.tertiary40012),
           ),
           Expanded(child: Divider(color: AppColors.dividerColor, thickness: 1)),
         ],

@@ -17,10 +17,10 @@ class GenderField extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Gender', style: AppStyles.fieldLabel50014),
+              Text('Gender', style: AppStyles.black14500),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
-                style: AppStyles.fieldLabel50014.copyWith(
+                style: AppStyles.black14500.copyWith(
                   color: AppColors.secondaryText,
                 ),
                 initialValue: state.gender.isEmpty ? null : state.gender,
@@ -31,6 +31,7 @@ class GenderField extends StatelessWidget {
                 onChanged: (value) {
                   if (value != null) {
                     context.read<ProfileFormCubit>().onGenderChanged(value);
+                    print('Selected gender: $value');
                   }
                 },
 

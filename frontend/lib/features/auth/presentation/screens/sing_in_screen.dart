@@ -74,8 +74,8 @@ class _SignInScreenState extends State<SignInScreen> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       // Header
-                      Text(widget.role.title, style: AppStyles.screenTitle),
-                      Text(AppStrings.signIn, style: AppStyles.screenTitle),
+                      Text(widget.role.title, style: AppStyles.black24700),
+                      Text(AppStrings.signIn, style: AppStyles.black24700),
                       SizedBox(height: AppSizes.h8),
                       Text(
                         AppStrings.welcomeBack,

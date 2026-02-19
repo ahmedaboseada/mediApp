@@ -27,13 +27,13 @@ class TermsConditionsCheckbox extends StatelessWidget {
             child: Text.rich(
               TextSpan(
                 text: 'Agree with ',
-                style: AppStyles.bodyText.copyWith(
+                style: AppStyles.black14400.copyWith(
                   color: AppColors.secondaryText,
                 ),
                 children: [
                   TextSpan(
                     text: 'Terms & Conditions',
-                    style: AppStyles.bodyText.copyWith(
+                    style: AppStyles.black14400.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w600,
                     ),

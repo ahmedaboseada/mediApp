@@ -38,7 +38,7 @@ class Role extends StatelessWidget {
         SizedBox(height: AppSizes.h16),
         Text(
           role,
-          style: AppStyles.onboardingSubtitle.copyWith(fontSize: AppSizes.sp18),
+          style: AppStyles.white14500.copyWith(fontSize: AppSizes.sp18),
         ),
       ],
     );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/constants/constants.dart';
-import 'package:medi/features/patient/questionnaire/presentation/widgets/q_text_fileld.dart';
+import 'package:medi/core/widgets/q_text_fileld.dart';
 
 class AccountInformationScreen extends StatelessWidget {
   AccountInformationScreen({super.key});
@@ -32,7 +32,7 @@ class AccountInformationScreen extends StatelessWidget {
                     children: [
                       Text(
                         'Account Information',
-                        style: AppStyles.fieldLabel50014.copyWith(
+                        style: AppStyles.black14500.copyWith(
                           fontSize: AppSizes.sp18,
                         ),
                         textAlign: TextAlign.start,

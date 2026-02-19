@@ -23,12 +23,12 @@ class CompleteYourProfileScreen extends StatelessWidget {
             children: [
               Text(
                 AppStrings.completeYourProfile,
-                style: AppStyles.screenTitle,
+                style: AppStyles.black24700,
                 textAlign: TextAlign.center,
               ),
               Text(
                 AppStrings.fillPersonalInformation,
-                style: AppStyles.subtitleText,
+                style: AppStyles.tertiary14500,
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: AppSizes.h32),
@@ -52,7 +52,7 @@ class CompleteYourProfileScreen extends StatelessWidget {
                     text: AppStrings.completeProfileButton,
                     onPressed: state.isValid
                         ? () {
-                            context.go(AppRouter.profileCompletedScreen);
+                            context.go(AppRouter.patientProfileCompletedScreen);
                           }
                         : null,
                   );

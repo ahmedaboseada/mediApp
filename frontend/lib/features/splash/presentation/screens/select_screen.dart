@@ -32,7 +32,7 @@ class SelectScreen extends StatelessWidget {
                       Text(
                         'Select what you are',
                         textAlign: TextAlign.center,
-                        style: AppStyles.onboardingTitle,
+                        style: AppStyles.white24700,
                       ),
                       SizedBox(height: AppSizes.h56),
                       Padding(

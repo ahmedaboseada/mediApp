@@ -75,21 +75,21 @@ class SignUpScreen extends StatelessWidget {
                     SizedBox(height: AppSizes.h12),
                     Text(
                       AppStrings.createAccount,
-                      style: AppStyles.screenTitle,
+                      style: AppStyles.black24700,
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: AppSizes.h8),
                     Text(
                       role.title,
                       textAlign: TextAlign.center,
-                      style: AppStyles.subtitleText.copyWith(
+                      style: AppStyles.tertiary14500.copyWith(
                         color: AppColors.secondaryText,
                       ),
                     ),
                     Text(
                       AppStrings.signUpMessage,
                       textAlign: TextAlign.center,
-                      style: AppStyles.bodyText.copyWith(
+                      style: AppStyles.black14400.copyWith(
                         color: AppColors.secondaryText,
                       ),
                     ),
@@ -192,7 +192,7 @@ class SignUpScreen extends StatelessWidget {
                       children: [
                         Text(
                           AppStrings.alreadyHaveAccount,
-                          style: AppStyles.bodyText.copyWith(
+                          style: AppStyles.black14400.copyWith(
                             color: AppColors.secondaryText,
                           ),
                         ),

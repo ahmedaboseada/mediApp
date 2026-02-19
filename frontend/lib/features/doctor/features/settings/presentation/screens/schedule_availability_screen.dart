@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/constants/constants.dart';
 import 'package:medi/features/doctor/features/settings/presentation/widgets/working_days_widget.dart';
-import 'package:medi/features/patient/questionnaire/presentation/widgets/q_text_fileld.dart';
+import 'package:medi/core/widgets/q_text_fileld.dart';
 
 class ScheduleAvailabilityScreen extends StatelessWidget {
   const ScheduleAvailabilityScreen({super.key});
@@ -30,20 +30,20 @@ class ScheduleAvailabilityScreen extends StatelessWidget {
                     SizedBox(height: AppSizes.h24),
                     Text(
                       'Schedule & Availability',
-                      style: AppStyles.fieldLabel50014.copyWith(
+                      style: AppStyles.black14500.copyWith(
                         fontSize: AppSizes.sp18,
                       ),
                     ),
                     SizedBox(height: AppSizes.h24),
                     Text(
                       'Working Days',
-                      style: AppStyles.bodyText.copyWith(
+                      style: AppStyles.black14400.copyWith(
                         fontSize: AppSizes.sp16,
                       ),
                     ),
                     Text(
                       'Select the days you\'re available for appointments',
-                      style: AppStyles.dividerText40012,
+                      style: AppStyles.tertiary40012,
                     ),
                     SizedBox(height: AppSizes.h16),
                     WorkingDaysWidget(),

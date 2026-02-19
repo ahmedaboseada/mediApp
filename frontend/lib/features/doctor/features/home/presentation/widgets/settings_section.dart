@@ -28,7 +28,7 @@ class SettingsSection extends StatelessWidget {
                 SizedBox(width: AppSizes.w8),
                 Text(
                   'Settings',
-                  style: AppStyles.fieldLabel50014.copyWith(
+                  style: AppStyles.black14500.copyWith(
                     fontSize: AppSizes.sp18,
                   ),
                 ),

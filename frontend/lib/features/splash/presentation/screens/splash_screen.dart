@@ -74,7 +74,7 @@ class _SplashScreenState extends State<SplashScreen>
             ),
             // SizedBox(height: AppSizes.h20),
             Text('Medi', style: AppStyles.splashScreenTitle),
-            Text("Pill Reminder", style: AppStyles.splashSubtitleText60016),
+            Text("Pill Reminder", style: AppStyles.white16600),
           ],
         ),
       ),

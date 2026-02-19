@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 
 class ProfileCompleted extends StatelessWidget {
-  const ProfileCompleted({super.key});
-
+  const ProfileCompleted({super.key, required this.user});
+ final UserRole user;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,14 +21,13 @@ class ProfileCompleted extends StatelessWidget {
               // Profile Completed Title
               Text(
                 AppStrings.profileCompletedSuccessfully,
-                style: AppStyles.screenTitle.copyWith(color: AppColors.primary),
+                style: AppStyles.black24700.copyWith(color: AppColors.primary),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: AppSizes.h16),
               // Subtitle
-              Text(
-                AppStrings.startMedicalRemindingJourney,
-                style: AppStyles.subtitleText,
+              Text( user == UserRole.patient ? AppStrings.startMedicalRemindingJourney : AppStrings.startHelpingPatientsJourney,
+                style: AppStyles.tertiary14500,
                 textAlign: TextAlign.center,
               ),
               // Complete Profile Image
@@ -40,7 +40,11 @@ class ProfileCompleted extends StatelessWidget {
               PrimaryButton(
                 text: AppStrings.letsStart,
                 onPressed: () {
-                  // Handle navigation to home or next screen
+                  if (user == UserRole.patient) {
+                    context.go(AppRouter.onboardingFlow);
+                  } else {
+                    context.go(AppRouter.qFlowScreen);
+                  }
                 },
               ),
             ],

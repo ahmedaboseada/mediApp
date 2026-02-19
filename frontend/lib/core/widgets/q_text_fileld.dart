@@ -10,12 +10,14 @@ class QTextField extends StatelessWidget {
     required this.label,
     this.singleSelect = false,
     this.hint,
+    this.enabled=true,
   });
   final Function(List<String>) onSelectionChange;
   final List<DropdownItem<String>> items;
   final String label;
   final bool singleSelect;
   final String? hint;
+  final bool? enabled ;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -23,7 +25,7 @@ class QTextField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: AppStyles.buttonLabel.copyWith(fontWeight: FontWeight.w500),
+          style: AppStyles.black14600.copyWith(fontWeight: FontWeight.w500),
           textAlign: TextAlign.start,
         ),
         MultiDropdown<String>(
@@ -36,7 +38,7 @@ class QTextField extends StatelessWidget {
           // },
           fieldDecoration: FieldDecoration(
             backgroundColor: AppColors.whiteText,
-            hintStyle: AppStyles.fieldLabel50014.copyWith(
+            hintStyle: AppStyles.black14500.copyWith(
               color: AppColors.secondaryText,
             ),
             padding: EdgeInsets.all(AppSizes.h12),

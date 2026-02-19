@@ -75,6 +75,8 @@ class AppStrings {
       "Profile Completed Successfully";
   static const String startMedicalRemindingJourney =
       "Let's start your medical reminding journey";
+    static const String startHelpingPatientsJourney =
+    "Let’s set your working hours";
   static const String letsStart = "Let's Start";
 
   // General
@@ -141,6 +143,27 @@ class AppStrings {
   static const String phoneNumber = "Phone Number*";
   static const String phoneNumberHint = "Enter Phone Number";
   static const String next = "Next";
+
+  // Doctor Appointment Availability
+  static const String appointmentAvailabilityTitle =
+      "Tell us when you're available\n to accept appointments.";
+  static const String appointmentAvailabilitySubtitle =
+      "Don't worry, you can edit it later";
+  static const String workingDaysQuestion =
+      "Which days do you usually work?";
+  static const String consultationLengthLabel =
+      "How long is each consultation?";
+  static const String selectTime = "Select Time";
+  static const String appointmentScheduleNote =
+      "This helps us schedule your appointments accurately.";
+  static const List<String> consultationDurations = [
+    "15 min",
+    "30 min",
+    "45 min",
+    "60 min",
+  ];
+  static const String appointmentTypeTitle =
+      "How you'd like to consult\n your patients";
 
   // Button Text
   static const String continueText = "Continue";

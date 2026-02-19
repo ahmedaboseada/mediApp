@@ -30,7 +30,7 @@ class CaregiverModeScreen extends StatelessWidget {
             children: [
               Text(
                 AppStrings.caregiverMode,
-                style: AppStyles.cardTitle70024.copyWith(
+                style: AppStyles.primary70024.copyWith(
                   fontSize: AppSizes.sp26,
                 ),
                 textAlign: TextAlign.center,
@@ -39,7 +39,7 @@ class CaregiverModeScreen extends StatelessWidget {
               Text(
                 AppStrings.caregiverModeDescription,
                 textAlign: TextAlign.center,
-                style: AppStyles.dividerText40012,
+                style: AppStyles.tertiary40012,
               ),
               SizedBox(height: AppSizes.h86),
               Center(
@@ -62,7 +62,7 @@ class CaregiverModeScreen extends StatelessWidget {
                 children: [
                   Text(
                     AppStrings.addSomeoneYouCareFor,
-                    style: AppStyles.cardTitle70024.copyWith(
+                    style: AppStyles.primary70024.copyWith(
                       fontSize: AppSizes.sp18,
                       fontWeight: FontWeight.w600,
                     ),
@@ -90,7 +90,7 @@ class CaregiverModeScreen extends StatelessWidget {
               Text(
                 AppStrings.addSomeoneYouCareForDescription,
                 textAlign: TextAlign.center,
-                style: AppStyles.dividerText40012,
+                style: AppStyles.tertiary40012,
               ),
               Spacer(),
               Row(
@@ -106,7 +106,7 @@ class CaregiverModeScreen extends StatelessWidget {
                   Text(
                     AppStrings.manageCaregiverLater,
                     textAlign: TextAlign.center,
-                    style: AppStyles.dividerText40012,
+                    style: AppStyles.tertiary40012,
                   ),
                 ],
               ),

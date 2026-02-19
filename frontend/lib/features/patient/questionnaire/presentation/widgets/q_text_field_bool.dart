@@ -21,7 +21,7 @@ class QTextFieldBoolean extends StatelessWidget {
       children: [
         Text(
           label,
-          style: AppStyles.buttonLabel.copyWith(fontWeight: FontWeight.w500),
+          style: AppStyles.black14600.copyWith(fontWeight: FontWeight.w500),
           textAlign: TextAlign.start,
         ),
         MultiDropdown<bool>(
@@ -33,7 +33,7 @@ class QTextFieldBoolean extends StatelessWidget {
           },
           fieldDecoration: FieldDecoration(
             backgroundColor: AppColors.whiteText,
-            hintStyle: AppStyles.fieldLabel50014.copyWith(
+            hintStyle: AppStyles.black14500.copyWith(
               color: AppColors.secondaryText,
             ),
 

@@ -29,17 +29,17 @@ class BalanceContainer extends StatelessWidget {
               SizedBox(width: AppSizes.w8),
               Text(
                 AppStrings.currentBalance,
-                style: AppStyles.balanceLabel1800Secondary,
+                style: AppStyles.secondary18500,
               ),
               Spacer(),
-              Text(balance, style: AppStyles.balanceAmount20700Primary),
+              Text(balance, style: AppStyles.primary20700),
             ],
           ),
           SizedBox(height: AppSizes.h8),
           // Available for Withdrawal Text
           Text(
             AppStrings.availableForWithdrawal,
-            style: AppStyles.balanceSubtitle14400Tertiary,
+            style: AppStyles.tertiary14400,
           ),
         ],
       ),

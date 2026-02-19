@@ -12,7 +12,7 @@ class PhoneField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Phone Number', style: AppStyles.fieldLabel50014),
+        Text('Phone Number', style: AppStyles.black14500),
         const SizedBox(height: 8),
 
         InternationalPhoneNumberInput(
@@ -30,6 +30,7 @@ class PhoneField extends StatelessWidget {
             context.read<ProfileFormCubit>().onPhoneChanged(
               number.phoneNumber ?? '',
             );
+            print('Phone number changed: ${number.phoneNumber}');
           },
           cursorColor: Colors.black,
           inputDecoration: InputDecoration(

@@ -18,8 +18,11 @@ import 'package:medi/features/auth/presentation/screens/profile_completed.dart';
 import 'package:medi/features/auth/presentation/screens/set_password_screen.dart';
 import 'package:medi/features/auth/presentation/screens/sign_up_screen.dart';
 import 'package:medi/features/auth/presentation/screens/sing_in_screen.dart';
+import 'package:medi/features/doctor/features/complete_profile/presentation/controller/q_flow/q_flow_cubit.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/allow_location_screen.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/doctor_complete_profile.dart';
+import 'package:medi/features/doctor/features/complete_profile/presentation/screens/enter_location_manually.dart';
+import 'package:medi/features/doctor/features/complete_profile/presentation/widgets/q_flow.dart';
 import 'package:medi/features/doctor/features/home/presentation/screens/main_layout.dart';
 import 'package:medi/features/doctor/features/settings/presentation/controller/cubit/schedule_cubit.dart';
 import 'package:medi/features/doctor/features/settings/presentation/screens/account_information_screen.dart';
@@ -55,7 +58,8 @@ class AppRouter {
   static const String onboardingFlow = '/onboardingFlow';
   static const String caregiverFormScreen = '/caregiverForm';
   static const String invitationSendScreen = '/invitationSend';
-  static const String profileCompletedScreen = '/profileCompleted';
+  static const String patientProfileCompletedScreen =
+      '/patient/ProfileCompleted';
 
   // ========== DOCTOR ROUTES ==========
   static const String doctorLogin = '/login/doctor';
@@ -67,13 +71,16 @@ class AppRouter {
   static const String availabilityScreen = '/doctor/availability';
   static const String accountInformationScreen = '/doctor/accountInformation';
   static const String payoutWithdrawalScreen = '/doctor/payoutWithdrawal';
+  static const String manualLocationScreen = '/doctor/manualLocation';
+  static const String doctorProfileCompletedScreen = '/doctor/ProfileCompleted';
+  static const String qFlowScreen = '/doctor/qFlow';
 
   // ========== DEPRECATED ==========
   static const String emailLoginScreen = '/emailLogin';
   static const String phoneLoginScreen = '/phoneLogin';
 
   static final router = GoRouter(
-    initialLocation: mainLayout,
+    initialLocation: '/',
     routes: [
       // ========== SHARED/SPLASH ROUTES ==========
       GoRoute(
@@ -153,6 +160,10 @@ class AppRouter {
           return InvitationSendScreen();
         },
       ),
+      GoRoute(
+        path: manualLocationScreen,
+        builder: (context, state) => const ManualLocationScreen(),
+      ),
 
       // ========== DOCTOR ROUTES ==========
       GoRoute(
@@ -182,6 +193,7 @@ class AppRouter {
           );
         },
       ),
+
       GoRoute(
         path: allowLocationScreen,
         builder: (context, state) => const AllowLocationScreen(),
@@ -204,6 +216,11 @@ class AppRouter {
       GoRoute(
         path: payoutWithdrawalScreen,
         builder: (context, state) => PayoutWithdrawalScreen(),
+      ),
+      GoRoute(
+        path: qFlowScreen,
+        builder: (context, state) =>
+            BlocProvider(create: (context) => QFlowCubit(), child: QFlow()),
       ),
 
       // ========== SHARED AUTH ROUTES ==========
@@ -232,9 +249,15 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: profileCompletedScreen,
+        path: patientProfileCompletedScreen,
         builder: (context, state) {
-          return const ProfileCompleted();
+          return const ProfileCompleted(user: UserRole.patient);
+        },
+      ),
+      GoRoute(
+        path: doctorProfileCompletedScreen,
+        builder: (context, state) {
+          return const ProfileCompleted(user: UserRole.doctor);
         },
       ),
       GoRoute(

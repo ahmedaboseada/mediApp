@@ -5,7 +5,7 @@ import 'package:medi/features/patient/questionnaire/constants/constants.dart';
 import 'package:medi/features/patient/questionnaire/presentation/cubit/cubit/questinnaire_cubit.dart';
 import 'package:medi/features/patient/questionnaire/presentation/widgets/onboarding_progress.dart';
 import 'package:medi/features/patient/questionnaire/presentation/widgets/q_text_field_bool.dart';
-import 'package:medi/features/patient/questionnaire/presentation/widgets/q_text_fileld.dart';
+import 'package:medi/core/widgets/q_text_fileld.dart';
 
 class Q1HealthScreen extends StatelessWidget {
   const Q1HealthScreen({super.key});
@@ -24,7 +24,7 @@ class Q1HealthScreen extends StatelessWidget {
               children: [
                 Text(
                   AppStrings.letsLearnMoreAboutYourHealth,
-                  style: AppStyles.cardTitle70024.copyWith(
+                  style: AppStyles.primary70024.copyWith(
                     fontSize: AppSizes.sp22,
                   ),
                 ),

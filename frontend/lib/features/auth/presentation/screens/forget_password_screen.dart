@@ -47,7 +47,7 @@ class ForgetPasswordScreen extends StatelessWidget {
                     // Forget Password Title
                     Text(
                       AppStrings.forgetPassword,
-                      style: AppStyles.screenTitle,
+                      style: AppStyles.black24700,
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: AppSizes.h8),
@@ -55,7 +55,7 @@ class ForgetPasswordScreen extends StatelessWidget {
                     // Subtitle
                     Text(
                       AppStrings.restoreAccessMessage,
-                      style: AppStyles.subtitleText,
+                      style: AppStyles.tertiary14500,
                       textAlign: TextAlign.center,
                     ),
                     SizedBox(height: AppSizes.h32),
@@ -88,13 +88,13 @@ class ForgetPasswordScreen extends StatelessWidget {
                     Text(
                       AppStrings.fatherInformation,
                       textAlign: TextAlign.center,
-                      style: AppStyles.subtitleText,
+                      style: AppStyles.tertiary14500,
                     ),
                     SizedBox(height: AppSizes.h8),
                     Text(
                       AppStrings.contactSupportTeam,
                       textAlign: TextAlign.center,
-                      style: AppStyles.bodyText.copyWith(
+                      style: AppStyles.black14400.copyWith(
                         fontSize: AppSizes.sp16,
                       ),
                     ),

@@ -6,7 +6,7 @@ import 'package:medi/features/auth/data/models/user_model.dart';
 import 'package:medi/features/auth/presentation/cubit/complete_profile/complete_profile_cubit.dart';
 import 'package:medi/features/auth/presentation/cubit/complete_profile/complete_profile_state.dart';
 import 'package:medi/features/doctor/constants/constants.dart';
-import 'package:medi/features/patient/questionnaire/presentation/widgets/q_text_fileld.dart';
+import 'package:medi/core/widgets/q_text_fileld.dart';
 
 class DoctorCompleteProfile extends StatelessWidget {
   DoctorCompleteProfile({super.key, this.userModel});
@@ -31,12 +31,12 @@ class DoctorCompleteProfile extends StatelessWidget {
               children: [
                 Text(
                   AppStrings.completeYourProfile,
-                  style: AppStyles.screenTitle,
+                  style: AppStyles.black24700,
                   textAlign: TextAlign.center,
                 ),
                 Text(
                   AppStrings.fillPersonalInformation,
-                  style: AppStyles.subtitleText,
+                  style: AppStyles.tertiary14500,
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: AppSizes.h32),
@@ -73,11 +73,15 @@ class DoctorCompleteProfile extends StatelessWidget {
                   builder: (context, state) {
                     return PrimaryButton(
                       text: AppStrings.completeProfileButton,
-                      onPressed: state.isValid
-                          ? () {
+                      onPressed: () {
                               context.go(AppRouter.allowLocationScreen);
                             }
-                          : null,
+                          
+                      //  state.isValid
+                      //     ? () {
+                      //         context.go(AppRouter.allowLocationScreen);
+                      //       }
+                      //     : null,
                     );
                   },
                 ),
