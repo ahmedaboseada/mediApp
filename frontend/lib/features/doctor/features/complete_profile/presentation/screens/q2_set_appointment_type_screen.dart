@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/core/widgets/q_text_fileld.dart';
 import 'package:medi/features/doctor/constants/constants.dart';
@@ -51,9 +52,9 @@ class Q2SetAppointmentTypeScreen extends StatelessWidget {
                 
                 SizedBox(height: AppSizes.h12),
                 PrimaryButton(
-                  text: AppStrings.next,
+                  text: AppStrings.done,
                   onPressed: () {
-                    context.read<QFlowCubit>().next();
+                    context.go(AppRouter.allowNotificationScreen);
                   },
                 ),
                 SizedBox(height: AppSizes.h24),

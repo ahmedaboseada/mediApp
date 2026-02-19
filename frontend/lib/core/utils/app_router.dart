@@ -20,6 +20,7 @@ import 'package:medi/features/auth/presentation/screens/sign_up_screen.dart';
 import 'package:medi/features/auth/presentation/screens/sing_in_screen.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/controller/q_flow/q_flow_cubit.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/allow_location_screen.dart';
+import 'package:medi/features/doctor/features/complete_profile/presentation/screens/allow_notification_screen.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/doctor_complete_profile.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/enter_location_manually.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/widgets/q_flow.dart';
@@ -74,6 +75,7 @@ class AppRouter {
   static const String manualLocationScreen = '/doctor/manualLocation';
   static const String doctorProfileCompletedScreen = '/doctor/ProfileCompleted';
   static const String qFlowScreen = '/doctor/qFlow';
+  static const String allowNotificationScreen = '/doctor/allowNotification';
 
   // ========== DEPRECATED ==========
   static const String emailLoginScreen = '/emailLogin';
@@ -222,6 +224,10 @@ class AppRouter {
         builder: (context, state) =>
             BlocProvider(create: (context) => QFlowCubit(), child: QFlow()),
       ),
+        GoRoute(
+          path: allowNotificationScreen,
+          builder: (context, state) =>  AllowNotificationScreen(),
+        ),
 
       // ========== SHARED AUTH ROUTES ==========
       GoRoute(

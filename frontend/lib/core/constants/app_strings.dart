@@ -188,4 +188,13 @@ class AppStrings {
   // Payout & Withdrawal
   static const String currentBalance = "Current Balance";
   static const String availableForWithdrawal = "Available for withdrawal";
+
+  // Notifications
+  static const String stayUpdated = "Stay Updated";
+  static const String turnOnNotifications =
+      "Turn on notifications so you never miss\n important updates and patient requests.";
+  static const String allowNotifications = "Allow Notifications";
+  static const String noThanks = "No thanks, I’ll take the risk";
+  static const String youAreAllSet = "You’re all set. Let’s follow up your patients";
+  static const String okay = "Okay";
 }

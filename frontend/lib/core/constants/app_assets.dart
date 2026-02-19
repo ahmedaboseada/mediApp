@@ -24,5 +24,8 @@ class AppAssets {
   static const String home = '${path}home.svg';
   static const String dollar = '${path}dollar.svg';
   static const String notification = '${path}notification.svg';
+  static const String notifications = '${path}notifications.svg';
   static const String settings = '${path}settings.svg';
+  static const String allowNotification = '${path}allow_notification.png';
+
 }

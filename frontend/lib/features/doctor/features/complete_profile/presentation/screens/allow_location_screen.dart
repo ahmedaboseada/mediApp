@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/controller/cubit/location_cubit.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/controller/cubit/location_state.dart';
+import 'package:medi/core/widgets/custom_text_button2.dart';
 
 class AllowLocationScreen extends StatelessWidget {
   const AllowLocationScreen({super.key});
@@ -82,18 +83,9 @@ class AllowLocationScreen extends StatelessWidget {
 
                 SizedBox(height: AppSizes.h24),
 
-                TextButton(
-                  onPressed: () {
-                    context.go(AppRouter.manualLocationScreen);
-                  },
-                  child: Text(
-                    AppStrings.enterLocationManually,
-                    style: TextStyle(
-                      color: AppColors.primary,
-                      fontSize: AppSizes.sp16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                CustomTextButton2(
+                  label: AppStrings.enterLocationManually,
+                  route: AppRouter.manualLocationScreen,
                 ),
               ],
             ),
