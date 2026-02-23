@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/core/widgets/q_text_fileld.dart';
 import 'package:medi/features/doctor/constants/constants.dart';
-import 'package:medi/features/doctor/features/complete_profile/presentation/controller/q_flow/q_flow_cubit.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/widgets/q_progress_widget.dart';
 
 class Q2SetAppointmentTypeScreen extends StatelessWidget {

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/auth/presentation/widgets/forgot_password_button.dart';
 import 'package:medi/core/widgets/custom_text_button2.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/widgets/permission_sheet.dart';
 
 class AllowNotificationScreen extends StatelessWidget {
   const AllowNotificationScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -25,20 +25,23 @@ class SignUpScreen extends StatelessWidget {
     if (role == UserRole.doctor) {
       context.go(AppRouter.doctorCompleteProfile);
     }
-    if (!_formKey.currentState!.validate()) return;
-    if (!_agreeToTerms.value) {
-      context.showSafeSnackBar(AppStrings.agreeToTermsMessage);
-      return;
+    if(role == UserRole.patient){
+      context.go(AppRouter.completeProfile);
     }
+    // if (!_formKey.currentState!.validate()) return;
+    // if (!_agreeToTerms.value) {
+    //   context.showSafeSnackBar(AppStrings.agreeToTermsMessage);
+    //   return;
+    // }
 
-    context.read<RegisterCubit>().register(
-      email: _emailController.text.trim(),
-      password: _passwordController.text.trim(),
-      confirmPassword: _confirmPasswordController.text.trim(),
-      firstName: _nameController.text.trim(),
-      lastName: _lastNameController.text.trim(),
-      role: role,
-    );
+    // context.read<RegisterCubit>().register(
+    //   email: _emailController.text.trim(),
+    //   password: _passwordController.text.trim(),
+    //   confirmPassword: _confirmPasswordController.text.trim(),
+    //   firstName: _nameController.text.trim(),
+    //   lastName: _lastNameController.text.trim(),
+    //   role: role,
+    // );
   }
 
   @override

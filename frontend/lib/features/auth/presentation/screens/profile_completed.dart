@@ -41,7 +41,7 @@ class ProfileCompleted extends StatelessWidget {
                 text: AppStrings.letsStart,
                 onPressed: () {
                   if (user == UserRole.patient) {
-                    context.go(AppRouter.onboardingFlow);
+                    context.go(AppRouter.chooseSoundScreen);
                   } else {
                     context.go(AppRouter.qFlowScreen);
                   }

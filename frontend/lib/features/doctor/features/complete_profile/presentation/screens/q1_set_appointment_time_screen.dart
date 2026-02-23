@@ -57,22 +57,8 @@ class Q1SetAppointmentTimeScreen extends StatelessWidget {
                     print(value);
                   },
                 ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      CupertinoIcons.info_circle,
-                      size: AppSizes.h18,
-                      color: AppColors.tertiaryText,
-                    ),
-                    SizedBox(width: AppSizes.w8),
-                    Expanded(
-                      child: Text(
-                        AppStrings.appointmentScheduleNote,
-                        style: AppStyles.tertiary40012,
-                      ),
-                    ),
-                  ],
+                InfoNoteWidget(
+                  text: AppStrings.appointmentScheduleNote,
                 ),
                 SizedBox(height: AppSizes.h24),
                 const QProgressWidget(step: 0),

@@ -14,51 +14,53 @@ class CompleteYourProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: AppSizes.w16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                AppStrings.completeYourProfile,
-                style: AppStyles.black24700,
-                textAlign: TextAlign.center,
-              ),
-              Text(
-                AppStrings.fillPersonalInformation,
-                style: AppStyles.tertiary14500,
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: AppSizes.h32),
-              Center(
-                child: CircularAvatar(
-                  selectedImagePath: selectedImage,
-                  networkImageUrl: userModel?.image,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: AppSizes.w16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  AppStrings.completeYourProfile,
+                  style: AppStyles.black24700,
+                  textAlign: TextAlign.center,
                 ),
-              ),
-              SizedBox(height: AppSizes.h24),
-              const PhoneField(),
-              SizedBox(height: AppSizes.h24),
-              const DatePickerField(),
-              SizedBox(height: AppSizes.h24),
-              const GenderField(),
-              SizedBox(height: AppSizes.h32),
-              BlocBuilder<ProfileFormCubit, ProfileFormState>(
-                buildWhen: (p, c) => p.isValid != c.isValid,
-                builder: (context, state) {
-                  return PrimaryButton(
-                    text: AppStrings.completeProfileButton,
-                    onPressed: state.isValid
-                        ? () {
-                            context.go(AppRouter.patientProfileCompletedScreen);
-                          }
-                        : null,
-                  );
-                },
-              ),
-            ],
+                Text(
+                  AppStrings.fillPersonalInformation,
+                  style: AppStyles.tertiary14500,
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: AppSizes.h32),
+                Center(
+                  child: CircularAvatar(
+                    selectedImagePath: selectedImage,
+                    networkImageUrl: userModel?.image,
+                  ),
+                ),
+                SizedBox(height: AppSizes.h24),
+                const PhoneField(),
+                SizedBox(height: AppSizes.h24),
+                const DatePickerField(),
+                SizedBox(height: AppSizes.h24),
+                const GenderField(),
+                SizedBox(height: AppSizes.h32),
+                BlocBuilder<ProfileFormCubit, ProfileFormState>(
+                  buildWhen: (p, c) => p.isValid != c.isValid,
+                  builder: (context, state) {
+                    return PrimaryButton(
+                      text: AppStrings.completeProfileButton,
+                      onPressed: state.isValid
+                          ? () {
+                              context.go(AppRouter.patientProfileCompletedScreen);
+                            }
+                          : null,
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

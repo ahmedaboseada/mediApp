@@ -5,7 +5,7 @@ import 'package:medi/features/doctor/features/home/presentation/widgets/notifica
 import 'package:medi/features/doctor/features/home/presentation/widgets/toggle_tile.dart';
 
 class NotificationSection extends StatefulWidget {
-  NotificationSection({super.key});
+  const NotificationSection({super.key});
 
   @override
   State<NotificationSection> createState() => _NotificationSectionState();

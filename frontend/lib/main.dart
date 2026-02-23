@@ -4,6 +4,7 @@ import 'package:medi/core/core.dart';
 import 'package:medi/core/utils/app_them.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   setupServiceLocator();
   runApp(const medi());
 }

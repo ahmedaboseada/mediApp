@@ -1,10 +1,11 @@
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:medi/core/constants/app_assets.dart';
 import 'package:medi/core/constants/app_colors.dart';
 import 'package:medi/core/constants/app_sizes.dart';
+import 'package:medi/core/core.dart';
 import 'package:medi/core/widgets/primary_button.dart';
 
 class PermissionSheet extends StatefulWidget {
@@ -96,7 +97,10 @@ class _PermissionSheetState extends State<PermissionSheet>
 
                     PrimaryButton(
                       text: "Allow",
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                       // Navigator.pop(context);
+                        context.push(AppRouter.takeInfoScreen);
+                      },
                     ),
 
                     const SizedBox(height: 12),

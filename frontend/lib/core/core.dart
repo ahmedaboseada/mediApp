@@ -28,6 +28,11 @@ export 'widgets/phone_field.dart';
 export 'widgets/circular_avatar.dart';
 export 'widgets/date_picker_field.dart';
 export 'widgets/custom_toggle_switch.dart';
+export 'widgets/info_note_widget.dart';
 
 // Enums
 export 'enums/user_role.dart';
+
+// Services
+export 'services/audio_player_service.dart';
+export 'services/local_notification_service.dart';

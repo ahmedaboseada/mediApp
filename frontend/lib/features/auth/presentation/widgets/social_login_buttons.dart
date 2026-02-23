@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/auth/data/repo/auth_repo_impl.dart';
@@ -48,7 +49,7 @@ class SocialLoginButtons extends StatelessWidget {
                 },
                 builder: (context, state) {
                   return SocialLoginButton(
-                    icon: Icons.g_mobiledata,
+                    icon: SvgPicture.asset(AppAssets.google, height: AppSizes.h24, width: AppSizes.w24),
                     label: 'Google',
                     onPressed: () =>
                         context.read<GoogleLogInCubit>().logInWithGoogle(),
@@ -60,13 +61,13 @@ class SocialLoginButtons extends StatelessWidget {
         ),
         SizedBox(width: AppSizes.w12),
         SocialLoginButton(
-          icon: Icons.facebook,
+          icon: SvgPicture.asset(AppAssets.facebook, height: AppSizes.h24, width: AppSizes.w24),
           label: 'Facebook',
           onPressed: onFacebookPressed,
         ),
         SizedBox(width: AppSizes.w12),
         SocialLoginButton(
-          icon: Icons.apple,
+          icon: SvgPicture.asset(AppAssets.apple, height: AppSizes.h24, width: AppSizes.w24),
           label: 'Apple',
           onPressed: onApplePressed,
         ),
@@ -76,7 +77,7 @@ class SocialLoginButtons extends StatelessWidget {
 }
 
 class SocialLoginButton extends StatelessWidget {
-  final IconData icon;
+  final Widget icon;
   final String label;
   final VoidCallback? onPressed;
 
@@ -102,7 +103,7 @@ class SocialLoginButton extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: AppSizes.w24, color: AppColors.primaryText),
+            icon,
           ],
         ),
       ),

@@ -18,7 +18,7 @@ class QFlow extends StatelessWidget {
             return const Q2SetAppointmentTypeScreen();
           default:
             return const SizedBox();
-       };
+       }
       },
     );
   }

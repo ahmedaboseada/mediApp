@@ -197,4 +197,15 @@ class AppStrings {
   static const String noThanks = "No thanks, I’ll take the risk";
   static const String youAreAllSet = "You’re all set. Let’s follow up your patients";
   static const String okay = "Okay";
+  static const String pickYourReminderTone = "Pick your reminder tone";
+  static const String forWhatMattersMostChooseASoundYouWontIgnore =
+      "For what matters most, choose a sound \nyou won’t ignore.";
+  static const String youCanAlwaysChangeThisLater =
+      "You can always change this later in Settings.";
+  static const String letsTakeSomeInfoAboutYourHealth =
+      "Let’s take some info about\n your health";
+  static const String thisHelpsUsGiveYouSaferMedicationRemindersAndAvoidPossibleRisks =
+      "This helps us give you safer medication reminders\n and avoid possible risks.";
+  static const String imReady = "I’m ready!";
+
 }

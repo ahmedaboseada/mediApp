@@ -1,3 +1,4 @@
+import 'package:flutter/src/widgets/basic.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/enums/user_role.dart';
@@ -30,10 +31,14 @@ import 'package:medi/features/doctor/features/settings/presentation/screens/acco
 import 'package:medi/features/doctor/features/settings/presentation/screens/payout_withdrawal_screen.dart';
 import 'package:medi/features/doctor/features/settings/presentation/screens/schedule_availability_screen.dart';
 import 'package:medi/features/patient/home/presentation/screens/home_screen.dart';
+import 'package:medi/features/patient/notification_sound/presentation/controller/sound_cubit/sound_cubit.dart';
+import 'package:medi/features/patient/notification_sound/presentation/screens/choose_sound_screen.dart';
+import 'package:medi/features/patient/notification_sound/presentation/screens/notification_sound_screen.dart';
 import 'package:medi/features/patient/questionnaire/presentation/cubit/cubit/questinnaire_cubit.dart';
 import 'package:medi/features/patient/questionnaire/presentation/screens/caregiver_form_screen.dart';
 import 'package:medi/features/patient/questionnaire/presentation/screens/invitation_send_screen.dart';
 import 'package:medi/features/patient/questionnaire/questionnaire_flow.dart';
+import 'package:medi/features/patient/questionnaire/presentation/screens/take_info_screen.dart';
 import 'package:medi/features/splash/presentation/screens/select_screen.dart';
 import 'package:medi/features/splash/presentation/screens/onboarding_screen.dart';
 import 'package:medi/features/splash/presentation/screens/splash_screen.dart';
@@ -61,7 +66,9 @@ class AppRouter {
   static const String invitationSendScreen = '/invitationSend';
   static const String patientProfileCompletedScreen =
       '/patient/ProfileCompleted';
-
+  static const String notificationSoundScreen = '/notificationSound';
+  static const String chooseSoundScreen = '/chooseSound';
+  static const String takeInfoScreen = '/takeInfo';
   // ========== DOCTOR ROUTES ==========
   static const String doctorLogin = '/login/doctor';
   static const String doctorSignUpScreen = '/signUp/doctor';
@@ -132,6 +139,34 @@ class AppRouter {
           );
         },
       ),
+GoRoute(
+  path: chooseSoundScreen,
+  builder: (context, state) {
+    return BlocProvider(
+      create: (_) => getIt<SoundCubit>()..loadSounds(),
+      child: const ChooseSoundScreen(),
+    );
+  },
+),
+GoRoute(
+  path: takeInfoScreen,
+  builder: (context, state) {
+    return const TakeInfoScreen();
+  },
+),
+
+GoRoute(
+  path: notificationSoundScreen,
+  builder: (context, state) {
+    final cubit = state.extra as SoundCubit;
+
+    return BlocProvider.value(
+      value: cubit,
+      child: const NotificationSoundScreen(),
+    );
+  },
+),
+
       GoRoute(
         path: homeScreen,
         builder: (context, state) {

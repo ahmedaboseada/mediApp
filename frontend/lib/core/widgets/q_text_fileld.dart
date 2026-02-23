@@ -65,6 +65,7 @@ class QTextField extends StatelessWidget {
           // QuestionnaireConstants().allergies,
           dropdownItemDecoration: DropdownItemDecoration(
             selectedIcon: const Icon(
+              textDirection: TextDirection.rtl,
               Icons.check_box_rounded,
               color: AppColors.primary,
             ),

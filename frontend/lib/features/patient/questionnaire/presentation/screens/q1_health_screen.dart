@@ -29,6 +29,7 @@ class Q1HealthScreen extends StatelessWidget {
                   ),
                 ),
                 Image.asset(AppAssets.addInfo, height: AppSizes.h270),
+
                 QTextField(
                   onSelectionChange: (List<String> selectedList) {
                     cubit.updateHealthConditions(selectedList);
@@ -40,15 +41,7 @@ class Q1HealthScreen extends StatelessWidget {
                 ),
 
                 SizedBox(height: AppSizes.h16),
-                QTextField(
-                  onSelectionChange: (List<String> selectedList) {
-                    cubit.updateMedications(selectedList);
-                    print(selectedList);
-                  },
-                  items: QuestionnaireConstants().longTermMedications,
-                  label: AppStrings.areYouCurrentlyTakingAnyLongTermMedications,
-                ),
-                SizedBox(height: AppSizes.h16),
+
                 QTextField(
                   onSelectionChange: (List<String> selectedList) {
                     cubit.updateMedications(selectedList);
