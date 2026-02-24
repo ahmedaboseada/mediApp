@@ -58,8 +58,9 @@ class OtpScreen extends StatelessWidget {
                     Text(AppStrings.verifyOtp, style: AppStyles.black24700),
                     SizedBox(height: AppSizes.h8),
                     Text(
-                      '${AppStrings.enterOtpSent} $email',
+                      '${AppStrings.enterOtpSent}\n $email',
                       style: AppStyles.tertiary14500,
+                      textAlign: TextAlign.center,
                     ),
 
                     SizedBox(height: AppSizes.h40),

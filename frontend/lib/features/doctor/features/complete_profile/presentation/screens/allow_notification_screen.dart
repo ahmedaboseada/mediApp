@@ -4,8 +4,8 @@ import 'package:medi/core/widgets/custom_text_button2.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/widgets/permission_sheet.dart';
 
 class AllowNotificationScreen extends StatelessWidget {
-  const AllowNotificationScreen({super.key});
-
+   AllowNotificationScreen({super.key});
+  final userRole= PrefHelper.getUserRole();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -41,6 +41,7 @@ class AllowNotificationScreen extends StatelessWidget {
 
               // Let's Start Button
               PrimaryButton(
+
                 text: AppStrings.allowNotifications,
                 onPressed: () {
                   _showPermissionSheet(context);
@@ -48,7 +49,9 @@ class AllowNotificationScreen extends StatelessWidget {
               ),
               SizedBox(height: AppSizes.h16),
               CustomTextButton2(
-                route: AppRouter.mainLayout,
+                route: userRole == UserRole.doctor
+                    ? AppRouter.allSetScreen
+                    : AppRouter.takeInfoScreen,
                 label: AppStrings.noThanks,
               ),
             ],

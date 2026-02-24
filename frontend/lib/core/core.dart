@@ -29,6 +29,10 @@ export 'widgets/circular_avatar.dart';
 export 'widgets/date_picker_field.dart';
 export 'widgets/custom_toggle_switch.dart';
 export 'widgets/info_note_widget.dart';
+export 'widgets/secondry_button.dart';
+export 'widgets/time_picker_field.dart';
+export 'widgets/user_info_scetion.dart';
+export 'widgets/q_text_fileld.dart';
 
 // Enums
 export 'enums/user_role.dart';

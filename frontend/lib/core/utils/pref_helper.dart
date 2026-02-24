@@ -1,9 +1,11 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:medi/core/enums/user_role.dart';
 
 class PrefHelper {
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
   static const String _onboardingKey = 'onboarding_completed';
+  static const String _userRoleKey = 'user_role';
 
   static Future<void> saveAccessToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
@@ -45,5 +47,23 @@ class PrefHelper {
     final prefs = await SharedPreferences.getInstance();
     prefs.remove(_accessTokenKey);
     prefs.remove(_refreshTokenKey);
+  }
+
+  /// User Role Management
+  static Future<void> saveUserRole(UserRole role) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_userRoleKey, role.routeName);
+  }
+
+  static Future<UserRole?> getUserRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    final roleString = prefs.getString(_userRoleKey);
+    if (roleString == null) return null;
+    return roleString == 'doctor' ? UserRole.doctor : UserRole.patient;
+  }
+
+  static Future<void> clearUserRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove(_userRoleKey);
   }
 }

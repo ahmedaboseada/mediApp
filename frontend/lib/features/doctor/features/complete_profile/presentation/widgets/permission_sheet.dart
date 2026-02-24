@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
-import 'package:medi/core/constants/app_assets.dart';
-import 'package:medi/core/constants/app_colors.dart';
-import 'package:medi/core/constants/app_sizes.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/core/widgets/primary_button.dart';
+import 'package:medi/core/utils/pref_helper.dart';
 
 class PermissionSheet extends StatefulWidget {
   const PermissionSheet({super.key});
@@ -19,6 +16,8 @@ class _PermissionSheetState extends State<PermissionSheet>
   late AnimationController controller;
   late Animation<double> scale;
   late Animation<double> opacity;
+  late UserRole userRole;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -37,10 +36,28 @@ class _PermissionSheetState extends State<PermissionSheet>
     opacity = Tween(begin: 0.0, end: 1.0).animate(controller);
 
     controller.forward();
+    _loadUserRole();
+  }
+
+  Future<void> _loadUserRole() async {
+    final role = await PrefHelper.getUserRole() ?? UserRole.patient;
+    setState(() {
+      userRole = role;
+      _isLoading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.all(AppSizes.w16),
@@ -94,7 +111,9 @@ class _PermissionSheetState extends State<PermissionSheet>
                   text: "Allow",
                   onPressed: () {
                     // Navigator.pop(context);
-                    context.push(AppRouter.takeInfoScreen);
+                    context.push(userRole == UserRole.doctor
+                        ? AppRouter.doctorAllSetScreen
+                        : AppRouter.takeInfoScreen);
                   },
                 ),
 

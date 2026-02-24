@@ -57,7 +57,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () => context.go(AppRouter.homeScreen),
+                    onPressed: () => context.go(AppRouter.selectScreen),
                     child: Text('Skip', style: AppStyles.white16600),
                   ),
                 ),

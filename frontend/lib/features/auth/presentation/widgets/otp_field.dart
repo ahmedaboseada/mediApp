@@ -14,7 +14,8 @@ class PinCodeField extends StatelessWidget {
       scrollPadding: EdgeInsets.all(AppSizes.w20),
       keyboardType: TextInputType.number,
       //autoFocus: true,
-      cursorColor: Colors.white,
+      
+      cursorColor: AppColors.primary,
       textStyle: TextStyle(
         color: Colors.white,
         fontSize: AppSizes.sp18,
@@ -24,6 +25,7 @@ class PinCodeField extends StatelessWidget {
       obscureText: false,
       animationType: AnimationType.fade,
       pinTheme: PinTheme(
+        
         shape: PinCodeFieldShape.box,
         borderRadius: BorderRadius.circular(AppSizes.r8),
         fieldHeight: AppSizes.h50,

@@ -75,13 +75,17 @@ class ForgetPasswordScreen extends StatelessWidget {
                     PrimaryButton(
                       text: AppStrings.submit,
                       onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          context
-                              .read<ForgetPasswordCubit>()
-                              .submitForgetPassword(
-                                _emailController.text.trim(),
-                              );
-                        }
+                        context.safeGo(
+                AppRouter.otpScreen,
+                extra: _emailController.text.trim(),
+              );
+                        // if (_formKey.currentState!.validate()) {
+                        //   context
+                        //       .read<ForgetPasswordCubit>()
+                        //       .submitForgetPassword(
+                        //         _emailController.text.trim(),
+                        //       );
+                        // }
                       },
                     ),
                     SizedBox(height: AppSizes.h40),

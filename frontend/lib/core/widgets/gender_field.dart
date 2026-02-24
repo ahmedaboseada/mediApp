@@ -37,12 +37,16 @@ class GenderField extends StatelessWidget {
                 if (value != null) {
                   context.read<ProfileFormCubit>().onGenderChanged(value);
                 }
-              },
+              }, 
+              
 
               decoration: InputDecoration(
+                filled: true,
+                fillColor: AppColors.whiteText,
                 hintText: "Select",
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
+                  
                 ),
               ),
 
@@ -52,7 +56,7 @@ class GenderField extends StatelessWidget {
                 offset: const Offset(
                   0,
                   0,
-                ), // Adjust the offset to move the menu towards the text
+                ), 
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),

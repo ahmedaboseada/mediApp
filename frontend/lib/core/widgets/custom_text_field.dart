@@ -11,7 +11,9 @@ class CustomTextField extends StatefulWidget {
     this.isPassword = false,
     this.readOnly = false,
     this.autofillHints,
-    required this.label,
+    required this.label, 
+    this.suffixIcon, 
+    this.onTap,
   });
 
   final String label;
@@ -22,6 +24,8 @@ class CustomTextField extends StatefulWidget {
   final bool isPassword;
   final bool readOnly;
   final Iterable<String>? autofillHints;
+  final Widget? suffixIcon;
+  final VoidCallback? onTap;
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
@@ -47,6 +51,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           // onTapOutside: (_) {
           //   FocusScope.of(context).unfocus();
           // },
+          onTap: widget.onTap,
           textInputAction: TextInputAction.next,
           autofillHints: widget.autofillHints,
           readOnly: widget.readOnly,
@@ -94,7 +99,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                       });
                     },
                   )
-                : null,
+                : widget.suffixIcon,
           ),
         ),
       ],

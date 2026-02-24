@@ -10,14 +10,14 @@ class QTextField extends StatelessWidget {
     required this.label,
     this.singleSelect = false,
     this.hint,
-    this.enabled = true,
+    this.search = true,
   });
   final Function(List<String>) onSelectionChange;
   final List<DropdownItem<String>> items;
   final String label;
   final bool singleSelect;
   final String? hint;
-  final bool? enabled;
+  final bool? search;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -57,7 +57,7 @@ class QTextField extends StatelessWidget {
           ),
           enabled: true,
 
-          searchEnabled: true,
+          searchEnabled: search ?? true,
           dropdownDecoration: DropdownDecoration(
             borderRadius: BorderRadius.circular(8),
           ),

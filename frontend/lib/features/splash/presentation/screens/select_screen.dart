@@ -43,7 +43,8 @@ class SelectScreen extends StatelessWidget {
                             Role(
                               role: UserRole.doctor.title,
                               onTap: () {
-                                context.go(AppRouter.doctorLogin);
+                                PrefHelper.saveUserRole(UserRole.doctor);
+                                context.push(AppRouter.doctorLogin);
                               },
                               imagePath: AppAssets.doctor,
                             ),
@@ -51,7 +52,8 @@ class SelectScreen extends StatelessWidget {
                             Role(
                               role: UserRole.patient.title,
                               onTap: () {
-                                context.go(AppRouter.patientLogin);
+                                PrefHelper.saveUserRole(UserRole.patient);
+                                context.push(AppRouter.patientLogin);
                               },
                               imagePath: AppAssets.patient,
                             ),

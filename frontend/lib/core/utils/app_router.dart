@@ -21,6 +21,7 @@ import 'package:medi/features/auth/presentation/screens/sing_in_screen.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/controller/q_flow/q_flow_cubit.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/allow_location_screen.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/allow_notification_screen.dart';
+import 'package:medi/features/doctor/features/complete_profile/presentation/screens/doctor_all_set_screen.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/doctor_complete_profile.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/enter_location_manually.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/widgets/q_flow.dart';
@@ -86,9 +87,10 @@ class AppRouter {
   static const String doctorProfileCompletedScreen = '/doctor/ProfileCompleted';
   static const String qFlowScreen = '/doctor/qFlow';
   static const String allowNotificationScreen = '/doctor/allowNotification';
+  static const String doctorAllSetScreen = '/doctorAllSetScreen';
 
   static final router = GoRouter(
-    initialLocation: takeInfoScreen,
+    initialLocation: '/',
     routes: [
       // ========== SHARED/SPLASH ROUTES ==========
       GoRoute(
@@ -286,6 +288,10 @@ class AppRouter {
       GoRoute(
         path: allowNotificationScreen,
         builder: (context, state) => AllowNotificationScreen(),
+      ),
+      GoRoute(
+        path: doctorAllSetScreen,
+        builder: (context, state) => const DoctorAllSetScreen(),
       ),
 
       // ========== SHARED AUTH ROUTES ==========

@@ -39,11 +39,19 @@ class Q1SetAppointmentTimeScreen extends StatelessWidget {
                 Image.asset(AppAssets.addInfo, height: AppSizes.h270),
                 SizedBox(height: AppSizes.h24),
                 QTextField(
+                  search: false,
                   label: AppStrings.workingDaysQuestion,
                   items: CompleteProfileConstants().workingDays,
                   onSelectionChange: (value) {
-                    // TODO: wire selection to cubit or controller.
                   },
+                ),
+                SizedBox(height: AppSizes.h16),
+                TimePickerField(
+                  label: 'Start Time',
+                ),
+                 SizedBox(height: AppSizes.h16),
+                TimePickerField(
+                  label: 'End Time',
                 ),
                 SizedBox(height: AppSizes.h16),
                 CustomDropdown(
@@ -54,6 +62,7 @@ class Q1SetAppointmentTimeScreen extends StatelessWidget {
                     print(value);
                   },
                 ),
+                  SizedBox(height: AppSizes.h16),
                 InfoNoteWidget(text: AppStrings.appointmentScheduleNote),
                 SizedBox(height: AppSizes.h24),
                 const QProgressWidget(step: 0),

@@ -17,7 +17,11 @@ class ProfileCompleted extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SizedBox(height: AppSizes.h40),
+              Image.asset(
+                AppAssets.completeProfile,
+                height: AppSizes.h450,
+                fit: BoxFit.contain,
+              ),
               // Profile Completed Title
               Text(
                 AppStrings.profileCompletedSuccessfully,
@@ -33,12 +37,7 @@ class ProfileCompleted extends StatelessWidget {
                 style: AppStyles.tertiary14500,
                 textAlign: TextAlign.center,
               ),
-              // Complete Profile Image
-              Image.asset(
-                AppAssets.completeProfile,
-                height: AppSizes.h450,
-                fit: BoxFit.contain,
-              ),
+              SizedBox(height: AppSizes.h24),
               // Let's Start Button
               PrimaryButton(
                 text: AppStrings.letsStart,

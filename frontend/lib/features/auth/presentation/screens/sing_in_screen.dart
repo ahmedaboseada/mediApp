@@ -49,6 +49,7 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+    appBar: CustomAppBar(),
       body: SafeArea(
         child: BlocConsumer<SiginCubit, SiginState>(
           listener: (context, state) {
