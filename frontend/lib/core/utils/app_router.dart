@@ -35,8 +35,10 @@ import 'package:medi/features/patient/notification_sound/presentation/controller
 import 'package:medi/features/patient/notification_sound/presentation/screens/choose_sound_screen.dart';
 import 'package:medi/features/patient/notification_sound/presentation/screens/notification_sound_screen.dart';
 import 'package:medi/features/patient/questionnaire/presentation/cubit/cubit/questinnaire_cubit.dart';
+import 'package:medi/features/patient/questionnaire/presentation/screens/all_set_screen.dart';
 import 'package:medi/features/patient/questionnaire/presentation/screens/caregiver_form_screen.dart';
 import 'package:medi/features/patient/questionnaire/presentation/screens/invitation_send_screen.dart';
+import 'package:medi/features/patient/questionnaire/presentation/screens/q3_caregiver_mode_screen.dart';
 import 'package:medi/features/patient/questionnaire/questionnaire_flow.dart';
 import 'package:medi/features/patient/questionnaire/presentation/screens/take_info_screen.dart';
 import 'package:medi/features/splash/presentation/screens/select_screen.dart';
@@ -69,6 +71,8 @@ class AppRouter {
   static const String notificationSoundScreen = '/notificationSound';
   static const String chooseSoundScreen = '/chooseSound';
   static const String takeInfoScreen = '/takeInfo';
+  static const String caregiverModeScreen = '/CaregiverModeScreen';
+  static const String allSetScreen ='/AllSetScreen';
   // ========== DOCTOR ROUTES ==========
   static const String doctorLogin = '/login/doctor';
   static const String doctorSignUpScreen = '/signUp/doctor';
@@ -84,12 +88,9 @@ class AppRouter {
   static const String qFlowScreen = '/doctor/qFlow';
   static const String allowNotificationScreen = '/doctor/allowNotification';
 
-  // ========== DEPRECATED ==========
-  static const String emailLoginScreen = '/emailLogin';
-  static const String phoneLoginScreen = '/phoneLogin';
-
+  
   static final router = GoRouter(
-    initialLocation: '/',
+    initialLocation: takeInfoScreen,
     routes: [
       // ========== SHARED/SPLASH ROUTES ==========
       GoRoute(
@@ -139,33 +140,33 @@ class AppRouter {
           );
         },
       ),
-GoRoute(
-  path: chooseSoundScreen,
-  builder: (context, state) {
-    return BlocProvider(
-      create: (_) => getIt<SoundCubit>()..loadSounds(),
-      child: const ChooseSoundScreen(),
-    );
-  },
-),
-GoRoute(
-  path: takeInfoScreen,
-  builder: (context, state) {
-    return const TakeInfoScreen();
-  },
-),
+      GoRoute(
+        path: chooseSoundScreen,
+        builder: (context, state) {
+          return BlocProvider(
+            create: (_) => getIt<SoundCubit>()..loadSounds(),
+            child: const ChooseSoundScreen(),
+          );
+        },
+      ),
+      GoRoute(
+        path: takeInfoScreen,
+        builder: (context, state) {
+          return const TakeInfoScreen();
+        },
+      ),
 
-GoRoute(
-  path: notificationSoundScreen,
-  builder: (context, state) {
-    final cubit = state.extra as SoundCubit;
+      GoRoute(
+        path: notificationSoundScreen,
+        builder: (context, state) {
+          final cubit = state.extra as SoundCubit;
 
-    return BlocProvider.value(
-      value: cubit,
-      child: const NotificationSoundScreen(),
-    );
-  },
-),
+          return BlocProvider.value(
+            value: cubit,
+            child: const NotificationSoundScreen(),
+          );
+        },
+      ),
 
       GoRoute(
         path: homeScreen,
@@ -176,31 +177,56 @@ GoRoute(
           );
         },
       ),
-      GoRoute(
-        path: onboardingFlow,
-        builder: (context, state) {
-          return BlocProvider(
-            create: (context) => QuestionnaireCubit(),
-            child: const OnboardingFlow(),
-          );
-        },
-      ),
-      GoRoute(
-        path: caregiverFormScreen,
-        builder: (context, state) {
-          return CaregiverFormScreen();
-        },
-      ),
-      GoRoute(
-        path: invitationSendScreen,
-        builder: (context, state) {
-          return InvitationSendScreen();
-        },
-      ),
+     GoRoute(
+  path: onboardingFlow,
+  builder: (context, state) {
+    return BlocProvider(
+      create: (context) => QuestionnaireCubit(),
+      child: const OnboardingFlow(),
+    );
+  },
+  routes: [
+    GoRoute(
+      path: 'caregiverMode',
+      builder: (context, state) => const CaregiverModeScreen(),
+    ),
+    GoRoute(
+      path: 'caregiverForm',
+      builder: (context, state) => CaregiverFormScreen(),
+    ),
+    GoRoute(
+      path: 'invitationSend',
+      builder: (context, state) => InvitationSendScreen(),
+    ),
+    GoRoute(
+      path: 'allSet',
+      builder: (context, state) => const AllSetScreen(),
+    ),
+  ],
+),
+      // GoRoute(
+      //   path: caregiverFormScreen,
+      //   builder: (context, state) {
+      //     return CaregiverFormScreen();
+      //   },
+      // ),
+      // GoRoute(
+      //   path: invitationSendScreen,
+      //   builder: (context, state) {
+      //     return InvitationSendScreen();
+      //   },
+      // ),
       GoRoute(
         path: manualLocationScreen,
         builder: (context, state) => const ManualLocationScreen(),
       ),
+      // GoRoute(
+      //   path: caregiverModeScreen,
+      //   builder: (context, state) => const CaregiverModeScreen(),
+      // ),
+      // GoRoute(path: allSetScreen,
+      // builder: (context, state) => const AllSetScreen(),
+      // ),
 
       // ========== DOCTOR ROUTES ==========
       GoRoute(
@@ -259,10 +285,10 @@ GoRoute(
         builder: (context, state) =>
             BlocProvider(create: (context) => QFlowCubit(), child: QFlow()),
       ),
-        GoRoute(
-          path: allowNotificationScreen,
-          builder: (context, state) =>  AllowNotificationScreen(),
-        ),
+      GoRoute(
+        path: allowNotificationScreen,
+        builder: (context, state) => AllowNotificationScreen(),
+      ),
 
       // ========== SHARED AUTH ROUTES ==========
       GoRoute(

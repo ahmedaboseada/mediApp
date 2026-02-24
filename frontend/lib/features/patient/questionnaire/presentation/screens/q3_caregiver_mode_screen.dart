@@ -116,7 +116,7 @@ class CaregiverModeScreen extends StatelessWidget {
               PrimaryButton(
                 text: AppStrings.skipForNow,
                 onPressed: () {
-                  context.go(AppRouter.homeScreen);
+                  context.go(AppRouter.allSetScreen);
                 },
               ),
             ],

@@ -207,5 +207,9 @@ class AppStrings {
   static const String thisHelpsUsGiveYouSaferMedicationRemindersAndAvoidPossibleRisks =
       "This helps us give you safer medication reminders\n and avoid possible risks.";
   static const String imReady = "I’m ready!";
+  
+  static const String allSet='You’re all set';
+  static const String   letsAddYourFirstMedication=" Let’s add your first medication.";
+  static const String  addMedication="Add Medication";
 
 }
