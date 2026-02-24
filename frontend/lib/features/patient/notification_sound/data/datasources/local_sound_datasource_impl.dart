@@ -29,9 +29,9 @@ class LocalSoundDataSourceImpl implements LocalSoundDataSource {
       ),
       SoundModel(
         id: "my_therapy_2",
-        name: "My Therapy 2", 
-        path: "assets/sounds/my_therapy_2.mp3"
-    ),
+        name: "My Therapy 2",
+        path: "assets/sounds/my_therapy_2.mp3",
+      ),
     ];
   }
 

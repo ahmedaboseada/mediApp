@@ -7,7 +7,7 @@ class SoundModel extends SoundEntity {
     required super.path,
     super.isCustom,
   });
-factory SoundModel.custom(String path) {
+  factory SoundModel.custom(String path) {
     return SoundModel(
       id: path,
       name: path.split('/').last,

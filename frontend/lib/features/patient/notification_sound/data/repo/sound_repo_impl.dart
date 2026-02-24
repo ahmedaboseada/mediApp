@@ -8,22 +8,17 @@ class SoundRepositoryImpl implements SoundRepository {
   SoundRepositoryImpl(this.local);
 
   @override
-  Future<List<SoundEntity>> getSounds()
-      => local.getSounds();
+  Future<List<SoundEntity>> getSounds() => local.getSounds();
 
   @override
-  Future<void> saveSelectedSound(SoundEntity sound)
-      => local.saveSelected(sound.path);
+  Future<void> saveSelectedSound(SoundEntity sound) =>
+      local.saveSelected(sound.path);
 
   @override
   Future<SoundEntity?> getSelectedSound() async {
     final path = await local.getSelected();
     if (path == null) return null;
 
-    return SoundEntity(
-      id: path,
-      name: path.split('/').last,
-      path: path,
-    );
+    return SoundEntity(id: path, name: path.split('/').last, path: path);
   }
 }

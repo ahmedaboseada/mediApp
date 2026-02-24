@@ -28,26 +28,23 @@ class Q2SetAppointmentTypeScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: AppSizes.h24),
-                Image.asset(
-                  AppAssets.addInfo,
-                  height: AppSizes.h270,
+                Image.asset(AppAssets.addInfo, height: AppSizes.h270),
+                QTextField(
+                  onSelectionChange: (List<String> p1) {
+                    print(p1);
+                  },
+                  items: DoctorConstants().appointmentsTypes,
+                  label: 'What type of appointments do you offer?',
                 ),
-                    QTextField(
-                      onSelectionChange: (List<String> p1) {
-                        print(p1);
-                      },
-                      items: DoctorConstants().appointmentsTypes,
-                      label: 'What type of appointments do you offer?',
-                    ),
-                    SizedBox(height: AppSizes.h16),
-                    CustomTextField(
-                      hintText: 'Max patients per day',
-                      keyboardType: TextInputType.number,
-                      label: 'Max patients per day',
-                    ),
-                    SizedBox(height: AppSizes.h24),
+                SizedBox(height: AppSizes.h16),
+                CustomTextField(
+                  hintText: 'Max patients per day',
+                  keyboardType: TextInputType.number,
+                  label: 'Max patients per day',
+                ),
+                SizedBox(height: AppSizes.h24),
                 const QProgressWidget(step: 1),
-                
+
                 SizedBox(height: AppSizes.h12),
                 PrimaryButton(
                   text: AppStrings.done,

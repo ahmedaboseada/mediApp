@@ -11,6 +11,7 @@ import 'package:medi/features/patient/notification_sound/domain/usecases/preview
 import 'package:medi/features/patient/notification_sound/domain/usecases/save_sound_usecase.dart';
 import 'package:medi/features/patient/notification_sound/presentation/controller/sound_cubit/sound_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 final getIt = GetIt.instance;
 void setupServiceLocator() async {
   getIt.registerLazySingleton<ApiService>(() => ApiService());
@@ -18,25 +19,17 @@ void setupServiceLocator() async {
     () => AuthRepoImpl(getIt<ApiService>()),
   );
   final sharedPreferences = await SharedPreferences.getInstance();
-  getIt.registerLazySingleton<SharedPreferences>(
-    () => sharedPreferences,
-  );
-   getIt.registerLazySingleton<LocalSoundDataSource>(
+  getIt.registerLazySingleton<SharedPreferences>(() => sharedPreferences);
+  getIt.registerLazySingleton<LocalSoundDataSource>(
     () => LocalSoundDataSourceImpl(getIt()),
   );
-    getIt.registerLazySingleton<SoundRepository>(
+  getIt.registerLazySingleton<SoundRepository>(
     () => SoundRepositoryImpl(getIt()),
   );
-  getIt.registerLazySingleton<AudioPlayerService>(
-  () => AudioPlayerService(),
-);
-   getIt.registerLazySingleton(
-    () => GetSoundsUseCase(getIt()),
-  );
+  getIt.registerLazySingleton<AudioPlayerService>(() => AudioPlayerService());
+  getIt.registerLazySingleton(() => GetSoundsUseCase(getIt()));
 
-  getIt.registerLazySingleton(
-    () => SaveSoundUseCase(getIt()),
-  );
+  getIt.registerLazySingleton(() => SaveSoundUseCase(getIt()));
 
   getIt.registerLazySingleton(
     () => PreviewSoundUseCase(

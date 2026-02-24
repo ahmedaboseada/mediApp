@@ -27,10 +27,7 @@ class BalanceContainer extends StatelessWidget {
                 width: AppSizes.w20,
               ),
               SizedBox(width: AppSizes.w8),
-              Text(
-                AppStrings.currentBalance,
-                style: AppStyles.secondary18500,
-              ),
+              Text(AppStrings.currentBalance, style: AppStyles.secondary18500),
               Spacer(),
               Text(balance, style: AppStyles.primary20700),
             ],

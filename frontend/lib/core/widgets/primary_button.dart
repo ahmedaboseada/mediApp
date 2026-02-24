@@ -25,7 +25,7 @@ class PrimaryButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor,
         side: BorderSide(color: AppColors.primary, width: 1.w),
-        shape: RoundedRectangleBorder(borderRadius: borderRadius,),
+        shape: RoundedRectangleBorder(borderRadius: borderRadius),
         padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 40.w),
         elevation: 0,
       ),

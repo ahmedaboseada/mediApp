@@ -17,11 +17,7 @@ class SoundLoaded extends SoundState {
   final SoundEntity? selected;
   final String? previewingId;
 
-  const SoundLoaded({
-    required this.sounds,
-    this.selected,
-    this.previewingId,
-  });
+  const SoundLoaded({required this.sounds, this.selected, this.previewingId});
 
   SoundLoaded copyWith({
     List<SoundEntity>? sounds,

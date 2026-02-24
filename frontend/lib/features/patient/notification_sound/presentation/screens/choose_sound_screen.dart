@@ -40,7 +40,7 @@ class ChooseSoundScreen extends StatelessWidget {
             PrimaryButton(
               text: AppStrings.continueText,
               onPressed: () {
-               context.push(AppRouter.allowNotificationScreen);
+                context.push(AppRouter.allowNotificationScreen);
               },
             ),
           ],

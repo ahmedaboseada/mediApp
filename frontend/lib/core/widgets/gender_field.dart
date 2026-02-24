@@ -10,60 +10,61 @@ class GenderField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  BlocBuilder<ProfileFormCubit, ProfileFormState>(
-        buildWhen: (p, c) => p.gender != c.gender,
-        builder: (context, state) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Gender', style: AppStyles.black14500),
-              const SizedBox(height: 8),
-              DropdownButtonFormField2<String>(
-  value: state.gender.isEmpty ? null : state.gender,
+    return BlocBuilder<ProfileFormCubit, ProfileFormState>(
+      buildWhen: (p, c) => p.gender != c.gender,
+      builder: (context, state) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Gender', style: AppStyles.black14500),
+            const SizedBox(height: 8),
+            DropdownButtonFormField2<String>(
+              value: state.gender.isEmpty ? null : state.gender,
 
-  items: ['Male', 'Female']
-      .map(
-        (item) => DropdownMenuItem(
-          value: item,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Text(item),
-          ),
-        ),
-      )
-      .toList(),
+              items: ['Male', 'Female']
+                  .map(
+                    (item) => DropdownMenuItem(
+                      value: item,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Text(item),
+                      ),
+                    ),
+                  )
+                  .toList(),
 
-  onChanged: (value) {
-    if (value != null) {
-      context.read<ProfileFormCubit>().onGenderChanged(value);
-    }
-    
-  },
+              onChanged: (value) {
+                if (value != null) {
+                  context.read<ProfileFormCubit>().onGenderChanged(value);
+                }
+              },
 
-  decoration: InputDecoration(
-    hintText: "Select",
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-    ),
-  ),
+              decoration: InputDecoration(
+                hintText: "Select",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
 
-  dropdownStyleData: DropdownStyleData(
-    width: 350,
+              dropdownStyleData: DropdownStyleData(
+                width: 350,
 
-     offset: const Offset(0, 0), // Adjust the offset to move the menu towards the text
-      padding: const EdgeInsets.symmetric(vertical: 4),
-    decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(16),
-      color: Colors.white,
-    ),
+                offset: const Offset(
+                  0,
+                  0,
+                ), // Adjust the offset to move the menu towards the text
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  color: Colors.white,
+                ),
 
-    elevation: 6,
-  ),
-)
-
-            ],
-          );
-        },
+                elevation: 6,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

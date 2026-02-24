@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
 
-
 class SecondryButton extends StatelessWidget {
   const SecondryButton({
-   super.key,
+    super.key,
     this.backgroundColor = AppColors.secondary,
     this.textColor = AppColors.primary,
     this.text,
     this.borderRadius = const BorderRadius.all(Radius.circular(80)),
     this.onPressed,
     this.child,
-    });
+  });
   final Color backgroundColor;
   final Color textColor;
   final String? text;
@@ -26,8 +25,11 @@ class SecondryButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor,
         //side: BorderSide(color: AppColors.primary),
-        shape: RoundedRectangleBorder(borderRadius: borderRadius,),
-        padding: EdgeInsets.symmetric(vertical:AppSizes.h12, horizontal:AppSizes.w40),
+        shape: RoundedRectangleBorder(borderRadius: borderRadius),
+        padding: EdgeInsets.symmetric(
+          vertical: AppSizes.h12,
+          horizontal: AppSizes.w40,
+        ),
         elevation: 0,
       ),
       child:
@@ -43,4 +45,3 @@ class SecondryButton extends StatelessWidget {
     );
   }
 }
-

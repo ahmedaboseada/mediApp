@@ -46,7 +46,9 @@ class LocationCubit extends Cubit<LocationState> {
           address: address.formattedAddress,
         ),
       );
-      print("Location: address: ${address.formattedAddress}, lat: ${position.latitude}, long: ${position.longitude}");
+      print(
+        "Location: address: ${address.formattedAddress}, lat: ${position.latitude}, long: ${position.longitude}",
+      );
     } catch (e) {
       emit(LocationFailure(e.toString()));
     }

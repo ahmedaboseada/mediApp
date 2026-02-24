@@ -55,9 +55,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           keyboardType: widget.keyboardType,
           obscuringCharacter: '*',
           obscureText: widget.isPassword ? _obscure : false,
-          style: AppStyles.black14500.copyWith(
-            color: AppColors.secondaryText,
-          ),
+          style: AppStyles.black14500.copyWith(color: AppColors.secondaryText),
           decoration: InputDecoration(
             filled: true,
             fillColor: AppColors.surfaceColor,

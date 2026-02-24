@@ -26,11 +26,7 @@ class SoundCubit extends Cubit<SoundState> {
     try {
       final sounds = await getSounds();
 
-      emit(
-        SoundLoaded(
-          sounds: sounds,
-        ),
-      );
+      emit(SoundLoaded(sounds: sounds));
     } catch (e) {
       emit(SoundError(e.toString()));
     }
@@ -42,11 +38,7 @@ class SoundCubit extends Cubit<SoundState> {
 
     if (current is! SoundLoaded) return;
 
-    emit(
-      current.copyWith(
-        selected: sound,
-      ),
-    );
+    emit(current.copyWith(selected: sound));
   }
 
   /// PREVIEW
@@ -57,12 +49,7 @@ class SoundCubit extends Cubit<SoundState> {
 
     await previewSound(sound.path);
 
-    emit(
-      current.copyWith(
-        previewingId: sound.id,
-        selected: sound,
-      ),
-    );
+    emit(current.copyWith(previewingId: sound.id, selected: sound));
   }
 
   /// SAVE
@@ -81,11 +68,6 @@ class SoundCubit extends Cubit<SoundState> {
 
     if (current is! SoundLoaded) return;
 
-    emit(
-      current.copyWith(
-        sounds: [...current.sounds, sound],
-        selected: sound,
-      ),
-    );
+    emit(current.copyWith(sounds: [...current.sounds, sound], selected: sound));
   }
 }

@@ -75,8 +75,8 @@ class AppStrings {
       "Profile Completed Successfully";
   static const String startMedicalRemindingJourney =
       "Let's start your medical reminding journey";
-    static const String startHelpingPatientsJourney =
-    "Let’s set your working hours";
+  static const String startHelpingPatientsJourney =
+      "Let’s set your working hours";
   static const String letsStart = "Let's Start";
 
   // General
@@ -149,8 +149,7 @@ class AppStrings {
       "Tell us when you're available\n to accept appointments.";
   static const String appointmentAvailabilitySubtitle =
       "Don't worry, you can edit it later";
-  static const String workingDaysQuestion =
-      "Which days do you usually work?";
+  static const String workingDaysQuestion = "Which days do you usually work?";
   static const String consultationLengthLabel =
       "How long is each consultation?";
   static const String selectTime = "Select Time";
@@ -195,7 +194,8 @@ class AppStrings {
       "Turn on notifications so you never miss\n important updates and patient requests.";
   static const String allowNotifications = "Allow Notifications";
   static const String noThanks = "No thanks, I’ll take the risk";
-  static const String youAreAllSet = "You’re all set. Let’s follow up your patients";
+  static const String youAreAllSet =
+      "You’re all set. Let’s follow up your patients";
   static const String okay = "Okay";
   static const String pickYourReminderTone = "Pick your reminder tone";
   static const String forWhatMattersMostChooseASoundYouWontIgnore =
@@ -204,12 +204,13 @@ class AppStrings {
       "You can always change this later in Settings.";
   static const String letsTakeSomeInfoAboutYourHealth =
       "Let’s take some info about\n your health";
-  static const String thisHelpsUsGiveYouSaferMedicationRemindersAndAvoidPossibleRisks =
+  static const String
+  thisHelpsUsGiveYouSaferMedicationRemindersAndAvoidPossibleRisks =
       "This helps us give you safer medication reminders\n and avoid possible risks.";
   static const String imReady = "I’m ready!";
-  
-  static const String allSet='You’re all set';
-  static const String   letsAddYourFirstMedication=" Let’s add your first medication.";
-  static const String  addMedication="Add Medication";
 
+  static const String allSet = 'You’re all set';
+  static const String letsAddYourFirstMedication =
+      " Let’s add your first medication.";
+  static const String addMedication = "Add Medication";
 }

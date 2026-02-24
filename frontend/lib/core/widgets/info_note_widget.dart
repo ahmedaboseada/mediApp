@@ -33,10 +33,7 @@ class InfoNoteWidget extends StatelessWidget {
         ),
         SizedBox(width: spacing ?? AppSizes.w8),
         Expanded(
-          child: Text(
-            text,
-            style: textStyle ?? AppStyles.tertiary40012,
-          ),
+          child: Text(text, style: textStyle ?? AppStyles.tertiary40012),
         ),
       ],
     );

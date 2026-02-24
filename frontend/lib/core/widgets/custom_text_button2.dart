@@ -13,9 +13,9 @@ class CustomTextButton2 extends StatelessWidget {
     super.key,
     this.label = 'Enter Location Manually',
     required this.route,
-    this.textColor=AppColors.primary,
+    this.textColor = AppColors.primary,
     this.fontSize,
-    this.fontWeight=FontWeight.w600,
+    this.fontWeight = FontWeight.w600,
   });
 
   @override
@@ -27,7 +27,7 @@ class CustomTextButton2 extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(
-          color: textColor ,
+          color: textColor,
           fontSize: fontSize ?? AppSizes.sp16,
           fontWeight: fontWeight,
         ),

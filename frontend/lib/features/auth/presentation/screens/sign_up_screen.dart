@@ -25,7 +25,7 @@ class SignUpScreen extends StatelessWidget {
     if (role == UserRole.doctor) {
       context.go(AppRouter.doctorCompleteProfile);
     }
-    if(role == UserRole.patient){
+    if (role == UserRole.patient) {
       context.go(AppRouter.completeProfile);
     }
     // if (!_formKey.currentState!.validate()) return;

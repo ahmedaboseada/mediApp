@@ -10,14 +10,14 @@ class QTextField extends StatelessWidget {
     required this.label,
     this.singleSelect = false,
     this.hint,
-    this.enabled=true,
+    this.enabled = true,
   });
   final Function(List<String>) onSelectionChange;
   final List<DropdownItem<String>> items;
   final String label;
   final bool singleSelect;
   final String? hint;
-  final bool? enabled ;
+  final bool? enabled;
   @override
   Widget build(BuildContext context) {
     return Column(

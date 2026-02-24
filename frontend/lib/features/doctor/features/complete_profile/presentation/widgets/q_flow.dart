@@ -11,14 +11,14 @@ class QFlow extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<QFlowCubit, QFlowState>(
       builder: (context, state) {
-       switch(state.step){
+        switch (state.step) {
           case 0:
             return const Q1SetAppointmentTimeScreen();
           case 1:
             return const Q2SetAppointmentTypeScreen();
           default:
             return const SizedBox();
-       }
+        }
       },
     );
   }

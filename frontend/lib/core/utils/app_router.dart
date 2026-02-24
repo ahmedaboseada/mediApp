@@ -1,4 +1,3 @@
-import 'package:flutter/src/widgets/basic.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/enums/user_role.dart';
@@ -72,7 +71,7 @@ class AppRouter {
   static const String chooseSoundScreen = '/chooseSound';
   static const String takeInfoScreen = '/takeInfo';
   static const String caregiverModeScreen = '/CaregiverModeScreen';
-  static const String allSetScreen ='/AllSetScreen';
+  static const String allSetScreen = '/AllSetScreen';
   // ========== DOCTOR ROUTES ==========
   static const String doctorLogin = '/login/doctor';
   static const String doctorSignUpScreen = '/signUp/doctor';
@@ -88,7 +87,6 @@ class AppRouter {
   static const String qFlowScreen = '/doctor/qFlow';
   static const String allowNotificationScreen = '/doctor/allowNotification';
 
-  
   static final router = GoRouter(
     initialLocation: takeInfoScreen,
     routes: [
@@ -177,33 +175,33 @@ class AppRouter {
           );
         },
       ),
-     GoRoute(
-  path: onboardingFlow,
-  builder: (context, state) {
-    return BlocProvider(
-      create: (context) => QuestionnaireCubit(),
-      child: const OnboardingFlow(),
-    );
-  },
-  routes: [
-    GoRoute(
-      path: 'caregiverMode',
-      builder: (context, state) => const CaregiverModeScreen(),
-    ),
-    GoRoute(
-      path: 'caregiverForm',
-      builder: (context, state) => CaregiverFormScreen(),
-    ),
-    GoRoute(
-      path: 'invitationSend',
-      builder: (context, state) => InvitationSendScreen(),
-    ),
-    GoRoute(
-      path: 'allSet',
-      builder: (context, state) => const AllSetScreen(),
-    ),
-  ],
-),
+      GoRoute(
+        path: onboardingFlow,
+        builder: (context, state) {
+          return BlocProvider(
+            create: (context) => QuestionnaireCubit(),
+            child: const OnboardingFlow(),
+          );
+        },
+        routes: [
+          GoRoute(
+            path: 'caregiverMode',
+            builder: (context, state) => const CaregiverModeScreen(),
+          ),
+          GoRoute(
+            path: 'caregiverForm',
+            builder: (context, state) => CaregiverFormScreen(),
+          ),
+          GoRoute(
+            path: 'invitationSend',
+            builder: (context, state) => InvitationSendScreen(),
+          ),
+          GoRoute(
+            path: 'allSet',
+            builder: (context, state) => const AllSetScreen(),
+          ),
+        ],
+      ),
       // GoRoute(
       //   path: caregiverFormScreen,
       //   builder: (context, state) {

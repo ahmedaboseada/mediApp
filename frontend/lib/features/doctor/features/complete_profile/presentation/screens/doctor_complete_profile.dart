@@ -74,9 +74,9 @@ class DoctorCompleteProfile extends StatelessWidget {
                     return PrimaryButton(
                       text: AppStrings.completeProfileButton,
                       onPressed: () {
-                              context.go(AppRouter.allowLocationScreen);
-                            }
-                          
+                        context.go(AppRouter.allowLocationScreen);
+                      },
+
                       //  state.isValid
                       //     ? () {
                       //         context.go(AppRouter.allowLocationScreen);

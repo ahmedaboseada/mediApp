@@ -53,7 +53,9 @@ class CompleteYourProfileScreen extends StatelessWidget {
                       text: AppStrings.completeProfileButton,
                       onPressed: state.isValid
                           ? () {
-                              context.go(AppRouter.patientProfileCompletedScreen);
+                              context.go(
+                                AppRouter.patientProfileCompletedScreen,
+                              );
                             }
                           : null,
                     );

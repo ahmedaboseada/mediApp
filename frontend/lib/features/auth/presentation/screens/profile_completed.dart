@@ -4,7 +4,7 @@ import 'package:medi/core/core.dart';
 
 class ProfileCompleted extends StatelessWidget {
   const ProfileCompleted({super.key, required this.user});
- final UserRole user;
+  final UserRole user;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,7 +26,10 @@ class ProfileCompleted extends StatelessWidget {
               ),
               SizedBox(height: AppSizes.h16),
               // Subtitle
-              Text( user == UserRole.patient ? AppStrings.startMedicalRemindingJourney : AppStrings.startHelpingPatientsJourney,
+              Text(
+                user == UserRole.patient
+                    ? AppStrings.startMedicalRemindingJourney
+                    : AppStrings.startHelpingPatientsJourney,
                 style: AppStyles.tertiary14500,
                 textAlign: TextAlign.center,
               ),

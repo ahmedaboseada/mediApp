@@ -26,11 +26,13 @@ class TakeInfoScreen extends StatelessWidget {
             style: AppStyles.tertiary14500,
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: AppSizes.h32,),
+          SizedBox(height: AppSizes.h32),
           PrimaryButton(
             text: AppStrings.imReady,
-            onPressed: (){context.go(AppRouter.onboardingFlow);},
-          )
+            onPressed: () {
+              context.go(AppRouter.onboardingFlow);
+            },
+          ),
         ],
       ),
     );

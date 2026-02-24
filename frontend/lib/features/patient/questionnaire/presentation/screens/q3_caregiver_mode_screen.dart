@@ -30,9 +30,7 @@ class CaregiverModeScreen extends StatelessWidget {
             children: [
               Text(
                 AppStrings.caregiverMode,
-                style: AppStyles.primary70024.copyWith(
-                  fontSize: AppSizes.sp26,
-                ),
+                style: AppStyles.primary70024.copyWith(fontSize: AppSizes.sp26),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: AppSizes.h8),
@@ -79,7 +77,9 @@ class CaregiverModeScreen extends StatelessWidget {
                     child: IconButton(
                       color: AppColors.whiteText,
                       onPressed: () {
-                        context.go(AppRouter.caregiverFormScreen);
+                        context.push(
+                          '${AppRouter.onboardingFlow}/caregiverForm',
+                        );
                       },
                       icon: Icon(Icons.add),
                     ),

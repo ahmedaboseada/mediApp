@@ -10,7 +10,7 @@ class ManualLocationScreen extends StatefulWidget {
 }
 
 class _ManualLocationScreenState extends State<ManualLocationScreen> {
-   final _config = GoogleApiConfig(
+  final _config = GoogleApiConfig(
     apiKey: 'foo-bar',
     locationRestriction: LocationConfig.circle(
       circleCenter: const Coordinates(latitude: 52.5200, longitude: 13.4050),
@@ -28,9 +28,7 @@ class _ManualLocationScreenState extends State<ManualLocationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Enter Location Manually'),
-      ),
+      appBar: AppBar(title: const Text('Enter Location Manually')),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -56,20 +54,18 @@ class _ManualLocationScreenState extends State<ManualLocationScreen> {
                 },
                 // proxyURL: _yourProxyURL,
                 maxLines: 1,
-                overlayContainerBuilder:
-                    (child) => Material(
-                      elevation: 1.0,
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      child: child,
-                    ),
+                overlayContainerBuilder: (child) => Material(
+                  elevation: 1.0,
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  child: child,
+                ),
                 onPredictionWithCoordinatesReceived: (prediction) {
                   // Do something with the place details with coordinates
                   //print('placeDetails${prediction.lng}');
                 },
-                onSuggestionClicked:
-                    (Prediction prediction) =>
-                        _textController.text = prediction.description!,
+                onSuggestionClicked: (Prediction prediction) =>
+                    _textController.text = prediction.description!,
                 minInputLength: 3,
               ),
             ),

@@ -49,7 +49,11 @@ class SocialLoginButtons extends StatelessWidget {
                 },
                 builder: (context, state) {
                   return SocialLoginButton(
-                    icon: SvgPicture.asset(AppAssets.google, height: AppSizes.h24, width: AppSizes.w24),
+                    icon: SvgPicture.asset(
+                      AppAssets.google,
+                      height: AppSizes.h24,
+                      width: AppSizes.w24,
+                    ),
                     label: 'Google',
                     onPressed: () =>
                         context.read<GoogleLogInCubit>().logInWithGoogle(),
@@ -61,13 +65,21 @@ class SocialLoginButtons extends StatelessWidget {
         ),
         SizedBox(width: AppSizes.w12),
         SocialLoginButton(
-          icon: SvgPicture.asset(AppAssets.facebook, height: AppSizes.h24, width: AppSizes.w24),
+          icon: SvgPicture.asset(
+            AppAssets.facebook,
+            height: AppSizes.h24,
+            width: AppSizes.w24,
+          ),
           label: 'Facebook',
           onPressed: onFacebookPressed,
         ),
         SizedBox(width: AppSizes.w12),
         SocialLoginButton(
-          icon: SvgPicture.asset(AppAssets.apple, height: AppSizes.h24, width: AppSizes.w24),
+          icon: SvgPicture.asset(
+            AppAssets.apple,
+            height: AppSizes.h24,
+            width: AppSizes.w24,
+          ),
           label: 'Apple',
           onPressed: onApplePressed,
         ),
@@ -102,9 +114,7 @@ class SocialLoginButton extends StatelessWidget {
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            icon,
-          ],
+          children: [icon],
         ),
       ),
     );

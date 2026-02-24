@@ -19,7 +19,7 @@ class AllowNotificationScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(height: AppSizes.h40),
-                Image.asset(
+              Image.asset(
                 AppAssets.allowNotification,
                 height: AppSizes.h300,
                 fit: BoxFit.contain,
@@ -32,27 +32,25 @@ class AllowNotificationScreen extends StatelessWidget {
               ),
               SizedBox(height: AppSizes.h16),
               // Subtitle
-              Text(  AppStrings.turnOnNotifications,
+              Text(
+                AppStrings.turnOnNotifications,
                 style: AppStyles.tertiary14500,
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: AppSizes.h24),
 
-            
               // Let's Start Button
               PrimaryButton(
                 text: AppStrings.allowNotifications,
                 onPressed: () {
-                 
-                     _showPermissionSheet(context);
-                 
-                  }
+                  _showPermissionSheet(context);
+                },
               ),
               SizedBox(height: AppSizes.h16),
               CustomTextButton2(
                 route: AppRouter.mainLayout,
                 label: AppStrings.noThanks,
-              )
+              ),
             ],
           ),
         ),
@@ -60,14 +58,13 @@ class AllowNotificationScreen extends StatelessWidget {
     );
   }
 }
-void _showPermissionSheet(
-    BuildContext context,
-    ) {
+
+void _showPermissionSheet(BuildContext context) {
   showModalBottomSheet(
     context: context,
     backgroundColor: Colors.transparent,
     isScrollControlled: true,
-     barrierColor: Colors.black.withOpacity(0.5),
+    barrierColor: Colors.black.withOpacity(0.5),
     builder: (_) => const PermissionSheet(),
   );
 }

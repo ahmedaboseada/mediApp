@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class QProgressWidget extends StatelessWidget {
   const QProgressWidget({super.key, required this.step});
-  final int step; 
+  final int step;
   @override
   Widget build(BuildContext context) {
     return Row(

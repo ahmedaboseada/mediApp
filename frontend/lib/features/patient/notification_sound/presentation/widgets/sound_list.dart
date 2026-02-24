@@ -6,27 +6,17 @@ import 'sound_item.dart';
 class SoundList extends StatelessWidget {
   final SoundLoaded state;
 
-  const SoundList({
-    super.key,
-    required this.state,
-  });
+  const SoundList({super.key, required this.state});
 
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding:  EdgeInsets.symmetric(vertical: AppSizes.h16),
+      padding: EdgeInsets.symmetric(vertical: AppSizes.h16),
       children: [
-
         /// DEFAULT + CUSTOM
-        ...state.sounds.map(
-          (sound) => SoundItem(
-            sound: sound,
-            state: state,
-          ),
-        ),
+        ...state.sounds.map((sound) => SoundItem(sound: sound, state: state)),
 
-       // const SizedBox(height: 20),
-
+        // const SizedBox(height: 20),
       ],
     );
   }

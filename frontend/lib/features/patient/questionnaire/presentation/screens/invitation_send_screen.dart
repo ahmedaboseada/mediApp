@@ -28,14 +28,17 @@ class InvitationSendScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               Spacer(),
-              PrimaryButton(text: AppStrings.done, onPressed: () {
-                context.go(AppRouter.allSetScreen);
-              }),
+              PrimaryButton(
+                text: AppStrings.done,
+                onPressed: () {
+                  context.go('/onboardingFlow/allSet');
+                },
+              ),
               SizedBox(height: AppSizes.h16),
               SecondryButton(
                 text: 'Add another person',
                 onPressed: () {
-                  context.push(AppRouter.caregiverModeScreen);
+                  context.push('/onboardingFlow/caregiverForm');
                 },
               ),
             ],

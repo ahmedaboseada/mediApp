@@ -28,7 +28,6 @@ class _CircularAvatarState extends State<CircularAvatar> {
   String? _pickedImagePath;
 
   Future<void> _pickImage(BuildContext context) async {
-
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       showDragHandle: true,
@@ -93,17 +92,14 @@ class _CircularAvatarState extends State<CircularAvatar> {
             child: imagePath != null
                 ? Image.file(File(imagePath), fit: BoxFit.cover)
                 : (widget.networkImageUrl != null &&
-                        widget.networkImageUrl!.isNotEmpty)
-                    ? Image.network(
-                        widget.networkImageUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, err, builder) =>
-                            const Icon(Icons.person),
-                      )
-                    : Image.asset(
-                        AppAssets.avatar1,
-                        fit: BoxFit.cover,
-                      ),
+                      widget.networkImageUrl!.isNotEmpty)
+                ? Image.network(
+                    widget.networkImageUrl!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, err, builder) =>
+                        const Icon(Icons.person),
+                  )
+                : Image.asset(AppAssets.avatar1, fit: BoxFit.cover),
           ),
         ),
         Positioned(

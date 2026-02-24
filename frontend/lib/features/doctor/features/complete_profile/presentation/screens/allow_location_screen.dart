@@ -58,9 +58,9 @@ class AllowLocationScreen extends StatelessWidget {
                 BlocConsumer<LocationCubit, LocationState>(
                   listener: (context, state) {
                     if (state is LocationFailure) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(state.error)),
-                      );
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(state.error)));
                     }
                     if (state is LocationSuccess) {
                       // Navigate or save data

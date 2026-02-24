@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
@@ -95,9 +97,14 @@ class CaregiverFormScreen extends StatelessWidget {
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       // Handle send invitation
+                      log(
+                        'Sending invitation to ${_nameController.text} (${_emailController.text})',
+                      );
                       print('Name: ${_nameController.text}');
                       print('Email: ${_emailController.text}');
-                      context.go(AppRouter.invitationSendScreen);
+                      context.go(
+                        '${AppRouter.onboardingFlow}${AppRouter.invitationSendScreen}',
+                      );
                     }
                   },
                 ),

@@ -36,10 +36,7 @@ class Q1SetAppointmentTimeScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: AppSizes.h24),
-                Image.asset(
-                  AppAssets.addInfo,
-                  height: AppSizes.h270,
-                ),
+                Image.asset(AppAssets.addInfo, height: AppSizes.h270),
                 SizedBox(height: AppSizes.h24),
                 QTextField(
                   label: AppStrings.workingDaysQuestion,
@@ -57,9 +54,7 @@ class Q1SetAppointmentTimeScreen extends StatelessWidget {
                     print(value);
                   },
                 ),
-                InfoNoteWidget(
-                  text: AppStrings.appointmentScheduleNote,
-                ),
+                InfoNoteWidget(text: AppStrings.appointmentScheduleNote),
                 SizedBox(height: AppSizes.h24),
                 const QProgressWidget(step: 0),
                 SizedBox(height: AppSizes.h12),

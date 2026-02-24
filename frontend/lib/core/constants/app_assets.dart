@@ -29,8 +29,7 @@ class AppAssets {
   static const String allowNotification = '${path}allow_notification.png';
   static const String apple = '${path}apple.svg';
   static const String google = '${path}google.svg';
-  static const String facebook = '${path}facebook.svg';  
-  static const String man = '${path}man.svg';  
+  static const String facebook = '${path}facebook.svg';
+  static const String man = '${path}man.svg';
   static const String ringtone = '${path}ringtone.png';
-
 }

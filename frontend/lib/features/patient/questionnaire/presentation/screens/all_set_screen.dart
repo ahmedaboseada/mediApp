@@ -7,9 +7,9 @@ class AllSetScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       body: Padding(
-        padding:  EdgeInsets.all(AppSizes.w16),
+        padding: EdgeInsets.all(AppSizes.w16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -28,14 +28,13 @@ class AllSetScreen extends StatelessWidget {
             SizedBox(height: AppSizes.h40),
             PrimaryButton(
               text: AppStrings.addMedication,
-               onPressed: () {
-               // context.go(AppRouter.addMedicationScreen);
+              onPressed: () {
+                // context.go(AppRouter.addMedicationScreen);
               },
-             
-            )
-          ]
+            ),
+          ],
         ),
-      )
+      ),
     );
   }
 }
