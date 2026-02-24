@@ -32,4 +32,5 @@ class AppAssets {
   static const String facebook = '${path}facebook.svg';
   static const String man = '${path}man.svg';
   static const String ringtone = '${path}ringtone.png';
+  static const String support = '${path}support.svg';
 }

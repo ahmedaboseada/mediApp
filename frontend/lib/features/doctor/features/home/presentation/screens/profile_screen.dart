@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/home/presentation/widgets/notification_section.dart';
 import 'package:medi/features/doctor/features/home/presentation/widgets/settings_section.dart';
+import 'package:medi/features/doctor/features/home/presentation/widgets/support_section.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -20,6 +21,8 @@ class ProfileScreen extends StatelessWidget {
                 SettingsSection(),
                 SizedBox(height: AppSizes.h24),
                 NotificationSection(),
+                SizedBox(height: AppSizes.h24),
+                 SupportSection(),
               ],
             ),
           ),
