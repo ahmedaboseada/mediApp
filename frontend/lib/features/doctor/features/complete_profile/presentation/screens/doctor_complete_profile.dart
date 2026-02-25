@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/auth/data/models/user_model.dart';
-import 'package:medi/features/auth/presentation/cubit/complete_profile/complete_profile_cubit.dart';
-import 'package:medi/features/auth/presentation/cubit/complete_profile/complete_profile_state.dart';
+import 'package:medi/features/shared/auth/data/models/user_model.dart';
+import 'package:medi/features/shared/auth/presentation/cubit/complete_profile/complete_profile_cubit.dart';
+import 'package:medi/features/shared/auth/presentation/cubit/complete_profile/complete_profile_state.dart';
 import 'package:medi/features/doctor/constants/constants.dart';
 import 'package:medi/core/widgets/q_text_fileld.dart';
 

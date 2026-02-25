@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/auth/presentation/cubit/complete_profile/complete_profile_cubit.dart';
+import 'package:medi/features/shared/auth/presentation/cubit/complete_profile/complete_profile_cubit.dart';
 
 class PhoneField extends StatelessWidget {
   const PhoneField({super.key});

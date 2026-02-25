@@ -33,6 +33,7 @@ export 'widgets/secondry_button.dart';
 export 'widgets/time_picker_field.dart';
 export 'widgets/user_info_scetion.dart';
 export 'widgets/q_text_fileld.dart';
+export 'widgets/advanced_bottom_nav_bar.dart';
 
 // Enums
 export 'enums/user_role.dart';

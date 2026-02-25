@@ -2,22 +2,22 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/enums/user_role.dart';
 import 'package:medi/core/utils/service_locator.dart';
-import 'package:medi/features/auth/data/repo/auth_repo_impl.dart';
-import 'package:medi/features/auth/presentation/cubit/complete_profile/complete_profile_cubit.dart';
-import 'package:medi/features/auth/presentation/cubit/forget_password/forget_password_cubit.dart';
-import 'package:medi/features/auth/presentation/cubit/log_out/log_out_cubit.dart';
-import 'package:medi/features/auth/presentation/cubit/otp/otp_cubit.dart';
-import 'package:medi/features/auth/presentation/cubit/register/register_cubit.dart';
-import 'package:medi/features/auth/presentation/cubit/reset_password/reset_password_cubit.dart';
-import 'package:medi/features/auth/presentation/cubit/signin/sigin_cubit.dart';
-import 'package:medi/features/auth/presentation/screens/complete_your_profile.dart';
-import 'package:medi/features/auth/presentation/screens/forget_password_screen.dart';
-import 'package:medi/features/auth/presentation/screens/otp_screen.dart';
-import 'package:medi/features/auth/presentation/screens/password_changed_screen.dart';
-import 'package:medi/features/auth/presentation/screens/profile_completed.dart';
-import 'package:medi/features/auth/presentation/screens/set_password_screen.dart';
-import 'package:medi/features/auth/presentation/screens/sign_up_screen.dart';
-import 'package:medi/features/auth/presentation/screens/sing_in_screen.dart';
+import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
+import 'package:medi/features/shared/auth/presentation/cubit/complete_profile/complete_profile_cubit.dart';
+import 'package:medi/features/shared/auth/presentation/cubit/forget_password/forget_password_cubit.dart';
+import 'package:medi/features/shared/auth/presentation/cubit/log_out/log_out_cubit.dart';
+import 'package:medi/features/shared/auth/presentation/cubit/otp/otp_cubit.dart';
+import 'package:medi/features/shared/auth/presentation/cubit/register/register_cubit.dart';
+import 'package:medi/features/shared/auth/presentation/cubit/reset_password/reset_password_cubit.dart';
+import 'package:medi/features/shared/auth/presentation/cubit/signin/sigin_cubit.dart';
+import 'package:medi/features/shared/auth/presentation/screens/complete_your_profile.dart';
+import 'package:medi/features/shared/auth/presentation/screens/forget_password_screen.dart';
+import 'package:medi/features/shared/auth/presentation/screens/otp_screen.dart';
+import 'package:medi/features/shared/auth/presentation/screens/password_changed_screen.dart';
+import 'package:medi/features/shared/auth/presentation/screens/profile_completed.dart';
+import 'package:medi/features/shared/auth/presentation/screens/set_password_screen.dart';
+import 'package:medi/features/shared/auth/presentation/screens/sign_up_screen.dart';
+import 'package:medi/features/shared/auth/presentation/screens/sing_in_screen.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/controller/q_flow/q_flow_cubit.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/allow_location_screen.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/allow_notification_screen.dart';
@@ -30,20 +30,21 @@ import 'package:medi/features/doctor/features/settings/presentation/controller/c
 import 'package:medi/features/doctor/features/settings/presentation/screens/account_information_screen.dart';
 import 'package:medi/features/doctor/features/settings/presentation/screens/payout_withdrawal_screen.dart';
 import 'package:medi/features/doctor/features/settings/presentation/screens/schedule_availability_screen.dart';
-import 'package:medi/features/patient/home/presentation/screens/home_screen.dart';
-import 'package:medi/features/patient/notification_sound/presentation/controller/sound_cubit/sound_cubit.dart';
-import 'package:medi/features/patient/notification_sound/presentation/screens/choose_sound_screen.dart';
-import 'package:medi/features/patient/notification_sound/presentation/screens/notification_sound_screen.dart';
-import 'package:medi/features/patient/questionnaire/presentation/cubit/cubit/questinnaire_cubit.dart';
-import 'package:medi/features/patient/questionnaire/presentation/screens/all_set_screen.dart';
-import 'package:medi/features/patient/questionnaire/presentation/screens/caregiver_form_screen.dart';
-import 'package:medi/features/patient/questionnaire/presentation/screens/invitation_send_screen.dart';
-import 'package:medi/features/patient/questionnaire/presentation/screens/q3_caregiver_mode_screen.dart';
-import 'package:medi/features/patient/questionnaire/questionnaire_flow.dart';
-import 'package:medi/features/patient/questionnaire/presentation/screens/take_info_screen.dart';
-import 'package:medi/features/splash/presentation/screens/select_screen.dart';
-import 'package:medi/features/splash/presentation/screens/onboarding_screen.dart';
-import 'package:medi/features/splash/presentation/screens/splash_screen.dart';
+import 'package:medi/features/patient/features/home/presentation/screens/home_screen.dart';
+import 'package:medi/features/patient/features/home/presentation/screens/main_patient_view.dart';
+import 'package:medi/features/patient/features/notification_sound/presentation/controller/sound_cubit/sound_cubit.dart';
+import 'package:medi/features/patient/features/notification_sound/presentation/screens/choose_sound_screen.dart';
+import 'package:medi/features/patient/features/notification_sound/presentation/screens/notification_sound_screen.dart';
+import 'package:medi/features/patient/features/questionnaire/presentation/cubit/cubit/questinnaire_cubit.dart';
+import 'package:medi/features/patient/features/questionnaire/presentation/screens/all_set_screen.dart';
+import 'package:medi/features/patient/features/questionnaire/presentation/screens/caregiver_form_screen.dart';
+import 'package:medi/features/patient/features/questionnaire/presentation/screens/invitation_send_screen.dart';
+import 'package:medi/features/patient/features/questionnaire/presentation/screens/q3_caregiver_mode_screen.dart';
+import 'package:medi/features/patient/features/questionnaire/questionnaire_flow.dart';
+import 'package:medi/features/patient/features/questionnaire/presentation/screens/take_info_screen.dart';
+import 'package:medi/features/shared/splash/presentation/screens/select_screen.dart';
+import 'package:medi/features/shared/splash/presentation/screens/onboarding_screen.dart';
+import 'package:medi/features/shared/splash/presentation/screens/splash_screen.dart';
 
 class AppRouter {
   // ========== SHARED ROUTES ==========
@@ -62,6 +63,7 @@ class AppRouter {
   static const String patientLogin = '/login/patient';
   static const String signUpScreen = '/signUp/patient';
   static const String homeScreen = '/home';
+  static const String patientMainView = '/patient/main';
   static const String completeProfile = '/completeProfile';
   static const String onboardingFlow = '/onboardingFlow';
   static const String caregiverFormScreen = '/caregiverForm';
@@ -178,6 +180,12 @@ class AppRouter {
         },
       ),
       GoRoute(
+        path: patientMainView,
+        builder: (context, state) {
+          return const MainPatientView();
+        },
+      ),
+      GoRoute(
         path: onboardingFlow,
         builder: (context, state) {
           return BlocProvider(
@@ -263,7 +271,7 @@ class AppRouter {
       ),
       GoRoute(
         path: mainLayout,
-        builder: (context, state) => const MainLayout(),
+        builder: (context, state) => const MainDoctorView(),
       ),
       GoRoute(
         path: availabilityScreen,
