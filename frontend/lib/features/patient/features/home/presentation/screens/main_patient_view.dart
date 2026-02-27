@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/home/presentation/controller/cubit/patient_flow_cubit.dart';
+import 'package:medi/features/patient/features/profile/presentation/screens/profile_screen.dart';
 
 class MainPatientView extends StatelessWidget {
   const MainPatientView({super.key});
@@ -39,7 +40,7 @@ class _MainPatientView extends StatelessWidget {
             PatientTab.medicine => Container(color: Colors.green),
             PatientTab.doctor => Container(color: Colors.blue),
             PatientTab.chat => Container(color: Colors.yellow),
-            PatientTab.profile => Container(color: Colors.orange),
+            PatientTab.profile => ProfileScreen(),
           },
             bottomNavigationBar: AdvancedBottomNavBar(
             items: navItems,

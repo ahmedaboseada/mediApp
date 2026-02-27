@@ -21,12 +21,13 @@ class PrimaryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
+      
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor,
         side: BorderSide(color: AppColors.primary, width: 1.w),
         shape: RoundedRectangleBorder(borderRadius: borderRadius),
-        padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 40.w),
+        padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 20.w),
         elevation: 0,
       ),
       child:

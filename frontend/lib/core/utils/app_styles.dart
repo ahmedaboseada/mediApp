@@ -10,6 +10,16 @@ class AppStyles {
     fontWeight: FontWeight.w700,
     color: AppColors.primaryText,
   );
+  static TextStyle black16400 = TextStyle(
+    fontSize: AppSizes.sp16,
+    fontWeight: FontWeight.w400,
+    color: AppColors.primaryText,
+  );
+  static TextStyle black18500 = TextStyle(
+    fontSize: AppSizes.sp18,
+    fontWeight: FontWeight.w500,
+    color: AppColors.primaryText,
+  );
 
   // Body Text Styles
   static TextStyle tertiary14500 = TextStyle(
@@ -89,6 +99,11 @@ class AppStyles {
   static TextStyle secondary18500 = TextStyle(
     fontSize: AppSizes.sp18,
     fontWeight: FontWeight.w500,
+    color: AppColors.secondaryText,
+  );
+   static TextStyle secondary12400 = TextStyle(
+    fontSize: AppSizes.sp12,
+    fontWeight: FontWeight.w400,
     color: AppColors.secondaryText,
   );
 

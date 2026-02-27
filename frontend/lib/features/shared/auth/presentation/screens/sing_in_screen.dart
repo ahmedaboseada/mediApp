@@ -37,13 +37,14 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   void _handleSignIn() {
-    if (_formKey.currentState!.validate()) {
-      context.read<SiginCubit>().signin(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-        widget.role,
-      );
-    }
+    context.safeGo(AppRouter.patientMainView);
+    // if (_formKey.currentState!.validate()) {
+    //   context.read<SiginCubit>().signin(
+    //     _emailController.text.trim(),
+    //     _passwordController.text.trim(),
+    //     widget.role,
+    //   );
+    // }
   }
 
   @override
@@ -55,7 +56,7 @@ class _SignInScreenState extends State<SignInScreen> {
           listener: (context, state) {
             if (state is SiginSuccess) {
               context.showSafeSnackBar(AppStrings.signInSuccessful);
-              context.safeGo(AppRouter.homeScreen);
+              context.safeGo(AppRouter.patientMainView);
             } else if (state is SiginFailure) {
               context.showSafeSnackBar(state.error);
             }

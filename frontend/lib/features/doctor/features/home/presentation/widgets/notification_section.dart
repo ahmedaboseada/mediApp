@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/doctor/features/home/presentation/widgets/notification_tile.dart';
-import 'package:medi/features/doctor/features/home/presentation/widgets/toggle_tile.dart';
+import 'package:medi/core/widgets/toggle_tile.dart';
 
 class NotificationSection extends StatefulWidget {
   const NotificationSection({super.key});

@@ -19,6 +19,7 @@ class AppAssets {
   static const String lineEdit = '${path}line_edit.svg';
   static const String calendar = '${path}calendar.svg';
   static const String chats = '${path}chats.svg';
+  static const String connectedDoctors = '${path}connected_doctors.svg';
   static const String profile = '${path}profile.svg';
   static const String docs = '${path}docs.svg';
   static const String home = '${path}home.svg';
@@ -26,6 +27,7 @@ class AppAssets {
   static const String notification = '${path}notification.svg';
   static const String notifications = '${path}notifications.svg';
   static const String settings = '${path}settings.svg';
+  static const String stethoscope = '${path}stethoscope.svg';
   static const String allowNotification = '${path}allow_notification.png';
   static const String apple = '${path}apple.svg';
   static const String google = '${path}google.svg';
@@ -33,5 +35,7 @@ class AppAssets {
   static const String man = '${path}man.svg';
   static const String ringtone = '${path}ringtone.png';
   static const String support = '${path}support.svg';
+  static const String switchAccount = '${path}switch_account.svg';
   static const String pills = '${path}pills.svg';
+  static const String export = '${path}export.svg';
 }
