@@ -1,0 +1,9 @@
+export { default as userModel } from './user.model.js';
+export { default as patientModel } from './patient.model.js';
+export { default as doctorModel } from './doctor.model.js';
+export { default as medicineModel } from './medicine.model.js';
+export { default as notificationModel } from './notification.model.js';
+export { default as chatModel } from './chat.model.js';
+export { default as messageModel } from './message.model.js';
+export { default as reviewModel } from './review.model.js';
+export { default as bookingModel } from './booking.model.js';
