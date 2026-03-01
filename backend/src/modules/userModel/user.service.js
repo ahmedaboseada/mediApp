@@ -514,7 +514,7 @@ import * as VT from '../../utils/token/index.js';
 import { otp6 } from '../../utils/index.js';
 import { nanoid } from 'nanoid';
 
-import { eventEmitter } from '../../utils/sendEmail-events/index.js';
+import { sendEmailEvent, sendOTPEvent, sendEmailChangeConfirmEvent } from '../../utils/sendEmail-events/index.js';
 
 const isAdminPrefix = (user) => user?.type === 'doctor';
 
@@ -584,8 +584,11 @@ export const signup = async (req, res) => {
             doctor = await doctorModel.create({ userId: user._id });
         }
 
-        // send confirm email (keep your emitter logic)
-        eventEmitter.emit("sendEmail", {
+        // eventEmitter.emit("sendEmail", {
+        //     email: user.email,
+        //     name: `${user.firstName} ${user.lastName}`,
+        // });
+        await sendEmailEvent({
             email: user.email,
             name: `${user.firstName} ${user.lastName}`,
         });
@@ -633,7 +636,8 @@ export const signin = async (req, res) => {
         const otpEnc = await ET.encrypt(otp);
         await userModel.updateOne({ _id: user._id }, { otp: otpEnc });
 
-        eventEmitter.emit('sendOTP', { email: user.email, otp, name: `${user.firstName} ${user.lastName}` });
+        // eventEmitter.emit('sendOTP', { email: user.email, otp, name: `${user.firstName} ${user.lastName}` });
+        await sendOTPEvent({ email: user.email, otp, name: `${user.firstName} ${user.lastName}` });
 
         const challengeToken = VT.generate2FAToken(user._id, '5m');
         return res.status(200).json({ message: 'OTP sent', requiresOtp: true, challengeToken });
@@ -723,7 +727,14 @@ export const requestEmailChange = async (req, res) => {
     user.confirmed = false;
     await user.save();
 
-    eventEmitter.emit('sendEmailChangeConfirm', {
+    // eventEmitter.emit('sendEmailChangeConfirm', {
+    //     email: user.pendingEmail,
+    //     name: `${user.firstName} ${user.lastName}`,
+    //     userId: user._id,
+    //     oldEmail: user.email,
+    //     newEmail: user.pendingEmail,
+    // });
+    await sendEmailChangeConfirmEvent({
         email: user.pendingEmail,
         name: `${user.firstName} ${user.lastName}`,
         userId: user._id,
@@ -858,7 +869,12 @@ export const requestOTP = async (req, res) => {
 
     await userModel.updateOne({ _id: user._id }, { otp: otpEnc });
 
-    eventEmitter.emit('sendOTP', {
+    // eventEmitter.emit('sendOTP', {
+    //     email: user.email,
+    //     otp,
+    //     name: `${user.firstName} ${user.lastName}`,
+    // });
+    await sendOTPEvent({
         email: user.email,
         otp,
         name: `${user.firstName} ${user.lastName}`,
@@ -894,7 +910,12 @@ export const forgetPassword = async (req, res) => {
 
     await userModel.updateOne({ _id: user._id }, { otp: otpEnc });
 
-    eventEmitter.emit('sendOTP', {
+    // eventEmitter.emit('sendOTP', {
+    //     email: user.email,
+    //     otp,
+    //     name: `${user.firstName} ${user.lastName}`,
+    // });
+    await sendOTPEvent({
         email: user.email,
         otp,
         name: `${user.firstName} ${user.lastName}`,
@@ -954,7 +975,8 @@ export const resendConfirmEmail = async (req, res) => {
 
         if (user.confirmed) return res.status(400).json({ message: 'Email Already Confirmed' });
 
-        eventEmitter.emit('sendEmail', { email: user.email, name: `${user.firstName} ${user.lastName}` });
+        // eventEmitter.emit('sendEmail', { email: user.email, name: `${user.firstName} ${user.lastName}` });
+        await sendEmailEvent({ email: user.email, name: `${user.firstName} ${user.lastName}` });
 
         return res.status(200).json({ message: 'Confirmation email sent successfully.' });
     } catch {
