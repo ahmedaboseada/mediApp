@@ -513,6 +513,7 @@ import * as ET from '../../utils/encryption/index.js';
 import * as VT from '../../utils/token/index.js';
 import { otp6 } from '../../utils/index.js';
 import { nanoid } from 'nanoid';
+import { waitUntil } from '@vercel/functions';
 
 import { sendEmailEvent, sendOTPEvent, sendEmailChangeConfirmEvent } from '../../utils/sendEmail-events/index.js';
 
@@ -584,14 +585,22 @@ export const signup = async (req, res) => {
             doctor = await doctorModel.create({ userId: user._id });
         }
 
+        // Tokens
+        const confirmTokenId = nanoid();
+        user.confirmTokenId = confirmTokenId;
+        await user.save();
+
         // eventEmitter.emit("sendEmail", {
         //     email: user.email,
         //     name: `${user.firstName} ${user.lastName}`,
+        //     tokenId: confirmTokenId // Not supported by EventEmitter
         // });
-        await sendEmailEvent({
+
+        waitUntil(sendEmailEvent({
             email: user.email,
             name: `${user.firstName} ${user.lastName}`,
-        });
+            tokenId: confirmTokenId
+        }));
 
         // tokens
         const tokenId = nanoid();
@@ -634,10 +643,11 @@ export const signin = async (req, res) => {
     if (user.twoFA) {
         const otp = otp6();
         const otpEnc = await ET.encrypt(otp);
-        await userModel.updateOne({ _id: user._id }, { otp: otpEnc });
+        const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
+        await userModel.updateOne({ _id: user._id }, { otp: otpEnc, otpExpires });
 
         // eventEmitter.emit('sendOTP', { email: user.email, otp, name: `${user.firstName} ${user.lastName}` });
-        await sendOTPEvent({ email: user.email, otp, name: `${user.firstName} ${user.lastName}` });
+        waitUntil(sendOTPEvent({ email: user.email, otp, name: `${user.firstName} ${user.lastName}` }));
 
         const challengeToken = VT.generate2FAToken(user._id, '5m');
         return res.status(200).json({ message: 'OTP sent', requiresOtp: true, challengeToken });
@@ -669,14 +679,15 @@ export const signinWithOtp = async (req, res) => {
     }
     if (decoded?.purpose !== '2fa') return res.status(401).json({ message: 'Unauthorized' });
 
-    const user = await userModel.findById(decoded.id).select('+otp');
+    const user = await userModel.findById(decoded.id).select('+otp +otpExpires');
     if (!user) return res.status(404).json({ message: 'User Not Found' });
     if (!user.otp) return res.status(400).json({ message: 'Invalid OTP' });
+    if (user.otpExpires && Date.now() > user.otpExpires) return res.status(400).json({ message: 'OTP Expired' });
 
     const otpPlain = await ET.decrypt(user.otp);
     if (String(otpPlain) !== String(otp)) return res.status(400).json({ message: 'Invalid OTP' });
 
-    await userModel.updateOne({ _id: user._id }, { $unset: { otp: 1 } });
+    await userModel.updateOne({ _id: user._id }, { $unset: { otp: 1, otpExpires: 1 } });
 
     const tokenId = nanoid();
     const accessToken = isAdminPrefix(user) ? VT.generateAdminAccessToken(user, '1h', tokenId) : VT.generateUserAccessToken(user, '1h', tokenId);
@@ -699,11 +710,13 @@ export const confirmEmail = async (req, res) => {
         const decoded = VT.verifyConfirmEmailToken(token);
         if (!decoded?.email) return res.status(400).json({ message: 'Invalid Token' });
 
-        const user = await userModel.findOne({ email: decoded.email.toLowerCase().trim() });
+        const user = await userModel.findOne({ email: decoded.email.toLowerCase().trim() }).select('+confirmTokenId');
         if (!user) return res.status(404).json({ message: 'User Not Found' });
         if (user.confirmed) return res.status(400).json({ message: 'Email Already Confirmed' });
+        if (!user.confirmTokenId || decoded.jti !== user.confirmTokenId) return res.status(400).json({ message: 'Token invalid or revoked' });
 
         user.confirmed = true;
+        user.confirmTokenId = undefined; // Single-use
         await user.save();
         return res.status(200).json({ message: 'Email Confirmed Successfully' });
     } catch (err) {
@@ -722,25 +735,22 @@ export const requestEmailChange = async (req, res) => {
     const exists = await userModel.findOne({ email: newEmail.toLowerCase().trim() }).lean();
     if (exists) return res.status(400).json({ message: 'Email already exists.' });
 
+    const emailChangeTokenId = nanoid();
     user.pendingEmail = newEmail.toLowerCase().trim();
     user.pendingEmailRequestedAt = new Date();
     user.confirmed = false;
+    user.emailChangeTokenId = emailChangeTokenId;
     await user.save();
 
-    // eventEmitter.emit('sendEmailChangeConfirm', {
-    //     email: user.pendingEmail,
-    //     name: `${user.firstName} ${user.lastName}`,
-    //     userId: user._id,
-    //     oldEmail: user.email,
-    //     newEmail: user.pendingEmail,
-    // });
-    await sendEmailChangeConfirmEvent({
+    // eventEmitter.emit('sendEmailChangeConfirm', ...
+    waitUntil(sendEmailChangeConfirmEvent({
         email: user.pendingEmail,
         name: `${user.firstName} ${user.lastName}`,
         userId: user._id,
         oldEmail: user.email,
         newEmail: user.pendingEmail,
-    });
+        tokenId: emailChangeTokenId
+    }));
 
     return res.status(200).json({ message: 'Confirmation email sent to new email address.' });
 };
@@ -765,11 +775,12 @@ export const confirmEmailChange = async (req, res) => {
         const decoded = VT.verifyEmailChangeToken(token);
         if (!decoded || decoded.purpose !== 'email_change') return res.status(400).json({ message: 'Invalid Token' });
 
-        const user = await userModel.findById(decoded.id);
+        const user = await userModel.findById(decoded.id).select('+emailChangeTokenId');
         if (!user) return res.status(404).json({ message: 'User Not Found' });
 
         const newEmail = String(decoded.newEmail || '').toLowerCase().trim();
         if (!user.pendingEmail || user.pendingEmail !== newEmail) return res.status(400).json({ message: 'No pending email change' });
+        if (!user.emailChangeTokenId || decoded.jti !== user.emailChangeTokenId) return res.status(400).json({ message: 'Token invalid or revoked' });
 
         const exists = await userModel.findOne({ email: newEmail }).lean();
         if (exists && String(exists._id) !== String(user._id)) return res.status(400).json({ message: 'Email already exists.' });
@@ -778,6 +789,7 @@ export const confirmEmailChange = async (req, res) => {
         user.pendingEmail = undefined;
         user.pendingEmailRequestedAt = undefined;
         user.confirmed = true;
+        user.emailChangeTokenId = undefined;
 
         await user.save();
         return res.status(200).json({ message: 'Email changed and confirmed successfully' });
@@ -866,19 +878,20 @@ export const requestOTP = async (req, res) => {
 
     const otp = otp6();
     const otpEnc = await ET.encrypt(otp);
+    const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
 
-    await userModel.updateOne({ _id: user._id }, { otp: otpEnc });
+    await userModel.updateOne({ _id: user._id }, { otp: otpEnc, otpExpires });
 
     // eventEmitter.emit('sendOTP', {
     //     email: user.email,
     //     otp,
     //     name: `${user.firstName} ${user.lastName}`,
     // });
-    await sendOTPEvent({
+    waitUntil(sendOTPEvent({
         email: user.email,
         otp,
         name: `${user.firstName} ${user.lastName}`,
-    });
+    }));
 
     return res.status(200).json({ message: 'OTP sent' });
 };
@@ -886,15 +899,16 @@ export const requestOTP = async (req, res) => {
 export const checkOTP = async (req, res) => {
     const { email, otp } = req.body;
 
-    const user = await userModel.findOne({ email: email.toLowerCase().trim() }).select('+otp');
+    const user = await userModel.findOne({ email: email.toLowerCase().trim() }).select('+otp +otpExpires');
     if (!user) return res.status(404).json({ message: 'User Not Found' });
 
     if (!user.otp) return res.status(400).json({ message: 'Invalid OTP' });
+    if (user.otpExpires && Date.now() > user.otpExpires) return res.status(400).json({ message: 'OTP Expired' });
 
     const decryptedOtp = await ET.decrypt(user.otp);
     if (String(decryptedOtp) !== String(otp)) return res.status(400).json({ message: 'Invalid OTP' });
 
-    await userModel.updateOne({ _id: user._id }, { $unset: { otp: 1 } });
+    await userModel.updateOne({ _id: user._id }, { $unset: { otp: 1, otpExpires: 1 } });
 
     return res.status(200).json({ message: 'OTP Verified Successfully' });
 };
@@ -927,17 +941,22 @@ export const forgetPassword = async (req, res) => {
 export const verifyForgetPasswordOTP = async (req, res) => {
     const { email, otp } = req.body;
 
-    const user = await userModel.findOne({ email: email.toLowerCase().trim() }).select('+otp');
+    const user = await userModel.findOne({ email: email.toLowerCase().trim() }).select('+otp +otpExpires');
     if (!user) return res.status(404).json({ message: 'User Not Found' });
 
     if (!user.otp) return res.status(400).json({ message: 'Invalid OTP' });
+    if (user.otpExpires && Date.now() > user.otpExpires) return res.status(400).json({ message: 'OTP Expired' });
 
     const decryptedOtp = await ET.decrypt(user.otp);
     if (String(decryptedOtp) !== String(otp)) return res.status(400).json({ message: 'Invalid OTP' });
 
-    await userModel.updateOne({ _id: user._id }, { $unset: { otp: 1 } });
+    await userModel.updateOne({ _id: user._id }, { $unset: { otp: 1, otpExpires: 1 } });
 
-    const resetToken = VT.generateResetPasswordToken(user._id);
+    const resetTokenId = nanoid();
+    user.resetTokenId = resetTokenId;
+    await user.save();
+
+    const resetToken = VT.generateResetPasswordToken(user._id, '15m', resetTokenId);
 
     return res.status(200).json({ message: 'OTP Verified Successfully', resetToken });
 };
@@ -975,8 +994,12 @@ export const resendConfirmEmail = async (req, res) => {
 
         if (user.confirmed) return res.status(400).json({ message: 'Email Already Confirmed' });
 
+        const confirmTokenId = nanoid();
+        user.confirmTokenId = confirmTokenId;
+        await user.save();
+
         // eventEmitter.emit('sendEmail', { email: user.email, name: `${user.firstName} ${user.lastName}` });
-        await sendEmailEvent({ email: user.email, name: `${user.firstName} ${user.lastName}` });
+        waitUntil(sendEmailEvent({ email: user.email, name: `${user.firstName} ${user.lastName}`, tokenId: confirmTokenId }));
 
         return res.status(200).json({ message: 'Confirmation email sent successfully.' });
     } catch {
@@ -1021,8 +1044,9 @@ export const resetPassword = async (req, res) => {
 
         if (decoded?.purpose !== 'reset_password') return res.status(400).json({ message: 'Invalid token purpose' });
 
-        const user = await userModel.findById(decoded.id);
+        const user = await userModel.findById(decoded.id).select('+resetTokenId');
         if (!user) return res.status(404).json({ message: 'User Not Found' });
+        if (!user.resetTokenId || decoded.jti !== user.resetTokenId) return res.status(400).json({ message: 'Token invalid or revoked' });
 
         const hashedPassword = await HT.hash({
             plainText: newPassword,
@@ -1030,6 +1054,7 @@ export const resetPassword = async (req, res) => {
         });
 
         user.password = hashedPassword;
+        user.resetTokenId = undefined; // Revoke
         await user.save();
 
         return res.status(200).json({ message: 'Password reset successfully' });

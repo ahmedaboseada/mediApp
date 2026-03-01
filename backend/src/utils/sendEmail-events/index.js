@@ -41,9 +41,9 @@ const render = ({ name, content, link }) => {
 // });
 
 // send confirm email
-export const sendEmailEvent = async ({ email, name }) => {
+export const sendEmailEvent = async ({ email, name, tokenId }) => {
     try {
-        const token = VT.generateConfirmEmailToken(email, process.env.JWT_EXPIRES_IN || '1d');
+        const token = VT.generateConfirmEmailToken(email, process.env.JWT_EXPIRES_IN || '1d', tokenId);
 
         const base = process.env.APP_BASE_URL || `http://localhost:${process.env.PORT || 8000}`;
         const link = `${base}/users/confirmEmail/${token}`;
@@ -116,9 +116,9 @@ export const sendOTPEvent = async ({ email, otp, name }) => {
 //     }
 // });
 
-export const sendEmailChangeConfirmEvent = async ({ email, name, userId, oldEmail, newEmail }) => {
+export const sendEmailChangeConfirmEvent = async ({ email, name, userId, oldEmail, newEmail, tokenId }) => {
     try {
-        const token = VT.generateEmailChangeToken({ userId, oldEmail, newEmail }, '1h');
+        const token = VT.generateEmailChangeToken({ userId, oldEmail, newEmail }, '1h', tokenId);
 
         const base = process.env.APP_BASE_URL || `http://localhost:${process.env.PORT || 8000}`;
         const link = `${base}/users/confirmEmailChange/${token}`;

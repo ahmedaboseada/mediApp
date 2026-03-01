@@ -31,7 +31,11 @@ const userSchema = new Schema(
 
         notifications: [{ type: Types.ObjectId, ref: 'Notification' }],
         booking: [{ type: Types.ObjectId, ref: 'Booking' }],
-        chats: [{ type: Types.ObjectId, ref: 'Chat' }],
+        // Tokens and Expirations Tracking for Auth
+        otpExpires: { type: Date, select: false },
+        confirmTokenId: { type: String, select: false },
+        resetTokenId: { type: String, select: false },
+        emailChangeTokenId: { type: String, select: false },
     },
     { timestamps: true }
 );
