@@ -104,3 +104,5 @@ eventEmitter.on('sendEmailChangeConfirm', async ({ email, name, userId, oldEmail
         console.error(err);
     }
 });
+
+// send email change confirm
