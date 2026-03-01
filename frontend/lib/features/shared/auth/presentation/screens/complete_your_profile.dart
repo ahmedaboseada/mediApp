@@ -6,10 +6,34 @@ import 'package:medi/features/shared/auth/data/models/user_model.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/complete_profile/complete_profile_cubit.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/complete_profile/complete_profile_state.dart';
 
-class CompleteYourProfileScreen extends StatelessWidget {
-  CompleteYourProfileScreen({super.key, this.userModel});
+class CompleteYourProfileScreen extends StatefulWidget {
+  const CompleteYourProfileScreen({super.key, this.userModel});
   final UserModel? userModel;
+
+  @override
+  State<CompleteYourProfileScreen> createState() => _CompleteYourProfileScreenState();
+}
+
+class _CompleteYourProfileScreenState extends State<CompleteYourProfileScreen> {
   String? selectedImage;
+  String? selectedPhone;
+  String? selectedGender;
+  String? selectedDateOfBirth;
+  String? selectedCountry = 'Egypt';
+
+  Future<void> _saveUserProfile() async {
+    // Save all user data to SharedPreferences
+    await PrefHelper.saveUserProfile(
+      firstName: widget.userModel?.name?.split(' ').first,
+      lastName: widget.userModel?.name?.split(' ').last,
+      email: widget.userModel?.email,
+      phone: selectedPhone,
+      country: selectedCountry,
+      dateOfBirth: selectedDateOfBirth,
+      gender: selectedGender,
+      profileImage: selectedImage ?? widget.userModel?.image,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,29 +60,39 @@ class CompleteYourProfileScreen extends StatelessWidget {
                 Center(
                   child: CircularAvatar(
                     selectedImagePath: selectedImage,
-                    networkImageUrl: userModel?.image,
+                    networkImageUrl: widget.userModel?.image,
                   ),
                 ),
                 SizedBox(height: AppSizes.h24),
-                const PhoneField(),
+                PhoneField(
+                  onPhoneChanged: (phone) {
+                    selectedPhone = phone;
+                  },
+                ),
                 SizedBox(height: AppSizes.h24),
-                const DatePickerField(),
+                DatePickerField(
+                  dateController: TextEditingController() ,
+                  onDateSelected: (date) {
+                    selectedDateOfBirth = date.toString();
+                  },
+                ),
                 SizedBox(height: AppSizes.h24),
-                const GenderField(),
+                GenderField(
+                  value: selectedGender ?? 'Male',
+                  onGenderChanged: (gender) {
+                    selectedGender = gender;
+                  },
+                ),
                 SizedBox(height: AppSizes.h32),
-                BlocBuilder<ProfileFormCubit, ProfileFormState>(
-                  buildWhen: (p, c) => p.isValid != c.isValid,
-                  builder: (context, state) {
-                    return PrimaryButton(
-                      text: AppStrings.completeProfileButton,
-                      onPressed: state.isValid
-                          ? () {
-                              context.go(
-                                AppRouter.patientProfileCompletedScreen,
-                              );
-                            }
-                          : null,
-                    );
+                PrimaryButton(
+                  text: AppStrings.completeProfileButton,
+                  onPressed: () async {
+                    await _saveUserProfile();
+                    if (mounted) {
+                      context.go(
+                        AppRouter.patientProfileCompletedScreen,
+                      );
+                    }
                   },
                 ),
               ],

@@ -38,4 +38,5 @@ class AppAssets {
   static const String switchAccount = '${path}switch_account.svg';
   static const String pills = '${path}pills.svg';
   static const String export = '${path}export.svg';
+  static const String tablerEdit = '${path}tabler_edit.svg';
 }

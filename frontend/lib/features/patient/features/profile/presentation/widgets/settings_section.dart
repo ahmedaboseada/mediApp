@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/core/widgets/toggle_tile.dart';
 import 'package:medi/features/patient/features/profile/presentation/widgets/section_item_tile.dart';
@@ -37,7 +38,9 @@ class _SettingsSectionState extends State<SettingsSection> {
             ],
           ),
           SizedBox(height: 20),
-          SectionItemTile(title: 'Account Information'),
+          SectionItemTile(title: 'Account Information',onTap: () {
+            context.push(AppRouter.patientAccountInfoScreen);
+          }),
          ToggleTile(
                 title: 'Notifications',
                 value: notifications,

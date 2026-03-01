@@ -49,6 +49,16 @@ extension AppValidators on String? {
     return null;
   }
 
+  String? validateConfirmEmail(String email) {
+    if (this == null || this!.isEmpty) {
+      return 'Confirm email is required';
+    }
+    if (this != email) {
+      return 'Emails do not match';
+    }
+    return null;
+  }
+
   String? validateFirstName() {
     if (this == null || this!.isEmpty) {
       return AppStrings.firstNameEmpty;

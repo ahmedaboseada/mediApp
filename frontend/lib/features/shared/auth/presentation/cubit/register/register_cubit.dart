@@ -14,7 +14,7 @@ class RegisterCubit extends Cubit<RegisterState> {
     required String confirmPassword,
     required String firstName,
     required String lastName,
-    required UserRole role,
+    required UserRole type,
   }) async {
     emit(RegisterLoading());
     final result = await authRepo.signUpWithEmailAndPassword(
@@ -24,11 +24,11 @@ class RegisterCubit extends Cubit<RegisterState> {
       firstName: firstName,
 
       lastName: lastName,
-      role: role,
+      type: type,
     );
     result.fold(
       (failure) => emit(RegisterFailure(failure.message)),
-      (response) => emit(RegisterSuccess(role, response.message)),
+      (response) => emit(RegisterSuccess(type, response.message)),
     );
   }
 }

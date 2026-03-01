@@ -21,27 +21,34 @@ class SignUpScreen extends StatelessWidget {
   final TextEditingController _lastNameController = TextEditingController();
   final ValueNotifier<bool> _agreeToTerms = ValueNotifier(false);
 
-  void _handleSignUp(BuildContext context) {
-    if (role == UserRole.doctor) {
-      context.go(AppRouter.doctorCompleteProfile);
-    }
-    if (role == UserRole.patient) {
-      context.go(AppRouter.completeProfile);
-    }
-    // if (!_formKey.currentState!.validate()) return;
-    // if (!_agreeToTerms.value) {
-    //   context.showSafeSnackBar(AppStrings.agreeToTermsMessage);
-    //   return;
-    // }
+  void _handleSignUp(BuildContext context) async {
+    // Save initial user data (name and email) to SharedPreferences
+    await PrefHelper.saveUserProfile(
+      firstName: _nameController.text.trim(),
+      lastName: _lastNameController.text.trim(),
+      email: _emailController.text.trim(),
+    );
 
-    // context.read<RegisterCubit>().register(
-    //   email: _emailController.text.trim(),
-    //   password: _passwordController.text.trim(),
-    //   confirmPassword: _confirmPasswordController.text.trim(),
-    //   firstName: _nameController.text.trim(),
-    //   lastName: _lastNameController.text.trim(),
-    //   role: role,
-    // );
+    // if (role == UserRole.doctor) {
+    //   context.go(AppRouter.doctorCompleteProfile);
+    // }
+    // if (role == UserRole.patient) {
+    //   context.go(AppRouter.completeProfile);
+    // }
+    if (!_formKey.currentState!.validate()) return;
+    if (!_agreeToTerms.value) {
+      context.showSafeSnackBar(AppStrings.agreeToTermsMessage);
+      return;
+    }
+
+    context.read<RegisterCubit>().register(
+      email: _emailController.text.trim(),
+      password: _passwordController.text.trim(),
+      confirmPassword: _confirmPasswordController.text.trim(),
+      firstName: _nameController.text.trim(),
+      lastName: _lastNameController.text.trim(),
+      type: role,
+    );
   }
 
   @override
@@ -55,7 +62,7 @@ class SignUpScreen extends StatelessWidget {
               context.safeGo(
                 role == UserRole.patient
                     ? AppRouter.completeProfile
-                    : AppRouter.doctorOtpScreen,
+                    : AppRouter.doctorCompleteProfile,
                 extra: _emailController.text.trim(),
               );
             } else if (state is RegisterFailure) {

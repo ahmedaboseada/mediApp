@@ -21,21 +21,20 @@ class ProfileScreen extends StatelessWidget {
             child: Column(
               children: [
                 UserInfoScetion(),
-                                SizedBox(height: AppSizes.h16),
+                SizedBox(height: AppSizes.h16),
 
-                 AccountSection(),
+                AccountSection(),
                 SizedBox(height: AppSizes.h16),
-                                SettingsSection(),
+                SettingsSection(),
                 SizedBox(height: AppSizes.h16),
-                                MedicalRecordsSection(),
+                MedicalRecordsSection(),
                 SizedBox(height: AppSizes.h16),
-               
+
                 ConnectedDoctorsSection(),
                 SizedBox(height: AppSizes.h16),
                 PrivacySecuritySection(),
                 SizedBox(height: AppSizes.h16),
 
-                
                 SupportSection(),
               ],
             ),

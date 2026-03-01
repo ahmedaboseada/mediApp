@@ -1,11 +1,14 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/shared/auth/presentation/cubit/complete_profile/complete_profile_cubit.dart';
 
 class PhoneField extends StatelessWidget {
-  const PhoneField({super.key});
+  const PhoneField({super.key, this.enabled = true, this.onPhoneChanged, this.phonecontroller});
+  final bool enabled;
+  final Function(String)? onPhoneChanged;
+  final TextEditingController? phonecontroller;
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +19,7 @@ class PhoneField extends StatelessWidget {
         const SizedBox(height: 8),
 
         InternationalPhoneNumberInput(
+          textFieldController: phonecontroller,
           initialValue: PhoneNumber(isoCode: 'EG'),
 
           selectorConfig: SelectorConfig(
@@ -25,17 +29,19 @@ class PhoneField extends StatelessWidget {
             leadingPadding: 12,
             showFlags: false,
           ),
-
+          isEnabled: enabled,
           onInputChanged: (number) {
-            context.read<ProfileFormCubit>().onPhoneChanged(
-              number.phoneNumber ?? '',
-            );
-            print('Phone number changed: ${number.phoneNumber}');
+            onPhoneChanged?.call(number.phoneNumber ?? '');
+            // context.read<ProfileFormCubit>().onPhoneChanged(
+            //   number.phoneNumber ?? '',
+            // );
+            // print('Phone number changed: ${number.phoneNumber}');
           },
           cursorColor: Colors.black,
           inputDecoration: InputDecoration(
             hintText: 'Enter Phone Number',
-
+            enabled: enabled,
+            
             hintStyle: TextStyle(color: Colors.grey.shade500),
             filled: true,
             fillColor: Colors.white,

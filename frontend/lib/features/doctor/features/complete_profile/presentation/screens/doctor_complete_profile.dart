@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/shared/auth/data/models/user_model.dart';
-import 'package:medi/features/shared/auth/presentation/cubit/complete_profile/complete_profile_cubit.dart';
-import 'package:medi/features/shared/auth/presentation/cubit/complete_profile/complete_profile_state.dart';
 import 'package:medi/features/doctor/constants/constants.dart';
-import 'package:medi/core/widgets/q_text_fileld.dart';
 
 class DoctorCompleteProfile extends StatelessWidget {
   DoctorCompleteProfile({super.key, this.userModel});
@@ -64,14 +60,13 @@ class DoctorCompleteProfile extends StatelessWidget {
                   label: AppStrings.medicalLicenseNumber,
                 ),
                 SizedBox(height: AppSizes.h24),
-                const GenderField(),
+                const GenderField(
+                  value: 'Male',
+                ),
                 SizedBox(height: AppSizes.h24),
                 const PhoneField(),
                 SizedBox(height: AppSizes.h32),
-                BlocBuilder<ProfileFormCubit, ProfileFormState>(
-                  buildWhen: (p, c) => p.isValid != c.isValid,
-                  builder: (context, state) {
-                    return PrimaryButton(
+              PrimaryButton(
                       text: AppStrings.completeProfileButton,
                       onPressed: () {
                         context.go(AppRouter.allowLocationScreen);
@@ -82,9 +77,9 @@ class DoctorCompleteProfile extends StatelessWidget {
                       //         context.go(AppRouter.allowLocationScreen);
                       //       }
                       //     : null,
-                    );
-                  },
-                ),
+                    )
+                  
+                
               ],
             ),
           ),

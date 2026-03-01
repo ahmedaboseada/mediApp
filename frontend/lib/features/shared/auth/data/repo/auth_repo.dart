@@ -5,12 +5,13 @@ import 'package:medi/features/shared/auth/data/models/register_response.dart';
 
 abstract class AuthRepo {
   Future<Either<ApiError, RegisterResponse>> signUpWithEmailAndPassword({
-    required String email,
-    required String password,
-    required String confirmPassword,
-    required String firstName,
-    required String lastName,
-    required UserRole role,
+  required String email,
+  required String password,
+  required String firstName,
+  required String lastName,
+  required String confirmPassword,
+  required UserRole type,
+  
   });
 
   Future<Either<ApiError, AuthTokensModel>> signInWithEmailAndPassword({

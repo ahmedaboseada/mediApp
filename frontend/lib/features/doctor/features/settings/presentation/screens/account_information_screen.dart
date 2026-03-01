@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/constants/constants.dart';
-import 'package:medi/core/widgets/q_text_fileld.dart';
 
 class AccountInformationScreen extends StatelessWidget {
   AccountInformationScreen({super.key});
@@ -92,7 +91,7 @@ class AccountInformationScreen extends StatelessWidget {
                         label: AppStrings.medicalLicenseNumber,
                       ),
                       SizedBox(height: AppSizes.h24),
-                      const GenderField(),
+                      const GenderField(value:'Male'),
                       SizedBox(height: AppSizes.h24),
                       PrimaryButton(
                         onPressed: () {

@@ -4,16 +4,20 @@ import 'package:intl/intl.dart';
 import 'package:medi/core/core.dart';
 
 class DatePickerField extends StatefulWidget {
-  const DatePickerField({super.key, this.initialDate, this.onDateSelected});
+  DatePickerField({super.key, this.initialDate, this.onDateSelected, required this.dateController});
   final DateTime? initialDate;
   final Function(DateTime)? onDateSelected;
+  final TextEditingController dateController;
+
+
+
+
 
   @override
   State<DatePickerField> createState() => _DatePickerFieldState();
 }
 
 class _DatePickerFieldState extends State<DatePickerField> {
-  TextEditingController dateController = TextEditingController();
 
   Future<void> selectDate() async {
     DateTime? date = await showDatePicker(
@@ -24,7 +28,7 @@ class _DatePickerFieldState extends State<DatePickerField> {
     if (date != null) {
       setState(() {
         String formattedDate = DateFormat('dd/MM/yyyy').format(date);
-        dateController.text = formattedDate;
+        widget.dateController.text = formattedDate;
       });
       widget.onDateSelected?.call(date);
     }
@@ -33,11 +37,9 @@ class _DatePickerFieldState extends State<DatePickerField> {
   @override
   void initState() {
     super.initState();
-    dateController = TextEditingController(
-      text: widget.initialDate != null
-          ? DateFormat('dd/MM/yyyy').format(widget.initialDate!)
-          : '',
-    );
+    widget.dateController.text = widget.initialDate != null
+        ? DateFormat('dd/MM/yyyy').format(widget.initialDate!)
+        : '';
   }
 
   @override
@@ -51,12 +53,12 @@ class _DatePickerFieldState extends State<DatePickerField> {
           Text('Year of birth', style: AppStyles.black14500),
           SizedBox(height: AppSizes.h8),
           TextField(
-            controller: dateController,
+            controller: widget.dateController,
             readOnly: true,
             decoration: InputDecoration(
               filled: true,
               fillColor: AppColors.surfaceColor,
-              hintText: 'DD/MM/YYYY',
+             // hintText: 'DD/MM/YYYY',
 
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSizes.r10),

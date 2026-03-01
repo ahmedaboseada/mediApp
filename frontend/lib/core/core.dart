@@ -22,6 +22,7 @@ export 'utils/service_locator.dart';
 export 'widgets/primary_button.dart';
 export 'widgets/custom_app_bar.dart';
 export 'widgets/custom_text_field.dart';
+export 'widgets/custom_text_button2.dart';
 export 'widgets/custom_drop_down.dart';
 export 'widgets/gender_field.dart';
 export 'widgets/phone_field.dart';

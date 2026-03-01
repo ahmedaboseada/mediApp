@@ -2,6 +2,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/enums/user_role.dart';
 import 'package:medi/core/utils/service_locator.dart';
+import 'package:medi/features/patient/features/profile/presentation/screens/account_info_screen.dart';
+import 'package:medi/features/patient/features/profile/presentation/screens/change_email_screen.dart';
+import 'package:medi/features/patient/features/profile/presentation/screens/change_password_screen.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/complete_profile/complete_profile_cubit.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/forget_password/forget_password_cubit.dart';
@@ -75,6 +78,9 @@ class AppRouter {
   static const String takeInfoScreen = '/takeInfo';
   static const String caregiverModeScreen = '/CaregiverModeScreen';
   static const String allSetScreen = '/AllSetScreen';
+  static const String patientAccountInfoScreen = '/patient/accountInfo';
+  static const String changeEmailScreen = '/patient/changeEmail';
+  static const String changePasswordScreen = '/patient/changePassword';
   // ========== DOCTOR ROUTES ==========
   static const String doctorLogin = '/login/doctor';
   static const String doctorSignUpScreen = '/signUp/doctor';
@@ -135,12 +141,9 @@ class AppRouter {
       ),
       GoRoute(
         path: completeProfile,
-        builder: (context, state) {
-          return BlocProvider(
-            create: (context) => ProfileFormCubit(),
-            child: CompleteYourProfileScreen(),
-          );
-        },
+        builder: (context, state) =>
+           CompleteYourProfileScreen(),
+          
       ),
       GoRoute(
         path: chooseSoundScreen,
@@ -235,6 +238,18 @@ class AppRouter {
       // GoRoute(path: allSetScreen,
       // builder: (context, state) => const AllSetScreen(),
       // ),
+      GoRoute(
+        path: patientAccountInfoScreen,
+        builder: (context, state) =>  AccountInfoScreen(),
+      ),
+      GoRoute(
+        path: changeEmailScreen,
+        builder: (context, state) =>  ChangeEmailScreen(),
+      ),
+      GoRoute(
+        path: changePasswordScreen,
+        builder: (context, state) =>  ChangePasswordScreen(),
+      ),
 
       // ========== DOCTOR ROUTES ==========
       GoRoute(
@@ -257,12 +272,9 @@ class AppRouter {
       ),
       GoRoute(
         path: doctorCompleteProfile,
-        builder: (context, state) {
-          return BlocProvider(
-            create: (context) => ProfileFormCubit(),
-            child: DoctorCompleteProfile(),
-          );
-        },
+        builder:(context, state) =>  DoctorCompleteProfile(),
+          
+        
       ),
 
       GoRoute(

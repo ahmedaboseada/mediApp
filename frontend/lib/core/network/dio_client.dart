@@ -4,7 +4,8 @@ import 'package:medi/core/utils/pref_helper.dart';
 class DioClient {
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: 'https://accessories-eshop.runasp.net',
+      baseUrl: 'https://medi-app-dusky.vercel.app/api/v1/auth/',
+      //'https://accessories-eshop.runasp.net',
       //https://medi-app-dusky.vercel.app/api/v1/auth/',
       headers: {"Content-Type": 'application/json'},
     ),

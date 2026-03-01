@@ -103,38 +103,74 @@ class AuthRepoImpl implements AuthRepo {
   }
 
   @override
-  Future<Either<ApiError, RegisterResponse>> signUpWithEmailAndPassword({
-    required String email,
-    required String password,
-    required String firstName,
-    required String lastName,
-    required String confirmPassword,
-    required UserRole role,
-  }) async {
-    try {
-      final data = {
-        'username': "$firstName $lastName",
-        'email': email,
-        'password': password,
-        'confirmPassword': confirmPassword,
-        // 'firstName': firstName,
-        // 'lastName': lastName,
-      };
-      final endpoint = role == UserRole.patient
-          ? 'register'
-          : '/api/auth/register/doctor';
-      final Response response = await apiService.post(endpoint, data);
-      log(response.toString());
+  // Future<Either<ApiError, RegisterResponse>> signUpWithEmailAndPassword({
+  //   required String email,
+  //   required String password,
+  //   required String firstName,
+  //   required String lastName,
+  //   required String confirmPassword,
+  //   required UserRole type,
+  // }) async {
+  //   try {
+  //     final data = {
+  //       'username': "$firstName $lastName",
+  //       'email': email,
+  //       'password': password,
+  //       'confirmPassword': confirmPassword,
+  //       // 'firstName': firstName,
+  //       // 'lastName': lastName,
+  //     };
+  //     final endpoint = type == UserRole.patient
+  //         ? 'register'
+  //         : '/api/auth/register/doctor';
+  //     final Response response = await apiService.post(endpoint, data);
+  //     log(response.toString());
 
-      final registerResponse = RegisterResponse.fromJson(response.data);
-      return Right(registerResponse);
-    } on DioException catch (e) {
-      final serverFailure = ServerFailure.fromDioError(e);
-      return Left(serverFailure);
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
-    }
+  //     final registerResponse = RegisterResponse.fromJson(response.data);
+  //     return Right(registerResponse);
+  //   } on DioException catch (e) {
+  //     final serverFailure = ServerFailure.fromDioError(e);
+  //     return Left(serverFailure);
+  //   } catch (e) {
+  //     return Left(ServerFailure(e.toString()));
+  //   }
+  // }
+  Future<Either<ApiError, RegisterResponse>> signUpWithEmailAndPassword({
+  required String email,
+  required String password,
+  required String firstName,
+  required String lastName,
+  required String confirmPassword,
+  required UserRole type,
+  
+}) async {
+  try {
+    final data = {
+      'type': type == UserRole.patient ? 'patient' : 'doctor',
+      'firstName': firstName,
+      'lastName': lastName,
+      'email': email,
+      'password': password,
+      'confirmPassword': confirmPassword,
+    
+    };
+
+    final Response response =
+        await apiService.post('/users/signup', data);
+
+    log(response.toString());
+
+    final registerResponse =
+        RegisterResponse.fromJson(response.data);
+
+    return Right(registerResponse);
+  } on DioException catch (e) {
+    final serverFailure = ServerFailure.fromDioError(e);
+    return Left(serverFailure);
+  } catch (e) {
+    return Left(ServerFailure(e.toString()));
   }
+}
 
   @override
   Future<Either<ApiError, String>> verifyOtp({
