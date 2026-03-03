@@ -5,8 +5,9 @@ import 'package:medi/core/utils/safe_go_router.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/forget_password/forget_password_cubit.dart';
 
 class ForgetPasswordScreen extends StatelessWidget {
-  ForgetPasswordScreen({super.key});
+  ForgetPasswordScreen({super.key, required this.role});
 
+  final UserRole role;
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
 
@@ -27,7 +28,10 @@ class ForgetPasswordScreen extends StatelessWidget {
               context.showSafeSnackBar(state.message);
               context.safeGo(
                 AppRouter.otpScreen,
-                extra: _emailController.text.trim(),
+                extra: {
+                  'email': _emailController.text.trim(),
+                  'role': role,
+                },
               );
             } else if (state is ForgetPasswordFailure) {
               context.showSafeSnackBar("${state.error},error");
@@ -75,10 +79,17 @@ class ForgetPasswordScreen extends StatelessWidget {
                     PrimaryButton(
                       text: AppStrings.submit,
                       onPressed: () {
-                        context.safeGo(
-                AppRouter.otpScreen,
-                extra: _emailController.text.trim(),
-              );
+                        if (_formKey.currentState!.validate()) {
+                          context
+                              .read<ForgetPasswordCubit>()
+                              .submitForgetPassword(
+                                _emailController.text.trim(),
+                              );
+                         }
+              //           context.safeGo(
+              //   AppRouter.otpScreen,
+              //   extra: _emailController.text.trim(),
+              // );
                         // if (_formKey.currentState!.validate()) {
                         //   context
                         //       .read<ForgetPasswordCubit>()

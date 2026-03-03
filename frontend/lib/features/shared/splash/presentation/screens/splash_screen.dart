@@ -37,12 +37,17 @@ class _SplashScreenState extends State<SplashScreen>
     if (!mounted) return;
 
     final accessToken = await PrefHelper.getAccessToken();
+    final userRole = await PrefHelper.getUserRole();
     final isOnboardingCompleted = await PrefHelper.isOnboardingCompleted();
 
     if (accessToken != null && accessToken.isNotEmpty) {
-      // User is logged in, go to home
+      // User is logged in, go to home based on role
       if (mounted) {
-        context.go(AppRouter.homeScreen);
+        if (userRole == UserRole.doctor) {
+          context.go(AppRouter.mainLayout);
+        } else {
+          context.go(AppRouter.patientMainView);
+        }
       }
     } else if (!isOnboardingCompleted) {
       // First time user, show onboarding

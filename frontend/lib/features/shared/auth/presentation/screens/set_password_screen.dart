@@ -7,29 +7,30 @@ import 'package:medi/core/utils/safe_go_router.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/reset_password/reset_password_cubit.dart';
 
 class SetPasswordScreen extends StatelessWidget {
-  SetPasswordScreen({super.key});
+  SetPasswordScreen({super.key, required this.resetToken, required this.role});
 
+  final String resetToken;
+  final UserRole role;
   final _formKey = GlobalKey<FormState>();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    final state = GoRouterState.of(context);
-    final args = state.extra;
+    //   final state = GoRouterState.of(context);
+    //  final args = state.extra;
+    // if (args == null || args is! Map<String, String>) {
+    //   return const Scaffold(
+    //     body: Center(child: Text('Invalid navigation data')),
+    //   );
+    // }
 
-    if (args == null || args is! Map<String, String>) {
-      return const Scaffold(
-        body: Center(child: Text('Invalid navigation data')),
-      );
-    }
+    // final email = args['email'];
+    // final otp = args['otp'];
 
-    final email = args['email'];
-    final otp = args['otp'];
-
-    if (email == null || otp == null) {
-      return const Scaffold(body: Center(child: Text('Missing reset data')));
-    }
+    // if (email == null || otp == null) {
+    //   return const Scaffold(body: Center(child: Text('Missing reset data')));
+    // }
 
     return Scaffold(
       appBar: AppBar(
@@ -43,7 +44,10 @@ class SetPasswordScreen extends StatelessWidget {
         listener: (context, state) {
           if (state is ResetPasswordSuccess) {
             context.showSafeSnackBar(state.message);
-            context.safeGo(AppRouter.passwordChangedScreen);
+            context.safeGo(
+              AppRouter.passwordChangedScreen,
+              extra: role,
+            );
           } else if (state is ResetPasswordFailure) {
             context.showSafeSnackBar(state.error);
           }
@@ -59,12 +63,13 @@ class SetPasswordScreen extends StatelessWidget {
             child: Form(
               key: _formKey,
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   SvgPicture.asset(
                     AppAssets.updatePassword,
                     height: AppSizes.h200,
                   ),
-                  Text(AppStrings.updatePassword, style: AppStyles.black24700),
+                  Text(AppStrings.updatePassword, style: AppStyles.black24700, textAlign: TextAlign.center),
                   SizedBox(height: AppSizes.h12),
                   Text(
                     AppStrings.newPasswordMessage,
@@ -97,14 +102,13 @@ class SetPasswordScreen extends StatelessWidget {
 
                   PrimaryButton(
                     text: AppStrings.createNewPassword,
-                    onPressed: isLoading
-                        ? null
-                        : () {
+                    onPressed:() {
                             if (_formKey.currentState!.validate()) {
                               context.read<ResetPasswordCubit>().resetPassword(
-                                email: email,
-                                otp: otp,
                                 newPassword: _passwordController.text.trim(),
+                                resetToken: resetToken,
+                                confirmPassword: _confirmPasswordController.text
+                                    .trim(),
                               );
                             }
                           },

@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:medi/core/enums/user_role.dart';
+import 'dart:convert';
 
 class PrefHelper {
   static const String _accessTokenKey = 'access_token';
@@ -16,6 +17,12 @@ class PrefHelper {
   static const String _dateOfBirthKey = 'dateOfBirth';
   static const String _genderKey = 'gender';
   static const String _profileImageKey = 'profileImage';
+  
+  // Patient Data Key
+  static const String _patientDataKey = 'patient_data';
+  
+  // Challenge Token Key (for 2FA/OTP flow)
+  static const String _challengeTokenKey = 'challenge_token';
 
   static Future<void> saveAccessToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
@@ -166,9 +173,46 @@ class PrefHelper {
     await prefs.remove(_profileImageKey);
   }
 
+  /// Patient Data Management
+  static Future<void> savePatientData(Map<String, dynamic> patientData) async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = jsonEncode(patientData);
+    await prefs.setString(_patientDataKey, jsonString);
+  }
+
+  static Future<Map<String, dynamic>?> getPatientData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString(_patientDataKey);
+    if (jsonString == null) return null;
+    return jsonDecode(jsonString) as Map<String, dynamic>;
+  }
+
+  static Future<void> clearPatientData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_patientDataKey);
+  }
+
+  /// Challenge Token Management (for 2FA/OTP flow)
+  static Future<void> saveChallengeToken(String token) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_challengeTokenKey, token);
+  }
+
+  static Future<String?> getChallengeToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_challengeTokenKey);
+  }
+
+  static Future<void> clearChallengeToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_challengeTokenKey);
+  }
+
   static Future<void> clearAll() async {
     await clearTokens();
     await clearUserRole();
     await clearUserProfile();
+    await clearPatientData();
+    await clearChallengeToken();
   }
 }

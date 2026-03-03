@@ -6,6 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/shared/auth/data/models/auth_token_model.dart';
 import 'package:medi/features/shared/auth/data/models/register_response.dart';
+import 'package:medi/features/shared/auth/data/models/verify_otp_reponse.dart';
 
 import 'package:medi/features/shared/auth/data/repo/auth_repo.dart';
 
@@ -19,27 +20,58 @@ class AuthRepoImpl implements AuthRepo {
   );
 
   @override
-  Future<Either<ApiError, AuthTokensModel>> signInWithEmailAndPassword({
+  Future<Either<ApiError, String>> signInWithEmailAndPassword({
     required String email,
     required String password,
     required UserRole role,
   }) async {
     try {
       final endpoint = role == UserRole.patient
-          ? '/api/auth/login'
-          : '/api/auth/login/doctor';
-      final Response response = await apiService.post(endpoint, {
+          ? '/users/signin'
+          : '/users/signin';
+      final dynamic response = await apiService.post(endpoint, {
         'email': email,
         'password': password,
       });
+      log(response.toString());
 
-      final token = AuthTokensModel.fromJson(response.data);
-      await PrefHelper.saveAccessToken(token.accessToken);
-      await PrefHelper.saveRefreshToken(token.refreshToken);
-      log(
-        'Access Token: ${token.accessToken}--------------------------------------------------------------------------',
+      // Check if response is an error
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      // Extract tokens
+      final accessToken = response['accessToken'];
+      final refreshToken = response['refreshToken'];
+      
+      // Save tokens
+      await PrefHelper.saveAccessToken(accessToken);
+      await PrefHelper.saveRefreshToken(refreshToken);
+
+      // Extract user data
+      final user = response['user'];
+      await PrefHelper.saveUserProfile(
+        firstName: user['firstName'],
+        lastName: user['lastName'],
+        email: user['email'],
+        profileImage: user['profilePicture'],
       );
-      return Right(token);
+
+      // Save user role
+      final userRole = user['type'] == 'doctor'
+          ? UserRole.doctor
+          : UserRole.patient;
+      await PrefHelper.saveUserRole(userRole);
+
+      // Save patient data if available
+      if (response['patient'] != null) {
+        await PrefHelper.savePatientData(response['patient']);
+      }
+
+      log(
+        'Access Token: $accessToken--------------------------------------------------------------------------',
+      );
+      return Right(accessToken);
     } on DioException catch (e) {
       final serverFailure = ServerFailure.fromDioError(e);
       return Left(serverFailure);
@@ -67,12 +99,16 @@ class AuthRepoImpl implements AuthRepo {
         return Left(ServerFailure('idToken is null'));
       }
 
-      final Response response = await apiService.post(
+      final dynamic response = await apiService.post(
         '/api/auth/google/mobile',
         {'idToken': auth.idToken},
       );
 
-      final token = AuthTokensModel.fromJson(response.data);
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final token = AuthTokensModel.fromJson(response);
       await PrefHelper.saveAccessToken(token.accessToken);
       await PrefHelper.saveRefreshToken(token.refreshToken);
       log(
@@ -125,7 +161,6 @@ class AuthRepoImpl implements AuthRepo {
   //         : '/api/auth/register/doctor';
   //     final Response response = await apiService.post(endpoint, data);
   //     log(response.toString());
-
   //     final registerResponse = RegisterResponse.fromJson(response.data);
   //     return Right(registerResponse);
   //   } on DioException catch (e) {
@@ -136,57 +171,86 @@ class AuthRepoImpl implements AuthRepo {
   //   }
   // }
   Future<Either<ApiError, RegisterResponse>> signUpWithEmailAndPassword({
-  required String email,
-  required String password,
-  required String firstName,
-  required String lastName,
-  required String confirmPassword,
-  required UserRole type,
-  
-}) async {
-  try {
-    final data = {
-      'type': type == UserRole.patient ? 'patient' : 'doctor',
-      'firstName': firstName,
-      'lastName': lastName,
-      'email': email,
-      'password': password,
-      'confirmPassword': confirmPassword,
-    
-    };
+    required String email,
+    required String password,
+    required String firstName,
+    required String lastName,
+    required String confirmPassword,
+    required UserRole type,
+  }) async {
+    try {
+      final data = {
+        'type': type == UserRole.patient ? 'patient' : 'doctor',
+        'firstName': firstName,
+        'lastName': lastName,
+        'email': email,
+        'password': password,
+        'confirmPassword': confirmPassword,
+      };
 
-    final Response response =
-        await apiService.post('/users/signup', data);
+      final dynamic response = await apiService.post('/users/signup', data);
 
-    log(response.toString());
+      log(response.toString());
 
-    final registerResponse =
-        RegisterResponse.fromJson(response.data);
+      if (response is ServerFailure) {
+        return Left(response);
+      }
 
-    return Right(registerResponse);
-  } on DioException catch (e) {
-    final serverFailure = ServerFailure.fromDioError(e);
-    return Left(serverFailure);
-  } catch (e) {
-    return Left(ServerFailure(e.toString()));
+      final registerResponse = RegisterResponse.fromJson(response);
+
+      // Save tokens
+      await PrefHelper.saveAccessToken(registerResponse.accessToken);
+      await PrefHelper.saveRefreshToken(registerResponse.refreshToken);
+
+      // Save user data
+      await PrefHelper.saveUserProfile(
+        firstName: registerResponse.user.firstName,
+        lastName: registerResponse.user.lastName,
+        email: registerResponse.user.email,
+        profileImage: registerResponse.user.profilePicture,
+      );
+
+      // Save user role
+      final role = registerResponse.user.type == 'doctor'
+          ? UserRole.doctor
+          : UserRole.patient;
+      await PrefHelper.saveUserRole(role);
+
+      // Save patient data
+      await PrefHelper.savePatientData(registerResponse.patient.toJson());
+
+      log(
+        'Access Token: ${registerResponse.accessToken}--------------------------------------------------------------------------',
+      );
+
+      return Right(registerResponse);
+    } on DioException catch (e) {
+      final serverFailure = ServerFailure.fromDioError(e);
+      return Left(serverFailure);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
   }
-}
 
   @override
-  Future<Either<ApiError, String>> verifyOtp({
+  Future<Either<ApiError, VerifyOtpResponse>> verifyOtp({
     required String email,
     required String otp,
   }) async {
     try {
       final data = {'email': email, 'otp': otp};
-      final Response response = await apiService.post(
-        '/api/auth/validate-otp',
+      final dynamic response = await apiService.post(
+        '/users/forgetPassword/verify',
         data,
       );
 
-      final message = response.data ?? 'OTP verified successfully rere';
-      log(response.data.toString());
-      return Right(message);
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final verifyOtpResponse = VerifyOtpResponse.fromJson(response);
+      log(response.toString());
+      return Right(verifyOtpResponse);
     } on DioException catch (e) {
       final serverFailure = ServerFailure.fromDioError(e);
       return Left(serverFailure);
@@ -197,19 +261,27 @@ class AuthRepoImpl implements AuthRepo {
 
   @override
   Future<Either<ApiError, String>> resetPassword({
-    required String email,
-    required String otp,
+    required String resetToken,
     required String newPassword,
+    required String confirmPassword,
   }) async {
     try {
-      final data = {'email': email, 'otp': otp, 'newPassword': newPassword};
-      final Response response = await apiService.post(
-        '/api/auth/reset-password',
+      final data = {
+        'resetToken': resetToken,
+        'newPassword': newPassword,
+        'confirmPassword': confirmPassword,
+      };
+      final dynamic response = await apiService.post(
+        '/users/resetPassword',
         data,
       );
 
-      final message = response.data ?? 'Password reset successfully rere';
-      log(response.data.toString());
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final message = response['message'] ?? 'Password reset successfully rere';
+      log(response.toString());
       return Right(message);
     } on DioException catch (e) {
       final serverFailure = ServerFailure.fromDioError(e);
@@ -225,13 +297,18 @@ class AuthRepoImpl implements AuthRepo {
   }) async {
     try {
       final data = {'email': email};
-      final Response response = await apiService.post(
-        '/api/auth/forgot-password',
+      final dynamic response = await apiService.post(
+        '/users/forgetPassword',
         data,
       );
 
-      final message = response.data;
-      log(response.data.toString());
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final message =
+          response['message'] ?? 'Password reset link sent to your email';
+      log(response.toString());
       return Right(message);
     } on DioException catch (e) {
       final serverFailure = ServerFailure.fromDioError(e);
@@ -245,13 +322,17 @@ class AuthRepoImpl implements AuthRepo {
   Future<Either<ApiError, String>> resendOtp({required String email}) async {
     try {
       final data = {'email': email};
-      final Response response = await apiService.post(
-        '/api/auth/resend-otp',
+      final dynamic response = await apiService.post(
+        '/users/requestOTP',
         data,
       );
 
-      final message = response.data;
-      log(response.data.toString());
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final message = response['message'] ?? 'OTP sent successfully';
+      log(response.toString());
       return Right(message);
     } on DioException catch (e) {
       final serverFailure = ServerFailure.fromDioError(e);

@@ -33,6 +33,9 @@ class AppAssets {
   static const String google = '${path}google.svg';
   static const String facebook = '${path}facebook.svg';
   static const String man = '${path}man.svg';
+  static const String manual = '${path}manual.svg';
+  static const String ocr = '${path}ocr.svg';
+  static const String barcode = '${path}barcode.svg';
   static const String ringtone = '${path}ringtone.png';
   static const String support = '${path}support.svg';
   static const String switchAccount = '${path}switch_account.svg';

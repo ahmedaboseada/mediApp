@@ -41,6 +41,7 @@ class _SettingsSectionState extends State<SettingsSection> {
           SectionItemTile(title: 'Account Information',onTap: () {
             context.push(AppRouter.patientAccountInfoScreen);
           }),
+          
          ToggleTile(
                 title: 'Notifications',
                 value: notifications,

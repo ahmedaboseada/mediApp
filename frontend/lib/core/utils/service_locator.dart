@@ -10,6 +10,9 @@ import 'package:medi/features/patient/features/notification_sound/domain/usecase
 import 'package:medi/features/patient/features/notification_sound/domain/usecases/preview_sound_usecase.dart';
 import 'package:medi/features/patient/features/notification_sound/domain/usecases/save_sound_usecase.dart';
 import 'package:medi/features/patient/features/notification_sound/presentation/controller/sound_cubit/sound_cubit.dart';
+import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
+import 'package:medi/features/patient/features/profile/data/repo/profile_repo_impl.dart';
+import 'package:medi/features/patient/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final getIt = GetIt.instance;
@@ -17,6 +20,12 @@ void setupServiceLocator() async {
   getIt.registerLazySingleton<ApiService>(() => ApiService());
   getIt.registerLazySingleton<AuthRepoImpl>(
     () => AuthRepoImpl(getIt<ApiService>()),
+  );
+  getIt.registerLazySingleton<ProfileRepo>(
+    () => ProfileRepoImpl(getIt<ApiService>()),
+  );
+  getIt.registerFactory<ProfileCubit>(
+    () => ProfileCubit(getIt<ProfileRepo>()),
   );
   final sharedPreferences = await SharedPreferences.getInstance();
   getIt.registerLazySingleton<SharedPreferences>(() => sharedPreferences);

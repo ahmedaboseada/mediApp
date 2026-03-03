@@ -24,14 +24,14 @@ class _CompleteYourProfileScreenState extends State<CompleteYourProfileScreen> {
   Future<void> _saveUserProfile() async {
     // Save all user data to SharedPreferences
     await PrefHelper.saveUserProfile(
-      firstName: widget.userModel?.name?.split(' ').first,
-      lastName: widget.userModel?.name?.split(' ').last,
+      firstName: widget.userModel?.firstName,
+      lastName: widget.userModel?.lastName,
       email: widget.userModel?.email,
       phone: selectedPhone,
       country: selectedCountry,
       dateOfBirth: selectedDateOfBirth,
       gender: selectedGender,
-      profileImage: selectedImage ?? widget.userModel?.image,
+      profileImage: selectedImage ?? widget.userModel?.profilePicture,
     );
   }
 
@@ -60,7 +60,7 @@ class _CompleteYourProfileScreenState extends State<CompleteYourProfileScreen> {
                 Center(
                   child: CircularAvatar(
                     selectedImagePath: selectedImage,
-                    networkImageUrl: widget.userModel?.image,
+                    networkImageUrl: widget.userModel?.profilePicture,
                   ),
                 ),
                 SizedBox(height: AppSizes.h24),
@@ -83,6 +83,7 @@ class _CompleteYourProfileScreenState extends State<CompleteYourProfileScreen> {
                     selectedGender = gender;
                   },
                 ),
+                
                 SizedBox(height: AppSizes.h32),
                 PrimaryButton(
                   text: AppStrings.completeProfileButton,

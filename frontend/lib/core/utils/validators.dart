@@ -33,9 +33,21 @@ extension AppValidators on String? {
     if (this == null || this!.isEmpty) {
       return AppStrings.passwordEmpty;
     }
-    if (this!.length < 6) {
-      return AppStrings.passwordTooShort;
+    if (this!.length < 8) {
+      return 'Password must be at least 8 characters long';
     }
+    if (!RegExp(r'[A-Z]').hasMatch(this!)) {
+      return 'Password must contain an uppercase letter';
+    }
+    if (!RegExp(r'[a-z]').hasMatch(this!)) {
+      return 'Password must contain a lowercase letter';
+    }
+    if (!RegExp(r'[0-9]').hasMatch(this!)) {
+      return 'Password must contain a number';
+    }
+    if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(this!)) {
+      return 'Password must contain a special character';
+    } 
     return null;
   }
 
@@ -89,27 +101,9 @@ extension AppValidators on String? {
     return null;
   }
 
-  String? descriptionValidator(value) {
-    if (value == null || value.trim().isEmpty) {
-      return AppStrings.pleaseDescribeYourMaterialCase;
-    }
-    return null;
-  }
+  
 
-  String? whatsAppNumberValidator(value) {
-    if (value == null || value.trim().isEmpty) {
-      return "WhatsApp number is required";
-    }
-    if (!RegExp(r'^[0-9]{11}$').hasMatch(value)) {
-      return "Enter a valid 11-digit number";
-    }
-    return null;
-  }
+  
 
-  String? locationValidator(value) {
-    if (value == null || value.trim().isEmpty) {
-      return "Please enter your location";
-    }
-    return null;
-  }
+  
 }

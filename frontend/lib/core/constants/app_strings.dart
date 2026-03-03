@@ -58,7 +58,7 @@ class AppStrings {
   // Set Password Screen
   static const String updatePassword = "Update Password";
   static const String newPasswordMessage =
-      "Your new password must be different from previously used one.";
+      "Your new password must be different \nfrom previously used one.";
   static const String createNewPassword = "Create New Password";
 
   // Sign Up Screen

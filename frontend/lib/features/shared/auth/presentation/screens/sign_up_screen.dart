@@ -66,7 +66,9 @@ class SignUpScreen extends StatelessWidget {
                 extra: _emailController.text.trim(),
               );
             } else if (state is RegisterFailure) {
-              context.showSafeSnackBar(state.error);
+              context.showSafeSnackBar(state.errors.isNotEmpty
+                  ? '${state.message}: ${state.errors.join(', ')}'
+                  : state.message);
             }
           },
           builder: (context, state) {
@@ -196,6 +198,7 @@ class SignUpScreen extends StatelessWidget {
                       onApplePressed: () {},
                     ),
                     SizedBox(height: AppSizes.h20),
+                    TextButton(onPressed: (){}, child: Text('resend confirmation email')),
 
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,

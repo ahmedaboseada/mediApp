@@ -37,14 +37,14 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   void _handleSignIn() {
-    context.safeGo(AppRouter.patientMainView);
-    // if (_formKey.currentState!.validate()) {
-    //   context.read<SiginCubit>().signin(
-    //     _emailController.text.trim(),
-    //     _passwordController.text.trim(),
-    //     widget.role,
-    //   );
-    // }
+    //context.safeGo(AppRouter.patientMainView);
+    if (_formKey.currentState!.validate()) {
+      context.read<SiginCubit>().signin(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+        widget.role,
+      );
+    }
   }
 
   @override
@@ -55,8 +55,9 @@ class _SignInScreenState extends State<SignInScreen> {
         child: BlocConsumer<SiginCubit, SiginState>(
           listener: (context, state) {
             if (state is SiginSuccess) {
-              context.showSafeSnackBar(AppStrings.signInSuccessful);
-              context.safeGo(AppRouter.patientMainView);
+              //context.showSafeSnackBar(AppStrings.signInSuccessful);
+
+              context.safeGo(widget.role == UserRole.patient ? AppRouter.patientMainView : AppRouter.mainLayout);
             } else if (state is SiginFailure) {
               context.showSafeSnackBar(state.error);
             }
@@ -117,7 +118,10 @@ class _SignInScreenState extends State<SignInScreen> {
                         child: CustomTextButton(
                           text: AppStrings.forgotPassword,
                           onPressed: () {
-                            context.push(AppRouter.forgetPasswordScreen);
+                            context.push(
+                              AppRouter.forgetPasswordScreen,
+                              extra: widget.role,
+                            );
                           },
                         ),
                       ),

@@ -6,6 +6,7 @@ part 'otp_state.dart';
 class OtpCubit extends Cubit<OtpState> {
   final AuthRepo authRepo;
   String otp = '';
+  String? resetToken; 
 
   OtpCubit(this.authRepo) : super(OtpInitial());
   void onOtpChanged(String value) {
@@ -18,7 +19,10 @@ class OtpCubit extends Cubit<OtpState> {
       final result = await authRepo.verifyOtp(email: email, otp: otp);
       result.fold(
         (failure) => emit(OtpFailure(failure.message)),
-        (message) => emit(OtpSuccess(message, otp)),
+        (data) {
+          resetToken = data.resetToken;
+          emit(OtpSuccess(data.message, otp));
+        },
       );
     } catch (e) {
       emit(OtpFailure(e.toString()));

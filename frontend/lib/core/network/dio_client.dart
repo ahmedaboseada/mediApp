@@ -4,7 +4,7 @@ import 'package:medi/core/utils/pref_helper.dart';
 class DioClient {
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: 'https://medi-app-dusky.vercel.app/api/v1/auth/',
+      baseUrl: 'https://medi-app-dusky.vercel.app',
       //'https://accessories-eshop.runasp.net',
       //https://medi-app-dusky.vercel.app/api/v1/auth/',
       headers: {"Content-Type": 'application/json'},
@@ -22,7 +22,7 @@ class DioClient {
           return handler.next(options);
         },
         onError: (error, handler) async {
-          if (error.response?.statusCode == 400 &&
+          if (error.response?.statusCode == 401 &&
               !error.requestOptions.extra.containsKey('retry')) {
             final refreshed = await _refreshAccessToken();
             if (refreshed) {
@@ -46,25 +46,62 @@ class DioClient {
 
   Dio get dio => _dio;
 
-  Future<bool> _refreshAccessToken() async {
-    try {
-      final refreshToken = await PrefHelper.getRefreshToken();
-      if (refreshToken == null) return false;
+//   Future<bool> _refreshAccessToken() async {
+//     try {
+//       final refreshToken = await PrefHelper.getRefreshToken();
+//       if (refreshToken == null) return false;
 
-      final response = await _dio.post(
-        '/api/auth/refresh-token',
-        data: {'refresh_token': refreshToken},
-      );
 
-      final newAccessToken = response.data['access_token'];
-      final newRefreshToken = response.data['refresh_token'];
+//      final dio = Dio(
+//       BaseOptions(
+//         baseUrl: 'https://medi-app-dusky.vercel.app',
+//         headers: {"Content-Type": 'application/json'},
+//       ),
+//     );
 
-      await PrefHelper.saveAccessToken(newAccessToken);
-      await PrefHelper.saveRefreshToken(newRefreshToken);
+//     final response = await dio.post(
+//       '/users/refreshToken',
+//       data: {'refresh_token': refreshToken},
+//     );
 
-      return true;
-    } catch (e) {
-      return false;
-    }
+//       final newAccessToken = response.data['access_token'];
+//       final newRefreshToken = response.data['refresh_token'];
+
+//       await PrefHelper.saveAccessToken(newAccessToken);
+//       await PrefHelper.saveRefreshToken(newRefreshToken);
+
+//       return true;
+//     } catch (e) {
+//       return false;
+//     }
+//   }
+// }
+Future<bool> _refreshAccessToken() async {
+  try {
+    final refreshToken = await PrefHelper.getRefreshToken();
+    if (refreshToken == null) return false;
+
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: 'https://medi-app-dusky.vercel.app',
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $refreshToken",
+        },
+      ),
+    );
+
+    final response = await dio.post('/users/refreshToken');
+
+    final newAccessToken = response.data['access_token'];
+    final newRefreshToken = response.data['refresh_token'];
+
+    await PrefHelper.saveAccessToken(newAccessToken);
+    await PrefHelper.saveRefreshToken(newRefreshToken);
+
+    return true;
+  } catch (e) {
+    return false;
   }
+}
 }

@@ -7,9 +7,10 @@ import 'package:medi/features/shared/auth/presentation/widgets/forgot_password_b
 import '../widgets/otp_field.dart';
 
 class OtpScreen extends StatelessWidget {
-  const OtpScreen({super.key, required this.email});
+  const OtpScreen({super.key, required this.email, required this.role});
 
   final String email;
+  final UserRole role;
 
   @override
   Widget build(BuildContext context) {
@@ -19,9 +20,13 @@ class OtpScreen extends StatelessWidget {
           listener: (context, state) {
             if (state is OtpSuccess) {
               context.showSafeSnackBar(state.message);
+               final token = context.read<OtpCubit>().resetToken;
               context.safeGo(
                 AppRouter.setPasswordScreen,
-                extra: {'email': email, 'otp': state.otp},
+                extra: {
+                  'resetToken': token,
+                  'role': role,
+                },
               );
             }
 

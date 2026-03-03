@@ -1,4 +1,6 @@
+import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:medi/core/core.dart';
 import 'package:medi/core/network/api_exceptions.dart';
 import 'package:medi/core/network/dio_client.dart';
 
@@ -8,9 +10,10 @@ class ApiService {
   /// CRUD METHODS
 
   /// get
-  Future<dynamic> get(String endPoint) async {
+  Future<dynamic> get(String endPoint, {Map<String, String>? headers}) async {
     try {
-      final response = await _dioClient.dio.get(endPoint);
+      final response = await _dioClient.dio.get(endPoint,
+          options: headers != null ? Options(headers: headers) : null);
       return response.data;
     } on DioException catch (e) {
       return ServerFailure.fromDioError(e);
@@ -18,15 +21,35 @@ class ApiService {
   }
 
   /// post
-  Future<dynamic> post(String endPoint, dynamic body) async {
-    final response = await _dioClient.dio.post(endPoint, data: body);
-    return response;
+  Future<dynamic> post(String endPoint, dynamic body,
+      {Map<String, String>? headers}) async {
+    try {
+      final response = await _dioClient.dio.post(endPoint,
+          data: body,
+          options: Options(headers: headers));
+      return response.data;
+    } on DioException catch (e) {
+      return ServerFailure.fromDioError(e);
+    }
   }
 
   /// put || update
   Future<dynamic> put(String endPoint, dynamic body) async {
     try {
       final response = await _dioClient.dio.put(endPoint, data: body);
+      return response.data;
+    } on DioException catch (e) {
+      return ServerFailure.fromDioError(e);
+    }
+  }
+
+  /// patch
+  Future< dynamic> patch(String endPoint, dynamic body,
+      {Map<String, String>? headers}) async {
+    try {
+      final response = await _dioClient.dio.patch(endPoint,
+          data: body,
+          options: Options(headers: headers));
       return response.data;
     } on DioException catch (e) {
       return ServerFailure.fromDioError(e);

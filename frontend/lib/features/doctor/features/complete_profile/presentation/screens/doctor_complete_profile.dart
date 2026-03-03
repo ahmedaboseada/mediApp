@@ -39,7 +39,7 @@ class DoctorCompleteProfile extends StatelessWidget {
                 Center(
                   child: CircularAvatar(
                     selectedImagePath: selectedImage,
-                    networkImageUrl: userModel?.image,
+                    networkImageUrl: userModel?.profilePicture,
                   ),
                 ),
                 QTextField(

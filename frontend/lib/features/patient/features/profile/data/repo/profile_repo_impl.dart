@@ -1,0 +1,155 @@
+import 'dart:developer';
+
+import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
+import 'package:medi/core/core.dart';
+import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
+
+class ProfileRepoImpl implements ProfileRepo {
+  final ApiService apiService;
+
+  ProfileRepoImpl(this.apiService);
+
+  @override
+  Future<Either<ApiError, String>> changePassword({
+    required String oldPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    try {
+      final data = {
+        'oldPassword': oldPassword,
+        'newPassword': newPassword,
+        'confirmPassword': confirmPassword,
+      };
+      final token = await PrefHelper.getAccessToken();
+      log('Access Token: $token');
+      final headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      };
+
+      final response = await apiService.patch(
+        '/users/changePassword',
+        data,
+        headers: headers,
+      );
+
+      log('Change Password Response: ${response.toString()}');
+
+      // Check if response is an error
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final message = response['message'] ??
+          'Password changed successfully';
+
+      log('Message: $message--------------------------------------------------------------------------');
+
+      return Right(message);
+    } on DioException catch (e) {
+      final serverFailure = ServerFailure.fromDioError(e);
+      return Left(serverFailure);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+ @override
+Future<Either<ApiError, String>> requestEmailChange({
+  required String newEmail,
+}) async {
+  try {
+    final data = {
+      'newEmail': newEmail,
+    };
+
+    final token = await PrefHelper.getAccessToken();
+
+    final response = await apiService.patch(
+      '/users/email/change',
+      data,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+ if (response is ServerFailure) {
+        return Left(response);
+      }
+    log('Request Email Change Response: ${response.toString()}');
+
+    final message = response['message'] ??
+        'Email change request sent successfully';
+
+    return Right(message);
+  } on DioException catch (e) {
+    return Left(ServerFailure.fromDioError(e));
+  } catch (e) {
+    return Left(ServerFailure(e.toString()));
+  }
+}
+
+  @override
+  Future<Either<ApiError, String>> cancelEmailChange() async {
+    try {
+      final token = await PrefHelper.getAccessToken();
+      final headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      };
+
+      final response = await apiService.patch(
+        '/users/email/cancel',
+        {},
+        headers: headers,
+      );
+
+      log('Cancel Email Change Response: ${response.toString()}');
+
+      // Check if response is an error
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final message = response['message'] ??
+          'Email change cancelled successfully';
+
+      return Right(message);
+    } on DioException catch (e) {
+      final serverFailure = ServerFailure.fromDioError(e);
+      return Left(serverFailure);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<ApiError, String>> confirmEmailChange({
+    required String confirmEmailChangeToken,
+  }) async {
+    try {
+      final response = await apiService.get(
+        '/users/confirmEmailChange/$confirmEmailChangeToken',
+      );
+
+      log('Confirm Email Change Response: ${response.toString()}');
+
+      // Check if response is an error
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final message = response['message'] ??
+          'Email changed successfully';
+
+      return Right(message);
+    } on DioException catch (e) {
+      final serverFailure = ServerFailure.fromDioError(e);
+      return Left(serverFailure);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+}

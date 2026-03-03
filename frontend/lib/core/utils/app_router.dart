@@ -2,9 +2,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/enums/user_role.dart';
 import 'package:medi/core/utils/service_locator.dart';
+import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
+import 'package:medi/features/patient/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/account_info_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/change_email_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/change_password_screen.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/screens/choose_method_screen.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/screens/medication_details_screen.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/screens/schedule_reminders_screen.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/screens/stock_expiry_screen.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/screens/confirmation_screen.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/complete_profile/complete_profile_cubit.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/forget_password/forget_password_cubit.dart';
@@ -81,6 +88,11 @@ class AppRouter {
   static const String patientAccountInfoScreen = '/patient/accountInfo';
   static const String changeEmailScreen = '/patient/changeEmail';
   static const String changePasswordScreen = '/patient/changePassword';
+  static const String chooseMethodScreen = '/patient/addMedication/chooseMethod';
+  static const String medicationDetailsScreen = '/patient/addMedication/medicationDetails';
+  static const String scheduleRemindersScreen = '/patient/addMedication/scheduleReminders';
+  static const String stockExpiryScreen = '/patient/addMedication/stockExpiry';
+  static const String confirmationScreen = '/patient/addMedication/confirmation';
   // ========== DOCTOR ROUTES ==========
   static const String doctorLogin = '/login/doctor';
   static const String doctorSignUpScreen = '/signUp/doctor';
@@ -141,9 +153,7 @@ class AppRouter {
       ),
       GoRoute(
         path: completeProfile,
-        builder: (context, state) =>
-           CompleteYourProfileScreen(),
-          
+        builder: (context, state) => CompleteYourProfileScreen(),
       ),
       GoRoute(
         path: chooseSoundScreen,
@@ -240,15 +250,41 @@ class AppRouter {
       // ),
       GoRoute(
         path: patientAccountInfoScreen,
-        builder: (context, state) =>  AccountInfoScreen(),
+        builder: (context, state) => AccountInfoScreen(),
       ),
       GoRoute(
         path: changeEmailScreen,
-        builder: (context, state) =>  ChangeEmailScreen(),
+        builder: (context, state) => BlocProvider(
+          create: (context) => getIt<ProfileCubit>(),
+          child: const ChangeEmailScreen(),
+        ),
       ),
       GoRoute(
         path: changePasswordScreen,
-        builder: (context, state) =>  ChangePasswordScreen(),
+        builder: (context, state) => BlocProvider(
+          create: (context) => getIt<ProfileCubit>(),
+          child: ChangePasswordScreen(),
+        ),
+      ),
+      GoRoute(
+        path: chooseMethodScreen,
+        builder: (context, state) => const ChooseMethodScreen(),
+      ),
+      GoRoute(
+        path: medicationDetailsScreen,
+        builder: (context, state) => const MedicationDetailsScreen(),
+      ),
+      GoRoute(
+        path: scheduleRemindersScreen,
+        builder: (context, state) => const ScheduleRemindersScreen(),
+      ),
+      GoRoute(
+        path: stockExpiryScreen,
+        builder: (context, state) => const StockExpiryScreen(),
+      ),
+      GoRoute(
+        path: confirmationScreen,
+        builder: (context, state) => const ConfirmationScreen(),
       ),
 
       // ========== DOCTOR ROUTES ==========
@@ -272,9 +308,7 @@ class AppRouter {
       ),
       GoRoute(
         path: doctorCompleteProfile,
-        builder:(context, state) =>  DoctorCompleteProfile(),
-          
-        
+        builder: (context, state) => DoctorCompleteProfile(),
       ),
 
       GoRoute(
@@ -318,18 +352,20 @@ class AppRouter {
       GoRoute(
         path: otpScreen,
         builder: (context, state) {
+          final data = state.extra as Map<String, dynamic>;
           return BlocProvider(
             create: (context) => OtpCubit(getIt<AuthRepoImpl>()),
-            child: OtpScreen(email: state.extra as String),
+            child: OtpScreen(email: data['email'] as String, role: data['role'] as UserRole),
           );
         },
       ),
       GoRoute(
         path: setPasswordScreen,
         builder: (context, state) {
+          final data = state.extra as Map<String, dynamic>;
           return BlocProvider(
             create: (context) => ResetPasswordCubit(getIt<AuthRepoImpl>()),
-            child: SetPasswordScreen(),
+            child: SetPasswordScreen(resetToken: data['resetToken'] as String, role: data['role'] as UserRole),
           );
         },
       ),
@@ -356,7 +392,7 @@ class AppRouter {
         builder: (context, state) {
           return BlocProvider(
             create: (context) => ForgetPasswordCubit(getIt<AuthRepoImpl>()),
-            child: ForgetPasswordScreen(),
+            child: ForgetPasswordScreen(role: state.extra as UserRole),
           );
         },
       ),
