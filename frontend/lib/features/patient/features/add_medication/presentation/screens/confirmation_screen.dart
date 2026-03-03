@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_cubit.dart';
+ import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_state.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/custom_stepper.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/widgets/navigation_buttons.dart';
 
 class ConfirmationScreen extends StatefulWidget {
   const ConfirmationScreen({super.key});
@@ -37,7 +41,10 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BlocBuilder<MedicationDataCubit, MedicationDataState>(
+      builder: (context, state) {
+        final medicationData = state.medicationData;
+        return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -72,10 +79,10 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
                 _buildSummaryCard(
                   title: 'Medication',
                   items: [
-                    _buildSummaryItem('Medication name', 'Medication name'),
-                    _buildSummaryItem('Dosage', 'Not specified'),
-                    _buildSummaryItem('Frequency', 'Every day'),
-                    _buildSummaryItem('Stock', 'Not specified units'),
+                    _buildSummaryItem('Medication name', medicationData.medicationName),
+                    _buildSummaryItem('Dosage', medicationData.dosage),
+                    _buildSummaryItem('Frequency', medicationData.frequency),
+                    _buildSummaryItem('Stock', '${medicationData.currentStock} units'),
                   ],
                 ),
                 SizedBox(height: AppSizes.h16),
@@ -84,8 +91,8 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
                 _buildSummaryCard(
                   title: 'Schedule & Dates',
                   items: [
-                    _buildSummaryItem('Start/end date', '12/2/2026 - 12/3/2026'),
-                    _buildSummaryItem('Expiration date', '30/7/2026'),
+                    _buildSummaryItem('Start/end date', '${medicationData.startDate} - ${medicationData.endDate}'),
+                    _buildSummaryItem('Expiration date', medicationData.expiryDate),
                   ],
                 ),
                 SizedBox(height: AppSizes.h16),
@@ -94,7 +101,9 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
                 _buildSummaryCard(
                   title: 'Reminders set',
                   items: [
-                    _buildSummaryItem('Time', '7 Am\n7 Pm'),
+                    _buildSummaryItem('Time', medicationData.reminders.isNotEmpty 
+                      ? medicationData.reminders.join('\n') 
+                        : 'No reminders set'),
                   ],
                 ),
                 SizedBox(height: AppSizes.h16),
@@ -133,37 +142,20 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
                 SizedBox(height: AppSizes.h32),
 
                 // Back and Add Buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: SizedBox(
-                        height: AppSizes.h48,
-                        child: PrimaryButton(
-                          onPressed: () => context.pop(),
-                          text: 'Back',
-                          backgroundColor: AppColors.whiteText,
-                          textColor: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: AppSizes.w12),
-                    Expanded(
-                      child: SizedBox(
-                        height: AppSizes.h48,
-                        child: PrimaryButton(
-                          text: _isLoading ? 'Adding...' : 'Add Medication',
-                          onPressed: _isLoading ? null : _handleAddMedication,
-                        ),
-                      ),
-                    ),
-                  ],
+                NavigationButtons(
+                  onBackPressed: () => context.pop(),
+                  nextEnabled: !_isLoading,
+                  onNextPressed: _isLoading ? null : _handleAddMedication,
+                  nextText: _isLoading ? 'Adding...' : 'Add Medication',
                 ),
               ],
             ),
           ),
         ),
-      ),
-    );
+          ),
+          );
+        },
+      );
   }
 
   Widget _buildSummaryCard({

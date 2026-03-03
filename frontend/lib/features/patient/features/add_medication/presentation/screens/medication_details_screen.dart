@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/core/utils/app_router.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_cubit.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_state.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/custom_stepper.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/widgets/navigation_buttons.dart';
 
 class MedicationDetailsScreen extends StatefulWidget {
   const MedicationDetailsScreen({super.key});
 
   @override
-  State<MedicationDetailsScreen> createState() => _MedicationDetailsScreenState();
+  State<MedicationDetailsScreen> createState() =>
+      _MedicationDetailsScreenState();
 }
 
 class _MedicationDetailsScreenState extends State<MedicationDetailsScreen> {
@@ -46,121 +50,113 @@ class _MedicationDetailsScreenState extends State<MedicationDetailsScreen> {
         );
         return;
       }
-      
-      // Navigate to Step 3 - Schedule & Reminders
-      context.go(AppRouter.scheduleRemindersScreen);
+
+      context.read<MedicationDataCubit>().updateMedicationDetails(
+        medicationName: _medicationNameController.text,
+        type: _selectedType!,
+        dosage: _dosageController.text,
+      );
+
+      context.push('/patient/addMedication/schedule');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: AppColors.primaryText),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          'Add Medication',
-          style: AppStyles.black16400.copyWith(fontWeight: FontWeight.w600),
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSizes.w16,
-              vertical: AppSizes.h16,
+    return BlocBuilder<MedicationDataCubit, MedicationDataState>(
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(
+                Icons.arrow_back_ios_new,
+                color: AppColors.primaryText,
+              ),
+              onPressed: () => context.pop(),
             ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Progress Stepper
-                  CustomStepper(
-                    currentStep: 2,
-                    title: 'Medication Details',
-                  ),
-                  SizedBox(height: AppSizes.h32),
-
-                  // Medication Name Field
-                  CustomTextField(
-                    label: 'Medication Name',
-                    hintText: 'e.g, Aspirin',
-                    controller: _medicationNameController,
-                    keyboardType: TextInputType.text,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter medication name';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: AppSizes.h16),
-
-                  // Type Dropdown
-                  CustomDropdown(
-                    label: 'Type',
-                    hint: 'Select type',
-                    items: _medicationTypes,
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedType = value;
-                      });
-                    },
-                  ),
-                  SizedBox(height: AppSizes.h16),
-
-                  // Dosage Field
-                  CustomTextField(
-                    label: 'Dosage',
-                    hintText: 'e.g, 100mg',
-                    controller: _dosageController,
-                    keyboardType: TextInputType.text,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please enter dosage';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: AppSizes.h32),
-
-                  Row(
+            title: Text(
+              'Add Medication',
+              style: AppStyles.black16400.copyWith(fontWeight: FontWeight.w600),
+            ),
+            centerTitle: true,
+          ),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSizes.w16,
+                  vertical: AppSizes.h16,
+                ),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: AppSizes.h48,
-                          child: PrimaryButton(
-                            onPressed: () => context.pop(),
-                            text: 'Back',
-                            backgroundColor: AppColors.whiteText,
-                            textColor: AppColors.primary,
-                          ),
-                        ),
+                      // Progress Stepper
+                      CustomStepper(
+                        currentStep: 2,
+                        title: 'Medication Details',
                       ),
-                      SizedBox(width: AppSizes.w12),
-                      Expanded(
-                        child: SizedBox(
-                          height: AppSizes.h48,
-                          child: PrimaryButton(
-                            text: 'Next',
-                            onPressed: _handleNext,
-                          ),
-                        ),
+                      SizedBox(height: AppSizes.h32),
+
+                      // Medication Name Field
+                      CustomTextField(
+                        label: 'Medication Name',
+                        hintText: 'e.g, Aspirin',
+                        controller: _medicationNameController,
+                        keyboardType: TextInputType.text,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter medication name';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: AppSizes.h16),
+
+                      // Type Dropdown
+                      CustomDropdown(
+                        label: 'Type',
+                        hint: 'Select type',
+                        items: _medicationTypes,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedType = value;
+                          });
+                        },
+                      ),
+                      SizedBox(height: AppSizes.h16),
+
+                      // Dosage Field
+                      CustomTextField(
+                        label: 'Dosage',
+                        hintText: 'e.g, 100mg',
+                        controller: _dosageController,
+                        keyboardType: TextInputType.text,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter dosage';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: AppSizes.h32),
+
+                      NavigationButtons(
+                        onBackPressed: () => context.pop(),
+                        nextEnabled: true,
+                        onNextPressed: _handleNext,
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

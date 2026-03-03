@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/core/utils/app_router.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_cubit.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_state.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/custom_stepper.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/widgets/navigation_buttons.dart';
 
 class StockExpiryScreen extends StatefulWidget {
   const StockExpiryScreen({super.key});
@@ -15,7 +18,7 @@ class _StockExpiryScreenState extends State<StockExpiryScreen> {
   final _formKey = GlobalKey<FormState>();
   final _currentStockController = TextEditingController();
   final _expiryDateController = TextEditingController();
-  
+
   bool _isCriticalModeEnabled = false;
 
   @override
@@ -34,270 +37,287 @@ class _StockExpiryScreenState extends State<StockExpiryScreen> {
     );
 
     if (selectedDate != null) {
-      _expiryDateController.text = '${selectedDate.month}/${selectedDate.day}/${selectedDate.year}';
+      _expiryDateController.text =
+          '${selectedDate.month}/${selectedDate.day}/${selectedDate.year}';
     }
   }
 
   void _handleNext() {
     if (_formKey.currentState!.validate()) {
-      // Navigate to Step 5 - Confirmation
-      context.go(AppRouter.confirmationScreen);
+      context.read<MedicationDataCubit>().updateStockAndExpiry(
+        currentStock: _currentStockController.text,
+        expiryDate: _expiryDateController.text,
+        isCriticalMode: _isCriticalModeEnabled,
+      );
+                                          ///patient/addMedication/confirmation
+      context.push('/patient/addMedication/confirmation');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: AppColors.primaryText),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          'Add Medication',
-          style: AppStyles.black16400.copyWith(fontWeight: FontWeight.w600),
-        ),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSizes.w16,
-              vertical: AppSizes.h16,
+    return BlocBuilder<MedicationDataCubit, MedicationDataState>(
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(
+                Icons.arrow_back_ios_new,
+                color: AppColors.primaryText,
+              ),
+              onPressed: () => context.pop(),
             ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Progress Stepper
-                  CustomStepper(
-                    currentStep: 4,
-                    title: 'Stock & Expiry',
-                  ),
-                  SizedBox(height: AppSizes.h32),
-
-                  // Current Stock Field with Spinner
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            title: Text(
+              'Add Medication',
+              style: AppStyles.black16400.copyWith(fontWeight: FontWeight.w600),
+            ),
+            centerTitle: true,
+          ),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSizes.w16,
+                  vertical: AppSizes.h16,
+                ),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        'Current stock',
-                        style: AppStyles.black14500,
+                      // Progress Stepper
+                      CustomStepper(currentStep: 4, title: 'Stock & Expiry'),
+                      SizedBox(height: AppSizes.h32),
+
+                      // Current Stock Field with Spinner
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Current stock', style: AppStyles.black14500),
+                          SizedBox(height: AppSizes.h6),
+                          TextFormField(
+                            controller: _currentStockController,
+                            keyboardType: TextInputType.number,
+                            style: AppStyles.black14500.copyWith(
+                              color: AppColors.primaryText,
+                            ),
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: AppColors.surfaceColor,
+                              hintText: 'e.g, 30',
+                              hintStyle: AppStyles.black14500.copyWith(
+                                color: AppColors.secondaryText,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppSizes.r10,
+                                ),
+                                borderSide: BorderSide(
+                                  color: AppColors.borderColor,
+                                ),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppSizes.r10,
+                                ),
+                                borderSide: BorderSide(
+                                  color: AppColors.borderColor,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppSizes.r10,
+                                ),
+                                borderSide: BorderSide(
+                                  color: AppColors.focusedBorderColor,
+                                ),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppSizes.r10,
+                                ),
+                                borderSide: BorderSide(
+                                  color: AppColors.errorBorderColor,
+                                ),
+                              ),
+                              focusedErrorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppSizes.r10,
+                                ),
+                                borderSide: BorderSide(
+                                  color: AppColors.errorBorderColor,
+                                ),
+                              ),
+                              suffixIcon: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      final currentValue =
+                                          int.tryParse(
+                                            _currentStockController.text,
+                                          ) ??
+                                          0;
+                                      setState(() {
+                                        _currentStockController.text =
+                                            (currentValue + 1).toString();
+                                      });
+                                    },
+                                    child: Icon(
+                                      Icons.arrow_drop_up,
+                                      color: AppColors.primary,
+                                      size: AppSizes.w20,
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      final currentValue =
+                                          int.tryParse(
+                                            _currentStockController.text,
+                                          ) ??
+                                          0;
+                                      if (currentValue > 0) {
+                                        setState(() {
+                                          _currentStockController.text =
+                                              (currentValue - 1).toString();
+                                        });
+                                      }
+                                    },
+                                    child: Icon(
+                                      Icons.arrow_drop_down,
+                                      color: AppColors.primary,
+                                      size: AppSizes.w20,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: AppSizes.w12,
+                                vertical: AppSizes.h12,
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please enter current stock';
+                              }
+                              if (int.tryParse(value) == null) {
+                                return 'Please enter a valid number';
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
                       ),
-                      SizedBox(height: AppSizes.h6),
-                      TextFormField(
-                        controller: _currentStockController,
-                        keyboardType: TextInputType.number,
-                        style: AppStyles.black14500.copyWith(
-                          color: AppColors.primaryText,
-                        ),
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: AppColors.surfaceColor,
-                          hintText: 'e.g, 30',
-                          hintStyle: AppStyles.black14500.copyWith(
-                            color: AppColors.secondaryText,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(AppSizes.r10),
-                            borderSide: BorderSide(color: AppColors.borderColor),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(AppSizes.r10),
-                            borderSide: BorderSide(color: AppColors.borderColor),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(AppSizes.r10),
-                            borderSide: BorderSide(color: AppColors.focusedBorderColor),
-                          ),
-                          errorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(AppSizes.r10),
-                            borderSide: BorderSide(color: AppColors.errorBorderColor),
-                          ),
-                          focusedErrorBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(AppSizes.r10),
-                            borderSide: BorderSide(color: AppColors.errorBorderColor),
-                          ),
-                          suffixIcon: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  final currentValue = int.tryParse(_currentStockController.text) ?? 0;
-                                  setState(() {
-                                    _currentStockController.text = (currentValue + 1).toString();
-                                  });
-                                },
-                                child: Icon(
-                                  Icons.arrow_drop_up,
-                                  color: AppColors.primary,
-                                  size: AppSizes.w20,
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  final currentValue = int.tryParse(_currentStockController.text) ?? 0;
-                                  if (currentValue > 0) {
-                                    setState(() {
-                                      _currentStockController.text = (currentValue - 1).toString();
-                                    });
-                                  }
-                                },
-                                child: Icon(
-                                  Icons.arrow_drop_down,
-                                  color: AppColors.primary,
-                                  size: AppSizes.w20,
-                                ),
-                              ),
-                            ],
-                          ),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: AppSizes.w12,
-                            vertical: AppSizes.h12,
-                          ),
+                      SizedBox(height: AppSizes.h16),
+
+                      // Expiry Date Field
+                      CustomTextField(
+                        label: 'Expiry date',
+                        hintText: 'mm/dd/yyyy',
+                        controller: _expiryDateController,
+                        readOnly: true,
+                        onTap: _selectExpiryDate,
+                        suffixIcon: Icon(
+                          Icons.calendar_today,
+                          color: AppColors.primary,
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Please enter current stock';
-                          }
-                          if (int.tryParse(value) == null) {
-                            return 'Please enter a valid number';
+                            return 'Please select expiry date';
                           }
                           return null;
                         },
                       ),
-                    ],
-                  ),
-                  SizedBox(height: AppSizes.h16),
+                      SizedBox(height: AppSizes.h32),
 
-                  // Expiry Date Field
-                  CustomTextField(
-                    label: 'Expiry date',
-                    hintText: 'mm/dd/yyyy',
-                    controller: _expiryDateController,
-                    readOnly: true,
-                    onTap: _selectExpiryDate,
-                    suffixIcon: Icon(
-                      Icons.calendar_today,
-                      color: AppColors.primary,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Please select expiry date';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: AppSizes.h32),
+                      // Critical Mode Toggle Section
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Critical mode',
+                                  style: AppStyles.black16400.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(height: AppSizes.h8),
+                                Text(
+                                  'When enabled, you\'ll receive a full-screen urgent alert to make sure this medication is never missed.',
+                                  style: AppStyles.secondary12400,
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(width: AppSizes.w16),
+                          CustomToggleSwitch(
+                            value: _isCriticalModeEnabled,
+                            onChanged: (value) {
+                              setState(() {
+                                _isCriticalModeEnabled = value;
+                              });
+                            },
+                            activeColor: AppColors.accent,
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: AppSizes.h32),
 
-                  // Critical Mode Toggle Section
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
+                      // Alert Box (Allergy & drug interaction check)
+                      Container(
+                        padding: EdgeInsets.all(AppSizes.w12),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(AppSizes.r10),
+                          color: AppColors.primary.withOpacity(0.08),
+                          border: Border.all(
+                            color: AppColors.primary.withOpacity(0.3),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Critical mode',
-                              style: AppStyles.black16400.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                            Icon(
+                              Icons.info_rounded,
+                              color: AppColors.primary,
+                              size: AppSizes.w20,
                             ),
-                            SizedBox(height: AppSizes.h8),
-                            Text(
-                              'When enabled, you\'ll receive a full-screen urgent alert to make sure this medication is never missed.',
-                              style: AppStyles.secondary12400,
+                            SizedBox(width: AppSizes.w12),
+                            Expanded(
+                              child: Text(
+                                'Allergy & drug interaction check will be performed automatically',
+                                style: AppStyles.black14500.copyWith(
+                                  color: AppColors.primary,
+                                  height: 1.4,
+                                ),
+                              ),
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(width: AppSizes.w16),
-                      CustomToggleSwitch(
-                        value: _isCriticalModeEnabled,
-                        onChanged: (value) {
-                          setState(() {
-                            _isCriticalModeEnabled = value;
-                          });
-                        },
-                        activeColor: AppColors.accent,
+                      SizedBox(height: AppSizes.h32),
+
+                      // Back and Next Buttons
+                      NavigationButtons(
+                        onBackPressed: () => context.pop(),
+                        nextEnabled: true,
+                        onNextPressed: _handleNext,
                       ),
                     ],
                   ),
-                  SizedBox(height: AppSizes.h32),
-
-                  // Alert Box (Allergy & drug interaction check)
-                  Container(
-                    padding: EdgeInsets.all(AppSizes.w12),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(AppSizes.r10),
-                      color: AppColors.primary.withOpacity(0.08),
-                      border: Border.all(
-                        color: AppColors.primary.withOpacity(0.3),
-                        width: 1.5,
-                      ),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.info_rounded,
-                          color: AppColors.primary,
-                          size: AppSizes.w20,
-                        ),
-                        SizedBox(width: AppSizes.w12),
-                        Expanded(
-                          child: Text(
-                            'Allergy & drug interaction check will be performed automatically',
-                            style: AppStyles.black14500.copyWith(
-                              color: AppColors.primary,
-                              height: 1.4,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: AppSizes.h32),
-
-                  // Back and Next Buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: SizedBox(
-                          height: AppSizes.h48,
-                          child: PrimaryButton(
-                            onPressed: () => context.pop(),
-                            text: 'Back',
-                            backgroundColor: AppColors.whiteText,
-                            textColor: AppColors.primary,
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: AppSizes.w12),
-                      Expanded(
-                        child: SizedBox(
-                          height: AppSizes.h48,
-                          child: PrimaryButton(
-                            text: 'Next',
-                            onPressed: _handleNext,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

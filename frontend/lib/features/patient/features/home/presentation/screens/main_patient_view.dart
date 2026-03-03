@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/patient/features/add_medication/presentation/screens/choose_method_screen.dart';
 import 'package:medi/features/patient/features/home/presentation/controller/cubit/patient_flow_cubit.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/profile_screen.dart';
 
@@ -38,7 +38,8 @@ class _MainPatientView extends StatelessWidget {
          
           body: switch (state) {
             PatientTab.home => Container(color: Colors.red),
-            PatientTab.medicine => ChooseMethodScreen(),
+            PatientTab.medicine =>  const SizedBox.shrink(),
+     
             PatientTab.doctor => Container(color: Colors.blue),
             PatientTab.chat => Container(color: Colors.yellow),
             PatientTab.profile => ProfileScreen(),
@@ -48,6 +49,9 @@ class _MainPatientView extends StatelessWidget {
             currentIndex: currentTab.index,
             onTap: (index) {
               context.read<PatientFlowCubit>().changeTab(PatientTab.values[index]);
+              if (index == 1) {
+            context.go('/patient/addMedication/chooseMethod');
+          }
             },
             selectedColor: AppColors.primary,
           ),

@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/enums/user_role.dart';
 import 'package:medi/core/utils/service_locator.dart';
-import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_cubit.dart';
 import 'package:medi/features/patient/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/account_info_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/change_email_screen.dart';
@@ -13,7 +13,6 @@ import 'package:medi/features/patient/features/add_medication/presentation/scree
 import 'package:medi/features/patient/features/add_medication/presentation/screens/stock_expiry_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/confirmation_screen.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
-import 'package:medi/features/shared/auth/presentation/cubit/complete_profile/complete_profile_cubit.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/forget_password/forget_password_cubit.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/log_out/log_out_cubit.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/otp/otp_cubit.dart';
@@ -88,11 +87,16 @@ class AppRouter {
   static const String patientAccountInfoScreen = '/patient/accountInfo';
   static const String changeEmailScreen = '/patient/changeEmail';
   static const String changePasswordScreen = '/patient/changePassword';
-  static const String chooseMethodScreen = '/patient/addMedication/chooseMethod';
-  static const String medicationDetailsScreen = '/patient/addMedication/medicationDetails';
-  static const String scheduleRemindersScreen = '/patient/addMedication/scheduleReminders';
-  static const String stockExpiryScreen = '/patient/addMedication/stockExpiry';
-  static const String confirmationScreen = '/patient/addMedication/confirmation';
+  static const String chooseMethodScreen =
+      '/patient/addMedication/chooseMethod';
+  static const String addMedicationFlow = '/patient/addMedication';
+  static const String medicationDetailsScreen =
+      '/patient/addMedication/details';
+  static const String scheduleRemindersScreen =
+      '/patient/addMedication/schedule';
+  static const String stockExpiryScreen = '/patient/addMedication/stock';
+  static const String confirmationScreen =
+      '/patient/addMedication/confirmation';
   // ========== DOCTOR ROUTES ==========
   static const String doctorLogin = '/login/doctor';
   static const String doctorSignUpScreen = '/signUp/doctor';
@@ -225,29 +229,11 @@ class AppRouter {
           ),
         ],
       ),
-      // GoRoute(
-      //   path: caregiverFormScreen,
-      //   builder: (context, state) {
-      //     return CaregiverFormScreen();
-      //   },
-      // ),
-      // GoRoute(
-      //   path: invitationSendScreen,
-      //   builder: (context, state) {
-      //     return InvitationSendScreen();
-      //   },
-      // ),
+
       GoRoute(
         path: manualLocationScreen,
         builder: (context, state) => const ManualLocationScreen(),
       ),
-      // GoRoute(
-      //   path: caregiverModeScreen,
-      //   builder: (context, state) => const CaregiverModeScreen(),
-      // ),
-      // GoRoute(path: allSetScreen,
-      // builder: (context, state) => const AllSetScreen(),
-      // ),
       GoRoute(
         path: patientAccountInfoScreen,
         builder: (context, state) => AccountInfoScreen(),
@@ -266,26 +252,37 @@ class AppRouter {
           child: ChangePasswordScreen(),
         ),
       ),
-      GoRoute(
-        path: chooseMethodScreen,
-        builder: (context, state) => const ChooseMethodScreen(),
-      ),
-      GoRoute(
-        path: medicationDetailsScreen,
-        builder: (context, state) => const MedicationDetailsScreen(),
-      ),
-      GoRoute(
-        path: scheduleRemindersScreen,
-        builder: (context, state) => const ScheduleRemindersScreen(),
-      ),
-      GoRoute(
-        path: stockExpiryScreen,
-        builder: (context, state) => const StockExpiryScreen(),
-      ),
-      GoRoute(
-        path: confirmationScreen,
-        builder: (context, state) => const ConfirmationScreen(),
-      ),
+
+         ShellRoute(
+      builder: (context, state, child) {
+        return BlocProvider(
+          create: (_) => MedicationDataCubit(),
+          child: child, // child هو الصفحة الفرعية
+        );
+      },
+      routes: [
+        GoRoute(
+          path: '/patient/addMedication/chooseMethod',
+          builder: (context, state) => const ChooseMethodScreen(),
+        ),
+        GoRoute(
+          path: '/patient/addMedication/details',
+          builder: (context, state) => const MedicationDetailsScreen(),
+        ),
+        GoRoute(
+          path: '/patient/addMedication/schedule',
+          builder: (context, state) => const ScheduleRemindersScreen(),
+        ),
+        GoRoute(
+          path: '/patient/addMedication/stock',
+          builder: (context, state) => const StockExpiryScreen(),
+        ),
+        GoRoute(
+          path: '/patient/addMedication/confirmation',
+          builder: (context, state) => const ConfirmationScreen(),
+        ),
+      ],
+    ),
 
       // ========== DOCTOR ROUTES ==========
       GoRoute(
@@ -355,7 +352,10 @@ class AppRouter {
           final data = state.extra as Map<String, dynamic>;
           return BlocProvider(
             create: (context) => OtpCubit(getIt<AuthRepoImpl>()),
-            child: OtpScreen(email: data['email'] as String, role: data['role'] as UserRole),
+            child: OtpScreen(
+              email: data['email'] as String,
+              role: data['role'] as UserRole,
+            ),
           );
         },
       ),
@@ -365,7 +365,10 @@ class AppRouter {
           final data = state.extra as Map<String, dynamic>;
           return BlocProvider(
             create: (context) => ResetPasswordCubit(getIt<AuthRepoImpl>()),
-            child: SetPasswordScreen(resetToken: data['resetToken'] as String, role: data['role'] as UserRole),
+            child: SetPasswordScreen(
+              resetToken: data['resetToken'] as String,
+              role: data['role'] as UserRole,
+            ),
           );
         },
       ),
