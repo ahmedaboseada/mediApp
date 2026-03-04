@@ -3,7 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/home/presentation/controller/cubit/patient_flow_cubit.dart';
+import 'package:medi/features/patient/features/profile/presentation/controller/profile/profile_cubit.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/profile_screen.dart';
+import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
+import 'package:medi/features/shared/auth/presentation/cubit/log_out/log_out_cubit.dart';
 
 class MainPatientView extends StatelessWidget {
   const MainPatientView({super.key});
@@ -42,7 +45,13 @@ class _MainPatientView extends StatelessWidget {
      
             PatientTab.doctor => Container(color: Colors.blue),
             PatientTab.chat => Container(color: Colors.yellow),
-            PatientTab.profile => ProfileScreen(),
+            PatientTab.profile => MultiBlocProvider(
+              providers: [
+                BlocProvider(create: (_) => getIt<ProfileCubit>()),
+                BlocProvider(create: (_) => LogOutCubit(getIt<AuthRepoImpl>())),
+              ],
+              child: const ProfileScreen(),
+            ),
           },
             bottomNavigationBar: AdvancedBottomNavBar(
             items: navItems,

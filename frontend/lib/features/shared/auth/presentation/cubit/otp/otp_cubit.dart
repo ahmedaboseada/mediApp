@@ -1,4 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:medi/core/enums/user_role.dart';
+import 'package:medi/core/utils/pref_helper.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo.dart';
 import 'package:meta/meta.dart';
 part 'otp_state.dart';
@@ -9,6 +11,7 @@ class OtpCubit extends Cubit<OtpState> {
   String? resetToken; 
 
   OtpCubit(this.authRepo) : super(OtpInitial());
+  
   void onOtpChanged(String value) {
     otp = value;
   }
@@ -22,6 +25,32 @@ class OtpCubit extends Cubit<OtpState> {
         (data) {
           resetToken = data.resetToken;
           emit(OtpSuccess(data.message, otp));
+        },
+      );
+    } catch (e) {
+      emit(OtpFailure(e.toString()));
+    }
+  }
+
+  Future<void> verify2FAOTP(UserRole role) async {
+    emit(OtpLoading());
+    try {
+      // Get challengeToken from storage
+      final challengeToken = await PrefHelper.getChallengeToken();
+      if (challengeToken == null) {
+        emit(OtpFailure('Challenge token not found'));
+        return;
+      }
+
+      final result = await authRepo.verify2FAOTP(
+        challengeToken: challengeToken,
+        otp: otp,
+      );
+      
+      result.fold(
+        (failure) => emit(OtpFailure(failure.message)),
+        (accessToken) {
+          emit(Otp2FASuccess('Two-factor authentication successful', role));
         },
       );
     } catch (e) {

@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/questionnaire/constants/constants.dart';
 import 'package:medi/features/patient/features/questionnaire/presentation/cubit/cubit/questinnaire_cubit.dart';
+import 'package:medi/features/patient/features/questionnaire/presentation/cubit/cubit/questinnaire_state.dart';
 import 'package:medi/features/patient/features/questionnaire/presentation/widgets/onboarding_progress.dart';
-import 'package:medi/features/patient/features/questionnaire/presentation/widgets/q_text_field_bool.dart';
 
 class Q1HealthScreen extends StatelessWidget {
   const Q1HealthScreen({super.key});
@@ -14,59 +14,75 @@ class Q1HealthScreen extends StatelessWidget {
     final cubit = context.read<QuestionnaireCubit>();
 
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: AppSizes.h16),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  AppStrings.letsLearnMoreAboutYourHealth,
-                  style: AppStyles.primary70024.copyWith(
-                    fontSize: AppSizes.sp22,
+      appBar: AppBar(),
+      body: BlocConsumer<QuestionnaireCubit, QuestionnaireState>(
+        listener: (context, state) {
+          if (state.error != null && state.error!.isNotEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.error!)),
+            );
+          }
+        },
+        builder: (context, state) {
+          return SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: AppSizes.h16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    AppStrings.letsLearnMoreAboutYourHealth,
+                    style: AppStyles.primary70024.copyWith(
+                      fontSize: AppSizes.sp22,
+                    ),
                   ),
-                ),
-                Image.asset(AppAssets.addInfo, height: AppSizes.h270),
+                  Image.asset(AppAssets.addInfo, height: AppSizes.h270),
 
-                QTextField(
-                  onSelectionChange: (List<String> selectedList) {
-                    cubit.updateHealthConditions(selectedList);
-                    print(selectedList);
-                  },
-                  items: QuestionnaireConstants().healthConditions,
+                  QTextField(
+                    onSelectionChange: (List<String> selectedList) {
+                      cubit.updateHealthConditions(selectedList);
+                      print(selectedList);
+                    },
+                    items: QuestionnaireConstants().healthConditions,
 
-                  label: AppStrings.anyHealthConditionsYouLikeToShare,
-                ),
+                    label: AppStrings.anyHealthConditionsYouLikeToShare,
+                  ),
 
-                SizedBox(height: AppSizes.h16),
+                  SizedBox(height: AppSizes.h16),
 
-                QTextField(
-                  onSelectionChange: (List<String> selectedList) {
-                    cubit.updateMedications(selectedList);
-                    print(selectedList);
-                  },
-                  items: QuestionnaireConstants().longTermMedications,
-                  label: AppStrings.areYouCurrentlyTakingAnyLongTermMedications,
-                ),
-                SizedBox(height: AppSizes.h16),
-                QTextFieldBoolean(
-                  singleSelect: true,
-                  onSelectionChange: (value) {
-                    cubit.ongoingHealth(value);
-                    print(value);
-                  },
-
-                  label: AppStrings.doYouManageAnyOngoingHealthConditions,
-                ),
-                SizedBox(height: AppSizes.h24),
-                const OnboardingProgress(step: 0),
-                SizedBox(height: AppSizes.h12),
-                PrimaryButton(text: 'Next', onPressed: cubit.next),
-              ],
+                  QTextField(
+                    onSelectionChange: (List<String> selectedList) {
+                      cubit.updateMedications(selectedList);
+                      print(selectedList);
+                    },
+                    items: QuestionnaireConstants().longTermMedications,
+                    label: AppStrings.areYouCurrentlyTakingAnyLongTermMedications,
+                  ),
+                  
+                
+                  Expanded(child: SizedBox(height: AppSizes.h86)),
+                  const OnboardingProgress(step: 0),
+                  SizedBox(height: AppSizes.h12),
+                  PrimaryButton(
+                    text: 'Next',
+                    onPressed: state.isLoading ? null : () => cubit.completeHealthStep1(),
+                    child: state.isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : null,
+                  ),
+                  SizedBox(height: AppSizes.h16),
+                ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

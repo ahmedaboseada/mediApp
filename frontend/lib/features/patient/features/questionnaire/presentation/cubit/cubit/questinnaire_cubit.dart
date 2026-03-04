@@ -1,13 +1,34 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/features/patient/features/questionnaire/data/models/questionnaire_model.dart';
+import 'package:medi/features/patient/features/questionnaire/data/repo/questionnaire_repo.dart';
 import 'package:medi/features/patient/features/questionnaire/presentation/cubit/cubit/questinnaire_state.dart';
 
 class QuestionnaireCubit extends Cubit<QuestionnaireState> {
-  QuestionnaireCubit()
+  final QuestionnaireRepo questionnaireRepo;
+
+  QuestionnaireCubit(this.questionnaireRepo)
     : super(QuestionnaireState(step: 0, data: QuestionnaireModel()));
 
   void next() => emit(state.copyWith(step: state.step + 1));
   void back() => emit(state.copyWith(step: state.step - 1));
+
+  Future<void> completeHealthStep1() async {
+    emit(state.copyWith(isLoading: true));
+    
+    final result = await questionnaireRepo.completeHealthStep1(
+      chronicConditions: state.data.healthConditions ?? [],
+      longTermMedication: state.data.longTermMeds ?? [],
+      activeIngredients: state.data.activeIngredients ?? [],
+    );
+
+    result.fold(
+      (failure) => emit(state.copyWith(isLoading: false, error: failure.message)),
+      (message) {
+        emit(state.copyWith(isLoading: false, error: null));
+        next(); // Move to next step after successful submission
+      },
+    );
+  }
 
   void updateHealthConditions(List<String> value) {
     state.data.healthConditions = value;
@@ -16,6 +37,11 @@ class QuestionnaireCubit extends Cubit<QuestionnaireState> {
 
   void updateMedications(List<String> value) {
     state.data.longTermMeds = value;
+    emit(state.copyWith());
+  }
+
+  void updateActiveIngredients(List<String> value) {
+    state.data.activeIngredients = value;
     emit(state.copyWith());
   }
 

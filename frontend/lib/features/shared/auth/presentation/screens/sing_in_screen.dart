@@ -58,6 +58,16 @@ class _SignInScreenState extends State<SignInScreen> {
               //context.showSafeSnackBar(AppStrings.signInSuccessful);
 
               context.safeGo(widget.role == UserRole.patient ? AppRouter.patientMainView : AppRouter.mainLayout);
+            } else if (state is Signin2FARequired) {
+              // Navigate to OTP screen for 2FA verification
+              context.push(
+                AppRouter.otpScreen,
+                extra: {
+                  'email': state.email,
+                  'role': state.role,
+                  'is2FA': true,
+                },
+              );
             } else if (state is SiginFailure) {
               context.showSafeSnackBar(state.error);
             }

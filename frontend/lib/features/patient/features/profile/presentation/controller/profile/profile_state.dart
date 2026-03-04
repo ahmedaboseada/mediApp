@@ -64,3 +64,18 @@ final class ConfirmEmailChangeFailure extends ProfileState {
 
   ConfirmEmailChangeFailure(this.message, [this.errors = const []]);
 }
+
+final class ToggleTwoFactorAuthLoading extends ProfileState {}
+
+final class ToggleTwoFactorAuthSuccess extends ProfileState {
+  final String message;
+
+  ToggleTwoFactorAuthSuccess(this.message);
+}
+
+final class ToggleTwoFactorAuthFailure extends ProfileState {
+  final String message;
+  final List<String> errors;
+
+  ToggleTwoFactorAuthFailure(this.message, [this.errors = const []]);
+}

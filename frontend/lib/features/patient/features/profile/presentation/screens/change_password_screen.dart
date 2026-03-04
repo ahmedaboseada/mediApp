@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/core/utils/safe_go_router.dart';
-import 'package:medi/features/patient/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:medi/features/patient/features/profile/presentation/controller/profile/profile_cubit.dart';
 
 class ChangePasswordScreen extends StatelessWidget {
   ChangePasswordScreen({super.key});

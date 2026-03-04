@@ -7,10 +7,16 @@ import 'package:medi/features/shared/auth/presentation/widgets/forgot_password_b
 import '../widgets/otp_field.dart';
 
 class OtpScreen extends StatelessWidget {
-  const OtpScreen({super.key, required this.email, required this.role});
+  const OtpScreen({
+    super.key,
+    required this.email,
+    required this.role,
+    this.is2FA = false,
+  });
 
   final String email;
   final UserRole role;
+  final bool is2FA;
 
   @override
   Widget build(BuildContext context) {
@@ -20,13 +26,23 @@ class OtpScreen extends StatelessWidget {
           listener: (context, state) {
             if (state is OtpSuccess) {
               context.showSafeSnackBar(state.message);
-               final token = context.read<OtpCubit>().resetToken;
+              final token = context.read<OtpCubit>().resetToken;
               context.safeGo(
                 AppRouter.setPasswordScreen,
                 extra: {
                   'resetToken': token,
                   'role': role,
                 },
+              );
+            }
+
+            if (state is Otp2FASuccess) {
+              context.showSafeSnackBar(state.message);
+              // Navigate to appropriate main view based on role
+              context.safeGo(
+                state.role == UserRole.patient
+                    ? AppRouter.patientMainView
+                    : AppRouter.mainLayout,
               );
             }
 
@@ -60,10 +76,15 @@ class OtpScreen extends StatelessWidget {
 
                     SizedBox(height: AppSizes.h24),
 
-                    Text(AppStrings.verifyOtp, style: AppStyles.black24700),
+                    Text(
+                      is2FA ? 'Two-Factor Authentication' : AppStrings.verifyOtp,
+                      style: AppStyles.black24700,
+                    ),
                     SizedBox(height: AppSizes.h8),
                     Text(
-                      '${AppStrings.enterOtpSent}\n $email',
+                      is2FA
+                          ? 'Enter the OTP sent to your email for verification'
+                          : '${AppStrings.enterOtpSent}\n $email',
                       style: AppStyles.tertiary14500,
                       textAlign: TextAlign.center,
                     ),
@@ -101,7 +122,11 @@ class OtpScreen extends StatelessWidget {
                         onPressed: isLoading
                             ? null
                             : () {
-                                context.read<OtpCubit>().verifyOtp(email);
+                                if (is2FA) {
+                                  context.read<OtpCubit>().verify2FAOTP(role);
+                                } else {
+                                  context.read<OtpCubit>().verifyOtp(email);
+                                }
                               },
                         child: isLoading
                             ? const CircularProgressIndicator(

@@ -27,7 +27,7 @@ class _DatePickerFieldState extends State<DatePickerField> {
     );
     if (date != null) {
       setState(() {
-        String formattedDate = DateFormat('dd/MM/yyyy').format(date);
+        String formattedDate = DateFormat('yyyy').format(date);
         widget.dateController.text = formattedDate;
       });
       widget.onDateSelected?.call(date);
@@ -38,7 +38,7 @@ class _DatePickerFieldState extends State<DatePickerField> {
   void initState() {
     super.initState();
     widget.dateController.text = widget.initialDate != null
-        ? DateFormat('dd/MM/yyyy').format(widget.initialDate!)
+        ? DateFormat('yyyy').format(widget.initialDate!)
         : '';
   }
 
@@ -58,7 +58,7 @@ class _DatePickerFieldState extends State<DatePickerField> {
             decoration: InputDecoration(
               filled: true,
               fillColor: AppColors.surfaceColor,
-             // hintText: 'DD/MM/YYYY',
+             // hintText: 'YYYY',
 
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSizes.r10),

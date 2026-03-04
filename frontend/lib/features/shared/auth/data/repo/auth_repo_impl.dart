@@ -40,6 +40,14 @@ class AuthRepoImpl implements AuthRepo {
         return Left(response);
       }
 
+      // Check if 2FA is required
+      if (response['requiresOtp'] == true && response['challengeToken'] != null) {
+        // Save challengeToken for 2FA verification
+        await PrefHelper.saveChallengeToken(response['challengeToken']);
+        // Return special indicator for 2FA required
+        return Right('2FA_REQUIRED:${response['challengeToken']}');
+      }
+
       // Extract tokens
       final accessToken = response['accessToken'];
       final refreshToken = response['refreshToken'];
@@ -126,20 +134,75 @@ class AuthRepoImpl implements AuthRepo {
   @override
   Future<void> signOut() async {
     try {
-      //final token = await PrefHelper.getAccessToken();
+      final token = await PrefHelper.getAccessToken();
+      log('Access Token for Logout: $token');
+      final headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      };
 
-      await apiService.post('/api/auth/logout', {});
+      final response = await apiService.post(
+        '/users/logout',
+        {},
+        headers: headers,
+      );
+
+      if (response is ServerFailure) {
+        throw response;
+      }
 
       await PrefHelper.clearTokens();
       await _googleSignIn.signOut();
       await PrefHelper.markOnboardingAsNotCompleted();
     } catch (e) {
       log('Logout error: $e');
+      //rethrow;
     }
   }
 
-  @override
-  // Future<Either<ApiError, RegisterResponse>> signUpWithEmailAndPassword({
+  @override  Future<Either<ApiError, String>> completeBasicProfile({
+    required String phone,
+    required int yearOfBirth,
+    required String gender,
+    String? profilePicture,
+  }) async {
+    try {
+      final token = await PrefHelper.getAccessToken();
+      final data = {
+        'phone': phone,
+        'yearOfBirth': yearOfBirth,
+        'gender': gender,
+        if (profilePicture != null) 'profilePicture': profilePicture,
+      };
+
+      final headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      };
+
+      final dynamic response = await apiService.patch(
+        '/patients/complete/basic',
+        data,
+        headers: headers,
+      );
+
+      log('Complete Basic Profile Response: ${response.toString()}');
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final message = response['message'] ?? 'Profile completed successfully';
+      return Right(message);
+    } on DioException catch (e) {
+      final serverFailure = ServerFailure.fromDioError(e);
+      return Left(serverFailure);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override  // Future<Either<ApiError, RegisterResponse>> signUpWithEmailAndPassword({
   //   required String email,
   //   required String password,
   //   required String firstName,
@@ -251,6 +314,68 @@ class AuthRepoImpl implements AuthRepo {
       final verifyOtpResponse = VerifyOtpResponse.fromJson(response);
       log(response.toString());
       return Right(verifyOtpResponse);
+    } on DioException catch (e) {
+      final serverFailure = ServerFailure.fromDioError(e);
+      return Left(serverFailure);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<ApiError, String>> verify2FAOTP({
+    required String challengeToken,
+    required String otp,
+  }) async {
+    try {
+      final data = {
+        'challengeToken': challengeToken,
+        'otp': otp,
+      };
+      final dynamic response = await apiService.post(
+        '/users/signin/otp',
+        data,
+      );
+
+      log('2FA OTP Verify Response: ${response.toString()}');
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      // Extract tokens after successful 2FA verification
+      final accessToken = response['accessToken'];
+      final refreshToken = response['refreshToken'];
+      
+      // Save tokens
+      await PrefHelper.saveAccessToken(accessToken);
+      await PrefHelper.saveRefreshToken(refreshToken);
+
+      // Extract user data
+      final user = response['user'];
+      await PrefHelper.saveUserProfile(
+        firstName: user['firstName'],
+        lastName: user['lastName'],
+        email: user['email'],
+        profileImage: user['profilePicture'],
+      );
+
+      // Save user role
+      final userRole = user['type'] == 'doctor'
+          ? UserRole.doctor
+          : UserRole.patient;
+      await PrefHelper.saveUserRole(userRole);
+
+      // Save patient data if available
+      if (response['patient'] != null) {
+        await PrefHelper.savePatientData(response['patient']);
+      }
+
+      // Clear challengeToken after successful verification
+      await PrefHelper.clearChallengeToken();
+
+      log('2FA Success - Access Token: $accessToken');
+      return Right(accessToken);
     } on DioException catch (e) {
       final serverFailure = ServerFailure.fromDioError(e);
       return Left(serverFailure);

@@ -1,18 +1,31 @@
-// import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:medi/features/shared/auth/presentation/cubit/complete_profile/complete_profile_state.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:medi/features/shared/auth/data/repo/auth_repo.dart';
+import 'package:medi/features/shared/auth/presentation/cubit/complete_profile/complete_profile_state.dart';
 
-// class ProfileFormCubit extends Cubit<ProfileFormState> {
-//   ProfileFormCubit() : super(const ProfileFormState());
+class CompleteProfileCubit extends Cubit<CompleteProfileState> {
+  final AuthRepo authRepo;
 
-//   // void onPhoneChanged(String value) {
-//   //   emit(state.copyWith(phone: value, isValid: _validate(value, state.gender)));
-//   // }
+  CompleteProfileCubit(this.authRepo) : super(CompleteProfileInitial());
 
-//   // void onGenderChanged(String value) {
-//   //   emit(state.copyWith(gender: value, isValid: _validate(state.phone, value)));
-//   // }
+  Future<void> completeBasicProfile({
+    required String phone,
+    required int yearOfBirth,
+    required String gender,
+    String? profilePicture,
+  }) async {
+    emit(CompleteProfileLoading());
 
-//   // bool _validate(String phone, String gender) {
-//   //   return phone.isNotEmpty && gender.isNotEmpty;
-//   // }
-// }
+    final result = await authRepo.completeBasicProfile(
+      phone: phone,
+      yearOfBirth: yearOfBirth,
+      gender: gender,
+      profilePicture: profilePicture,
+    );
+
+    result.fold(
+      (failure) => emit(CompleteProfileFailure(failure.message)),
+      (message) => emit(CompleteProfileSuccess(message)),
+    );
+  }
+}
+

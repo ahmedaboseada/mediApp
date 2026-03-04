@@ -6,8 +6,15 @@ import 'package:medi/features/patient/features/questionnaire/presentation/cubit/
 import 'package:medi/features/patient/features/questionnaire/presentation/widgets/onboarding_progress.dart';
 import 'package:medi/features/patient/features/questionnaire/presentation/widgets/q_text_field_bool.dart';
 
-class Q2AllergiesScreen extends StatelessWidget {
+class Q2AllergiesScreen extends StatefulWidget {
   const Q2AllergiesScreen({super.key});
+
+  @override
+  State<Q2AllergiesScreen> createState() => _Q2AllergiesScreenState();
+}
+
+class _Q2AllergiesScreenState extends State<Q2AllergiesScreen> {
+  bool hasReactionToMedication = false;
 
   @override
   Widget build(BuildContext context) {
@@ -26,11 +33,10 @@ class Q2AllergiesScreen extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: AppSizes.h16),
-          child: SingleChildScrollView(
-            child: Column(
+          child:  Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                SizedBox(height: AppSizes.h40),
+               // SizedBox(height: AppSizes.h40),
                 Text(
                   AppStrings.hangTight,
                   style: AppStyles.primary70024.copyWith(
@@ -39,24 +45,29 @@ class Q2AllergiesScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 Image.asset(AppAssets.addInfo, height: AppSizes.h270),
-                QTextField(
-                  onSelectionChange: (List<String> selectedList) {
-                    cubit.updateAllergyList(selectedList);
-                    print(selectedList);
-                  },
-                  items: QuestionnaireConstants().allergies,
-
-                  label: AppStrings.allergiesOrSensitivities,
-                ),
-
-                SizedBox(height: AppSizes.h16),
                 QTextFieldBoolean(
                   onSelectionChange: (value) {
+                    setState(() {
+                      hasReactionToMedication = value;
+                    });
                     cubit.updateAllergies(value);
                     print(value);
                   },
                   label: AppStrings.reactionToMedication,
                 ),
+
+                if (hasReactionToMedication) ...[
+                  SizedBox(height: AppSizes.h16),
+                  QTextField(
+                    onSelectionChange: (List<String> selectedList) {
+                      cubit.updateAllergyList(selectedList);
+                      print(selectedList);
+                    },
+                    items: QuestionnaireConstants().allergies,
+
+                    label: AppStrings.allergiesOrSensitivities,
+                  ),
+                ],
 
                 SizedBox(height: AppSizes.h16),
                 QTextFieldBoolean(
@@ -68,13 +79,15 @@ class Q2AllergiesScreen extends StatelessWidget {
 
                   label: AppStrings.allergyAlerts,
                 ),
-                SizedBox(height: AppSizes.h24),
+                Expanded(child: SizedBox(height: AppSizes.h24)),
                 const OnboardingProgress(step: 1),
                 SizedBox(height: AppSizes.h12),
                 PrimaryButton(text: 'Next', onPressed: cubit.next),
+                SizedBox(height: AppSizes.h12),
+
               ],
             ),
-          ),
+          
         ),
       ),
     );

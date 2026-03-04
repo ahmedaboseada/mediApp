@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:medi/core/enums/user_role.dart';
 import 'package:medi/core/utils/service_locator.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_cubit.dart';
-import 'package:medi/features/patient/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:medi/features/patient/features/profile/presentation/controller/profile/profile_cubit.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/account_info_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/change_email_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/change_password_screen.dart';
@@ -13,6 +13,7 @@ import 'package:medi/features/patient/features/add_medication/presentation/scree
 import 'package:medi/features/patient/features/add_medication/presentation/screens/stock_expiry_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/confirmation_screen.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
+import 'package:medi/features/shared/auth/presentation/cubit/complete_profile/complete_profile_cubit.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/forget_password/forget_password_cubit.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/log_out/log_out_cubit.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/otp/otp_cubit.dart';
@@ -44,6 +45,7 @@ import 'package:medi/features/patient/features/home/presentation/screens/main_pa
 import 'package:medi/features/patient/features/notification_sound/presentation/controller/sound_cubit/sound_cubit.dart';
 import 'package:medi/features/patient/features/notification_sound/presentation/screens/choose_sound_screen.dart';
 import 'package:medi/features/patient/features/notification_sound/presentation/screens/notification_sound_screen.dart';
+import 'package:medi/features/patient/features/questionnaire/data/repo/questionnaire_repo.dart';
 import 'package:medi/features/patient/features/questionnaire/presentation/cubit/cubit/questinnaire_cubit.dart';
 import 'package:medi/features/patient/features/questionnaire/presentation/screens/all_set_screen.dart';
 import 'package:medi/features/patient/features/questionnaire/presentation/screens/caregiver_form_screen.dart';
@@ -114,7 +116,7 @@ class AppRouter {
   static const String doctorAllSetScreen = '/doctorAllSetScreen';
 
   static final router = GoRouter(
-    initialLocation: '/',
+    initialLocation: homeScreen,
     routes: [
       // ========== SHARED/SPLASH ROUTES ==========
       GoRoute(
@@ -157,7 +159,10 @@ class AppRouter {
       ),
       GoRoute(
         path: completeProfile,
-        builder: (context, state) => CompleteYourProfileScreen(),
+        builder: (context, state) => BlocProvider(
+          create: (context) => CompleteProfileCubit(getIt<AuthRepoImpl>()),
+          child: const CompleteYourProfileScreen(),
+        ),
       ),
       GoRoute(
         path: chooseSoundScreen,
@@ -206,7 +211,7 @@ class AppRouter {
         path: onboardingFlow,
         builder: (context, state) {
           return BlocProvider(
-            create: (context) => QuestionnaireCubit(),
+            create: (context) => QuestionnaireCubit(getIt<QuestionnaireRepo>()),
             child: const OnboardingFlow(),
           );
         },
@@ -355,6 +360,7 @@ class AppRouter {
             child: OtpScreen(
               email: data['email'] as String,
               role: data['role'] as UserRole,
+              is2FA: (data['is2FA'] as bool?) ?? false,
             ),
           );
         },

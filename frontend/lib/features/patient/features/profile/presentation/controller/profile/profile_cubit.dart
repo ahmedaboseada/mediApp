@@ -68,4 +68,15 @@ class ProfileCubit extends Cubit<ProfileState> {
       (message) => emit(ConfirmEmailChangeSuccess(message)),
     );
   }
+
+  Future<void> toggleTwoFactorAuth(bool enabled) async {
+    emit(ToggleTwoFactorAuthLoading());
+    
+    final result = await profileRepo.toggleTwoFactorAuth(enabled);
+
+    result.fold(
+      (failure) => emit(ToggleTwoFactorAuthFailure(failure.message, failure.errors)),
+      (message) => emit(ToggleTwoFactorAuthSuccess(message)),
+    );
+  }
 }

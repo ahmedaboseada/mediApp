@@ -2,6 +2,7 @@ class QuestionnaireModel {
   List<String>? healthConditions;
   List<String>? longTermMeds;
   List<String>? allergies;
+  List<String>? activeIngredients;
   bool? ongoingHealthConditions;
   bool? hasAllergies;
   bool? wantsAllergyAlerts;
@@ -11,6 +12,7 @@ class QuestionnaireModel {
     this.healthConditions,
     this.longTermMeds,
     this.allergies,
+    this.activeIngredients,
     this.hasAllergies,
     this.wantsAllergyAlerts,
     this.ongoingHealthConditions,

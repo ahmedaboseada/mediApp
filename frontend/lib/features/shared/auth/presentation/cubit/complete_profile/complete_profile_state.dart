@@ -1,19 +1,18 @@
-class ProfileFormState {
-  final String phone;
-  final String gender;
-  final bool isValid;
+import 'package:meta/meta.dart';
 
-  const ProfileFormState({
-    this.phone = '',
-    this.gender = '',
-    this.isValid = false,
-  });
+@immutable
+sealed class CompleteProfileState {}
 
-  ProfileFormState copyWith({String? phone, String? gender, bool? isValid}) {
-    return ProfileFormState(
-      phone: phone ?? this.phone,
-      gender: gender ?? this.gender,
-      isValid: isValid ?? this.isValid,
-    );
-  }
+final class CompleteProfileInitial extends CompleteProfileState {}
+
+final class CompleteProfileLoading extends CompleteProfileState {}
+
+final class CompleteProfileSuccess extends CompleteProfileState {
+  final String message;
+  CompleteProfileSuccess(this.message);
+}
+
+final class CompleteProfileFailure extends CompleteProfileState {
+  final String error;
+  CompleteProfileFailure(this.error);
 }

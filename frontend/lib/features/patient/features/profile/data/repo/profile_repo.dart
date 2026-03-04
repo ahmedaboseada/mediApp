@@ -17,4 +17,6 @@ abstract class ProfileRepo {
   Future<Either<ApiError, String>> confirmEmailChange({
     required String confirmEmailChangeToken,
   });
+
+  Future<Either<ApiError, String>> toggleTwoFactorAuth(bool enabled);
 }

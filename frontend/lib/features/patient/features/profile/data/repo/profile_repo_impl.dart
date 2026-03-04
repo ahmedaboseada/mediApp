@@ -152,4 +152,39 @@ Future<Either<ApiError, String>> requestEmailChange({
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<ApiError, String>> toggleTwoFactorAuth(bool enabled) async {
+    try {
+      final token = await PrefHelper.getAccessToken();
+      log('Access Token: $token');
+      final headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      };
+
+      final response = await apiService.patch(
+        '/users/2fa',
+        {'enabled': enabled},
+        headers: headers,
+      );
+
+      log('Toggle Two-Factor Auth Response: ${response.toString()}');
+
+      // Check if response is an error
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final message = response['message'] ??
+          'Two-Factor Authentication toggled successfully';
+
+      return Right(message);
+    } on DioException catch (e) {
+      final serverFailure = ServerFailure.fromDioError(e);
+      return Left(serverFailure);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

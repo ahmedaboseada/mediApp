@@ -23,6 +23,9 @@ class PrefHelper {
   
   // Challenge Token Key (for 2FA/OTP flow)
   static const String _challengeTokenKey = 'challenge_token';
+  
+  // 2FA Status Key
+  static const String _twoFactorEnabledKey = 'two_factor_enabled';
 
   static Future<void> saveAccessToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
@@ -208,11 +211,28 @@ class PrefHelper {
     await prefs.remove(_challengeTokenKey);
   }
 
+  /// Two-Factor Authentication Status Management
+  static Future<void> setTwoFactorEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_twoFactorEnabledKey, enabled);
+  }
+
+  static Future<bool> isTwoFactorEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_twoFactorEnabledKey) ?? false;
+  }
+
+  static Future<void> clearTwoFactorStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_twoFactorEnabledKey);
+  }
+
   static Future<void> clearAll() async {
     await clearTokens();
     await clearUserRole();
     await clearUserProfile();
     await clearPatientData();
     await clearChallengeToken();
+    await clearTwoFactorStatus();
   }
 }

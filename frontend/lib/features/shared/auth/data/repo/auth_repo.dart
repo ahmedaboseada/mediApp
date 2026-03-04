@@ -23,6 +23,12 @@ abstract class AuthRepo {
     required String email,
     required String otp,
   });
+  
+  Future<Either<ApiError, String>> verify2FAOTP({
+    required String challengeToken,
+    required String otp,
+  });
+  
   Future<Either<ApiError, String>> resetPassword({
     required String resetToken,
     required String newPassword,
@@ -33,4 +39,11 @@ abstract class AuthRepo {
   Future<Either<ApiError, AuthTokensModel>> signInWithGoogle();
 
   Future<void> signOut();
+  
+  Future<Either<ApiError, String>> completeBasicProfile({
+    required String phone,
+    required int yearOfBirth,
+    required String gender,
+    String? profilePicture,
+  });
 }

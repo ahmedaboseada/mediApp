@@ -24,3 +24,9 @@ final class ResendOtpSuccess extends OtpState {
   final String message;
   ResendOtpSuccess(this.message);
 }
+
+final class Otp2FASuccess extends OtpState {
+  final String message;
+  final UserRole role;
+  Otp2FASuccess(this.message, this.role);
+}
