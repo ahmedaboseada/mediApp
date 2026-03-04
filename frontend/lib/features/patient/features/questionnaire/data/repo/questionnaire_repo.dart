@@ -7,4 +7,10 @@ abstract class QuestionnaireRepo {
     required List<String> longTermMedication,
     required List<String> activeIngredients,
   });
+
+  Future<Either<ApiError, String>> completeHealthStep2({
+    required List<String> allergies,
+    required bool reactionToMedication,
+    required bool allergyAlerts,
+  });
 }

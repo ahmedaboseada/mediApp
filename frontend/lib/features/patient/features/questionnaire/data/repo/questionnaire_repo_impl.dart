@@ -50,4 +50,45 @@ class QuestionnaireRepoImpl implements QuestionnaireRepo {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<ApiError, String>> completeHealthStep2({
+    required List<String> allergies,
+    required bool reactionToMedication,
+    required bool allergyAlerts,
+  }) async {
+    try {
+      final token = await PrefHelper.getAccessToken();
+      final data = {
+        'allergies': allergies,
+        'reactionToMedication': reactionToMedication,
+        'allergyAlerts': allergyAlerts,
+      };
+
+      final headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      };
+
+      final dynamic response = await apiService.patch(
+        '/patients/complete/health2',
+        data,
+        headers: headers,
+      );
+
+      log('Complete Health Step 2 Response: ${response.toString()}');
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final message = response['message'] ?? 'Health step 2 completed successfully';
+      return Right(message);
+    } on DioException catch (e) {
+      final serverFailure = ServerFailure.fromDioError(e);
+      return Left(serverFailure);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }
