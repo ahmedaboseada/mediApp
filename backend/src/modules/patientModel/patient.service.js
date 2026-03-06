@@ -177,6 +177,8 @@
 import userModel from '../../models/user.model.js';
 import patientModel from '../../models/patient.model.js';
 import caregiverRequestModel from '../../models/caregiver-request.model.js';
+import notificationModel from '../../models/notification.model.js';
+import { analyzeMedications } from '../../utils/ai.util.js';
 import * as ET from '../../utils/encryption/index.js';
 
 const publicUser = (u) => ({
@@ -219,7 +221,12 @@ export const completeBasic = async (req, res) => {
     user.DOB = dob;
     user.age = age;
     user.gender = gender;
-    if (profilePicture !== undefined) user.profilePicture = profilePicture;
+
+    if (req.files?.avatar?.[0]?.cloudinaryUrl) {
+        user.profilePicture = req.files.avatar[0].cloudinaryUrl;
+    } else if (profilePicture !== undefined) {
+        user.profilePicture = profilePicture;
+    }
 
     await user.save();
 
@@ -245,6 +252,11 @@ export const completeHealth1 = async (req, res) => {
 
     await patient.save();
 
+    // AI Check in background: Extract active ingredients and check interactions
+    if (longTermMedication && longTermMedication.length > 0) {
+        analyzeMedications(patient._id, longTermMedication, patient.allergies || []).catch(console.error);
+    }
+
     return res.status(200).json({ message: 'Health step 1 saved', patient: patient.toObject() });
 };
 
@@ -266,6 +278,11 @@ export const completeHealth2 = async (req, res) => {
     patient.allergyAlerts = allergyAlerts;
 
     await patient.save();
+
+    // AI Check in background if allergies change
+    if (patient.longTermMedication && patient.longTermMedication.length > 0) {
+        analyzeMedications(patient._id, patient.longTermMedication, patient.allergies || []).catch(console.error);
+    }
 
     return res.status(200).json({ message: 'Health step 2 saved', patient: patient.toObject() });
 };
@@ -352,6 +369,13 @@ export const acceptCaregiverRequest = async (req, res) => {
     r.respondedAt = new Date();
     await r.save();
 
+    await notificationModel.create({
+        type: 'caregiverRequestAccepted',
+        header: 'Caregiver Accepted',
+        message: 'Your request for a caregiver has been accepted.',
+        userId: patient.userId,
+    });
+
     return res.status(200).json({ message: 'Request accepted' });
 };
 
@@ -367,6 +391,16 @@ export const rejectCaregiverRequest = async (req, res) => {
     r.status = 'rejected';
     r.respondedAt = new Date();
     await r.save();
+
+    const patient = await patientModel.findById(r.patientId);
+    if (patient) {
+        await notificationModel.create({
+            type: 'caregiverRequestRejected',
+            header: 'Caregiver Rejected',
+            message: 'Your request for a caregiver has been rejected.',
+            userId: patient.userId,
+        });
+    }
 
     return res.status(200).json({ message: 'Request rejected' });
 };
@@ -389,7 +423,12 @@ export const completeProfile = async (req, res) => {
     user.DOB = dob;
     user.age = age;
     user.gender = gender;
-    if (profilePicture) user.profilePicture = profilePicture;
+
+    if (req.files?.avatar?.[0]?.cloudinaryUrl) {
+        user.profilePicture = req.files.avatar[0].cloudinaryUrl;
+    } else if (profilePicture !== undefined) {
+        user.profilePicture = profilePicture;
+    }
 
     await user.save();
 
@@ -409,6 +448,10 @@ export const completeProfile = async (req, res) => {
     }
 
     const updatedPatient = await patientModel.findByIdAndUpdate(patient._id, patch, { new: true }).lean();
+
+    if (patch.longTermMedication && patch.longTermMedication.length > 0) {
+        analyzeMedications(updatedPatient._id, patch.longTermMedication, updatedPatient.allergies || []).catch(console.error);
+    }
 
     return res.status(200).json({
         message: 'Profile completed',

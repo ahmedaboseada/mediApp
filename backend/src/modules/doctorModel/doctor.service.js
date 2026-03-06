@@ -100,7 +100,13 @@ export const completeStep1 = async (req, res) => {
     // user fields from screen
     user.phone = await ET.encrypt(req.body.phone);
     user.gender = req.body.gender;
-    if (req.body.profilePicture !== undefined) user.profilePicture = req.body.profilePicture;
+
+    if (req.files?.avatar?.[0]?.cloudinaryUrl) {
+        user.profilePicture = req.files.avatar[0].cloudinaryUrl;
+    } else if (req.body.profilePicture !== undefined) {
+        user.profilePicture = req.body.profilePicture;
+    }
+
     await user.save();
 
     // doctor fields from screen
@@ -178,7 +184,12 @@ export const completeProfile = async (req, res) => {
     const userPatch = {};
     if (req.body.phone) userPatch.phone = await ET.encrypt(req.body.phone);
     if (req.body.gender) userPatch.gender = req.body.gender;
-    if (req.body.profilePicture) userPatch.profilePicture = req.body.profilePicture;
+
+    if (req.files?.avatar?.[0]?.cloudinaryUrl) {
+        userPatch.profilePicture = req.files.avatar[0].cloudinaryUrl;
+    } else if (req.body.profilePicture !== undefined) {
+        userPatch.profilePicture = req.body.profilePicture;
+    }
 
     if (Object.keys(userPatch).length) {
         await userModel.updateOne({ _id: userId }, userPatch);

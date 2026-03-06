@@ -25,6 +25,23 @@ export const completeHealth2Schema = {
     }),
 };
 
+export const completeProfileSchema = {
+    body: joi.object({
+        phone: joi.string().required(),
+        yearOfBirth: joi.number().integer().min(1900).max(new Date().getFullYear()).required(),
+        gender: joi.string().valid('male', 'female').required(),
+        profilePicture: joi.string().uri().allow('', null),
+
+        chronicConditions: joi.array().items(joi.string()).default([]),
+        longTermMedication: joi.array().items(joi.string()).default([]),
+        activeIngredients: joi.array().items(joi.string()).default([]),
+
+        allergies: joi.array().items(joi.string()).default([]),
+        reactionToMedication: joi.boolean().required(),
+        allergyAlerts: joi.boolean().required(),
+    }),
+};
+
 export const caregiverOptionSchema = {
     body: joi.object({
         caregivingOption: joi.boolean().required(),

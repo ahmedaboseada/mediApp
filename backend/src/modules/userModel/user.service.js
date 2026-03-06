@@ -517,7 +517,7 @@ import { waitUntil } from '@vercel/functions';
 
 import { sendEmailEvent, sendOTPEvent, sendEmailChangeConfirmEvent } from '../../utils/sendEmail-events/index.js';
 
-const isAdminPrefix = (user) => user?.type === 'doctor';
+const isAdminPrefix = (user) => user?.type === 'admin';
 
 const publicUser = (u) => ({
     id: String(u._id),

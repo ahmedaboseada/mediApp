@@ -38,14 +38,18 @@ import { restrictTo } from '../../middlewares/restrictTo.js';
 
 import * as PVS from './patient.validation.js';
 import * as PS from './patient.service.js';
+import { cloudinaryUploadAvatarAndCover } from '../../middlewares/cloudinary.js';
 
 const patientRouter = Router();
 
 patientRouter.use(verifyToken);
 patientRouter.use(restrictTo(['patient']));
 
-// screens: complete profile
-patientRouter.patch('/complete/basic', validation(PVS.completeBasicSchema), PS.completeBasic);
+// screens: complete profile (merged)
+patientRouter.patch('/complete', ...cloudinaryUploadAvatarAndCover({ folder: 'patients' }), validation(PVS.completeProfileSchema), PS.completeProfile);
+
+// screens: complete profile (individual)
+patientRouter.patch('/complete/basic', ...cloudinaryUploadAvatarAndCover({ folder: 'patients' }), validation(PVS.completeBasicSchema), PS.completeBasic);
 patientRouter.patch('/complete/health1', validation(PVS.completeHealth1Schema), PS.completeHealth1);
 patientRouter.patch('/complete/health2', validation(PVS.completeHealth2Schema), PS.completeHealth2);
 
