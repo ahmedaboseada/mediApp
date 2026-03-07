@@ -36,9 +36,9 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (!mounted) return;
 
-    final accessToken = await PrefHelper.getAccessToken();
-    final userRole = await PrefHelper.getUserRole();
-    final isOnboardingCompleted = await PrefHelper.isOnboardingCompleted();
+    final accessToken = HiveService.getAccessToken();
+    final userRole = HiveService.getUserRole();
+    final isOnboardingCompleted = HiveService.isOnboardingCompleted();
 
     if (accessToken != null && accessToken.isNotEmpty) {
       // User is logged in, go to home based on role

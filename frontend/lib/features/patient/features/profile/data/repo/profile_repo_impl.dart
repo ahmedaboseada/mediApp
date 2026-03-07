@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/features/patient/features/profile/data/models/caregiver_request_model.dart';
 import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
 
 class ProfileRepoImpl implements ProfileRepo {
@@ -22,7 +23,7 @@ class ProfileRepoImpl implements ProfileRepo {
         'newPassword': newPassword,
         'confirmPassword': confirmPassword,
       };
-      final token = await PrefHelper.getAccessToken();
+      final token = HiveService.getAccessToken();
       log('Access Token: $token');
       final headers = {
         "Content-Type": "application/json",
@@ -65,7 +66,7 @@ Future<Either<ApiError, String>> requestEmailChange({
       'newEmail': newEmail,
     };
 
-    final token = await PrefHelper.getAccessToken();
+    final token = HiveService.getAccessToken();
 
     final response = await apiService.patch(
       '/users/email/change',
@@ -94,7 +95,7 @@ Future<Either<ApiError, String>> requestEmailChange({
   @override
   Future<Either<ApiError, String>> cancelEmailChange() async {
     try {
-      final token = await PrefHelper.getAccessToken();
+      final token = HiveService.getAccessToken();
       final headers = {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token",
@@ -156,7 +157,7 @@ Future<Either<ApiError, String>> requestEmailChange({
   @override
   Future<Either<ApiError, String>> toggleTwoFactorAuth(bool enabled) async {
     try {
-      final token = await PrefHelper.getAccessToken();
+      final token = HiveService.getAccessToken();
       log('Access Token: $token');
       final headers = {
         "Content-Type": "application/json",
@@ -183,6 +184,98 @@ Future<Either<ApiError, String>> requestEmailChange({
     } on DioException catch (e) {
       final serverFailure = ServerFailure.fromDioError(e);
       return Left(serverFailure);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<ApiError, List<CaregiverRequestModel>>> listCaregiverRequests() async {
+    try {
+      final token = HiveService.getAccessToken();
+      final headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      };
+
+      final response = await apiService.get(
+        '/patients/caregiver/requests',
+        headers: headers,
+      );
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final requestsJson = (response['requests'] as List<dynamic>? ?? []);
+      final requests = requestsJson
+          .whereType<Map<String, dynamic>>()
+          .map(CaregiverRequestModel.fromJson)
+          .toList();
+
+      return Right(requests);
+    } on DioException catch (e) {
+      return Left(ServerFailure.fromDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<ApiError, String>> acceptCaregiverRequest({
+    required String requestId,
+  }) async {
+    try {
+      final token = HiveService.getAccessToken();
+      final headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      };
+
+      final response = await apiService.patch(
+        '/patients/caregiver/requests/$requestId/accept',
+        {},
+        headers: headers,
+      );
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final message = response['message'] ?? 'Request accepted';
+      return Right(message.toString());
+    } on DioException catch (e) {
+      return Left(ServerFailure.fromDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<ApiError, String>> rejectCaregiverRequest({
+    required String requestId,
+  }) async {
+    try {
+      final token = HiveService.getAccessToken();
+      final headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      };
+
+      final response = await apiService.patch(
+        '/patients/caregiver/requests/$requestId/reject',
+        {},
+        headers: headers,
+      );
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final message = response['message'] ?? 'Request rejected';
+      return Right(message.toString());
+    } on DioException catch (e) {
+      return Left(ServerFailure.fromDioError(e));
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }

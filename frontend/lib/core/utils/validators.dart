@@ -47,7 +47,7 @@ extension AppValidators on String? {
     }
     if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(this!)) {
       return 'Password must contain a special character';
-    } 
+    }
     return null;
   }
 
@@ -101,9 +101,23 @@ extension AppValidators on String? {
     return null;
   }
 
-  
+  String? validateClinicName() {
+    if (this == null || this!.isEmpty) {
+      return 'Clinic/Hospital name is required';
+    }
+    if (this!.trim().length < 2) {
+      return 'Clinic/Hospital name is too short';
+    }
+    return null;
+  }
 
-  
-
-  
+  String? validateMedicalLicense() {
+    if (this == null || this!.isEmpty) {
+      return 'Medical license number is required';
+    }
+    if (this!.trim().length < 3) {
+      return 'Medical license number is too short';
+    }
+    return null;
+  }
 }

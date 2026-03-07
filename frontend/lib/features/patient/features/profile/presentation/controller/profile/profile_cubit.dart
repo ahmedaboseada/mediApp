@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:medi/features/patient/features/profile/data/models/caregiver_request_model.dart';
 import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
 import 'package:meta/meta.dart';
 
@@ -77,6 +78,49 @@ class ProfileCubit extends Cubit<ProfileState> {
     result.fold(
       (failure) => emit(ToggleTwoFactorAuthFailure(failure.message, failure.errors)),
       (message) => emit(ToggleTwoFactorAuthSuccess(message)),
+    );
+  }
+
+  Future<void> listCaregiverRequests() async {
+    emit(CaregiverRequestsLoading());
+
+    final result = await profileRepo.listCaregiverRequests();
+
+    result.fold(
+      (failure) => emit(CaregiverRequestsFailure(failure.message, failure.errors)),
+      (requests) => emit(CaregiverRequestsSuccess(requests)),
+    );
+  }
+
+  Future<void> acceptCaregiverRequest({required String requestId}) async {
+    emit(CaregiverRequestActionLoading());
+
+    final result = await profileRepo.acceptCaregiverRequest(requestId: requestId);
+
+    await result.fold(
+      (failure) async {
+        emit(CaregiverRequestActionFailure(failure.message, failure.errors));
+      },
+      (message) async {
+        emit(CaregiverRequestActionSuccess(message));
+        await listCaregiverRequests();
+      },
+    );
+  }
+
+  Future<void> rejectCaregiverRequest({required String requestId}) async {
+    emit(CaregiverRequestActionLoading());
+
+    final result = await profileRepo.rejectCaregiverRequest(requestId: requestId);
+
+    await result.fold(
+      (failure) async {
+        emit(CaregiverRequestActionFailure(failure.message, failure.errors));
+      },
+      (message) async {
+        emit(CaregiverRequestActionSuccess(message));
+        await listCaregiverRequests();
+      },
     );
   }
 }

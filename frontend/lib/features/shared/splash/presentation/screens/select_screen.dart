@@ -42,8 +42,8 @@ class SelectScreen extends StatelessWidget {
                           children: [
                             Role(
                               role: UserRole.doctor.title,
-                              onTap: () {
-                                PrefHelper.saveUserRole(UserRole.doctor);
+                              onTap: () async {
+                                await HiveService.saveUserRole(UserRole.doctor);
                                 context.push(AppRouter.doctorLogin);
                               },
                               imagePath: AppAssets.doctor,
@@ -51,8 +51,8 @@ class SelectScreen extends StatelessWidget {
 
                             Role(
                               role: UserRole.patient.title,
-                              onTap: () {
-                                PrefHelper.saveUserRole(UserRole.patient);
+                              onTap: () async {
+                                await HiveService.saveUserRole(UserRole.patient);
                                 context.push(AppRouter.patientLogin);
                               },
                               imagePath: AppAssets.patient,

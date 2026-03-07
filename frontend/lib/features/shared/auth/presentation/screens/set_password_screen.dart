@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/core/utils/safe_go_router.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/reset_password/reset_password_cubit.dart';

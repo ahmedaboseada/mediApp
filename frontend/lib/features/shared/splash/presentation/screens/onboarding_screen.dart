@@ -138,14 +138,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: SizedBox(
                     width: double.infinity,
                     child: PrimaryButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (_currentPage < _pages.length - 1) {
                           _controller.nextPage(
                             duration: const Duration(milliseconds: 300),
                             curve: Curves.easeIn,
                           );
                         } else {
-                          PrefHelper.markOnboardingAsCompleted();
+                          await HiveService.markOnboardingAsCompleted();
                           context.replace(AppRouter.selectScreen);
                         }
                       },

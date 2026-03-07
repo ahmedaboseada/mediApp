@@ -1,8 +1,5 @@
-import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/core/network/api_exceptions.dart';
-import 'package:medi/core/network/dio_client.dart';
 
 class ApiService {
   final DioClient _dioClient = DioClient();

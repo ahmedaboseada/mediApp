@@ -13,4 +13,9 @@ abstract class QuestionnaireRepo {
     required bool reactionToMedication,
     required bool allergyAlerts,
   });
+
+  Future<Either<ApiError, String>> sendCaregiverRequest({
+    required String caregiverEmail,
+    required String relationship,
+  });
 }

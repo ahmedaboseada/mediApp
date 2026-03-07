@@ -28,7 +28,7 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
   }
 
   Future<void> _loadUserData() async {
-    final userData = await PrefHelper.getUserProfile();
+    final userData = HiveService.getUserProfile();
     
     setState(() {
       _nameController.text = userData['firstName'] ?? '';
@@ -42,7 +42,7 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
   }
 
   Future<void> _saveUserData() async {
-    await PrefHelper.saveUserProfile(
+    await HiveService.saveUserProfile(
       firstName: _nameController.text,
       lastName: _lastNameController.text,
       email: _emailController.text,

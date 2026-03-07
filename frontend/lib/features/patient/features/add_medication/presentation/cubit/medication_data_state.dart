@@ -29,21 +29,20 @@ class MedicationDataUpdated extends MedicationDataState {
   final String updateType; // For tracking what was updated
 
   const MedicationDataUpdated({
-    required MedicationData medicationData,
+    required super.medicationData,
     required this.updateType,
-  }) : super(medicationData: medicationData);
+  });
 }
 
 class MedicationDataLoading extends MedicationDataState {
-  const MedicationDataLoading({required MedicationData medicationData})
-      : super(medicationData: medicationData);
+  const MedicationDataLoading({required super.medicationData});
 }
 
 class MedicationDataError extends MedicationDataState {
   final String message;
 
   const MedicationDataError({
-    required MedicationData medicationData,
+    required super.medicationData,
     required this.message,
-  }) : super(medicationData: medicationData);
+  });
 }

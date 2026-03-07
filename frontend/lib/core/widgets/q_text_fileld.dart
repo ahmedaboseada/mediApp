@@ -11,6 +11,7 @@ class QTextField extends StatelessWidget {
     this.singleSelect = false,
     this.hint,
     this.search = true,
+    this.validator,
   });
   final Function(List<String>) onSelectionChange;
   final List<DropdownItem<String>> items;
@@ -18,6 +19,8 @@ class QTextField extends StatelessWidget {
   final bool singleSelect;
   final String? hint;
   final bool? search;
+  final String? Function(List<DropdownItem<String>>?)? validator;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -29,6 +32,7 @@ class QTextField extends StatelessWidget {
           textAlign: TextAlign.start,
         ),
         MultiDropdown<String>(
+          validator: validator,
           singleSelect: singleSelect,
           onSelectionChange: onSelectionChange,
           // (List<String> selectedList) {

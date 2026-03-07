@@ -11,7 +11,8 @@ class CompleteYourProfileScreen extends StatefulWidget {
   final UserModel? userModel;
 
   @override
-  State<CompleteYourProfileScreen> createState() => _CompleteYourProfileScreenState();
+  State<CompleteYourProfileScreen> createState() =>
+      _CompleteYourProfileScreenState();
 }
 
 class _CompleteYourProfileScreenState extends State<CompleteYourProfileScreen> {
@@ -22,8 +23,8 @@ class _CompleteYourProfileScreenState extends State<CompleteYourProfileScreen> {
   String? selectedCountry = 'Egypt';
 
   Future<void> _saveUserProfile() async {
-    // Save all user data to SharedPreferences
-    await PrefHelper.saveUserProfile(
+    // Save all user data to HiveService
+    await HiveService.saveUserProfile(
       firstName: widget.userModel?.firstName,
       lastName: widget.userModel?.lastName,
       email: widget.userModel?.email,
@@ -78,9 +79,9 @@ class _CompleteYourProfileScreenState extends State<CompleteYourProfileScreen> {
               context.go(AppRouter.patientProfileCompletedScreen);
             });
           } else if (state is CompleteProfileFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.error)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.error)));
           }
         },
         builder: (context, state) {
@@ -109,6 +110,11 @@ class _CompleteYourProfileScreenState extends State<CompleteYourProfileScreen> {
                       child: CircularAvatar(
                         selectedImagePath: selectedImage,
                         networkImageUrl: widget.userModel?.profilePicture,
+                        onImagePicked: (path) {
+                          setState(() {
+                            selectedImage = path;
+                          });
+                        }, 
                       ),
                     ),
                     SizedBox(height: AppSizes.h24),
@@ -119,19 +125,19 @@ class _CompleteYourProfileScreenState extends State<CompleteYourProfileScreen> {
                     ),
                     SizedBox(height: AppSizes.h24),
                     DatePickerField(
-                      dateController: TextEditingController() ,
+                      dateController: TextEditingController(),
                       onDateSelected: (date) {
                         selectedDateOfBirth = date.toString();
                       },
                     ),
                     SizedBox(height: AppSizes.h24),
                     GenderField(
-                      value: selectedGender ?? 'Male',
+                      value: selectedGender ?? 'male',
                       onGenderChanged: (gender) {
                         selectedGender = gender;
                       },
                     ),
-                    
+
                     SizedBox(height: AppSizes.h32),
                     PrimaryButton(
                       text: AppStrings.completeProfileButton,

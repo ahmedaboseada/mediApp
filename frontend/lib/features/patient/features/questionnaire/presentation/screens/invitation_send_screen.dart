@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/core/widgets/secondry_button.dart';
 
 class InvitationSendScreen extends StatelessWidget {
   const InvitationSendScreen({super.key});

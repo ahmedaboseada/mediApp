@@ -27,7 +27,7 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
   }
 
   Future<void> _loadCurrentEmail() async {
-    final email = await PrefHelper.getEmail();
+    final email = HiveService.getEmail();
     if (mounted) {
       setState(() {
         _currentEmailController.text = email ?? 'Ahmed14@email.com';

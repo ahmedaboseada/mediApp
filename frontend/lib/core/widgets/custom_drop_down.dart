@@ -6,6 +6,7 @@ class CustomDropdown extends StatelessWidget {
   final String label;
   final List<String> items;
   final Function(String) onChanged;
+  final String? Function(String?)? validator;
 
   const CustomDropdown({
     super.key,
@@ -13,6 +14,7 @@ class CustomDropdown extends StatelessWidget {
     required this.items,
     required this.onChanged,
     required this.label,
+    this.validator,
   });
 
   @override
@@ -29,7 +31,7 @@ class CustomDropdown extends StatelessWidget {
           
           child: DropdownButtonFormField<String>(
             dropdownColor: AppColors.whiteText,
-            
+            validator: validator,
             icon: Transform.rotate(
               angle: 1.5708,
               child: Icon(Icons.chevron_right, color: AppColors.arrow),

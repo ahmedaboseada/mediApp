@@ -22,8 +22,8 @@ class SignUpScreen extends StatelessWidget {
   final ValueNotifier<bool> _agreeToTerms = ValueNotifier(false);
 
   void _handleSignUp(BuildContext context) async {
-    // Save initial user data (name and email) to SharedPreferences
-    await PrefHelper.saveUserProfile(
+    // Save initial user data (name and email) to HiveService
+    await HiveService.saveUserProfile(
       firstName: _nameController.text.trim(),
       lastName: _lastNameController.text.trim(),
       email: _emailController.text.trim(),

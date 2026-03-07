@@ -1,14 +1,15 @@
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:medi/core/core.dart';
 
 class PhoneField extends StatelessWidget {
-  const PhoneField({super.key, this.enabled = true, this.onPhoneChanged, this.phonecontroller});
+  const PhoneField({super.key, this.enabled = true, this.onPhoneChanged, this.phonecontroller, this.validator});
   final bool enabled;
   final Function(String)? onPhoneChanged;
   final TextEditingController? phonecontroller;
+    final String? Function(String?)? validator;
+
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +20,7 @@ class PhoneField extends StatelessWidget {
         const SizedBox(height: 8),
 
         InternationalPhoneNumberInput(
+          validator: validator,
           textFieldController: phonecontroller,
           initialValue: PhoneNumber(isoCode: 'EG'),
 

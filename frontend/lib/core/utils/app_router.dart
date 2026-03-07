@@ -3,8 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:medi/core/enums/user_role.dart';
 import 'package:medi/core/utils/service_locator.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_cubit.dart';
+import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
 import 'package:medi/features/patient/features/profile/presentation/controller/profile/profile_cubit.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/account_info_screen.dart';
+import 'package:medi/features/patient/features/profile/presentation/screens/caregiver_mode_screen.dart'
+    as profile_caregiver;
 import 'package:medi/features/patient/features/profile/presentation/screens/change_email_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/change_password_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/choose_method_screen.dart';
@@ -20,6 +23,7 @@ import 'package:medi/features/shared/auth/presentation/cubit/otp/otp_cubit.dart'
 import 'package:medi/features/shared/auth/presentation/cubit/register/register_cubit.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/reset_password/reset_password_cubit.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/signin/sigin_cubit.dart';
+import 'package:medi/features/shared/auth/presentation/cubit/user_profile/user_profile_cubit.dart';
 import 'package:medi/features/shared/auth/presentation/screens/complete_your_profile.dart';
 import 'package:medi/features/shared/auth/presentation/screens/forget_password_screen.dart';
 import 'package:medi/features/shared/auth/presentation/screens/otp_screen.dart';
@@ -28,12 +32,15 @@ import 'package:medi/features/shared/auth/presentation/screens/profile_completed
 import 'package:medi/features/shared/auth/presentation/screens/set_password_screen.dart';
 import 'package:medi/features/shared/auth/presentation/screens/sign_up_screen.dart';
 import 'package:medi/features/shared/auth/presentation/screens/sing_in_screen.dart';
+import 'package:medi/features/doctor/features/complete_profile/data/repo/doctor_complete_profile_repo.dart';
+import 'package:medi/features/doctor/features/complete_profile/presentation/controller/cubit/doctor_complete_profile_cubit.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/controller/q_flow/q_flow_cubit.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/allow_location_screen.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/allow_notification_screen.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/doctor_all_set_screen.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/doctor_complete_profile.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/enter_location_manually.dart';
+import 'package:medi/features/doctor/features/complete_profile/presentation/screens/upload_license_screen.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/widgets/q_flow.dart';
 import 'package:medi/features/doctor/features/home/presentation/screens/main_layout.dart';
 import 'package:medi/features/doctor/features/settings/presentation/controller/cubit/schedule_cubit.dart';
@@ -87,6 +94,7 @@ class AppRouter {
   static const String caregiverModeScreen = '/CaregiverModeScreen';
   static const String allSetScreen = '/AllSetScreen';
   static const String patientAccountInfoScreen = '/patient/accountInfo';
+  static const String patientCaregiverModeScreen = '/patient/caregiverMode';
   static const String changeEmailScreen = '/patient/changeEmail';
   static const String changePasswordScreen = '/patient/changePassword';
   static const String chooseMethodScreen =
@@ -112,11 +120,12 @@ class AppRouter {
   static const String manualLocationScreen = '/doctor/manualLocation';
   static const String doctorProfileCompletedScreen = '/doctor/ProfileCompleted';
   static const String qFlowScreen = '/doctor/qFlow';
+  static const String uploadLicenseScreen = '/doctor/uploadLicense';
   static const String allowNotificationScreen = '/doctor/allowNotification';
   static const String doctorAllSetScreen = '/doctorAllSetScreen';
 
   static final router = GoRouter(
-    initialLocation: homeScreen,
+    initialLocation: selectScreen,
     routes: [
       // ========== SHARED/SPLASH ROUTES ==========
       GoRoute(
@@ -207,29 +216,32 @@ class AppRouter {
           return const MainPatientView();
         },
       ),
-      GoRoute(
-        path: onboardingFlow,
-        builder: (context, state) {
+      ShellRoute(
+        builder: (context, state, child) {
           return BlocProvider(
             create: (context) => QuestionnaireCubit(getIt<QuestionnaireRepo>()),
-            child: const OnboardingFlow(),
+            child: child,
           );
         },
         routes: [
           GoRoute(
-            path: 'caregiverMode',
+            path: onboardingFlow,
+            builder: (context, state) => const OnboardingFlow(),
+          ),
+          GoRoute(
+            path: '$onboardingFlow/caregiverMode',
             builder: (context, state) => const CaregiverModeScreen(),
           ),
           GoRoute(
-            path: 'caregiverForm',
-            builder: (context, state) => CaregiverFormScreen(),
+            path: '$onboardingFlow/caregiverForm',
+            builder: (context, state) => const CaregiverFormScreen(),
           ),
           GoRoute(
-            path: 'invitationSend',
+            path: '$onboardingFlow/invitationSend',
             builder: (context, state) => InvitationSendScreen(),
           ),
           GoRoute(
-            path: 'allSet',
+            path: '$onboardingFlow/allSet',
             builder: (context, state) => const AllSetScreen(),
           ),
         ],
@@ -242,6 +254,13 @@ class AppRouter {
       GoRoute(
         path: patientAccountInfoScreen,
         builder: (context, state) => AccountInfoScreen(),
+      ),
+      GoRoute(
+        path: patientCaregiverModeScreen,
+        builder: (context, state) => BlocProvider(
+          create: (context) => getIt<ProfileCubit>(),
+          child: const profile_caregiver.CaregiverModeScreen(),
+        ),
       ),
       GoRoute(
         path: changeEmailScreen,
@@ -258,36 +277,36 @@ class AppRouter {
         ),
       ),
 
-         ShellRoute(
-      builder: (context, state, child) {
-        return BlocProvider(
-          create: (_) => MedicationDataCubit(),
-          child: child, // child هو الصفحة الفرعية
-        );
-      },
-      routes: [
-        GoRoute(
-          path: '/patient/addMedication/chooseMethod',
-          builder: (context, state) => const ChooseMethodScreen(),
-        ),
-        GoRoute(
-          path: '/patient/addMedication/details',
-          builder: (context, state) => const MedicationDetailsScreen(),
-        ),
-        GoRoute(
-          path: '/patient/addMedication/schedule',
-          builder: (context, state) => const ScheduleRemindersScreen(),
-        ),
-        GoRoute(
-          path: '/patient/addMedication/stock',
-          builder: (context, state) => const StockExpiryScreen(),
-        ),
-        GoRoute(
-          path: '/patient/addMedication/confirmation',
-          builder: (context, state) => const ConfirmationScreen(),
-        ),
-      ],
-    ),
+      ShellRoute(
+        builder: (context, state, child) {
+          return BlocProvider(
+            create: (_) => MedicationDataCubit(),
+            child: child, // child هو الصفحة الفرعية
+          );
+        },
+        routes: [
+          GoRoute(
+            path: '/patient/addMedication/chooseMethod',
+            builder: (context, state) => const ChooseMethodScreen(),
+          ),
+          GoRoute(
+            path: '/patient/addMedication/details',
+            builder: (context, state) => const MedicationDetailsScreen(),
+          ),
+          GoRoute(
+            path: '/patient/addMedication/schedule',
+            builder: (context, state) => const ScheduleRemindersScreen(),
+          ),
+          GoRoute(
+            path: '/patient/addMedication/stock',
+            builder: (context, state) => const StockExpiryScreen(),
+          ),
+          GoRoute(
+            path: '/patient/addMedication/confirmation',
+            builder: (context, state) => const ConfirmationScreen(),
+          ),
+        ],
+      ),
 
       // ========== DOCTOR ROUTES ==========
       GoRoute(
@@ -310,7 +329,11 @@ class AppRouter {
       ),
       GoRoute(
         path: doctorCompleteProfile,
-        builder: (context, state) => DoctorCompleteProfile(),
+        builder: (context, state) => BlocProvider(
+          create: (context) =>
+              DoctorCompleteProfileCubit(getIt<DoctorCompleteProfileRepo>()),
+          child: DoctorCompleteProfile(),
+        ),
       ),
 
       GoRoute(
@@ -330,7 +353,10 @@ class AppRouter {
       ),
       GoRoute(
         path: accountInformationScreen,
-        builder: (context, state) => AccountInformationScreen(),
+        builder: (context, state) => BlocProvider(
+          create: (context) => UserProfileCubit(getIt<AuthRepoImpl>())..getMe(),
+          child: AccountInformationScreen(),
+        ),
       ),
       GoRoute(
         path: payoutWithdrawalScreen,
@@ -340,6 +366,10 @@ class AppRouter {
         path: qFlowScreen,
         builder: (context, state) =>
             BlocProvider(create: (context) => QFlowCubit(), child: QFlow()),
+      ),
+      GoRoute(
+        path: uploadLicenseScreen,
+        builder: (context, state) => const UploadLicenseScreen(),
       ),
       GoRoute(
         path: allowNotificationScreen,

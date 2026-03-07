@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/core/utils/pref_helper.dart';
 
 class PermissionSheet extends StatefulWidget {
   const PermissionSheet({super.key});
@@ -40,7 +39,7 @@ class _PermissionSheetState extends State<PermissionSheet>
   }
 
   Future<void> _loadUserRole() async {
-    final role = await PrefHelper.getUserRole() ?? UserRole.patient;
+    final role = HiveService.getUserRole() ?? UserRole.patient;
     setState(() {
       userRole = role;
       _isLoading = false;

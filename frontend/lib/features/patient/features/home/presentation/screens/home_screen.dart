@@ -79,6 +79,14 @@ class HomeScreen extends StatelessWidget {
                 onPressed: () => context.go(AppRouter.onboardingFlow),
                 child: const Text('Go to Questionnaire'),
               ),
+              TextButton(
+                onPressed: () => context.go(AppRouter.completeProfile),
+                child: const Text('View Profile'),
+              ),
+              TextButton(
+                onPressed: () => context.go(AppRouter.doctorCompleteProfile),
+                child: const Text('Caregiver Mode'),
+              ),
             ],
           ),
         );

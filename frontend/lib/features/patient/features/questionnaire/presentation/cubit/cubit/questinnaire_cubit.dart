@@ -48,6 +48,26 @@ class QuestionnaireCubit extends Cubit<QuestionnaireState> {
     );
   }
 
+  Future<void> sendCaregiverRequest({
+    required String caregiverEmail,
+    required String relationship,
+  }) async {
+    emit(state.copyWith(isLoading: true));
+    
+    final result = await questionnaireRepo.sendCaregiverRequest(
+      caregiverEmail: caregiverEmail,
+      relationship: relationship,
+    );
+
+    result.fold(
+      (failure) => emit(state.copyWith(isLoading: false, error: failure.message)),
+      (message) {
+        emit(state.copyWith(isLoading: false, error: null));
+        // Success handled in UI listener
+      },
+    );
+  }
+
   void updateHealthConditions(List<String> value) {
     state.data.healthConditions = value;
     emit(state.copyWith());

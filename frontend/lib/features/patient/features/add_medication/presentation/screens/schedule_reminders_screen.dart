@@ -23,7 +23,7 @@ class _ScheduleRemindersScreenState extends State<ScheduleRemindersScreen> {
   final _timeController = TextEditingController();
 
   String? _selectedFrequency;
-  List<String> _reminders = [];
+  final List<String> _reminders = [];
 
   final List<String> _frequencyOptions = [
     'Every day',

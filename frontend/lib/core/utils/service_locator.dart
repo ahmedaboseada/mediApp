@@ -1,6 +1,8 @@
 import 'package:get_it/get_it.dart';
 import 'package:medi/core/network/api_service.dart';
 import 'package:medi/core/services/audio_player_service.dart';
+import 'package:medi/features/doctor/features/complete_profile/data/repo/doctor_complete_profile_repo.dart';
+import 'package:medi/features/doctor/features/complete_profile/data/repo/doctor_complete_profile_repo_impl.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
 import 'package:medi/features/patient/features/notification_sound/data/datasources/local_sound_datasource.dart';
 import 'package:medi/features/patient/features/notification_sound/data/datasources/local_sound_datasource_impl.dart';
@@ -26,11 +28,12 @@ void setupServiceLocator() async {
   getIt.registerLazySingleton<ProfileRepo>(
     () => ProfileRepoImpl(getIt<ApiService>()),
   );
-  getIt.registerFactory<ProfileCubit>(
-    () => ProfileCubit(getIt<ProfileRepo>()),
-  );
+  getIt.registerFactory<ProfileCubit>(() => ProfileCubit(getIt<ProfileRepo>()));
   getIt.registerLazySingleton<QuestionnaireRepo>(
     () => QuestionnaireRepoImpl(getIt<ApiService>()),
+  );
+  getIt.registerLazySingleton<DoctorCompleteProfileRepo>(
+    () => DoctorCompleteProfileRepoImpl(getIt<ApiService>()),
   );
   final sharedPreferences = await SharedPreferences.getInstance();
   getIt.registerLazySingleton<SharedPreferences>(() => sharedPreferences);

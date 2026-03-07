@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:medi/core/utils/pref_helper.dart';
+import 'package:medi/core/services/hive_service.dart';
 
 class DioClient {
   final Dio _dio = Dio(
@@ -12,10 +12,14 @@ class DioClient {
   DioClient() {
     _dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, handler) async {
-          final token = await PrefHelper.getAccessToken();
+        onRequest: (options, handler) {
+          final token = HiveService.getAccessToken();
           if (token != null) {
             options.headers["Authorization"] = "Bearer $token";
+            print('[DioClient] Adding Authorization header');
+            print('[DioClient] Token: ${token.length > 50 ? token.substring(0, 50) : token}...');
+          } else {
+            print('[DioClient] WARNING: No token found in HiveService');
           }
           return handler.next(options);
         },
@@ -30,7 +34,7 @@ class DioClient {
             try {
               final refreshed = await _refreshAccessToken();
               if (refreshed) {
-                final token = await PrefHelper.getAccessToken();
+                final token = HiveService.getAccessToken();
 
                 if (token != null) {
                   // Create new request options with updated token and retry flag
@@ -74,71 +78,45 @@ class DioClient {
 
   Future<bool> _refreshAccessToken() async {
     try {
-      final refreshToken = await PrefHelper.getRefreshToken();
+      final refreshToken = HiveService.getRefreshToken();
+      print('[DioClient] Attempting token refresh...');
+      print('[DioClient] Refresh token exists: ${refreshToken != null}');
+      
       if (refreshToken == null) {
-        print('[DioClient] ❌ No refresh token available in storage');
+        print('[DioClient] No refresh token available');
         return false;
       }
-
-      print('[DioClient] 🔄 Attempting to refresh token...');
-      print('[DioClient] Refresh token: ${refreshToken.substring(0, 20)}...');
 
       final dio = Dio(
         BaseOptions(
           baseUrl: 'https://medi-app-dusky.vercel.app',
           headers: {
             "Content-Type": "application/json",
+            "Authorization": "Bearer $refreshToken",
           },
-          connectTimeout: const Duration(seconds: 10),
-          receiveTimeout: const Duration(seconds: 10),
         ),
       );
 
-      // Try sending refresh token in request body (most common pattern)
-      final response = await dio.post(
-        '/users/refreshToken',
-        data: {
-          'refreshToken': refreshToken,
-        },
-      );
+      print('[DioClient] Calling /users/refreshToken endpoint...');
+      final response = await dio.post('/users/refreshToken');
+      print('[DioClient] Refresh response: ${response.statusCode}');
 
-      print('[DioClient] ✓ Refresh response code: ${response.statusCode}');
-      print('[DioClient] ✓ Refresh response data: ${response.data}');
+      final newAccessToken = response.data['accessToken'] ?? response.data['access_token'];
+      final newRefreshToken = response.data['refreshToken'] ?? response.data['refresh_token'];
 
-      final newAccessToken = response.data['accessToken'] ?? 
-                            response.data['access_token'] ??
-                            response.data['token'];
-      final newRefreshToken = response.data['refreshToken'] ?? 
-                             response.data['refresh_token'];
-
-      if (newAccessToken != null && newAccessToken.toString().isNotEmpty) {
-        await PrefHelper.saveAccessToken(newAccessToken);
-        print('[DioClient] ✅ New access token saved');
-        
-        if (newRefreshToken != null && newRefreshToken.toString().isNotEmpty) {
-          await PrefHelper.saveRefreshToken(newRefreshToken);
-          print('[DioClient] ✅ New refresh token saved');
+      if (newAccessToken != null) {
+        await HiveService.saveAccessToken(newAccessToken);
+        if (newRefreshToken != null) {
+          await HiveService.saveRefreshToken(newRefreshToken);
         }
+        print('[DioClient] Token refresh successful');
         return true;
-      } else {
-        print('[DioClient] ❌ No access token in refresh response');
-        return false;
       }
-    } on DioException catch (e) {
-      print('[DioClient] ❌ Dio error during token refresh: ${e.message}');
-      print('[DioClient] Status code: ${e.response?.statusCode}');
-      print('[DioClient] Response: ${e.response?.data}');
-      
-      // If refresh token endpoint returns 401, it means refresh token is invalid/expired
-      if (e.response?.statusCode == 401) {
-        print('[DioClient] ⚠️  Refresh token is invalid or expired - clearing all tokens');
-        await PrefHelper.clearTokens();
-        // TODO: Emit navigation event to redirect to login screen
-      }
-      
+
+      print('[DioClient] No new access token in response');
       return false;
     } catch (e) {
-      print('[DioClient] ❌ Unexpected error during token refresh: $e');
+      print('[DioClient] Token refresh failed: $e');
       return false;
     }
   }

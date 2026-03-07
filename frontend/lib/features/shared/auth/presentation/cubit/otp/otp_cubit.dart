@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:medi/core/enums/user_role.dart';
-import 'package:medi/core/utils/pref_helper.dart';
+import 'package:medi/core/core.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo.dart';
 import 'package:meta/meta.dart';
 part 'otp_state.dart';
@@ -36,7 +35,7 @@ class OtpCubit extends Cubit<OtpState> {
     emit(OtpLoading());
     try {
       // Get challengeToken from storage
-      final challengeToken = await PrefHelper.getChallengeToken();
+      final challengeToken = HiveService.getChallengeToken();
       if (challengeToken == null) {
         emit(OtpFailure('Challenge token not found'));
         return;

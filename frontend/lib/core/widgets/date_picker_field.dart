@@ -4,21 +4,23 @@ import 'package:intl/intl.dart';
 import 'package:medi/core/core.dart';
 
 class DatePickerField extends StatefulWidget {
-  DatePickerField({super.key, this.initialDate, this.onDateSelected, required this.dateController});
+  const DatePickerField({
+    super.key,
+    this.initialDate,
+    this.onDateSelected,
+    required this.dateController,
+    this.validator,
+  });
   final DateTime? initialDate;
   final Function(DateTime)? onDateSelected;
   final TextEditingController dateController;
-
-
-
-
+  final String? Function(String?)? validator;
 
   @override
   State<DatePickerField> createState() => _DatePickerFieldState();
 }
 
 class _DatePickerFieldState extends State<DatePickerField> {
-
   Future<void> selectDate() async {
     DateTime? date = await showDatePicker(
       context: context,
@@ -52,14 +54,15 @@ class _DatePickerFieldState extends State<DatePickerField> {
         children: [
           Text('Year of birth', style: AppStyles.black14500),
           SizedBox(height: AppSizes.h8),
-          TextField(
+          TextFormField(
             controller: widget.dateController,
             readOnly: true,
+            validator: widget.validator,
             decoration: InputDecoration(
               filled: true,
               fillColor: AppColors.surfaceColor,
-             // hintText: 'YYYY',
 
+              // hintText: 'YYYY',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSizes.r10),
                 borderSide: BorderSide(color: AppColors.borderColor),

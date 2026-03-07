@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/core/widgets/custom_text_button2.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/widgets/permission_sheet.dart';
 
 class AllowNotificationScreen extends StatelessWidget {
    AllowNotificationScreen({super.key});
-  final userRole= PrefHelper.getUserRole();
+  final userRole= HiveService.getUserRole();
   @override
   Widget build(BuildContext context) {
     return Scaffold(

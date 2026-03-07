@@ -24,7 +24,7 @@ class _PrivacySecuritySectionState extends State<PrivacySecuritySection> {
   }
 
   void _loadTwoFactorStatus() async {
-    final enabled = await PrefHelper.isTwoFactorEnabled();
+    final enabled = HiveService.isTwoFactorEnabled();
     setState(() {
       twoFactorAuth = enabled;
     });
@@ -170,9 +170,9 @@ class _PrivacySecuritySectionState extends State<PrivacySecuritySection> {
           pendingToggleAction = null;
           // Update local 2FA status
           if (twoFactorAuth) {
-            PrefHelper.setTwoFactorEnabled(true);
+            HiveService.setTwoFactorEnabled(true);
           } else {
-            PrefHelper.setTwoFactorEnabled(false);
+            HiveService.setTwoFactorEnabled(false);
           }
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

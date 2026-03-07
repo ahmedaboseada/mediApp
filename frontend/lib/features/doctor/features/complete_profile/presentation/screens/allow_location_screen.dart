@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/features/doctor/features/complete_profile/data/repo/doctor_complete_profile_repo.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/controller/cubit/location_cubit.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/controller/cubit/location_state.dart';
-import 'package:medi/core/widgets/custom_text_button2.dart';
 
 class AllowLocationScreen extends StatelessWidget {
   const AllowLocationScreen({super.key});
@@ -12,7 +12,7 @@ class AllowLocationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => LocationCubit(),
+      create: (_) => LocationCubit(getIt<DoctorCompleteProfileRepo>()),
       child: Scaffold(
         body: SafeArea(
           child: Padding(

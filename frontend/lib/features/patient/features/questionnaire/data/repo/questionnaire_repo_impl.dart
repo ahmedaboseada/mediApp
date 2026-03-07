@@ -17,7 +17,7 @@ class QuestionnaireRepoImpl implements QuestionnaireRepo {
     required List<String> activeIngredients,
   }) async {
     try {
-      final token = await PrefHelper.getAccessToken();
+      final token = HiveService.getAccessToken();
       final data = {
         'chronicConditions': chronicConditions,
         'longTermMedication': longTermMedication,
@@ -58,7 +58,7 @@ class QuestionnaireRepoImpl implements QuestionnaireRepo {
     required bool allergyAlerts,
   }) async {
     try {
-      final token = await PrefHelper.getAccessToken();
+      final token = HiveService.getAccessToken();
       final data = {
         'allergies': allergies,
         'reactionToMedication': reactionToMedication,
@@ -83,6 +83,45 @@ class QuestionnaireRepoImpl implements QuestionnaireRepo {
       }
 
       final message = response['message'] ?? 'Health step 2 completed successfully';
+      return Right(message);
+    } on DioException catch (e) {
+      final serverFailure = ServerFailure.fromDioError(e);
+      return Left(serverFailure);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<ApiError, String>> sendCaregiverRequest({
+    required String caregiverEmail,
+    required String relationship,
+  }) async {
+    try {
+      final token = HiveService.getAccessToken();
+      final data = {
+        'caregiverEmail': caregiverEmail,
+        'relationship': relationship,
+      };
+
+      final headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      };
+
+      final dynamic response = await apiService.post(
+        '/patients/caregiver/request',
+        data,
+        headers: headers,
+      );
+
+      log('Send Caregiver Request Response: ${response.toString()}');
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final message = response['message'] ?? 'Caregiver request sent successfully';
       return Right(message);
     } on DioException catch (e) {
       final serverFailure = ServerFailure.fromDioError(e);

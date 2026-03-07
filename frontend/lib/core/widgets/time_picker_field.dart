@@ -2,10 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
 
 class TimePickerField extends StatefulWidget {
-  const TimePickerField({super.key, required this.label});
+  const TimePickerField({
+    super.key,
+    required this.label,
+    this.onTimeSelected,
+    this.validator,
+  });
+
   final String label;
-  
-   @override
+  final ValueChanged<TimeOfDay>? onTimeSelected;
+  final String? Function(String?)? validator;
+
+
   @override
   State<TimePickerField> createState() => _TimePickerFieldState();
 }
@@ -30,6 +38,7 @@ class _TimePickerFieldState extends State<TimePickerField> {
         selectedTime = time;
         _timeController.text = formattedTime;
       });
+      widget.onTimeSelected?.call(time);
     }
   }
 
@@ -40,6 +49,7 @@ class _TimePickerFieldState extends State<TimePickerField> {
         // Time Picker Field
         Expanded(
           child: CustomTextField(
+            validator: widget.validator,
             readOnly: true,
             controller: _timeController,
             onTap: () {
