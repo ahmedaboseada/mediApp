@@ -14,7 +14,8 @@ class Q1SetAppointmentTimeScreen extends StatefulWidget {
       _Q1SetAppointmentTimeScreenState();
 }
 
-class _Q1SetAppointmentTimeScreenState extends State<Q1SetAppointmentTimeScreen> {
+class _Q1SetAppointmentTimeScreenState
+    extends State<Q1SetAppointmentTimeScreen> {
   List<String> _workingDays = [];
   TimeOfDay? _startTime;
   TimeOfDay? _endTime;
@@ -131,7 +132,7 @@ class _Q1SetAppointmentTimeScreenState extends State<Q1SetAppointmentTimeScreen>
                     _startTime = time;
                   },
                 ),
-                 SizedBox(height: AppSizes.h16),
+                SizedBox(height: AppSizes.h16),
                 TimePickerField(
                   label: 'End Time',
                   onTimeSelected: (time) {
@@ -147,7 +148,7 @@ class _Q1SetAppointmentTimeScreenState extends State<Q1SetAppointmentTimeScreen>
                     _consultationDuration = value;
                   },
                 ),
-                  SizedBox(height: AppSizes.h16),
+                SizedBox(height: AppSizes.h16),
                 InfoNoteWidget(text: AppStrings.appointmentScheduleNote),
                 SizedBox(height: AppSizes.h24),
                 const QProgressWidget(step: 0),

@@ -18,34 +18,48 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
     required String medicalLicenseId,
     required String phone,
     required String gender,
-    String? profilePicture,
+    File? profilePicture,
   }) async {
     try {
       final token = HiveService.getAccessToken();
-      log('Doctor Complete Step1 - Token: ${token != null ? "EXISTS" : "NULL"}');
+      log(
+        'Doctor Complete Step1 - Token: ${token != null ? "EXISTS" : "NULL"}',
+      );
       if (token == null || token.isEmpty) {
-        return Left(ServerFailure('Access token is missing. Please login again.'));
+        return Left(
+          ServerFailure('Access token is missing. Please login again.'),
+        );
       }
       if (token.length > 50) {
-        log('Doctor Complete Step1 - Token Preview: ${token.substring(0, 50)}...');
+        log(
+          'Doctor Complete Step1 - Token Preview: ${token.substring(0, 50)}...',
+        );
       }
       final headers = {
-        "Content-Type": "application/json",
+        "Content-Type": "multipart/form-data",
         "Authorization": "Bearer $token",
       };
-      final data = {
+      final data = <String, dynamic>{
         'specialization': specialization,
         'clinicName': clinicName,
         'medicalLicenseId': medicalLicenseId,
         'phone': phone,
         'gender': gender,
-        if (profilePicture != null && profilePicture.isNotEmpty)
-          'profilePicture': profilePicture,
       };
+
+      if (profilePicture != null) {
+        final fileName = profilePicture.path.split(RegExp(r'[\\/]')).last;
+        data['avatar'] = await MultipartFile.fromFile(
+          profilePicture.path,
+          filename: fileName,
+        );
+      }
+
+      final formData = FormData.fromMap(data);
 
       final dynamic response = await apiService.patch(
         '/doctors/complete/step1',
-        data,
+        formData,
         headers: headers,
       );
 
@@ -73,9 +87,13 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
   }) async {
     try {
       final token = HiveService.getAccessToken();
-      log('Doctor Complete Location - Token: ${token != null ? "EXISTS" : "NULL"}');
+      log(
+        'Doctor Complete Location - Token: ${token != null ? "EXISTS" : "NULL"}',
+      );
       if (token == null || token.isEmpty) {
-        return Left(ServerFailure('Access token is missing. Please login again.'));
+        return Left(
+          ServerFailure('Access token is missing. Please login again.'),
+        );
       }
 
       final headers = {
@@ -85,11 +103,7 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
 
       final data = {
         'clinicAddress': clinicAddress,
-        'clinicLocation': {
-          'lat': lat,
-          'lng': lng,
-          'label': label,
-        },
+        'clinicLocation': {'lat': lat, 'lng': lng, 'label': label},
       };
 
       final dynamic response = await apiService.patch(
@@ -121,9 +135,13 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
   }) async {
     try {
       final token = HiveService.getAccessToken();
-      log('Doctor Complete Schedule - Token: ${token != null ? "EXISTS" : "NULL"}');
+      log(
+        'Doctor Complete Schedule - Token: ${token != null ? "EXISTS" : "NULL"}',
+      );
       if (token == null || token.isEmpty) {
-        return Left(ServerFailure('Access token is missing. Please login again.'));
+        return Left(
+          ServerFailure('Access token is missing. Please login again.'),
+        );
       }
 
       final headers = {
@@ -134,10 +152,7 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
       final data = {
         'workingDays': workingDays,
         'workingHours': [
-          {
-            'startHour': startHour,
-            'endHour': endHour,
-          },
+          {'startHour': startHour, 'endHour': endHour},
         ],
         'consultationDuration': consultationDuration,
       };
@@ -173,7 +188,9 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
         'Doctor Complete Appointments - Token: ${token != null ? "EXISTS" : "NULL"}',
       );
       if (token == null || token.isEmpty) {
-        return Left(ServerFailure('Access token is missing. Please login again.'));
+        return Left(
+          ServerFailure('Access token is missing. Please login again.'),
+        );
       }
 
       final headers = {
@@ -197,7 +214,8 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
         return Left(response);
       }
 
-      final message = response['message'] ?? 'Appointments completed successfully';
+      final message =
+          response['message'] ?? 'Appointments completed successfully';
       return Right(message.toString());
     } on DioException catch (e) {
       return Left(ServerFailure.fromDioError(e));
@@ -212,9 +230,13 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
   }) async {
     try {
       final token = HiveService.getAccessToken();
-      log('Doctor Complete License - Token: ${token != null ? "EXISTS" : "NULL"}');
+      log(
+        'Doctor Complete License - Token: ${token != null ? "EXISTS" : "NULL"}',
+      );
       if (token == null || token.isEmpty) {
-        return Left(ServerFailure('Access token is missing. Please login again.'));
+        return Left(
+          ServerFailure('Access token is missing. Please login again.'),
+        );
       }
 
       final file = File(filePath);
@@ -222,8 +244,6 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
         return Left(ServerFailure('License file not found'));
       }
 
-      final fileName = filePath.split('/').last.split('\\').last;
-      
       // final formData = FormData.fromMap({
       //   'licenseImage': await MultipartFile.fromFile(
       //     filePath,
@@ -236,13 +256,11 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
       //     filename: fileName,
       //   ),
       // };
-       final formData ={
-       
-        if (filePath != null && filePath.isNotEmpty)
-          'licenseImage': await MultipartFile.fromFile(
-            filePath,
-            filename: 'profile.jpg',
-          ),
+      final formData = {
+        'licenseImage': await MultipartFile.fromFile(
+          filePath,
+          filename: 'profile.jpg',
+        ),
       };
 
       final dio = Dio();
@@ -251,7 +269,6 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
       final response = await dio.patch(
         'https://medi-app-dusky.vercel.app/doctors/complete/license',
         data: formData,
-        
       );
 
       log('Doctor Complete License Response: ${response.data.toString()}');
@@ -260,7 +277,8 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
         return Left(ServerFailure('Failed to upload license'));
       }
 
-      final message = response.data['message'] ?? 'License uploaded successfully';
+      final message =
+          response.data['message'] ?? 'License uploaded successfully';
       return Right(message.toString());
     } on DioException catch (e) {
       return Left(ServerFailure.fromDioError(e));

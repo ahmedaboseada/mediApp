@@ -29,7 +29,7 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
 
   Future<void> _loadUserData() async {
     final userData = HiveService.getUserProfile();
-    
+
     setState(() {
       _nameController.text = userData['firstName'] ?? '';
       _lastNameController.text = userData['lastName'] ?? '';
@@ -64,6 +64,7 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
     _emailController.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -92,7 +93,6 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                
                                 Text(
                                   'Account Information',
                                   style: AppStyles.black14500.copyWith(
@@ -100,18 +100,19 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
                                   ),
                                   textAlign: TextAlign.start,
                                 ),
-                                if (!state.isEditing)...[IconButton(
-                                  onPressed: () =>
-                                      context.read<EditCubit>().toggleEdit(),
-                                  icon: SvgPicture.asset(
-                                    AppAssets.tablerEdit,
-                                    colorFilter: const ColorFilter.mode(
-                                      Colors.black,
-                                      BlendMode.srcIn,
+                                if (!state.isEditing) ...[
+                                  IconButton(
+                                    onPressed: () =>
+                                        context.read<EditCubit>().toggleEdit(),
+                                    icon: SvgPicture.asset(
+                                      AppAssets.tablerEdit,
+                                      colorFilter: const ColorFilter.mode(
+                                        Colors.black,
+                                        BlendMode.srcIn,
+                                      ),
                                     ),
                                   ),
-                                ),]
-                                
+                                ],
                               ],
                             ),
                             SizedBox(height: AppSizes.h24),
@@ -155,7 +156,6 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
                             PhoneField(
                               phonecontroller: _phoneController,
                               enabled: state.isEditing,
-                             
                             ),
 
                             SizedBox(height: AppSizes.h24),
@@ -176,7 +176,6 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
                             GenderField(
                               value: _genderController.text,
                               isEditing: state.isEditing,
-                         
                             ),
                             SizedBox(height: AppSizes.h24),
                             if (state.isEditing) ...[

@@ -114,7 +114,7 @@ class _CompleteYourProfileScreenState extends State<CompleteYourProfileScreen> {
                           setState(() {
                             selectedImage = path;
                           });
-                        }, 
+                        },
                       ),
                     ),
                     SizedBox(height: AppSizes.h24),

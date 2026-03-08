@@ -30,11 +30,9 @@ class MethodCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSizes.r20),
           border: Border.all(
             color: isSelected ? AppColors.primary : AppColors.borderColor,
-            width:  1,
+            width: 1,
           ),
-          color: isSelected
-              ? AppColors.lightBackground
-              : Colors.white,
+          color: isSelected ? AppColors.lightBackground : Colors.white,
         ),
         child: Row(
           children: [
@@ -43,16 +41,12 @@ class MethodCard extends StatelessWidget {
               padding: EdgeInsets.all(AppSizes.w12),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color:
-                     AppColors.lightBlue
-                    
+                color: AppColors.lightBlue,
               ),
               child: SvgPicture.asset(
                 iconPath,
                 colorFilter: ColorFilter.mode(
-                  isSelected
-                      ? AppColors.primary
-                      : AppColors.primaryText,
+                  isSelected ? AppColors.primary : AppColors.primaryText,
                   BlendMode.srcIn,
                 ),
                 width: AppSizes.w24,
@@ -73,15 +67,10 @@ class MethodCard extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: AppSizes.h4),
-                  Text(
-                    subtitle,
-                    style: AppStyles.secondary12400,
-                  ),
+                  Text(subtitle, style: AppStyles.secondary12400),
                 ],
               ),
             ),
-
-           
           ],
         ),
       ),

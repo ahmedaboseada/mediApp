@@ -43,10 +43,11 @@ class ProfileRepoImpl implements ProfileRepo {
         return Left(response);
       }
 
-      final message = response['message'] ??
-          'Password changed successfully';
+      final message = response['message'] ?? 'Password changed successfully';
 
-      log('Message: $message--------------------------------------------------------------------------');
+      log(
+        'Message: $message--------------------------------------------------------------------------',
+      );
 
       return Right(message);
     } on DioException catch (e) {
@@ -57,40 +58,38 @@ class ProfileRepoImpl implements ProfileRepo {
     }
   }
 
- @override
-Future<Either<ApiError, String>> requestEmailChange({
-  required String newEmail,
-}) async {
-  try {
-    final data = {
-      'newEmail': newEmail,
-    };
+  @override
+  Future<Either<ApiError, String>> requestEmailChange({
+    required String newEmail,
+  }) async {
+    try {
+      final data = {'newEmail': newEmail};
 
-    final token = HiveService.getAccessToken();
+      final token = HiveService.getAccessToken();
 
-    final response = await apiService.patch(
-      '/users/email/change',
-      data,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer $token",
-      },
-    );
- if (response is ServerFailure) {
+      final response = await apiService.patch(
+        '/users/email/change',
+        data,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+      if (response is ServerFailure) {
         return Left(response);
       }
-    log('Request Email Change Response: ${response.toString()}');
+      log('Request Email Change Response: ${response.toString()}');
 
-    final message = response['message'] ??
-        'Email change request sent successfully';
+      final message =
+          response['message'] ?? 'Email change request sent successfully';
 
-    return Right(message);
-  } on DioException catch (e) {
-    return Left(ServerFailure.fromDioError(e));
-  } catch (e) {
-    return Left(ServerFailure(e.toString()));
+      return Right(message);
+    } on DioException catch (e) {
+      return Left(ServerFailure.fromDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
   }
-}
 
   @override
   Future<Either<ApiError, String>> cancelEmailChange() async {
@@ -114,8 +113,8 @@ Future<Either<ApiError, String>> requestEmailChange({
         return Left(response);
       }
 
-      final message = response['message'] ??
-          'Email change cancelled successfully';
+      final message =
+          response['message'] ?? 'Email change cancelled successfully';
 
       return Right(message);
     } on DioException catch (e) {
@@ -142,8 +141,7 @@ Future<Either<ApiError, String>> requestEmailChange({
         return Left(response);
       }
 
-      final message = response['message'] ??
-          'Email changed successfully';
+      final message = response['message'] ?? 'Email changed successfully';
 
       return Right(message);
     } on DioException catch (e) {
@@ -164,11 +162,9 @@ Future<Either<ApiError, String>> requestEmailChange({
         "Authorization": "Bearer $token",
       };
 
-      final response = await apiService.patch(
-        '/users/2fa',
-        {'enabled': enabled},
-        headers: headers,
-      );
+      final response = await apiService.patch('/users/2fa', {
+        'enabled': enabled,
+      }, headers: headers);
 
       log('Toggle Two-Factor Auth Response: ${response.toString()}');
 
@@ -177,7 +173,8 @@ Future<Either<ApiError, String>> requestEmailChange({
         return Left(response);
       }
 
-      final message = response['message'] ??
+      final message =
+          response['message'] ??
           'Two-Factor Authentication toggled successfully';
 
       return Right(message);
@@ -190,7 +187,8 @@ Future<Either<ApiError, String>> requestEmailChange({
   }
 
   @override
-  Future<Either<ApiError, List<CaregiverRequestModel>>> listCaregiverRequests() async {
+  Future<Either<ApiError, List<CaregiverRequestModel>>>
+  listCaregiverRequests() async {
     try {
       final token = HiveService.getAccessToken();
       final headers = {

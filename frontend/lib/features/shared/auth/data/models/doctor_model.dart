@@ -74,7 +74,9 @@ class DoctorModel {
           .toList(),
       reviewsCount: json['reviewsCount'] as int? ?? 0,
       workingHours: (json['workingHours'] as List? ?? [])
-          .map((item) => WorkingHoursModel.fromJson(item as Map<String, dynamic>))
+          .map(
+            (item) => WorkingHoursModel.fromJson(item as Map<String, dynamic>),
+          )
           .toList(),
       connectedPatients: List<String>.from(
         json['connectedPatients'] as List? ?? [],
@@ -86,7 +88,9 @@ class DoctorModel {
       specialization: (json['specialization'] ?? '').toString(),
       clinicAddress: (json['clinicAddress'] ?? '').toString(),
       clinicLocation: json['clinicLocation'] != null
-          ? ClinicLocationModel.fromJson(json['clinicLocation'] as Map<String, dynamic>)
+          ? ClinicLocationModel.fromJson(
+              json['clinicLocation'] as Map<String, dynamic>,
+            )
           : null,
       consultationDuration: json['consultationDuration'] as int? ?? 0,
       maxDailyPatients: json['maxDailyPatients'] as int? ?? 0,

@@ -41,7 +41,8 @@ class QuestionnaireRepoImpl implements QuestionnaireRepo {
         return Left(response);
       }
 
-      final message = response['message'] ?? 'Health step 1 completed successfully';
+      final message =
+          response['message'] ?? 'Health step 1 completed successfully';
       return Right(message);
     } on DioException catch (e) {
       final serverFailure = ServerFailure.fromDioError(e);
@@ -82,7 +83,8 @@ class QuestionnaireRepoImpl implements QuestionnaireRepo {
         return Left(response);
       }
 
-      final message = response['message'] ?? 'Health step 2 completed successfully';
+      final message =
+          response['message'] ?? 'Health step 2 completed successfully';
       return Right(message);
     } on DioException catch (e) {
       final serverFailure = ServerFailure.fromDioError(e);
@@ -121,7 +123,8 @@ class QuestionnaireRepoImpl implements QuestionnaireRepo {
         return Left(response);
       }
 
-      final message = response['message'] ?? 'Caregiver request sent successfully';
+      final message =
+          response['message'] ?? 'Caregiver request sent successfully';
       return Right(message);
     } on DioException catch (e) {
       final serverFailure = ServerFailure.fromDioError(e);

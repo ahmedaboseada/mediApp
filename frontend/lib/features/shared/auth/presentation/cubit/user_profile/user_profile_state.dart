@@ -23,6 +23,7 @@ class UserProfileError extends UserProfileState {
 
   const UserProfileError(this.message);
 }
+
 class UserProfileUpdated extends UserProfileState {
   final AuthResponseModel profile;
 

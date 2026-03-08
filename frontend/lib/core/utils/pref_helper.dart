@@ -7,7 +7,7 @@
 //   static const String _refreshTokenKey = 'refresh_token';
 //   static const String _onboardingKey = 'onboarding_completed';
 //   static const String _userRoleKey = 'user_role';
-  
+
 //   // User Profile Keys
 //   static const String _firstNameKey = 'firstName';
 //   static const String _lastNameKey = 'lastName';
@@ -17,13 +17,13 @@
 //   static const String _dateOfBirthKey = 'dateOfBirth';
 //   static const String _genderKey = 'gender';
 //   static const String _profileImageKey = 'profileImage';
-  
+
 //   // Patient Data Key
 //   static const String _patientDataKey = 'patient_data';
-  
+
 //   // Challenge Token Key (for 2FA/OTP flow)
 //   static const String _challengeTokenKey = 'challenge_token';
-  
+
 //   // 2FA Status Key
 //   static const String _twoFactorEnabledKey = 'two_factor_enabled';
 
@@ -99,7 +99,7 @@
 //     String? profileImage,
 //   }) async {
 //     final prefs = await SharedPreferences.getInstance();
-    
+
 //     if (firstName != null) await prefs.setString(_firstNameKey, firstName);
 //     if (lastName != null) await prefs.setString(_lastNameKey, lastName);
 //     if (email != null) await prefs.setString(_emailKey, email);

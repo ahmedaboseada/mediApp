@@ -30,9 +30,7 @@ class CaretakerCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: AppColors.primary,
               ),
-              child: Center(
-                child: Text(initials, style: AppStyles.white16600),
-              ),
+              child: Center(child: Text(initials, style: AppStyles.white16600)),
             ),
             SizedBox(width: AppSizes.w16),
             Expanded(

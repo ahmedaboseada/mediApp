@@ -50,14 +50,18 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-    appBar: CustomAppBar(),
+      appBar: CustomAppBar(),
       body: SafeArea(
         child: BlocConsumer<SiginCubit, SiginState>(
           listener: (context, state) {
             if (state is SiginSuccess) {
               //context.showSafeSnackBar(AppStrings.signInSuccessful);
 
-              context.safeGo(widget.role == UserRole.patient ? AppRouter.patientMainView : AppRouter.mainLayout);
+              context.safeGo(
+                widget.role == UserRole.patient
+                    ? AppRouter.patientMainView
+                    : AppRouter.mainLayout,
+              );
             } else if (state is Signin2FARequired) {
               // Navigate to OTP screen for 2FA verification
               context.push(

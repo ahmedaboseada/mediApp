@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:medi/core/enums/user_role.dart';
 import 'package:medi/core/utils/service_locator.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_cubit.dart';
-import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
 import 'package:medi/features/patient/features/profile/presentation/controller/profile/profile_cubit.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/account_info_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/caregiver_mode_screen.dart'

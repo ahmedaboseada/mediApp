@@ -89,7 +89,7 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
                 // Okay Button
                 PrimaryButton(
                   onPressed: () {
-                   // _changeEmail(context);
+                    // _changeEmail(context);
                     Navigator.pop(dialogContext);
                   },
                   text: 'Okay',
@@ -195,7 +195,7 @@ class _ChangeEmailScreenState extends State<ChangeEmailScreen> {
                         PrimaryButton(
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                             // _showChangeEmailDialog(context);
+                              // _showChangeEmailDialog(context);
                               _changeEmail(context);
                             }
                           },

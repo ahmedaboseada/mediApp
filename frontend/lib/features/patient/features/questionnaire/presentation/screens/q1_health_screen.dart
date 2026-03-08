@@ -18,9 +18,9 @@ class Q1HealthScreen extends StatelessWidget {
       body: BlocConsumer<QuestionnaireCubit, QuestionnaireState>(
         listener: (context, state) {
           if (state.error != null && state.error!.isNotEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.error!)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.error!)));
           }
         },
         builder: (context, state) {
@@ -56,16 +56,18 @@ class Q1HealthScreen extends StatelessWidget {
                       print(selectedList);
                     },
                     items: QuestionnaireConstants().longTermMedications,
-                    label: AppStrings.areYouCurrentlyTakingAnyLongTermMedications,
+                    label:
+                        AppStrings.areYouCurrentlyTakingAnyLongTermMedications,
                   ),
-                  
-                
+
                   Expanded(child: SizedBox(height: AppSizes.h86)),
                   const OnboardingProgress(step: 0),
                   SizedBox(height: AppSizes.h12),
                   PrimaryButton(
                     text: 'Next',
-                    onPressed: state.isLoading ? null : () => cubit.completeHealthStep1(),
+                    onPressed: state.isLoading
+                        ? null
+                        : () => cubit.completeHealthStep1(),
                     child: state.isLoading
                         ? const SizedBox(
                             height: 20,

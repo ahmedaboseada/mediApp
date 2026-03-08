@@ -36,9 +36,8 @@ class _ScheduleAvailabilityScreenState
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => ScheduleAppointmentsCubit(
-        getIt<DoctorCompleteProfileRepo>(),
-      ),
+      create: (_) =>
+          ScheduleAppointmentsCubit(getIt<DoctorCompleteProfileRepo>()),
       child: BlocConsumer<ScheduleAppointmentsCubit, ScheduleAppointmentsState>(
         listener: (context, state) {
           if (state.errorMessage != null && !state.showFieldErrors) {
@@ -106,7 +105,7 @@ class _ScheduleAvailabilityScreenState
                                     .updateWorkingDays(days);
                               },
                             ),
-                        
+
                             SizedBox(height: AppSizes.h24),
                             CustomDropdown(
                               validator: (value) {
@@ -124,7 +123,7 @@ class _ScheduleAvailabilityScreenState
                                     .updateConsultationDuration(value);
                               },
                             ),
-                        
+
                             SizedBox(height: AppSizes.h16),
                             TimePickerField(
                               label: 'Start Time',
@@ -140,7 +139,7 @@ class _ScheduleAvailabilityScreenState
                                 return null;
                               },
                             ),
-                        
+
                             SizedBox(height: AppSizes.h16),
                             TimePickerField(
                               label: 'End Time',
@@ -156,7 +155,7 @@ class _ScheduleAvailabilityScreenState
                                 return null;
                               },
                             ),
-                        
+
                             SizedBox(height: AppSizes.h16),
                             QTextField(
                               validator: (types) {
@@ -173,7 +172,7 @@ class _ScheduleAvailabilityScreenState
                               items: DoctorConstants().appointmentsTypes,
                               label: 'What type of appointments do you offer?',
                             ),
-                        
+
                             SizedBox(height: AppSizes.h16),
                             CustomTextField(
                               validator: (value) {
@@ -190,26 +189,26 @@ class _ScheduleAvailabilityScreenState
                               keyboardType: TextInputType.number,
                               label: 'Max patients per day',
                             ),
-                        
+
                             SizedBox(height: AppSizes.h24),
                             PrimaryButton(
                               onPressed: state.isSubmitting
                                   ? null
                                   : () {
                                       if (_formKey.currentState!.validate()) {
-                                      if (_maxPatientsController
-                                          .text
-                                          .isNotEmpty) {
+                                        if (_maxPatientsController
+                                            .text
+                                            .isNotEmpty) {
+                                          context
+                                              .read<ScheduleAppointmentsCubit>()
+                                              .updateMaxDailyPatients(
+                                                _maxPatientsController.text,
+                                              );
+                                        }
                                         context
                                             .read<ScheduleAppointmentsCubit>()
-                                            .updateMaxDailyPatients(
-                                              _maxPatientsController.text,
-                                            );
+                                            .submitScheduleAndAppointments();
                                       }
-                                      context
-                                          .read<ScheduleAppointmentsCubit>()
-                                          .submitScheduleAndAppointments();
-                                    }
                                     },
                               text: 'Save',
                               child: state.isSubmitting

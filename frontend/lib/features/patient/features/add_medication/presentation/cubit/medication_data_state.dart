@@ -8,21 +8,21 @@ abstract class MedicationDataState {
 
 class MedicationDataInitial extends MedicationDataState {
   const MedicationDataInitial()
-      : super(
-          medicationData: const MedicationData(
-            selectedMethod: 0,
-            medicationName: '',
-            type: '',
-            dosage: '',
-            frequency: '',
-            startDate: '',
-            endDate: '',
-            reminders: [],
-            currentStock: '',
-            expiryDate: '',
-            isCriticalMode: false,
-          ),
-        );
+    : super(
+        medicationData: const MedicationData(
+          selectedMethod: 0,
+          medicationName: '',
+          type: '',
+          dosage: '',
+          frequency: '',
+          startDate: '',
+          endDate: '',
+          reminders: [],
+          currentStock: '',
+          expiryDate: '',
+          isCriticalMode: false,
+        ),
+      );
 }
 
 class MedicationDataUpdated extends MedicationDataState {

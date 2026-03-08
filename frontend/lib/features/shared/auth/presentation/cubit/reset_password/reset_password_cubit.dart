@@ -8,17 +8,16 @@ class ResetPasswordCubit extends Cubit<ResetPasswordState> {
   final AuthRepo authRepo;
   ResetPasswordCubit(this.authRepo) : super(ResetPasswordInitial());
   Future<void> resetPassword({
-  required String resetToken,
-  required String newPassword,
-  required String confirmPassword,
+    required String resetToken,
+    required String newPassword,
+    required String confirmPassword,
   }) async {
     emit(ResetPasswordLoading());
     try {
       final message = await authRepo.resetPassword(
-      resetToken: resetToken,
-      newPassword: newPassword,
-      confirmPassword: confirmPassword,
-
+        resetToken: resetToken,
+        newPassword: newPassword,
+        confirmPassword: confirmPassword,
       );
       message.fold(
         (failure) => emit(ResetPasswordFailure(failure.message)),

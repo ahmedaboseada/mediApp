@@ -16,6 +16,6 @@ final class RegisterSuccess extends RegisterState {
 final class RegisterFailure extends RegisterState {
   final String message;
   final List<String> errors;
-  
+
   RegisterFailure(this.message, [this.errors = const []]);
 }

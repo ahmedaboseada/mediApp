@@ -101,7 +101,7 @@ class AppStyles {
     fontWeight: FontWeight.w500,
     color: AppColors.secondaryText,
   );
-   static TextStyle secondary12400 = TextStyle(
+  static TextStyle secondary12400 = TextStyle(
     fontSize: AppSizes.sp12,
     fontWeight: FontWeight.w400,
     color: AppColors.secondaryText,

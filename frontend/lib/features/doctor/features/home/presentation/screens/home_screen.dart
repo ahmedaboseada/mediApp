@@ -8,14 +8,12 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Home'),
-      ),
-      body:  Center(
-        child:  TextButton(
-                onPressed: () => context.go(AppRouter.doctorCompleteProfile),
-                child: const Text('Caregiver Mode'),
-              ),
+      appBar: AppBar(title: const Text('Home')),
+      body: Center(
+        child: TextButton(
+          onPressed: () => context.go(AppRouter.doctorCompleteProfile),
+          child: const Text('Caregiver Mode'),
+        ),
       ),
     );
   }

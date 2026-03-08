@@ -51,7 +51,10 @@ class LocationCubit extends Cubit<LocationState> {
 
       final hasFailure = locationResult.fold((_) => true, (_) => false);
       if (hasFailure) {
-        final error = locationResult.fold((failure) => failure.message, (_) => '');
+        final error = locationResult.fold(
+          (failure) => failure.message,
+          (_) => '',
+        );
         emit(LocationFailure(error));
         return;
       }

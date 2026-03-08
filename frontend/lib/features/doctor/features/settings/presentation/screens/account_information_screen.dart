@@ -71,7 +71,6 @@ class _AccountInformationScreenState extends State<AccountInformationScreen> {
         clinicName: _clinicNameController.text.trim(),
         medicalLicenseId: _medicalLicenseController.text.trim(),
       );
-
     }
   }
 
@@ -92,7 +91,7 @@ class _AccountInformationScreenState extends State<AccountInformationScreen> {
                   backgroundColor: Colors.red,
                 ),
               );
-            }else if (state is UserProfileUpdated) {
+            } else if (state is UserProfileUpdated) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Profile updated successfully'),

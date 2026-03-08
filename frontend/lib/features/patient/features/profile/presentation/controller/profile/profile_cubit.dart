@@ -16,7 +16,7 @@ class ProfileCubit extends Cubit<ProfileState> {
     required String confirmPassword,
   }) async {
     emit(ChangePasswordLoading());
-    
+
     final result = await profileRepo.changePassword(
       oldPassword: oldPassword,
       newPassword: newPassword,
@@ -29,28 +29,26 @@ class ProfileCubit extends Cubit<ProfileState> {
     );
   }
 
-  Future<void> requestEmailChange({
-    required String newEmail,
-  }) async {
+  Future<void> requestEmailChange({required String newEmail}) async {
     emit(RequestEmailChangeLoading());
-    
-    final result = await profileRepo.requestEmailChange(
-      newEmail: newEmail,
-    );
+
+    final result = await profileRepo.requestEmailChange(newEmail: newEmail);
 
     result.fold(
-      (failure) => emit(RequestEmailChangeFailure(failure.message, failure.errors)),
+      (failure) =>
+          emit(RequestEmailChangeFailure(failure.message, failure.errors)),
       (message) => emit(RequestEmailChangeSuccess(message)),
     );
   }
 
   Future<void> cancelEmailChange() async {
     emit(CancelEmailChangeLoading());
-    
+
     final result = await profileRepo.cancelEmailChange();
 
     result.fold(
-      (failure) => emit(CancelEmailChangeFailure(failure.message, failure.errors)),
+      (failure) =>
+          emit(CancelEmailChangeFailure(failure.message, failure.errors)),
       (message) => emit(CancelEmailChangeSuccess(message)),
     );
   }
@@ -59,24 +57,26 @@ class ProfileCubit extends Cubit<ProfileState> {
     required String confirmEmailChangeToken,
   }) async {
     emit(ConfirmEmailChangeLoading());
-    
+
     final result = await profileRepo.confirmEmailChange(
       confirmEmailChangeToken: confirmEmailChangeToken,
     );
 
     result.fold(
-      (failure) => emit(ConfirmEmailChangeFailure(failure.message, failure.errors)),
+      (failure) =>
+          emit(ConfirmEmailChangeFailure(failure.message, failure.errors)),
       (message) => emit(ConfirmEmailChangeSuccess(message)),
     );
   }
 
   Future<void> toggleTwoFactorAuth(bool enabled) async {
     emit(ToggleTwoFactorAuthLoading());
-    
+
     final result = await profileRepo.toggleTwoFactorAuth(enabled);
 
     result.fold(
-      (failure) => emit(ToggleTwoFactorAuthFailure(failure.message, failure.errors)),
+      (failure) =>
+          emit(ToggleTwoFactorAuthFailure(failure.message, failure.errors)),
       (message) => emit(ToggleTwoFactorAuthSuccess(message)),
     );
   }
@@ -87,7 +87,8 @@ class ProfileCubit extends Cubit<ProfileState> {
     final result = await profileRepo.listCaregiverRequests();
 
     result.fold(
-      (failure) => emit(CaregiverRequestsFailure(failure.message, failure.errors)),
+      (failure) =>
+          emit(CaregiverRequestsFailure(failure.message, failure.errors)),
       (requests) => emit(CaregiverRequestsSuccess(requests)),
     );
   }
@@ -95,7 +96,9 @@ class ProfileCubit extends Cubit<ProfileState> {
   Future<void> acceptCaregiverRequest({required String requestId}) async {
     emit(CaregiverRequestActionLoading());
 
-    final result = await profileRepo.acceptCaregiverRequest(requestId: requestId);
+    final result = await profileRepo.acceptCaregiverRequest(
+      requestId: requestId,
+    );
 
     await result.fold(
       (failure) async {
@@ -111,7 +114,9 @@ class ProfileCubit extends Cubit<ProfileState> {
   Future<void> rejectCaregiverRequest({required String requestId}) async {
     emit(CaregiverRequestActionLoading());
 
-    final result = await profileRepo.rejectCaregiverRequest(requestId: requestId);
+    final result = await profileRepo.rejectCaregiverRequest(
+      requestId: requestId,
+    );
 
     await result.fold(
       (failure) async {

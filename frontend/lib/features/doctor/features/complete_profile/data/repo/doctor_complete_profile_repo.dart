@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dartz/dartz.dart';
 import 'package:medi/core/core.dart';
 
@@ -8,7 +10,7 @@ abstract class DoctorCompleteProfileRepo {
     required String medicalLicenseId,
     required String phone,
     required String gender,
-    String? profilePicture,
+    File? profilePicture,
   });
 
   Future<Either<ApiError, String>> completeLocation({
@@ -30,7 +32,5 @@ abstract class DoctorCompleteProfileRepo {
     required int maxDailyPatients,
   });
 
-  Future<Either<ApiError, String>> completeLicense({
-    required String filePath,
-  });
+  Future<Either<ApiError, String>> completeLicense({required String filePath});
 }

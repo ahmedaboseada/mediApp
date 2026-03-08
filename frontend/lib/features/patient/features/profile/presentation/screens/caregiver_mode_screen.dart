@@ -51,10 +51,7 @@ class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => context.pop(),
         ),
-        title: Text(
-          'Caregiver Mode',
-          style: AppStyles.black18500,
-        ),
+        title: Text('Caregiver Mode', style: AppStyles.black18500),
         centerTitle: false,
         elevation: 0,
       ),
@@ -115,16 +112,20 @@ class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
                         onAccept: isActionLoading
                             ? () {}
                             : () {
-                                context.read<ProfileCubit>().acceptCaregiverRequest(
-                                  requestId: request.id,
-                                );
+                                context
+                                    .read<ProfileCubit>()
+                                    .acceptCaregiverRequest(
+                                      requestId: request.id,
+                                    );
                               },
                         onReject: isActionLoading
                             ? () {}
                             : () {
-                                context.read<ProfileCubit>().rejectCaregiverRequest(
-                                  requestId: request.id,
-                                );
+                                context
+                                    .read<ProfileCubit>()
+                                    .rejectCaregiverRequest(
+                                      requestId: request.id,
+                                    );
                               },
                       );
                     }),

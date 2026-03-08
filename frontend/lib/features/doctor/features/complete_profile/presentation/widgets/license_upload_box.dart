@@ -56,10 +56,7 @@ class LicenseUploadBox extends StatelessWidget {
                         style: AppStyles.black14600,
                       ),
                       SizedBox(height: AppSizes.h4),
-                      Text(
-                        '${fileSizeKb!} KB',
-                        style: AppStyles.tertiary40012,
-                      ),
+                      Text('${fileSizeKb!} KB', style: AppStyles.tertiary40012),
                     ],
                   ),
                 ),
@@ -90,15 +87,9 @@ class LicenseUploadBox extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: AppSizes.h14),
-                Text(
-                  'Click to upload',
-                  style: AppStyles.black14600,
-                ),
+                Text('Click to upload', style: AppStyles.black14600),
                 SizedBox(height: AppSizes.h4),
-                Text(
-                  'JPG, or PNG (max 4MB)',
-                  style: AppStyles.tertiary40012,
-                ),
+                Text('JPG, or PNG (max 4MB)', style: AppStyles.tertiary40012),
               ],
             ),
     );

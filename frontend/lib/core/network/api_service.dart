@@ -9,8 +9,10 @@ class ApiService {
   /// get
   Future<dynamic> get(String endPoint, {Map<String, String>? headers}) async {
     try {
-      final response = await _dioClient.dio.get(endPoint,
-          options: headers != null ? Options(headers: headers) : null);
+      final response = await _dioClient.dio.get(
+        endPoint,
+        options: headers != null ? Options(headers: headers) : null,
+      );
       return response.data;
     } on DioException catch (e) {
       return ServerFailure.fromDioError(e);
@@ -18,12 +20,17 @@ class ApiService {
   }
 
   /// post
-  Future<dynamic> post(String endPoint, dynamic body,
-      {Map<String, String>? headers}) async {
+  Future<dynamic> post(
+    String endPoint,
+    dynamic body, {
+    Map<String, String>? headers,
+  }) async {
     try {
-      final response = await _dioClient.dio.post(endPoint,
-          data: body,
-          options: Options(headers: headers));
+      final response = await _dioClient.dio.post(
+        endPoint,
+        data: body,
+        options: Options(headers: headers),
+      );
       return response.data;
     } on DioException catch (e) {
       return ServerFailure.fromDioError(e);
@@ -41,12 +48,17 @@ class ApiService {
   }
 
   /// patch
-  Future< dynamic> patch(String endPoint, dynamic body,
-      {Map<String, String>? headers}) async {
+  Future<dynamic> patch(
+    String endPoint,
+    dynamic body, {
+    Map<String, String>? headers,
+  }) async {
     try {
-      final response = await _dioClient.dio.patch(endPoint,
-          data: body,
-          options: Options(headers: headers));
+      final response = await _dioClient.dio.patch(
+        endPoint,
+        data: body,
+        options: Options(headers: headers),
+      );
       return response.data;
     } on DioException catch (e) {
       return ServerFailure.fromDioError(e);

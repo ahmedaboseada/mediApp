@@ -26,10 +26,6 @@ class ClinicLocationModel {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'lat': lat,
-      'lng': lng,
-      'label': label,
-    };
+    return {'lat': lat, 'lng': lng, 'label': label};
   }
 }

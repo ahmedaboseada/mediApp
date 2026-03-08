@@ -51,9 +51,9 @@ class _CaregiverFormScreenState extends State<CaregiverFormScreen> {
       body: BlocConsumer<QuestionnaireCubit, QuestionnaireState>(
         listener: (context, state) {
           if (state.error != null && state.error!.isNotEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.error!)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.error!)));
           } else if (!state.isLoading && state.error == null) {
             // Check if we just completed a caregiver request (not navigating from back button)
             // Only navigate if the state changed from loading to not loading
@@ -106,7 +106,9 @@ class _CaregiverFormScreenState extends State<CaregiverFormScreen> {
                           setState(() {
                             _selectedRelationship = selectedList.first;
                           });
-                          print('Selected relationship: $_selectedRelationship');
+                          print(
+                            'Selected relationship: $_selectedRelationship',
+                          );
                         }
                       },
                       items: _relationshipOptions,

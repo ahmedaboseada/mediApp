@@ -14,7 +14,7 @@ class QuestionnaireCubit extends Cubit<QuestionnaireState> {
 
   Future<void> completeHealthStep1() async {
     emit(state.copyWith(isLoading: true));
-    
+
     final result = await questionnaireRepo.completeHealthStep1(
       chronicConditions: state.data.healthConditions ?? [],
       longTermMedication: state.data.longTermMeds ?? [],
@@ -22,7 +22,8 @@ class QuestionnaireCubit extends Cubit<QuestionnaireState> {
     );
 
     result.fold(
-      (failure) => emit(state.copyWith(isLoading: false, error: failure.message)),
+      (failure) =>
+          emit(state.copyWith(isLoading: false, error: failure.message)),
       (message) {
         emit(state.copyWith(isLoading: false, error: null));
         next(); // Move to next step after successful submission
@@ -32,7 +33,7 @@ class QuestionnaireCubit extends Cubit<QuestionnaireState> {
 
   Future<void> completeHealthStep2() async {
     emit(state.copyWith(isLoading: true));
-    
+
     final result = await questionnaireRepo.completeHealthStep2(
       allergies: state.data.allergies ?? [],
       reactionToMedication: state.data.hasAllergies ?? false,
@@ -40,7 +41,8 @@ class QuestionnaireCubit extends Cubit<QuestionnaireState> {
     );
 
     result.fold(
-      (failure) => emit(state.copyWith(isLoading: false, error: failure.message)),
+      (failure) =>
+          emit(state.copyWith(isLoading: false, error: failure.message)),
       (message) {
         emit(state.copyWith(isLoading: false, error: null));
         next(); // Move to next step after successful submission
@@ -53,14 +55,15 @@ class QuestionnaireCubit extends Cubit<QuestionnaireState> {
     required String relationship,
   }) async {
     emit(state.copyWith(isLoading: true));
-    
+
     final result = await questionnaireRepo.sendCaregiverRequest(
       caregiverEmail: caregiverEmail,
       relationship: relationship,
     );
 
     result.fold(
-      (failure) => emit(state.copyWith(isLoading: false, error: failure.message)),
+      (failure) =>
+          emit(state.copyWith(isLoading: false, error: failure.message)),
       (message) {
         emit(state.copyWith(isLoading: false, error: null));
         // Success handled in UI listener

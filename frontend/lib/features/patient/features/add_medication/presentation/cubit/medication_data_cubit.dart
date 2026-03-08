@@ -7,18 +7,22 @@ class MedicationDataCubit extends Cubit<MedicationDataState> {
 
   // Initialize with existing medication data
   void initializeMedicationData(MedicationData medicationData) {
-    emit(MedicationDataUpdated(
-      medicationData: medicationData,
-      updateType: 'initialize',
-    ));
+    emit(
+      MedicationDataUpdated(
+        medicationData: medicationData,
+        updateType: 'initialize',
+      ),
+    );
   }
 
   // Update medication method
   void updateMethod(int method) {
-    emit(MedicationDataUpdated(
-      medicationData: state.medicationData.copyWith(selectedMethod: method),
-      updateType: 'method',
-    ));
+    emit(
+      MedicationDataUpdated(
+        medicationData: state.medicationData.copyWith(selectedMethod: method),
+        updateType: 'method',
+      ),
+    );
   }
 
   // Update medication details (name, type, dosage)
@@ -27,14 +31,16 @@ class MedicationDataCubit extends Cubit<MedicationDataState> {
     required String type,
     required String dosage,
   }) {
-    emit(MedicationDataUpdated(
-      medicationData: state.medicationData.copyWith(
-        medicationName: medicationName,
-        type: type,
-        dosage: dosage,
+    emit(
+      MedicationDataUpdated(
+        medicationData: state.medicationData.copyWith(
+          medicationName: medicationName,
+          type: type,
+          dosage: dosage,
+        ),
+        updateType: 'details',
       ),
-      updateType: 'details',
-    ));
+    );
   }
 
   // Update schedule and reminders
@@ -44,15 +50,17 @@ class MedicationDataCubit extends Cubit<MedicationDataState> {
     required String endDate,
     required List<String> reminders,
   }) {
-    emit(MedicationDataUpdated(
-      medicationData: state.medicationData.copyWith(
-        frequency: frequency,
-        startDate: startDate,
-        endDate: endDate,
-        reminders: reminders,
+    emit(
+      MedicationDataUpdated(
+        medicationData: state.medicationData.copyWith(
+          frequency: frequency,
+          startDate: startDate,
+          endDate: endDate,
+          reminders: reminders,
+        ),
+        updateType: 'schedule',
       ),
-      updateType: 'schedule',
-    ));
+    );
   }
 
   // Update stock and expiry
@@ -61,27 +69,32 @@ class MedicationDataCubit extends Cubit<MedicationDataState> {
     required String expiryDate,
     required bool isCriticalMode,
   }) {
-    emit(MedicationDataUpdated(
-      medicationData: state.medicationData.copyWith(
-        currentStock: currentStock,
-        expiryDate: expiryDate,
-        isCriticalMode: isCriticalMode,
+    emit(
+      MedicationDataUpdated(
+        medicationData: state.medicationData.copyWith(
+          currentStock: currentStock,
+          expiryDate: expiryDate,
+          isCriticalMode: isCriticalMode,
+        ),
+        updateType: 'stock',
       ),
-      updateType: 'stock',
-    ));
+    );
   }
 
   // Update a single field
   void updateField(String fieldName, dynamic value) {
     final updatedData = _updateField(state.medicationData, fieldName, value);
-    emit(MedicationDataUpdated(
-      medicationData: updatedData,
-      updateType: fieldName,
-    ));
+    emit(
+      MedicationDataUpdated(medicationData: updatedData, updateType: fieldName),
+    );
   }
 
   // Helper method to update a single field
-  MedicationData _updateField(MedicationData data, String fieldName, dynamic value) {
+  MedicationData _updateField(
+    MedicationData data,
+    String fieldName,
+    dynamic value,
+  ) {
     switch (fieldName) {
       case 'medicationName':
         return data.copyWith(medicationName: value as String);

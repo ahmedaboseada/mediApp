@@ -31,17 +31,13 @@ class CustomStepper extends StatelessWidget {
                     height: AppSizes.h40,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: isActive
-                          ? Colors.blue
-                          : Colors.grey.shade300,
+                      color: isActive ? Colors.blue : Colors.grey.shade300,
                     ),
                     child: Center(
                       child: Text(
                         "$stepNumber",
                         style: TextStyle(
-                          color: isActive
-                              ? Colors.white
-                              : Colors.black54,
+                          color: isActive ? Colors.white : Colors.black54,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -65,21 +61,16 @@ class CustomStepper extends StatelessWidget {
           }),
         ),
 
-         SizedBox(height: AppSizes.h12),
+        SizedBox(height: AppSizes.h12),
 
         Text(
           title,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
 
         Text(
           "Step $currentStep of $totalSteps",
-          style: TextStyle(
-            color: Colors.grey,
-          ),
+          style: TextStyle(color: Colors.grey),
         ),
       ],
     );

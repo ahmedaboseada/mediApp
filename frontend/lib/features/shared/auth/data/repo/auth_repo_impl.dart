@@ -236,7 +236,7 @@ class AuthRepoImpl implements AuthRepo {
   }) async {
     try {
       final data = <String, dynamic>{};
-      
+
       if (firstName != null) data['firstName'] = firstName;
       if (lastName != null) data['lastName'] = lastName;
       if (email != null) data['email'] = email;

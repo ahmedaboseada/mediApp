@@ -4,7 +4,8 @@ import 'package:medi/features/doctor/features/complete_profile/data/repo/doctor_
 import 'package:medi/features/doctor/features/complete_profile/presentation/controller/schedule_appointments/schedule_appointments_state.dart';
 
 class ScheduleAppointmentsCubit extends Cubit<ScheduleAppointmentsState> {
-  ScheduleAppointmentsCubit(this._repo) : super(const ScheduleAppointmentsState());
+  ScheduleAppointmentsCubit(this._repo)
+    : super(const ScheduleAppointmentsState());
 
   final DoctorCompleteProfileRepo _repo;
 
@@ -38,50 +39,62 @@ class ScheduleAppointmentsCubit extends Cubit<ScheduleAppointmentsState> {
     emit(state.copyWith(showFieldErrors: true));
 
     if (state.workingDays.isEmpty) {
-      emit(state.copyWith(
-        errorMessage: 'Please select working days',
-        clearError: false,
-      ));
+      emit(
+        state.copyWith(
+          errorMessage: 'Please select working days',
+          clearError: false,
+        ),
+      );
       return false;
     }
 
     if (state.startTime == null) {
-      emit(state.copyWith(
-        errorMessage: 'Please select start time',
-        clearError: false,
-      ));
+      emit(
+        state.copyWith(
+          errorMessage: 'Please select start time',
+          clearError: false,
+        ),
+      );
       return false;
     }
 
     if (state.endTime == null) {
-      emit(state.copyWith(
-        errorMessage: 'Please select end time',
-        clearError: false,
-      ));
+      emit(
+        state.copyWith(
+          errorMessage: 'Please select end time',
+          clearError: false,
+        ),
+      );
       return false;
     }
 
     if (state.consultationDuration == null || state.consultationDuration == 0) {
-      emit(state.copyWith(
-        errorMessage: 'Please select consultation duration',
-        clearError: false,
-      ));
+      emit(
+        state.copyWith(
+          errorMessage: 'Please select consultation duration',
+          clearError: false,
+        ),
+      );
       return false;
     }
 
     if (state.appointmentTypes.isEmpty) {
-      emit(state.copyWith(
-        errorMessage: 'Please select appointment types',
-        clearError: false,
-      ));
+      emit(
+        state.copyWith(
+          errorMessage: 'Please select appointment types',
+          clearError: false,
+        ),
+      );
       return false;
     }
 
     if (state.maxDailyPatients == null || state.maxDailyPatients == 0) {
-      emit(state.copyWith(
-        errorMessage: 'Please enter max daily patients',
-        clearError: false,
-      ));
+      emit(
+        state.copyWith(
+          errorMessage: 'Please enter max daily patients',
+          clearError: false,
+        ),
+      );
       return false;
     }
 
@@ -93,15 +106,19 @@ class ScheduleAppointmentsCubit extends Cubit<ScheduleAppointmentsState> {
       return;
     }
 
-    emit(state.copyWith(
-      isSubmitting: true,
-      isSuccess: false,
-      showFieldErrors: false,
-      clearError: true,
-    ));
+    emit(
+      state.copyWith(
+        isSubmitting: true,
+        isSuccess: false,
+        showFieldErrors: false,
+        clearError: true,
+      ),
+    );
 
-    final startHour = '${state.startTime!.hour.toString().padLeft(2, '0')}:${state.startTime!.minute.toString().padLeft(2, '0')}';
-    final endHour = '${state.endTime!.hour.toString().padLeft(2, '0')}:${state.endTime!.minute.toString().padLeft(2, '0')}';
+    final startHour =
+        '${state.startTime!.hour.toString().padLeft(2, '0')}:${state.startTime!.minute.toString().padLeft(2, '0')}';
+    final endHour =
+        '${state.endTime!.hour.toString().padLeft(2, '0')}:${state.endTime!.minute.toString().padLeft(2, '0')}';
 
     // Call complete schedule endpoint
     final scheduleResult = await _repo.completeSchedule(
@@ -113,14 +130,16 @@ class ScheduleAppointmentsCubit extends Cubit<ScheduleAppointmentsState> {
 
     // If schedule failed, return early
     if (scheduleResult.isLeft()) {
-      emit(state.copyWith(
-        isSubmitting: false,
-        isSuccess: false,
-        errorMessage: scheduleResult.fold(
-          (error) => error.message,
-          (message) => null,
+      emit(
+        state.copyWith(
+          isSubmitting: false,
+          isSuccess: false,
+          errorMessage: scheduleResult.fold(
+            (error) => error.message,
+            (message) => null,
+          ),
         ),
-      ));
+      );
       return;
     }
 
@@ -132,17 +151,16 @@ class ScheduleAppointmentsCubit extends Cubit<ScheduleAppointmentsState> {
 
     appointmentsResult.fold(
       (error) {
-        emit(state.copyWith(
-          isSubmitting: false,
-          isSuccess: false,
-          errorMessage: error.message,
-        ));
+        emit(
+          state.copyWith(
+            isSubmitting: false,
+            isSuccess: false,
+            errorMessage: error.message,
+          ),
+        );
       },
       (message) {
-        emit(state.copyWith(
-          isSubmitting: false,
-          isSuccess: true,
-        ));
+        emit(state.copyWith(isSubmitting: false, isSuccess: true));
       },
     );
   }

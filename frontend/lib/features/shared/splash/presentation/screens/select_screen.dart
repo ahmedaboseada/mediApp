@@ -52,7 +52,9 @@ class SelectScreen extends StatelessWidget {
                             Role(
                               role: UserRole.patient.title,
                               onTap: () async {
-                                await HiveService.saveUserRole(UserRole.patient);
+                                await HiveService.saveUserRole(
+                                  UserRole.patient,
+                                );
                                 context.push(AppRouter.patientLogin);
                               },
                               imagePath: AppAssets.patient,

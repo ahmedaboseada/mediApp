@@ -13,11 +13,9 @@ class TimePickerField extends StatefulWidget {
   final ValueChanged<TimeOfDay>? onTimeSelected;
   final String? Function(String?)? validator;
 
-
   @override
   State<TimePickerField> createState() => _TimePickerFieldState();
 }
-
 
 class _TimePickerFieldState extends State<TimePickerField> {
   final TextEditingController _timeController = TextEditingController();
@@ -30,7 +28,10 @@ class _TimePickerFieldState extends State<TimePickerField> {
   }
 
   Future<void> _pickTime() async {
-    final time = await showTimePicker(context: context, initialTime: TimeOfDay.now());
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
 
     if (time != null) {
       final formattedTime = time.format(context);
@@ -59,9 +60,7 @@ class _TimePickerFieldState extends State<TimePickerField> {
             suffixIcon: Icon(Icons.access_time, color: AppColors.primary),
           ),
         ),
-      
       ],
-    )
-    ;
+    );
   }
 }

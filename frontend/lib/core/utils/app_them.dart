@@ -15,8 +15,7 @@ ThemeData get lightTheme {
       ),
       elevation: 0,
     ),
-      inputDecorationTheme: InputDecorationTheme(
-      
+    inputDecorationTheme: InputDecorationTheme(
       // filled: true,
       // fillColor: AppColors.surfaceColor,
       border: OutlineInputBorder(

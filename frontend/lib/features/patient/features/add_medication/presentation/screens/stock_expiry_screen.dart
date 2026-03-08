@@ -49,7 +49,8 @@ class _StockExpiryScreenState extends State<StockExpiryScreen> {
         expiryDate: _expiryDateController.text,
         isCriticalMode: _isCriticalModeEnabled,
       );
-                                          ///patient/addMedication/confirmation
+
+      ///patient/addMedication/confirmation
       context.push('/patient/addMedication/confirmation');
     }
   }

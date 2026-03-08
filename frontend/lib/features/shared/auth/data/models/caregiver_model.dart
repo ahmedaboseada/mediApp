@@ -9,10 +9,7 @@ class CaregiverModel {
   @HiveField(1)
   final bool caregivingOption;
 
-  CaregiverModel({
-    required this.giving,
-    required this.caregivingOption,
-  });
+  CaregiverModel({required this.giving, required this.caregivingOption});
 
   factory CaregiverModel.fromJson(Map<String, dynamic> json) {
     return CaregiverModel(
@@ -22,9 +19,6 @@ class CaregiverModel {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'giving': giving,
-      'caregivingOption': caregivingOption,
-    };
+    return {'giving': giving, 'caregivingOption': caregivingOption};
   }
 }

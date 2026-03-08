@@ -107,7 +107,7 @@ class _PrivacySecuritySectionState extends State<PrivacySecuritySection> {
                                       : null,
                                 );
                               },
-                            )
+                            ),
                           ),
                           SizedBox(width: AppSizes.h12),
 
@@ -138,12 +138,12 @@ class _PrivacySecuritySectionState extends State<PrivacySecuritySection> {
 
   void _handleToggleTwoFactor(BuildContext context, bool value) {
     final profileCubit = context.read<ProfileCubit>();
-    
+
     // Optimistic update - immediately update UI
     setState(() {
       twoFactorAuth = value;
     });
-    
+
     if (value) {
       // Enabling 2FA - show dialog
       pendingToggleAction = true;
@@ -187,10 +187,7 @@ class _PrivacySecuritySectionState extends State<PrivacySecuritySection> {
             pendingToggleAction = null;
           });
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
           );
         }
       },
@@ -225,7 +222,6 @@ class _PrivacySecuritySectionState extends State<PrivacySecuritySection> {
                 value: twoFactorAuth,
                 onChanged: (bool value) {
                   _handleToggleTwoFactor(context, value);
-                  
                 },
               ),
             ],

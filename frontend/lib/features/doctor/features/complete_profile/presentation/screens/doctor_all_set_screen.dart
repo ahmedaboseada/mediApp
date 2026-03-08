@@ -14,20 +14,18 @@ class DoctorAllSetScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-           
             Text(
               AppStrings.youAreAllSet,
               style: AppStyles.black24700.copyWith(color: AppColors.primary),
               textAlign: TextAlign.center,
             ),
-             Image.asset(AppAssets.completeProfile, height: AppSizes.h300),
+            Image.asset(AppAssets.completeProfile, height: AppSizes.h300),
 
-          
             SizedBox(height: AppSizes.h40),
             PrimaryButton(
               text: AppStrings.okay,
               onPressed: () {
-                 context.go(AppRouter.mainLayout);
+                context.go(AppRouter.mainLayout);
               },
             ),
           ],

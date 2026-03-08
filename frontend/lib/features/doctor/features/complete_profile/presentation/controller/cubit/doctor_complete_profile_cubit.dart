@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/features/doctor/features/complete_profile/data/repo/doctor_complete_profile_repo.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/controller/cubit/doctor_complete_profile_state.dart';
@@ -14,7 +16,7 @@ class DoctorCompleteProfileCubit extends Cubit<DoctorCompleteProfileState> {
     required String medicalLicenseId,
     required String phone,
     required String gender,
-    String? profilePicture,
+    File? profilePicture,
   }) async {
     emit(DoctorCompleteProfileLoading());
 

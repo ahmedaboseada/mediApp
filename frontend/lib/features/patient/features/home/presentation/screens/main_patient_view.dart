@@ -22,7 +22,7 @@ class MainPatientView extends StatelessWidget {
 
 class _MainPatientView extends StatelessWidget {
   const _MainPatientView();
- 
+
   @override
   Widget build(BuildContext context) {
     final currentTab = context.watch<PatientFlowCubit>().state;
@@ -38,11 +38,11 @@ class _MainPatientView extends StatelessWidget {
       builder: (context, state) {
         return Scaffold(
           extendBody: true,
-         
+
           body: switch (state) {
             PatientTab.home => Container(color: Colors.red),
-            PatientTab.medicine =>  const SizedBox.shrink(),
-     
+            PatientTab.medicine => const SizedBox.shrink(),
+
             PatientTab.doctor => Container(color: Colors.blue),
             PatientTab.chat => Container(color: Colors.yellow),
             PatientTab.profile => MultiBlocProvider(
@@ -53,14 +53,16 @@ class _MainPatientView extends StatelessWidget {
               child: const ProfileScreen(),
             ),
           },
-            bottomNavigationBar: AdvancedBottomNavBar(
+          bottomNavigationBar: AdvancedBottomNavBar(
             items: navItems,
             currentIndex: currentTab.index,
             onTap: (index) {
-              context.read<PatientFlowCubit>().changeTab(PatientTab.values[index]);
+              context.read<PatientFlowCubit>().changeTab(
+                PatientTab.values[index],
+              );
               if (index == 1) {
-            context.go('/patient/addMedication/chooseMethod');
-          }
+                context.go('/patient/addMedication/chooseMethod');
+              }
             },
             selectedColor: AppColors.primary,
           ),

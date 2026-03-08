@@ -57,7 +57,9 @@ class ServerFailure extends ApiError {
     }
 
     if (response['message'] is String) {
-      final errors = response['errors'] is List ? List<String>.from(response['errors']) : <String>[];
+      final errors = response['errors'] is List
+          ? List<String>.from(response['errors'])
+          : <String>[];
       return ServerFailure(response['message'], errors);
     }
 

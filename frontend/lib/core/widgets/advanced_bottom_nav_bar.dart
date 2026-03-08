@@ -7,11 +7,7 @@ class NavItem {
   final String label;
   final int index;
 
-  const NavItem({
-    required this.icon,
-    required this.label,
-    required this.index,
-  });
+  const NavItem({required this.icon, required this.label, required this.index});
 }
 
 class AdvancedBottomNavBar extends StatelessWidget {
@@ -48,12 +44,14 @@ class AdvancedBottomNavBar extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: items
-                    .map((item) => _NavItem(
-                          item: item,
-                          isSelected: currentIndex == item.index,
-                          onTap: () => onTap(item.index),
-                          selectedColor: selectedColor,
-                        ))
+                    .map(
+                      (item) => _NavItem(
+                        item: item,
+                        isSelected: currentIndex == item.index,
+                        onTap: () => onTap(item.index),
+                        selectedColor: selectedColor,
+                      ),
+                    )
                     .toList(),
               ),
             ),

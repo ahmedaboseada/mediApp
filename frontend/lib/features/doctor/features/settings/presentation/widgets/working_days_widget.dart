@@ -3,10 +3,7 @@ import 'package:medi/core/constants/app_colors.dart';
 import 'package:medi/core/constants/app_sizes.dart';
 
 class WorkingDaysWidget extends StatefulWidget {
-  const WorkingDaysWidget({
-    super.key,
-    required this.onDaysSelected,
-  });
+  const WorkingDaysWidget({super.key, required this.onDaysSelected});
 
   final Function(List<String>) onDaysSelected;
 

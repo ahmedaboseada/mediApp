@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/core/utils/app_router.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_cubit.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_state.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/custom_stepper.dart';

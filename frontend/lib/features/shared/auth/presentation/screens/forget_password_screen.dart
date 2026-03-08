@@ -28,10 +28,7 @@ class ForgetPasswordScreen extends StatelessWidget {
               context.showSafeSnackBar(state.message);
               context.safeGo(
                 AppRouter.otpScreen,
-                extra: {
-                  'email': _emailController.text.trim(),
-                  'role': role,
-                },
+                extra: {'email': _emailController.text.trim(), 'role': role},
               );
             } else if (state is ForgetPasswordFailure) {
               context.showSafeSnackBar("${state.error},error");
@@ -85,11 +82,11 @@ class ForgetPasswordScreen extends StatelessWidget {
                               .submitForgetPassword(
                                 _emailController.text.trim(),
                               );
-                         }
-              //           context.safeGo(
-              //   AppRouter.otpScreen,
-              //   extra: _emailController.text.trim(),
-              // );
+                        }
+                        //           context.safeGo(
+                        //   AppRouter.otpScreen,
+                        //   extra: _emailController.text.trim(),
+                        // );
                         // if (_formKey.currentState!.validate()) {
                         //   context
                         //       .read<ForgetPasswordCubit>()

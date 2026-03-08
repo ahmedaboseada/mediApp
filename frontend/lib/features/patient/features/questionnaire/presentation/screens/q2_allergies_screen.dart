@@ -35,9 +35,9 @@ class _Q2AllergiesScreenState extends State<Q2AllergiesScreen> {
       body: BlocConsumer<QuestionnaireCubit, QuestionnaireState>(
         listener: (context, state) {
           if (state.error != null && state.error!.isNotEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.error!)),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.error!)));
           }
         },
         builder: (context, state) {
@@ -97,7 +97,9 @@ class _Q2AllergiesScreenState extends State<Q2AllergiesScreen> {
                   SizedBox(height: AppSizes.h12),
                   PrimaryButton(
                     text: 'Next',
-                    onPressed: state.isLoading ? null : () => cubit.completeHealthStep2(),
+                    onPressed: state.isLoading
+                        ? null
+                        : () => cubit.completeHealthStep2(),
                     child: state.isLoading
                         ? const SizedBox(
                             height: 20,

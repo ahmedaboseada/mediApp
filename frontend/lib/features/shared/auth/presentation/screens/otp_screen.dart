@@ -29,10 +29,7 @@ class OtpScreen extends StatelessWidget {
               final token = context.read<OtpCubit>().resetToken;
               context.safeGo(
                 AppRouter.setPasswordScreen,
-                extra: {
-                  'resetToken': token,
-                  'role': role,
-                },
+                extra: {'resetToken': token, 'role': role},
               );
             }
 
@@ -77,7 +74,9 @@ class OtpScreen extends StatelessWidget {
                     SizedBox(height: AppSizes.h24),
 
                     Text(
-                      is2FA ? 'Two-Factor Authentication' : AppStrings.verifyOtp,
+                      is2FA
+                          ? 'Two-Factor Authentication'
+                          : AppStrings.verifyOtp,
                       style: AppStyles.black24700,
                     ),
                     SizedBox(height: AppSizes.h8),

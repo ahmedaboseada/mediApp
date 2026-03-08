@@ -176,7 +176,7 @@ class ChangePasswordScreen extends StatelessWidget {
                           return PrimaryButton(
                             text: 'Change Password',
 
-                            onPressed:  () => _changePassword(context),
+                            onPressed: () => _changePassword(context),
                             child: isLoading
                                 ? const SizedBox(
                                     width: 20,

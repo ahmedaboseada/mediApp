@@ -43,13 +43,7 @@ class UploadLicenseCubit extends Cubit<UploadLicenseState> {
   }
 
   void removeSelectedFile() {
-    emit(
-      state.copyWith(
-        clearFile: true,
-        clearError: true,
-        isSuccess: false,
-      ),
-    );
+    emit(state.copyWith(clearFile: true, clearError: true, isSuccess: false));
   }
 
   Future<void> submitLicense() async {
@@ -58,11 +52,7 @@ class UploadLicenseCubit extends Cubit<UploadLicenseState> {
     }
 
     emit(
-      state.copyWith(
-        isSubmitting: true,
-        isSuccess: false,
-        clearError: true,
-      ),
+      state.copyWith(isSubmitting: true, isSuccess: false, clearError: true),
     );
 
     final result = await _repo.completeLicense(
@@ -80,12 +70,7 @@ class UploadLicenseCubit extends Cubit<UploadLicenseState> {
         );
       },
       (message) {
-        emit(
-          state.copyWith(
-            isSubmitting: false,
-            isSuccess: true,
-          ),
-        );
+        emit(state.copyWith(isSubmitting: false, isSuccess: true));
       },
     );
   }

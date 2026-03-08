@@ -9,10 +9,7 @@ class WorkingHoursModel {
   @HiveField(1)
   final String endHour;
 
-  WorkingHoursModel({
-    required this.startHour,
-    required this.endHour,
-  });
+  WorkingHoursModel({required this.startHour, required this.endHour});
 
   factory WorkingHoursModel.fromJson(Map<String, dynamic> json) {
     return WorkingHoursModel(
@@ -22,9 +19,6 @@ class WorkingHoursModel {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'startHour': startHour,
-      'endHour': endHour,
-    };
+    return {'startHour': startHour, 'endHour': endHour};
   }
 }

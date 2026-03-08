@@ -17,7 +17,9 @@ class DioClient {
           if (token != null) {
             options.headers["Authorization"] = "Bearer $token";
             print('[DioClient] Adding Authorization header');
-            print('[DioClient] Token: ${token.length > 50 ? token.substring(0, 50) : token}...');
+            print(
+              '[DioClient] Token: ${token.length > 50 ? token.substring(0, 50) : token}...',
+            );
           } else {
             print('[DioClient] WARNING: No token found in HiveService');
           }
@@ -81,7 +83,7 @@ class DioClient {
       final refreshToken = HiveService.getRefreshToken();
       print('[DioClient] Attempting token refresh...');
       print('[DioClient] Refresh token exists: ${refreshToken != null}');
-      
+
       if (refreshToken == null) {
         print('[DioClient] No refresh token available');
         return false;
@@ -101,8 +103,10 @@ class DioClient {
       final response = await dio.post('/users/refreshToken');
       print('[DioClient] Refresh response: ${response.statusCode}');
 
-      final newAccessToken = response.data['accessToken'] ?? response.data['access_token'];
-      final newRefreshToken = response.data['refreshToken'] ?? response.data['refresh_token'];
+      final newAccessToken =
+          response.data['accessToken'] ?? response.data['access_token'];
+      final newRefreshToken =
+          response.data['refreshToken'] ?? response.data['refresh_token'];
 
       if (newAccessToken != null) {
         await HiveService.saveAccessToken(newAccessToken);

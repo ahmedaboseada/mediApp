@@ -13,7 +13,11 @@ class SectionItemTile extends StatelessWidget {
     super.key,
     required this.title,
     this.subtitle,
-    this.trailingIcon= const Icon(  Icons.arrow_forward_ios ,color: AppColors.primary,size: 16,),
+    this.trailingIcon = const Icon(
+      Icons.arrow_forward_ios,
+      color: AppColors.primary,
+      size: 16,
+    ),
     this.trailingAsset,
     this.onTap,
   });
@@ -27,8 +31,11 @@ class SectionItemTile extends StatelessWidget {
         child: ListTile(
           contentPadding: EdgeInsets.zero,
           title: Text(title, style: AppStyles.black16400),
-          subtitle: subtitle != null ? Text(subtitle!, style: AppStyles.secondary12400) : null,
-          trailing: trailingIcon ??
+          subtitle: subtitle != null
+              ? Text(subtitle!, style: AppStyles.secondary12400)
+              : null,
+          trailing:
+              trailingIcon ??
               (trailingAsset != null
                   ? SvgPicture.asset(trailingAsset!, width: 24, height: 24)
                   : null),

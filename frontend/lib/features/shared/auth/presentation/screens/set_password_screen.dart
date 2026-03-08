@@ -43,10 +43,7 @@ class SetPasswordScreen extends StatelessWidget {
         listener: (context, state) {
           if (state is ResetPasswordSuccess) {
             context.showSafeSnackBar(state.message);
-            context.safeGo(
-              AppRouter.passwordChangedScreen,
-              extra: role,
-            );
+            context.safeGo(AppRouter.passwordChangedScreen, extra: role);
           } else if (state is ResetPasswordFailure) {
             context.showSafeSnackBar(state.error);
           }
@@ -68,7 +65,11 @@ class SetPasswordScreen extends StatelessWidget {
                     AppAssets.updatePassword,
                     height: AppSizes.h200,
                   ),
-                  Text(AppStrings.updatePassword, style: AppStyles.black24700, textAlign: TextAlign.center),
+                  Text(
+                    AppStrings.updatePassword,
+                    style: AppStyles.black24700,
+                    textAlign: TextAlign.center,
+                  ),
                   SizedBox(height: AppSizes.h12),
                   Text(
                     AppStrings.newPasswordMessage,
@@ -101,16 +102,16 @@ class SetPasswordScreen extends StatelessWidget {
 
                   PrimaryButton(
                     text: AppStrings.createNewPassword,
-                    onPressed:() {
-                            if (_formKey.currentState!.validate()) {
-                              context.read<ResetPasswordCubit>().resetPassword(
-                                newPassword: _passwordController.text.trim(),
-                                resetToken: resetToken,
-                                confirmPassword: _confirmPasswordController.text
-                                    .trim(),
-                              );
-                            }
-                          },
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        context.read<ResetPasswordCubit>().resetPassword(
+                          newPassword: _passwordController.text.trim(),
+                          resetToken: resetToken,
+                          confirmPassword: _confirmPasswordController.text
+                              .trim(),
+                        );
+                      }
+                    },
                     child: isLoading
                         ? const CircularProgressIndicator(
                             color: AppColors.whiteText,

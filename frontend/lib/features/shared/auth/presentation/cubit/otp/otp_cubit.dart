@@ -7,10 +7,10 @@ part 'otp_state.dart';
 class OtpCubit extends Cubit<OtpState> {
   final AuthRepo authRepo;
   String otp = '';
-  String? resetToken; 
+  String? resetToken;
 
   OtpCubit(this.authRepo) : super(OtpInitial());
-  
+
   void onOtpChanged(String value) {
     otp = value;
   }
@@ -19,13 +19,10 @@ class OtpCubit extends Cubit<OtpState> {
     emit(OtpLoading());
     try {
       final result = await authRepo.verifyOtp(email: email, otp: otp);
-      result.fold(
-        (failure) => emit(OtpFailure(failure.message)),
-        (data) {
-          resetToken = data.resetToken;
-          emit(OtpSuccess(data.message, otp));
-        },
-      );
+      result.fold((failure) => emit(OtpFailure(failure.message)), (data) {
+        resetToken = data.resetToken;
+        emit(OtpSuccess(data.message, otp));
+      });
     } catch (e) {
       emit(OtpFailure(e.toString()));
     }
@@ -45,13 +42,12 @@ class OtpCubit extends Cubit<OtpState> {
         challengeToken: challengeToken,
         otp: otp,
       );
-      
-      result.fold(
-        (failure) => emit(OtpFailure(failure.message)),
-        (accessToken) {
-          emit(Otp2FASuccess('Two-factor authentication successful', role));
-        },
-      );
+
+      result.fold((failure) => emit(OtpFailure(failure.message)), (
+        accessToken,
+      ) {
+        emit(Otp2FASuccess('Two-factor authentication successful', role));
+      });
     } catch (e) {
       emit(OtpFailure(e.toString()));
     }

@@ -3,8 +3,8 @@ import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/widgets/permission_sheet.dart';
 
 class AllowNotificationScreen extends StatelessWidget {
-   AllowNotificationScreen({super.key});
-  final userRole= HiveService.getUserRole();
+  AllowNotificationScreen({super.key});
+  final userRole = HiveService.getUserRole();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,7 +40,6 @@ class AllowNotificationScreen extends StatelessWidget {
 
               // Let's Start Button
               PrimaryButton(
-
                 text: AppStrings.allowNotifications,
                 onPressed: () {
                   _showPermissionSheet(context);

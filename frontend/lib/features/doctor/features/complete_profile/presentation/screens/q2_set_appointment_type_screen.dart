@@ -15,7 +15,8 @@ class Q2SetAppointmentTypeScreen extends StatefulWidget {
       _Q2SetAppointmentTypeScreenState();
 }
 
-class _Q2SetAppointmentTypeScreenState extends State<Q2SetAppointmentTypeScreen> {
+class _Q2SetAppointmentTypeScreenState
+    extends State<Q2SetAppointmentTypeScreen> {
   final TextEditingController _maxPatientsController = TextEditingController();
   List<String> _appointmentTypes = [];
   bool _isLoading = false;
@@ -52,7 +53,9 @@ class _Q2SetAppointmentTypeScreenState extends State<Q2SetAppointmentTypeScreen>
     final maxDailyPatients = int.tryParse(_maxPatientsController.text.trim());
     if (maxDailyPatients == null || maxDailyPatients <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid max patients number')),
+        const SnackBar(
+          content: Text('Please enter a valid max patients number'),
+        ),
       );
       return;
     }

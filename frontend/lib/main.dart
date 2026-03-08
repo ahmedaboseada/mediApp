@@ -5,10 +5,10 @@ import 'package:medi/core/utils/app_them.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Hive before anything else
   await HiveService.init();
-  
+
   setupServiceLocator();
   runApp(const medi());
 }

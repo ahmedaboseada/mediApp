@@ -11,8 +11,8 @@ class CustomTextField extends StatefulWidget {
     this.isPassword = false,
     this.readOnly = false,
     this.autofillHints,
-    required this.label, 
-    this.suffixIcon, 
+    required this.label,
+    this.suffixIcon,
     this.onTap,
   });
 

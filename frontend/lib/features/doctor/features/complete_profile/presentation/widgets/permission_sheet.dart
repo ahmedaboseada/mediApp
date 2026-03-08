@@ -110,9 +110,11 @@ class _PermissionSheetState extends State<PermissionSheet>
                   text: "Allow",
                   onPressed: () {
                     // Navigator.pop(context);
-                    context.push(userRole == UserRole.doctor
-                        ? AppRouter.doctorAllSetScreen
-                        : AppRouter.takeInfoScreen);
+                    context.push(
+                      userRole == UserRole.doctor
+                          ? AppRouter.doctorAllSetScreen
+                          : AppRouter.takeInfoScreen,
+                    );
                   },
                 ),
 

@@ -37,16 +37,12 @@ class SupportSection extends StatelessWidget {
               },
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: AppSizes.h12),
-                child: Text(
-                  'Help & FAQ',
-                  style: AppStyles.black40016,
-                ),
+                child: Text('Help & FAQ', style: AppStyles.black40016),
               ),
             ),
-            
-            ],
-            ),
-            )
-            );
+          ],
+        ),
+      ),
+    );
   }
 }
