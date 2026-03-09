@@ -9,10 +9,6 @@
 
 // import { eventEmitter } from '../../utils/sendEmail-events/index.js';
 
-import patientModel from '../../models/patient.model.js';
-import doctorModel from '../../models/doctor.model.js';
-import { OAuth2Client } from 'google-auth-library';
-
 // // helper: do NOT infer admin from doctor unless you intentionally want that
 // const isAdminPrefix = (user) => user?.type === 'doctor';
 
@@ -507,6 +503,7 @@ import { OAuth2Client } from 'google-auth-library';
 import userModel from '../../models/user.model.js';
 import patientModel from '../../models/patient.model.js';
 import doctorModel from '../../models/doctor.model.js';
+import { OAuth2Client } from 'google-auth-library';
 import { revokeTokenModel } from '../../models/revoke-token.model.js';
 
 import * as HT from '../../utils/hash/index.js';

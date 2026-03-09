@@ -1,0 +1,8 @@
+C:\Users\ahmed\Desktop\mediApp\backend\src\modules\userModel\user.service.js:508
+import patientModel from '../../models/patient.model.js';
+^^^^^^^^^^^^^^^^^^^
+
+SyntaxError: Identifier 'patientModel' has already been declared
+    at checkSyntax (node:internal/main/check_syntax:72:5)
+
+Node.js v24.11.1
