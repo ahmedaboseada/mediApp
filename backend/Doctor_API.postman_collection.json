@@ -120,8 +120,8 @@
                                 },
                                 {
                                     "key": "licenseImage",
-                                    "value": "https://example.com/license.jpg",
-                                    "type": "text"
+                                    "type": "file",
+                                    "src": []
                                 }
                             ]
                         },
@@ -302,13 +302,14 @@
                             }
                         ],
                         "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"licenseImage\": \"https://example.com/license.jpg\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "licenseImage",
+                                    "type": "file",
+                                    "src": []
                                 }
-                            }
+                            ]
                         },
                         "url": {
                             "raw": "{{BASE_URL}}/doctors/complete/license",

@@ -17,6 +17,7 @@ export const cloudinaryUploadAvatarAndCover = ({ folder = 'uploads' } = {}) => {
     const fields = [
         { name: 'avatar', maxCount: 1 },
         { name: 'images', maxCount: 10 },
+        { name: 'licenseImage', maxCount: 1 },
     ];
 
     return [
@@ -44,6 +45,17 @@ export const cloudinaryUploadAvatarAndCover = ({ folder = 'uploads' } = {}) => {
                         const r = await uploadBuffer(f.buffer, `${folder}/coverImages`, 'image');
                         out.images.push({ cloudinaryUrl: r.secure_url, publicId: r.public_id });
                     }
+                }
+
+                if (req.files.licenseImage?.[0]) {
+                    const f = req.files.licenseImage[0];
+                    const r = await uploadBuffer(f.buffer, `${folder}/licenseImages`, 'image');
+                    out.licenseImage = [
+                        {
+                            cloudinaryUrl: r.secure_url,
+                            publicId: r.public_id,
+                        },
+                    ];
                 }
 
                 req.files = out;

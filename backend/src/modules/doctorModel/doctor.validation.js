@@ -46,7 +46,7 @@ export const completeAppointmentsSchema = {
 
 export const completeLicenseSchema = {
     body: joi.object({
-        licenseImage: joi.string().uri().required(),
+        licenseImage: joi.string().uri().allow('', null),
     }),
 };
 
@@ -73,6 +73,6 @@ export const completeProfileSchema = {
         appointmentTypes: joi.array().items(joi.string().valid('in-person', 'online')).min(1).required(),
         maxDailyPatients: joi.number().integer().min(1).max(500).required(),
 
-        licenseImage: joi.string().uri().required(),
+        licenseImage: joi.string().uri().allow('', null),
     }),
 };

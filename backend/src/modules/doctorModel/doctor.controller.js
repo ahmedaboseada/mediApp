@@ -32,7 +32,7 @@ doctorRouter.patch('/complete/step1', ...cloudinaryUploadAvatarAndCover({ folder
 doctorRouter.patch('/complete/location', validation(DVS.completeLocationSchema), DS.completeLocation);
 doctorRouter.patch('/complete/schedule', validation(DVS.completeScheduleSchema), DS.completeSchedule);
 doctorRouter.patch('/complete/appointments', validation(DVS.completeAppointmentsSchema), DS.completeAppointments);
-doctorRouter.patch('/complete/license', validation(DVS.completeLicenseSchema), DS.completeLicense);
+doctorRouter.patch('/complete/license', ...cloudinaryUploadAvatarAndCover({ folder: 'doctors' }), validation(DVS.completeLicenseSchema), DS.completeLicense);
 
 // single unified completion step
 doctorRouter.patch('/complete', ...cloudinaryUploadAvatarAndCover({ folder: 'doctors' }), validation(DVS.completeProfileSchema), DS.completeProfile);

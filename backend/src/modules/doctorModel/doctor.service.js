@@ -164,7 +164,12 @@ export const completeLicense = async (req, res) => {
     const { err, doc } = await assertDoctor(userId);
     if (err) return res.status(err.status).json({ message: err.message });
 
-    doc.licenseImage = await ET.encrypt(req.body.licenseImage);
+    let licenseImage = req.files?.licenseImage?.[0]?.cloudinaryUrl || req.body.licenseImage;
+    if (!licenseImage) {
+        return res.status(400).json({ message: 'License image is required' });
+    }
+
+    doc.licenseImage = await ET.encrypt(licenseImage);
     doc.status = 'pending';
     await doc.save();
 
@@ -204,8 +209,9 @@ export const completeProfile = async (req, res) => {
     delete doctorPatch.gender;
     delete doctorPatch.profilePicture;
 
-    if (doctorPatch.licenseImage) {
-        doctorPatch.licenseImage = await ET.encrypt(doctorPatch.licenseImage);
+    let licenseImage = req.files?.licenseImage?.[0]?.cloudinaryUrl || doctorPatch.licenseImage;
+    if (licenseImage) {
+        doctorPatch.licenseImage = await ET.encrypt(licenseImage);
         doctorPatch.status = 'pending';
     }
 
