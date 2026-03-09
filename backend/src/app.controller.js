@@ -1,6 +1,3 @@
-import dotenv from 'dotenv';
-dotenv.config();
-
 import express from 'express';
 import connectDB from './config/DB.js';
 import cors from 'cors';
@@ -15,6 +12,7 @@ import { errorHandler } from './middlewares/errorHandler.js';
 import mongoose from 'mongoose';
 import patientRouter from './modules/patientModel/patient.controller.js';
 import doctorRouter from './modules/doctorModel/doctor.controller.js';
+import adminRouter from './modules/adminModel/admin.controller.js';
 
 
 import { startWeeklyAvailabilityReset } from './utils/index.js';
@@ -67,6 +65,7 @@ export const bootstrap = async () => {
     app.use('/messages', messageRouter);
     app.use('/patients', patientRouter);
     app.use('/doctors', doctorRouter);
+    app.use('/admin', adminRouter);
 
 
 

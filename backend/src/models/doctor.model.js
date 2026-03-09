@@ -18,6 +18,7 @@ const doctorSchema = new Schema(
         specialization: { type: String, index: true }, // required only at step1, enforce in Joi
         clinicName: { type: String, trim: true, maxlength: 160 },
         medicalLicenseId: { type: String, trim: true, maxlength: 80 },
+        status: { type: String, enum: ['incomplete', 'pending', 'approved', 'rejected'], default: 'incomplete' },
 
         clinicAddress: { type: String, trim: true, maxlength: 300 },
         clinicLocation: clinicLocationSchema,

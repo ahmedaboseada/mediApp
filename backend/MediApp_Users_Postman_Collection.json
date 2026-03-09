@@ -82,6 +82,37 @@
             ]
         },
         {
+            "name": "02.5 - Google Auth (Public)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"idToken\": \"PUT_YOUR_GOOGLE_ID_TOKEN_HERE\",\n  \"userType\": \"patient\"\n}"
+                },
+                "url": "{{baseUrl}}/users/google"
+            },
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "let json = {};",
+                            "try { json = pm.response.json(); } catch (e) {}",
+                            "if (json?.user?.id) pm.collectionVariables.set('userId', json.user.id);",
+                            "if (json?.accessToken) pm.collectionVariables.set('accessToken', json.accessToken);",
+                            "if (json?.refreshToken) pm.collectionVariables.set('refreshToken', json.refreshToken);"
+                        ]
+                    }
+                }
+            ]
+        },
+        {
             "name": "03 - Confirm Email (paste token into confirmEmailToken)",
             "request": {
                 "method": "GET",

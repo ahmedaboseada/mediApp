@@ -111,3 +111,10 @@ export const resetPasswordSchema = {
             .messages({ "any.only": "Passwords do not match" }),
     }),
 };
+
+export const googleAuthSchema = {
+    body: joi.object({
+        idToken: joi.string().required(),
+        userType: joi.string().valid("user", "patient", "doctor").optional(),
+    }),
+};

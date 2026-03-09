@@ -4,7 +4,7 @@ const { Schema, Types } = mongoose;
 
 const userSchema = new Schema(
     {
-        type: { type: String, enum: ['user', 'patient', 'doctor'], required: true, index: true },
+        type: { type: String, enum: ['user', 'patient', 'doctor', 'admin'], required: true, index: true },
 
         firstName: { type: String, required: true, trim: true, maxlength: 60 },
         lastName: { type: String, required: true, trim: true, maxlength: 60 },

@@ -9,8 +9,9 @@
 
 // import { eventEmitter } from '../../utils/sendEmail-events/index.js';
 
-// import patientModel from '../../models/patient.model.js';
-// import doctorModel from '../../models/doctor.model.js';
+import patientModel from '../../models/patient.model.js';
+import doctorModel from '../../models/doctor.model.js';
+import { OAuth2Client } from 'google-auth-library';
 
 // // helper: do NOT infer admin from doctor unless you intentionally want that
 // const isAdminPrefix = (user) => user?.type === 'doctor';
@@ -1060,5 +1061,66 @@ export const resetPassword = async (req, res) => {
         return res.status(200).json({ message: 'Password reset successfully' });
     } catch (err) {
         return res.status(500).json({ message: 'Internal server error.' });
+    }
+};
+
+export const googleAuth = async (req, res) => {
+    try {
+        const { idToken, userType } = req.body;
+
+        const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+        const ticket = await client.verifyIdToken({
+            idToken,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+
+        const payload = ticket.getPayload();
+        const { email, given_name, family_name, picture } = payload;
+
+        let user = await userModel.findOne({ email: email.toLowerCase().trim() });
+
+        if (!user) {
+            const requestedType = userType && ['patient', 'doctor', 'user'].includes(userType) ? userType : 'patient';
+            const randomPassword = await HT.hash({
+                plainText: nanoid(16) + 'A1!a',
+                SALT_ROUNDS: Number(process.env.SALT_ROUNDS || 12)
+            });
+
+            user = await userModel.create({
+                type: requestedType,
+                firstName: given_name || 'Google',
+                lastName: family_name || 'User',
+                email: email.toLowerCase().trim(),
+                password: randomPassword,
+                profilePicture: picture || '',
+                confirmed: true, // Google accounts are naturally pre-verified
+            });
+
+            if (user.type === 'patient') {
+                await patientModel.create({ userId: user._id });
+            } else if (user.type === 'doctor') {
+                await doctorModel.create({ userId: user._id });
+            }
+        }
+
+        const tokenId = nanoid();
+        const accessToken = isAdminPrefix(user)
+            ? VT.generateAdminAccessToken(user, '1h', tokenId)
+            : VT.generateUserAccessToken(user, '1h', tokenId);
+
+        const refreshToken = isAdminPrefix(user)
+            ? VT.generateAdminRefreshToken(user, process.env.JWT_EXPIRES_IN || '7d', tokenId)
+            : VT.generateUserRefreshToken(user, process.env.JWT_EXPIRES_IN || '7d', tokenId);
+
+        return res.status(200).json({
+            message: 'Google Auth Successful',
+            user: publicUser(user),
+            ...(await attachTypeDoc(user)),
+            accessToken,
+            refreshToken,
+        });
+
+    } catch (err) {
+        return res.status(401).json({ message: 'Google Authentication Failed', error: err.message });
     }
 };

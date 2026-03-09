@@ -165,6 +165,7 @@ export const completeLicense = async (req, res) => {
     if (err) return res.status(err.status).json({ message: err.message });
 
     doc.licenseImage = await ET.encrypt(req.body.licenseImage);
+    doc.status = 'pending';
     await doc.save();
 
     return res.status(200).json({ message: 'License saved' });
@@ -205,6 +206,7 @@ export const completeProfile = async (req, res) => {
 
     if (doctorPatch.licenseImage) {
         doctorPatch.licenseImage = await ET.encrypt(doctorPatch.licenseImage);
+        doctorPatch.status = 'pending';
     }
 
     // normalize: if clinicLocation.label exists but clinicAddress empty -> fill clinicAddress

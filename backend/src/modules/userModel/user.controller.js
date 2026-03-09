@@ -188,6 +188,7 @@ userRouter.use('/:id/messages', messageRouter);
 // =======================
 userRouter.post('/signup', validation(UVS.signupSchema), US.signup);
 userRouter.post('/signin', validation(UVS.signinSchema), US.signin);
+userRouter.post('/google', validation(UVS.googleAuthSchema), US.googleAuth);
 userRouter.post('/signin/otp', validation(UVS.signinOtpSchema), US.signinWithOtp);
 
 userRouter.get('/confirmEmail/:token', US.confirmEmail);
