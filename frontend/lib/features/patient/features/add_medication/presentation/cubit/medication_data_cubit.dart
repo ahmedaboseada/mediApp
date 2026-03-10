@@ -1,12 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_state.dart';
-import 'package:medi/features/patient/features/add_medication/presentation/models/medication_data.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/models/medication.dart';
 
 class MedicationDataCubit extends Cubit<MedicationDataState> {
   MedicationDataCubit() : super(const MedicationDataInitial());
 
   // Initialize with existing medication data
-  void initializeMedicationData(MedicationData medicationData) {
+  void initializeMedicationData(Medication medicationData) {
     emit(
       MedicationDataUpdated(
         medicationData: medicationData,
@@ -90,11 +90,7 @@ class MedicationDataCubit extends Cubit<MedicationDataState> {
   }
 
   // Helper method to update a single field
-  MedicationData _updateField(
-    MedicationData data,
-    String fieldName,
-    dynamic value,
-  ) {
+  Medication _updateField(Medication data, String fieldName, dynamic value) {
     switch (fieldName) {
       case 'medicationName':
         return data.copyWith(medicationName: value as String);
@@ -127,5 +123,5 @@ class MedicationDataCubit extends Cubit<MedicationDataState> {
   }
 
   // Get current medication data
-  MedicationData getMedicationData() => state.medicationData;
+  Medication getMedicationData() => state.medicationData;
 }

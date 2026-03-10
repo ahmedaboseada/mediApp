@@ -1,8 +1,12 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/enums/user_role.dart';
 import 'package:medi/core/utils/service_locator.dart';
+import 'package:medi/features/doctor/features/home/presentation/screens/profile_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_cubit.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/models/medication.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/screens/medicine_info_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/controller/profile/profile_cubit.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/account_info_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/caregiver_mode_screen.dart'
@@ -10,6 +14,7 @@ import 'package:medi/features/patient/features/profile/presentation/screens/care
 import 'package:medi/features/patient/features/profile/presentation/screens/change_email_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/change_password_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/choose_method_screen.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/screens/medicine_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/medication_details_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/schedule_reminders_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/stock_expiry_screen.dart';
@@ -79,7 +84,7 @@ class AppRouter {
   // ========== PATIENT ROUTES ==========
   static const String patientLogin = '/login/patient';
   static const String signUpScreen = '/signUp/patient';
-  static const String homeScreen = '/home';
+  // static const String homeScreen = '/home';
   static const String patientMainView = '/patient/main';
   static const String completeProfile = '/completeProfile';
   static const String onboardingFlow = '/onboardingFlow';
@@ -124,7 +129,7 @@ class AppRouter {
   static const String doctorAllSetScreen = '/doctorAllSetScreen';
 
   static final router = GoRouter(
-    initialLocation: selectScreen,
+    initialLocation: '/',
     routes: [
       // ========== SHARED/SPLASH ROUTES ==========
       GoRoute(
@@ -200,21 +205,6 @@ class AppRouter {
         },
       ),
 
-      GoRoute(
-        path: homeScreen,
-        builder: (context, state) {
-          return BlocProvider(
-            create: (context) => LogOutCubit(getIt<AuthRepoImpl>()),
-            child: HomeScreen(),
-          );
-        },
-      ),
-      GoRoute(
-        path: patientMainView,
-        builder: (context, state) {
-          return const MainPatientView();
-        },
-      ),
       ShellRoute(
         builder: (context, state, child) {
           return BlocProvider(
@@ -276,33 +266,103 @@ class AppRouter {
         ),
       ),
 
-      ShellRoute(
-        builder: (context, state, child) {
-          return BlocProvider(
-            create: (_) => MedicationDataCubit(),
-            child: child, // child هو الصفحة الفرعية
-          );
+      /// ================= PATIENT SHELL =================
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return MainPatientView(shell: navigationShell);
         },
-        routes: [
-          GoRoute(
-            path: '/patient/addMedication/chooseMethod',
-            builder: (context, state) => const ChooseMethodScreen(),
+        branches: [
+          /// ========= HOME TAB =========
+          StatefulShellBranch(
+            routes: [
+              GoRoute(path: '/home', builder: (context, state) => HomeScreen()),
+            ],
           ),
-          GoRoute(
-            path: '/patient/addMedication/details',
-            builder: (context, state) => const MedicationDetailsScreen(),
+
+          /// ========= MEDICINE TAB =========
+          StatefulShellBranch(
+            routes: [
+              ShellRoute(
+                builder: (context, state, child) {
+                  return BlocProvider(
+                    create: (_) => MedicationDataCubit(),
+                    child: child,
+                  );
+                },
+                routes: [
+                  GoRoute(
+                    path: '/medicine',
+                    builder: (context, state) => const MedicineScreen(),
+                  ),
+                  GoRoute(
+                    path: '/medicine/chooseMethod',
+                    builder: (context, state) => const ChooseMethodScreen(),
+                  ),
+                  GoRoute(
+                    path: '/medicine/details',
+                    builder: (context, state) =>
+                        const MedicationDetailsScreen(),
+                  ),
+                  GoRoute(
+                    path: '/medicine/schedule',
+                    builder: (context, state) =>
+                        const ScheduleRemindersScreen(),
+                  ),
+                  GoRoute(
+                    path: '/medicine/stock',
+                    builder: (context, state) => const StockExpiryScreen(),
+                  ),
+                  GoRoute(
+                    path: '/medicine/confirmation',
+                    builder: (context, state) => const ConfirmationScreen(),
+                  ), GoRoute(
+                    path: '/medicine/info',
+                    builder: (context, state) {
+                      final medication = state.extra as Medication?;
+                      return MedicineInfoScreen(medication: medication);
+                    },
+                  ),
+                ],
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/patient/addMedication/schedule',
-            builder: (context, state) => const ScheduleRemindersScreen(),
+
+          /// ========= DOCTORS TAB =========
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/doctors',
+                builder: (context, state) => Container(color: Colors.blue),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/patient/addMedication/stock',
-            builder: (context, state) => const StockExpiryScreen(),
+
+          /// ========= CHAT TAB =========
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/chat',
+                builder: (context, state) => Container(color: Colors.yellow),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/patient/addMedication/confirmation',
-            builder: (context, state) => const ConfirmationScreen(),
+
+          /// ========= PROFILE TAB =========
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/profile',
+                builder: (context, state) => MultiBlocProvider(
+                  providers: [
+                    BlocProvider(create: (_) => getIt<ProfileCubit>()),
+                    BlocProvider(
+                      create: (_) => LogOutCubit(getIt<AuthRepoImpl>()),
+                    ),
+                  ],
+                  child: const ProfileScreen(),
+                ),
+              ),
+            ],
           ),
         ],
       ),

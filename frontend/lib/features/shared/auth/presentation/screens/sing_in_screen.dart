@@ -176,6 +176,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
                       // Social Login Buttons
                       SocialLoginButtons(
+                        userRole: widget.role,
                         onGooglePressed: () {},
                         onFacebookPressed: () {},
                         onApplePressed: () {},

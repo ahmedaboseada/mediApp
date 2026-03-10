@@ -10,12 +10,14 @@ class SocialLoginButtons extends StatelessWidget {
   final VoidCallback? onGooglePressed;
   final VoidCallback? onFacebookPressed;
   final VoidCallback? onApplePressed;
+  final UserRole userRole;
 
   const SocialLoginButtons({
     super.key,
     this.onGooglePressed,
     this.onFacebookPressed,
     this.onApplePressed,
+    required this.userRole,
   });
 
   //make goole login logic in onGooglePressed
@@ -37,7 +39,12 @@ class SocialLoginButtons extends StatelessWidget {
                         content: Text('Google Sign In Successful'),
                       ),
                     );
-                    context.go(AppRouter.homeScreen);
+                    if (userRole == UserRole.doctor) {
+                      context.go(AppRouter.mainLayout);
+                    } else {
+                      context.go('/home');
+                    }
+                    
                     // Navigate to home screen or desired screen
                   } else if (state is GoogleLogInFailure) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -55,8 +62,9 @@ class SocialLoginButtons extends StatelessWidget {
                       width: AppSizes.w24,
                     ),
                     label: 'Google',
-                    onPressed: () =>
-                        context.read<GoogleLogInCubit>().logInWithGoogle(),
+                    onPressed: () => context
+                        .read<GoogleLogInCubit>()
+                        .logInWithGoogle(userType: userRole),
                   );
                 },
               );

@@ -213,4 +213,21 @@ class AppStrings {
   static const String letsAddYourFirstMedication =
       " Let’s add your first medication.";
   static const String addMedication = "Add Medication";
+
+  // Medicine Screen
+  static const String medicine = 'Medicine';
+  static const String searchMedications = 'Search Medications';
+  static const String all = 'All';
+  static const String active = 'Active';
+  static const String chronic = 'Chronic';
+  static const String exportHealthReport = 'Export Health Report';
+  static const String medicationSearch = 'Medication Search';
+  static const String generateQr = 'Generate QR';
+  static const String chatBot = 'Chat bot';
+  static const String critical = 'Critical';
+  static const String stock = 'Stock';
+  static const String expiryPrefix = 'EXP:';
+  static const String low = 'Low';
+  static const String medium = 'Medium';
+  static const String good = 'Good';
 }

@@ -233,6 +233,7 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
       log(
         'Doctor Complete License - Token: ${token != null ? "EXISTS" : "NULL"}',
       );
+
       if (token == null || token.isEmpty) {
         return Left(
           ServerFailure('Access token is missing. Please login again.'),
@@ -244,41 +245,29 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
         return Left(ServerFailure('License file not found'));
       }
 
-      // final formData = FormData.fromMap({
-      //   'licenseImage': await MultipartFile.fromFile(
-      //     filePath,
-      //     filename: 'license.png',
-      //   ),
-      // });
-      // final data = {
-      //   'licenseImage': await MultipartFile.fromFile(
-      //     filePath,
-      //     filename: fileName,
-      //   ),
-      // };
-      final formData = {
+      final fileName = file.path.split(RegExp(r'[\\/]')).last;
+      final formData = FormData.fromMap({
         'licenseImage': await MultipartFile.fromFile(
-          filePath,
-          filename: 'profile.jpg',
+          file.path,
+          filename: fileName,
         ),
-      };
+      });
 
-      final dio = Dio();
-      dio.options.headers['Authorization'] = 'Bearer $token';
+      final headers = {'Authorization': 'Bearer $token'};
 
-      final response = await dio.patch(
-        'https://medi-app-dusky.vercel.app/doctors/complete/license',
-        data: formData,
+      final dynamic response = await apiService.patch(
+        '/doctors/complete/license',
+        formData,
+        headers: headers,
       );
 
-      log('Doctor Complete License Response: ${response.data.toString()}');
+      log('Doctor Complete License Response: ${response.toString()}');
 
-      if (response.statusCode != 200 && response.statusCode != 201) {
-        return Left(ServerFailure('Failed to upload license'));
+      if (response is ServerFailure) {
+        return Left(response);
       }
 
-      final message =
-          response.data['message'] ?? 'License uploaded successfully';
+      final message = response['message'] ?? 'License uploaded successfully';
       return Right(message.toString());
     } on DioException catch (e) {
       return Left(ServerFailure.fromDioError(e));

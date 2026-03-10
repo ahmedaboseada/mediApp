@@ -4,6 +4,9 @@ import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/home/presentation/widgets/notification_section.dart';
 import 'package:medi/features/doctor/features/home/presentation/widgets/settings_section.dart';
 import 'package:medi/features/doctor/features/home/presentation/widgets/support_section.dart';
+import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
+import 'package:medi/features/patient/features/profile/presentation/controller/profile/profile_cubit.dart';
+import 'package:medi/features/patient/features/profile/presentation/widgets/privacy_security_section.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/user_profile/user_profile_cubit.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/user_profile/user_profile_state.dart';
@@ -53,6 +56,11 @@ class ProfileScreen extends StatelessWidget {
                   SettingsSection(),
                   SizedBox(height: AppSizes.h24),
                   NotificationSection(),
+                  SizedBox(height: AppSizes.h24),
+                  BlocProvider(
+                    create: (context) => ProfileCubit(getIt<ProfileRepo>()),
+                    child: PrivacySecuritySection(),
+                  ),
                   SizedBox(height: AppSizes.h24),
                   SupportSection(),
                 ],

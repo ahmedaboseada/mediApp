@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/shared/auth/presentation/cubit/log_out/log_out_cubit.dart';
 import 'package:medi/features/patient/features/questionnaire/constants/constants.dart';
 import 'package:medi/features/patient/features/questionnaire/presentation/widgets/multi_select_field.dart';
 import 'package:multi_dropdown/multi_dropdown.dart';
@@ -12,37 +10,12 @@ class HomeScreen extends StatelessWidget {
   List<String> selected = [];
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<LogOutCubit, LogOutState>(
-      listener: (context, state) {
-        if (state is LogOutSuccess) {
-          context.go(AppRouter.selectScreen);
-        } else if (state is LogOutFailure) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.error)));
-        }
-      },
-      builder: (context, state) {
-        final isLoading = state is LogOutLoading;
-
-        return Scaffold(
+    return  Scaffold(
           appBar: AppBar(
             title: const Text('Home'),
 
             actions: [
-              IconButton(
-                onPressed: isLoading
-                    ? null
-                    : () => context.read<LogOutCubit>().logOut(),
-                icon: isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.logout),
-                tooltip: 'Logout',
-              ),
+           
             ],
           ),
           body: Column(
@@ -90,7 +63,6 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
         );
-      },
-    );
+    
   }
 }

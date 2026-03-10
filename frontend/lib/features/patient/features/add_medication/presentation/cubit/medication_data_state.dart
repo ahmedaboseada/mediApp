@@ -1,7 +1,7 @@
-import 'package:medi/features/patient/features/add_medication/presentation/models/medication_data.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/models/medication.dart';
 
 abstract class MedicationDataState {
-  final MedicationData medicationData;
+  final Medication medicationData;
 
   const MedicationDataState({required this.medicationData});
 }
@@ -9,9 +9,9 @@ abstract class MedicationDataState {
 class MedicationDataInitial extends MedicationDataState {
   const MedicationDataInitial()
     : super(
-        medicationData: const MedicationData(
+        medicationData: const Medication(
           selectedMethod: 0,
-          medicationName: '',
+          name: '',
           type: '',
           dosage: '',
           frequency: '',

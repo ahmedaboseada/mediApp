@@ -174,12 +174,7 @@ class _PrivacySecuritySectionState extends State<PrivacySecuritySection> {
           } else {
             HiveService.setTwoFactorEnabled(false);
           }
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.green,
-            ),
-          );
+         
         } else if (state is ToggleTwoFactorAuthFailure) {
           // Revert to original state on failure
           setState(() {

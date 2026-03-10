@@ -109,7 +109,7 @@ class _ScheduleRemindersScreenState extends State<ScheduleRemindersScreen> {
         reminders: _reminders,
       );
 
-      context.push('/patient/addMedication/stock');
+      context.push('/medicine/stock');
     }
   }
 

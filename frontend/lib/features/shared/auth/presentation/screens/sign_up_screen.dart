@@ -195,6 +195,7 @@ class SignUpScreen extends StatelessWidget {
                     SizedBox(height: AppSizes.h20),
 
                     SocialLoginButtons(
+                      userRole: role,
                       onGooglePressed: () {},
                       onFacebookPressed: () {},
                       onApplePressed: () {},

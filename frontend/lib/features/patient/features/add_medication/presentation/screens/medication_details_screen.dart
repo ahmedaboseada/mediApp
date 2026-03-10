@@ -57,7 +57,7 @@ class _MedicationDetailsScreenState extends State<MedicationDetailsScreen> {
         dosage: _dosageController.text,
       );
 
-      context.push('/patient/addMedication/schedule');
+      context.push('/medicine/schedule');
     }
   }
 

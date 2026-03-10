@@ -80,7 +80,7 @@ class ChangePasswordScreen extends StatelessWidget {
         child: BlocListener<ProfileCubit, ProfileState>(
           listener: (context, state) {
             if (state is ChangePasswordSuccess) {
-              context.showSafeSnackBar(state.message);
+             // context.showSafeSnackBar(state.message);
               _showChangePasswordDialog(context);
               _currentPasswordController.clear();
               _newPasswordController.clear();
@@ -170,7 +170,9 @@ class ChangePasswordScreen extends StatelessWidget {
                       // Change Password Button with Loading State
                       BlocBuilder<ProfileCubit, ProfileState>(
                         buildWhen: (previous, current) =>
-                            current is ChangePasswordLoading,
+                            current is ChangePasswordLoading ||
+                            current is ChangePasswordSuccess ||
+                            current is ChangePasswordFailure,
                         builder: (context, state) {
                           final isLoading = state is ChangePasswordLoading;
                           return PrimaryButton(

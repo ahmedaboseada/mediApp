@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/complete_profile/complete_profile_state.dart';
@@ -11,7 +13,7 @@ class CompleteProfileCubit extends Cubit<CompleteProfileState> {
     required String phone,
     required int yearOfBirth,
     required String gender,
-    String? profilePicture,
+    File? profilePicture,
   }) async {
     emit(CompleteProfileLoading());
 

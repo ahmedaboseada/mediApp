@@ -45,4 +45,20 @@ class AppColors {
 
   // Container backgrounds
   static const Color balanceContainerBackground = Color(0xFFF8FAFC);
+
+  // Medicine feature colors
+  static const Color medicineCriticalCardBackground = Color(0xFFF6EFF2);
+  static const Color medicineCriticalCardBorder = Color(0xFFF4A1AE);
+  static const Color medicineCriticalBadgeBackground = Color(0xFFD81B46);
+
+  static const Color medicineTabSelectedCountBackground = Color(0xFF5F97F3);
+  static const Color medicineTabUnselectedCountBackground = Color(0xFFE5E7EB);
+
+  static const Color medicineStatusLowBackground = Color(0xFFFACC15);
+  static const Color medicineStatusGoodBackground = Color(0xFF38C95D);
+
+  static const Color medicineFabExportBackground = Color(0xFFF4A5AA);
+  static const Color medicineFabSearchBackground = Color(0xFFF3B03F);
+  static const Color medicineFabGenerateQrBackground = Color(0xFF12B7AF);
+  static const Color medicineFabChatBotBackground = Color(0xFF8F4AF2);
 }

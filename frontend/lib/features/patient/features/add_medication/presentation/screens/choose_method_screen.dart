@@ -6,7 +6,6 @@ import 'package:medi/features/patient/features/add_medication/presentation/cubit
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/custom_stepper.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/method_card.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/navigation_buttons.dart';
-import 'package:medi/features/patient/features/home/presentation/screens/main_patient_view.dart';
 
 class ChooseMethodScreen extends StatefulWidget {
   const ChooseMethodScreen({super.key});
@@ -27,7 +26,7 @@ class _ChooseMethodScreenState extends State<ChooseMethodScreen> {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new, color: AppColors.primaryText),
-          onPressed: () => MainPatientView(),
+          onPressed: () => context.pop(),
         ),
         title: Text(
           'Add Medication',
@@ -114,7 +113,7 @@ class _ChooseMethodScreenState extends State<ChooseMethodScreen> {
                           final cubit = context.read<MedicationDataCubit>();
                           cubit.updateMethod(_selectedMethod!);
 
-                          context.push('/patient/addMedication/details');
+                          context.push('/medicine/details');
                         }
                       : null,
                 ),

@@ -46,7 +46,7 @@ class _SplashScreenState extends State<SplashScreen>
         if (userRole == UserRole.doctor) {
           context.go(AppRouter.mainLayout);
         } else {
-          context.go(AppRouter.patientMainView);
+          context.go('/home');
         }
       }
     } else if (!isOnboardingCompleted) {

@@ -51,7 +51,7 @@ class _StockExpiryScreenState extends State<StockExpiryScreen> {
       );
 
       ///patient/addMedication/confirmation
-      context.push('/patient/addMedication/confirmation');
+      context.push('/medicine/confirmation');
     }
   }
 

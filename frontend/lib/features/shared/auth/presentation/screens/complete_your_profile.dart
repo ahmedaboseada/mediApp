@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -65,7 +67,7 @@ class _CompleteYourProfileScreenState extends State<CompleteYourProfileScreen> {
       phone: selectedPhone!,
       yearOfBirth: yearOfBirth,
       gender: selectedGender!,
-      profilePicture: selectedImage ?? widget.userModel?.profilePicture,
+      profilePicture: selectedImage != null ? File(selectedImage!) : null,
     );
   }
 

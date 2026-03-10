@@ -42,4 +42,31 @@ class AppAssets {
   static const String pills = '${path}pills.svg';
   static const String export = '${path}export.svg';
   static const String tablerEdit = '${path}tabler_edit.svg';
+
+  // Medicine item icons
+  static const String injection = '${path}injection.png';
+  static const String tabletIcon = '${path}tablet.png';
+  static const String medicineBox = '${path}box.svg';
+  static const String medicineDrop = '${path}drop.svg';
+  static const String medicineCream = '${path}cream.svg';
+  static const String medicineOintment = '${path}ointment.svg';
+  static const String medicineInhaler = '${path}inhaler.svg';
+
+  // Helper method to get medicine icon by type
+  static String getMedicineIcon(dynamic medicationType) {
+    // Import required: import 'package:medi/features/patient/features/add_medication/presentation/models/medication.dart';
+    final typeStr = medicationType.toString().split('.').last;
+    
+    return switch (typeStr) {
+      'pill' => medicineBox,
+      'syringe' => injection,
+      'bottle' => medicineBox,
+      'tablet' => tabletIcon,
+      'cream' => medicineCream,
+      'drop' => medicineDrop,
+      'inhaler' => medicineInhaler,
+      'ointment' => medicineOintment,
+      _ => tabletIcon, // default
+    };
+  }
 }

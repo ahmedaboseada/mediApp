@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
@@ -90,7 +91,9 @@ class AuthRepoImpl implements AuthRepo {
   }
 
   @override
-  Future<Either<ApiError, AuthTokensModel>> signInWithGoogle() async {
+  Future<Either<ApiError, AuthTokensModel>> signInWithGoogle({
+    required UserRole userType,
+  }) async {
     try {
       await _googleSignIn.signOut();
       final user = await _googleSignIn.signIn();
@@ -106,18 +109,28 @@ class AuthRepoImpl implements AuthRepo {
         return Left(ServerFailure('idToken is null'));
       }
 
-      final dynamic response = await apiService.post(
-        '/api/auth/google/mobile',
-        {'idToken': auth.idToken},
-      );
+      final dynamic response = await apiService.post('/users/google', {
+        'idToken': auth.idToken,
+        'userType': userType == UserRole.patient ? 'patient' : 'doctor',
+      });
 
       if (response is ServerFailure) {
         return Left(response);
       }
+      log('Google Sign In Response: ${response.toString()}');
 
       final token = AuthTokensModel.fromJson(response);
+
+      if (token.accessToken.isEmpty) {
+        return Left(ServerFailure('Missing accessToken in Google response'));
+      }
+
       await HiveService.saveAccessToken(token.accessToken);
-      await HiveService.saveRefreshToken(token.refreshToken);
+
+      if (token.refreshToken != null && token.refreshToken!.isNotEmpty) {
+        await HiveService.saveRefreshToken(token.refreshToken!);
+      }
+
       log('Google Sign In Token saved via Hive: ${token.accessToken}');
       return Right(token);
     } on DioException catch (e) {
@@ -161,19 +174,29 @@ class AuthRepoImpl implements AuthRepo {
     required String phone,
     required int yearOfBirth,
     required String gender,
-    String? profilePicture,
+    File? profilePicture,
   }) async {
     try {
-      final data = {
+      final data = <String, dynamic>{
         'phone': phone,
         'yearOfBirth': yearOfBirth,
         'gender': gender,
-        if (profilePicture != null) 'profilePicture': profilePicture,
       };
+
+      if (profilePicture != null) {
+        final fileName = profilePicture.path.split(RegExp(r'[\\/]')).last;
+        data['avatar'] = await MultipartFile.fromFile(
+          profilePicture.path,
+          filename: fileName,
+        );
+      }
+
+      final formData = FormData.fromMap(data);
 
       final dynamic response = await apiService.patch(
         '/patients/complete/basic',
-        data,
+        formData,
+        headers: {'Content-Type': 'multipart/form-data'},
       );
 
       log('Complete Basic Profile Response: ${response.toString()}');

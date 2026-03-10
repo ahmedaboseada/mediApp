@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'dart:io';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/shared/auth/data/models/auth_token_model.dart';
 import 'package:medi/features/shared/auth/data/models/auth_response_model.dart';
@@ -36,7 +37,9 @@ abstract class AuthRepo {
   });
   Future<Either<ApiError, String>> forgetPassword({required String email});
   Future<Either<ApiError, String>> resendOtp({required String email});
-  Future<Either<ApiError, AuthTokensModel>> signInWithGoogle();
+  Future<Either<ApiError, AuthTokensModel>> signInWithGoogle({
+    required UserRole userType,
+  });
 
   Future<void> signOut();
 
@@ -44,7 +47,7 @@ abstract class AuthRepo {
     required String phone,
     required int yearOfBirth,
     required String gender,
-    String? profilePicture,
+    File? profilePicture,
   });
 
   Future<Either<ApiError, AuthResponseModel>> getMe();
