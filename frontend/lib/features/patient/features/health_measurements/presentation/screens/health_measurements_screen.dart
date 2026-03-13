@@ -4,6 +4,7 @@ import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/models/measurement_model.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/controller/health_measurements/health_measurements_cubit.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/controller/health_measurements/health_measurements_state.dart';
+import 'package:medi/features/patient/features/health_measurements/presentation/widgets/add_measurement_bottom_sheet.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/widgets/health_header_card.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/widgets/measurement_chart_card.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/widgets/measurement_tabs.dart';
@@ -88,9 +89,8 @@ class _HealthMeasurementsView extends StatelessWidget {
                           userName: displayName,
                           profileImagePath: profileImagePath,
                           measurements: state.summaryMeasurements,
-                          onAddPressed: context
-                              .read<HealthMeasurementsCubit>()
-                              .toggleFab,
+                          onAddPressed: () =>
+                              showAddMeasurementBottomSheet(context),
                         ),
                         SizedBox(height: AppSizes.h20),
                         MeasurementTabs(

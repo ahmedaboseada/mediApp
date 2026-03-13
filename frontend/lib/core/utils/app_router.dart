@@ -132,7 +132,7 @@ class AppRouter {
   static const String healthMeasurements = '/healthMeasurements';
 
   static final router = GoRouter(
-    initialLocation: selectScreen,
+    initialLocation: '/',
     routes: [
       // ========== SHARED/SPLASH ROUTES ==========
       GoRoute(

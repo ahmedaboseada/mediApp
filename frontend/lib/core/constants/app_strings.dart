@@ -102,6 +102,7 @@ class AppStrings {
   static const String days90 = "90 Days";
   static const String systolic = "Systolic";
   static const String diastolic = "Diastolic";
+  static const String addMeasurements = "Add Measurements";
   static const String addBloodPressure = "Add Blood Pressure";
   static const String addBloodSugar = "Add Blood Sugar";
   static const String addHeartRate = "Add Heart Rate";

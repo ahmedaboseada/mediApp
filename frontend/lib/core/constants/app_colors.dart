@@ -61,4 +61,14 @@ class AppColors {
   static const Color medicineFabSearchBackground = Color(0xFFF3B03F);
   static const Color medicineFabGenerateQrBackground = Color(0xFF12B7AF);
   static const Color medicineFabChatBotBackground = Color(0xFF8F4AF2);
+
+  // Health measurements bottom sheet colors
+  static const Color heartRateIconBackground = Color(0xFFFDE8E8);
+  static const Color heartRateIconColor = Color(0xFFE5484D);
+  static const Color bloodPressureIconBackground = Color(0xFFE8F0FE);
+  static const Color bloodPressureIconColor = Color(0xFF2178F3);
+  static const Color bloodSugarIconBackground = Color(0xFFFFF3E0);
+  static const Color bloodSugarIconColor = Color(0xFFF5A524);
+  static const Color weightIconBackground = Color(0xFFE8F5E9);
+  static const Color weightIconColor = Color(0xFF34C759);
 }
