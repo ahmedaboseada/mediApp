@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/models/measurement_model.dart';
-import 'package:medi/features/patient/features/health_measurements/presentation/state/health_measurements_state.dart';
+import 'package:medi/features/patient/features/health_measurements/presentation/controller/health_measurements/health_measurements_state.dart';
 
 class HealthMeasurementsCubit extends Cubit<HealthMeasurementsState> {
   HealthMeasurementsCubit()

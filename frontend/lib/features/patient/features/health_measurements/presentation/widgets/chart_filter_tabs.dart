@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/patient/features/health_measurements/presentation/state/health_measurements_state.dart';
+import 'package:medi/features/patient/features/health_measurements/presentation/controller/health_measurements/health_measurements_state.dart';
 
 class ChartFilterTabs extends StatelessWidget {
   const ChartFilterTabs({
