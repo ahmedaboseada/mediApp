@@ -102,11 +102,15 @@ class AppStrings {
   static const String days90 = "90 Days";
   static const String systolic = "Systolic";
   static const String diastolic = "Diastolic";
+    static const String addMeasurement = "Add Measurement";
   static const String addMeasurements = "Add Measurements";
   static const String addBloodPressure = "Add Blood Pressure";
   static const String addBloodSugar = "Add Blood Sugar";
   static const String addHeartRate = "Add Heart Rate";
   static const String addWeight = "Add Weight";
+    static const String bloodGlucose = "Blood Glucose";
+    static const String normalRange = "Normal range:";
+    static const String tips = "Tips:";
   static const String noSymptomsTracked =
       "No symptoms tracked yet. Start adding your first symptom update.";
   static const String monthJan = "JAN";

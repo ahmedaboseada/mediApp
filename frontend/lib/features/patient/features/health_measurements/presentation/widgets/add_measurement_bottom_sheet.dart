@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/models/measurement_model.dart';
+import 'package:medi/features/patient/features/health_measurements/presentation/screens/add_measurement_screen.dart';
 
 void showAddMeasurementBottomSheet(
   BuildContext context, {
@@ -11,12 +12,12 @@ void showAddMeasurementBottomSheet(
     context: context,
     backgroundColor: AppColors.surfaceColor,
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(AppSizes.r32),
-      ),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(AppSizes.r32)),
     ),
     builder: (BuildContext context) {
-      return SafeArea(child: _AddMeasurementSheet(onMetricSelected: onMetricSelected));
+      return SafeArea(
+        child: _AddMeasurementSheet(onMetricSelected: onMetricSelected),
+      );
     },
   );
 }
@@ -108,8 +109,20 @@ class _AddMeasurementSheet extends StatelessWidget {
   }
 
   void _onTap(BuildContext context, MeasurementMetric metric) {
-    Navigator.maybePop(context);
+    final NavigatorState navigator = Navigator.of(context, rootNavigator: true);
+    final AddMeasurementTab initialTab = switch (metric) {
+      MeasurementMetric.bloodSugar => AddMeasurementTab.bloodSugar,
+      MeasurementMetric.bodyWeight => AddMeasurementTab.weight,
+      _ => AddMeasurementTab.bloodPressure,
+    };
+
+    navigator.pop();
     onMetricSelected?.call(metric);
+    navigator.push(
+      MaterialPageRoute<void>(
+        builder: (_) => AddMeasurementScreen(initialTab: initialTab),
+      ),
+    );
   }
 }
 
@@ -151,10 +164,7 @@ class _MeasurementOption extends StatelessWidget {
               child: Center(
                 child: SvgPicture.asset(
                   iconPath,
-                  colorFilter: ColorFilter.mode(
-                    iconColor,
-                    BlendMode.srcIn,
-                  ),
+                  colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
                   width: AppSizes.w32,
                   height: AppSizes.h32,
                 ),
