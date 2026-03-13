@@ -84,6 +84,42 @@ class AppStrings {
       "Please describe your material case";
   static const String forgotPassword = "Forgot Password?";
   static const String rememberMe = "Remember me";
+  static const String measurements = "Measurements";
+  static const String symptoms = "Symptoms";
+  static const String normal = "Normal";
+  static const String bloodPressure = "Blood Pressure";
+  static const String heartRate = "Heart Rate";
+  static const String bloodSugar = "Blood Sugar";
+  static const String weight = "Weight";
+  static const String bodyWeightKg = "Body Weight (kg)";
+  static const String bloodPressureValue = "80 / 120";
+  static const String bloodSugarValue = "95 mg/dL";
+  static const String heartRateValue = "72 bpm";
+  static const String weightValue = "68 kg";
+  static const String userAhmed = "Ahmed";
+  static const String days7 = "7 Days";
+  static const String days30 = "30 Days";
+  static const String days90 = "90 Days";
+  static const String systolic = "Systolic";
+  static const String diastolic = "Diastolic";
+  static const String addBloodPressure = "Add Blood Pressure";
+  static const String addBloodSugar = "Add Blood Sugar";
+  static const String addHeartRate = "Add Heart Rate";
+  static const String addWeight = "Add Weight";
+  static const String noSymptomsTracked =
+      "No symptoms tracked yet. Start adding your first symptom update.";
+  static const String monthJan = "JAN";
+  static const String monthFeb = "FEB";
+  static const String monthMar = "MAR";
+  static const String monthApr = "APR";
+  static const String monthMay = "MAY";
+  static const String monthJun = "JUN";
+  static const String monthJul = "JUL";
+  static const String monthAug = "AUG";
+  static const String monthSep = "SEP";
+  static const String monthOct = "OCT";
+  static const String monthNov = "NOV";
+  static const String monthDec = "DEC";
   static const String orContinueWith = "Or continue with";
   static const String dontHaveAccount = "Don't have an account?";
   static const String alreadyHaveAccount = "Already have an account?";
@@ -230,4 +266,7 @@ class AppStrings {
   static const String low = 'Low';
   static const String medium = 'Medium';
   static const String good = 'Good';
+
+  // Health Measurements Screen
+  static const String healthMeasurements = 'Health Measurements';
 }

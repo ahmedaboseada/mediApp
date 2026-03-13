@@ -60,6 +60,10 @@ class HomeScreen extends StatelessWidget {
                 onPressed: () => context.go(AppRouter.doctorCompleteProfile),
                 child: const Text('Caregiver Mode'),
               ),
+              TextButton(
+                onPressed: () => context.go(AppRouter.healthMeasurements),
+                child: const Text('Health Measurements'),
+              ),
             ],
           ),
         );

@@ -1,5 +1,6 @@
 class AppAssets {
   static const String path = 'assets/images/';
+  static const String svgPath = 'assets/svg/';
   static const String medication = '${path}medication.svg';
   static const String doctors = '${path}doctors.svg';
   static const String progress = '${path}progress.svg';
@@ -42,8 +43,17 @@ class AppAssets {
   static const String pills = '${path}pills.svg';
   static const String export = '${path}export.svg';
   static const String tablerEdit = '${path}tabler_edit.svg';
+  static const String bloodPressure = '${path}hugeicons_blood-pressure.svg';
+
+  // Health measurement icons
+  static const String bloodPressureIcon = '${svgPath}blood_pressure.svg';
+  static const String bloodSugarIcon = '${svgPath}blood_sugar.svg';
+  static const String heartRateIcon = '${svgPath}heart_rate.svg';
+  static const String weightScaleIcon = '${svgPath}weight_scale.svg';
+  static const String statusNormalIcon = '${svgPath}status_normal.svg';
 
   // Medicine item icons
+  static const String heartRate = '${path}heartrate.svg';
   static const String injection = '${path}injection.png';
   static const String tabletIcon = '${path}tablet.png';
   static const String medicineBox = '${path}box.svg';

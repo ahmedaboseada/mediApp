@@ -29,7 +29,7 @@ class AllSetScreen extends StatelessWidget {
             PrimaryButton(
               text: AppStrings.addMedication,
               onPressed: () {
-                context.go(AppRouter.patientMainView);
+                context.go('/home');
               },
             ),
           ],

@@ -3,10 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/enums/user_role.dart';
 import 'package:medi/core/utils/service_locator.dart';
-import 'package:medi/features/doctor/features/home/presentation/screens/profile_screen.dart';
+//import 'package:medi/features/doctor/features/home/presentation/screens/profile_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_cubit.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/models/medication.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/medicine_info_screen.dart';
+import 'package:medi/features/patient/features/health_measurements/presentation/screens/health_measurements_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/controller/profile/profile_cubit.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/account_info_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/caregiver_mode_screen.dart'
@@ -19,6 +20,7 @@ import 'package:medi/features/patient/features/add_medication/presentation/scree
 import 'package:medi/features/patient/features/add_medication/presentation/screens/schedule_reminders_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/stock_expiry_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/confirmation_screen.dart';
+import 'package:medi/features/patient/features/profile/presentation/screens/profile_screen.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/complete_profile/complete_profile_cubit.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/forget_password/forget_password_cubit.dart';
@@ -127,9 +129,10 @@ class AppRouter {
   static const String uploadLicenseScreen = '/doctor/uploadLicense';
   static const String allowNotificationScreen = '/doctor/allowNotification';
   static const String doctorAllSetScreen = '/doctorAllSetScreen';
+  static const String healthMeasurements = '/healthMeasurements';
 
   static final router = GoRouter(
-    initialLocation: '/',
+    initialLocation: selectScreen,
     routes: [
       // ========== SHARED/SPLASH ROUTES ==========
       GoRoute(
@@ -265,6 +268,9 @@ class AppRouter {
           child: ChangePasswordScreen(),
         ),
       ),
+      GoRoute(path: healthMeasurements,
+          builder: (context, state) =>  HealthMeasurementsScreen()
+          ),
 
       /// ================= PATIENT SHELL =================
       StatefulShellRoute.indexedStack(

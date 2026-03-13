@@ -59,7 +59,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
               context.safeGo(
                 widget.role == UserRole.patient
-                    ? AppRouter.patientMainView
+                    ? '/home'
                     : AppRouter.mainLayout,
               );
             } else if (state is Signin2FARequired) {

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:medi/core/services/hive_service.dart';
 
@@ -27,7 +29,7 @@ class DioClient {
         },
         onError: (error, handler) async {
           // Handle 401 Unauthorized - refresh token and retry
-          if (error.response?.statusCode == 401) {
+          if (error.response?.statusCode == 401  && error.requestOptions.path != '/users/refreshToken') {
             // Avoid infinite retry loops
             if (error.requestOptions.extra['_retry'] == true) {
               return handler.next(error);
@@ -82,6 +84,7 @@ class DioClient {
     try {
       final refreshToken = HiveService.getRefreshToken();
       print('[DioClient] Attempting token refresh...');
+      log(refreshToken.toString(),);
       print('[DioClient] Refresh token exists: ${refreshToken != null}');
 
       if (refreshToken == null) {

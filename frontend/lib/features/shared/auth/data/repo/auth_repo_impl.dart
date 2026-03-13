@@ -219,10 +219,11 @@ class AuthRepoImpl implements AuthRepo {
   Future<Either<ApiError, AuthResponseModel>> getMe() async {
     try {
       final dynamic response = await apiService.get('/users/me');
-
+      log('Get Me Response: ${response.toString()}');
       if (response is ServerFailure) {
         return Left(response);
       }
+
 
       final profile = AuthResponseModel.fromJson(
         response as Map<String, dynamic>,
@@ -273,7 +274,11 @@ class AuthRepoImpl implements AuthRepo {
       final dynamic response = await apiService.patch(
         '/users/updateProfile',
         data,
+        headers: {'Content-Type': 'application/json'
+       
+        },
       );
+      
 
       if (response is ServerFailure) {
         return Left(response);
