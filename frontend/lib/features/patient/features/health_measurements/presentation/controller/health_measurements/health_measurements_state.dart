@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:medi/features/patient/features/health_measurements/presentation/models/measurement_model.dart';
+import 'package:medi/features/patient/features/health_measurements/data/models/measurement_model.dart';
 
 enum HealthDashboardTab { measurements, symptoms }
 

@@ -86,31 +86,29 @@ class MedicineHeaderCard extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: AppSizes.h12),
-                 
                 ],
               ),
             ),
-             Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      CustomToggleSwitch(
-                        value: isTaken,
-                        onChanged: onTakenChanged,
-                        width: 50,
-                        height: 26,
-                       
-                      ),
-                      SizedBox(height: AppSizes.h4),
-                      Text(
-                        isTaken ? 'Taken' : 'Not Taken',
-                        style: TextStyle(
-                          fontSize: AppSizes.sp12,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white.withOpacity(0.95),
-                        ),
-                      ),
-                    ],
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                CustomToggleSwitch(
+                  value: isTaken,
+                  onChanged: onTakenChanged,
+                  width: 50,
+                  height: 26,
+                ),
+                SizedBox(height: AppSizes.h4),
+                Text(
+                  isTaken ? 'Taken' : 'Not Taken',
+                  style: TextStyle(
+                    fontSize: AppSizes.sp12,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white.withOpacity(0.95),
                   ),
+                ),
+              ],
+            ),
           ],
         ),
       ),

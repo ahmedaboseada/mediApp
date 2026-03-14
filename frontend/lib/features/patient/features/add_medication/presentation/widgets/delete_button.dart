@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
 
 class DeleteButton extends StatefulWidget {
-  const DeleteButton({
-    super.key,
-    required this.onConfirmedDelete,
-  });
+  const DeleteButton({super.key, required this.onConfirmedDelete});
 
   final VoidCallback onConfirmedDelete;
 
@@ -31,10 +28,7 @@ class _DeleteButtonState extends State<DeleteButton> {
           ),
           title: const Text(
             'Delete Medication',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
           ),
           content: const Text(
             'Are you sure you want to delete this medication? This action cannot be undone.',
@@ -63,10 +57,7 @@ class _DeleteButtonState extends State<DeleteButton> {
               ),
               child: const Text(
                 'Delete',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
               ),
             ),
           ],

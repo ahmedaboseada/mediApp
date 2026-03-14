@@ -26,13 +26,19 @@ class AddMeasurementInfoCard extends StatelessWidget {
         children: <Widget>[
           Text(
             title,
-            style: AppStyles.primaryDark12400.copyWith(fontSize: AppSizes.sp14,fontWeight: FontWeight.w600),
+            style: AppStyles.primaryDark12400.copyWith(
+              fontSize: AppSizes.sp14,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           SizedBox(height: AppSizes.h8),
           ...lines.map(
             (String line) => Text(
               line,
-              style: AppStyles.primaryDark12400.copyWith(fontSize: AppSizes.sp12,fontWeight: FontWeight.w400),
+              style: AppStyles.primaryDark12400.copyWith(
+                fontSize: AppSizes.sp12,
+                fontWeight: FontWeight.w400,
+              ),
             ),
           ),
         ],

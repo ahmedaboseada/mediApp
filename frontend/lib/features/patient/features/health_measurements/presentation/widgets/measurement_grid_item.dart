@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/patient/features/health_measurements/presentation/models/measurement_model.dart';
+import 'package:medi/features/patient/features/health_measurements/data/models/measurement_model.dart';
 
 class MeasurementGridItem extends StatelessWidget {
   const MeasurementGridItem({super.key, required this.measurement});
@@ -28,7 +28,6 @@ class MeasurementGridItem extends StatelessWidget {
                 width: AppSizes.w40,
                 padding: EdgeInsets.all(AppSizes.w8),
                 decoration: BoxDecoration(
-                  
                   color: AppColors.whiteText,
                   borderRadius: BorderRadius.circular(AppSizes.r40),
                 ),
@@ -41,7 +40,7 @@ class MeasurementGridItem extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       SvgPicture.asset(
-                       AppAssets.heartRate,
+                        AppAssets.heartRate,
                         width: AppSizes.w14,
                         height: AppSizes.h14,
                       ),
@@ -56,14 +55,14 @@ class MeasurementGridItem extends StatelessWidget {
                       ),
                     ],
                   ),
-                   Text(
-                measurement.value,
-                style: TextStyle(
-                  color: AppColors.whiteText,
-                  fontSize: AppSizes.sp14,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+                  Text(
+                    measurement.value,
+                    style: TextStyle(
+                      color: AppColors.whiteText,
+                      fontSize: AppSizes.sp14,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -71,14 +70,12 @@ class MeasurementGridItem extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-             
               SizedBox(height: AppSizes.h4),
               Text(
                 measurement.title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppStyles.white14500
-               ,
+                style: AppStyles.white14500,
               ),
             ],
           ),

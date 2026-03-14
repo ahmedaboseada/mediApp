@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 
-
 class MainPatientView extends StatelessWidget {
   const MainPatientView({super.key, required this.shell});
 
@@ -25,10 +24,7 @@ class MainPatientView extends StatelessWidget {
         items: navItems,
         currentIndex: shell.currentIndex,
         onTap: (index) {
-          shell.goBranch(
-            index,
-            initialLocation: index == shell.currentIndex,
-          );
+          shell.goBranch(index, initialLocation: index == shell.currentIndex);
         },
         selectedColor: AppColors.primary,
       ),

@@ -27,7 +27,7 @@ class AppColors {
   static const Color splashBackground = Color(0xFFF0F0F0);
 
   // Background colors
-  static  Color cardBackground = Color(0xFFFFFFFF).withOpacity(0.15);
+  static Color cardBackground = Color(0xFFFFFFFF).withOpacity(0.15);
   static const Color surfaceColor = Color(0xFFFFFFFF);
   static const Color disabledColor = Color(0xFFF3F4F6);
   static const Color transparentColor = Color(0x00000000);

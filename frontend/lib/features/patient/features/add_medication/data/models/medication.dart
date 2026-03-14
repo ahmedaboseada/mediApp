@@ -2,7 +2,16 @@ import 'package:equatable/equatable.dart';
 
 enum MedicationStockStatus { low, medium, good }
 
-enum MedicationType { pill, syringe, bottle, tablet,cream,drop,inhaler,ointment }
+enum MedicationType {
+  pill,
+  syringe,
+  bottle,
+  tablet,
+  cream,
+  drop,
+  inhaler,
+  ointment,
+}
 
 class Medication extends Equatable {
   const Medication({

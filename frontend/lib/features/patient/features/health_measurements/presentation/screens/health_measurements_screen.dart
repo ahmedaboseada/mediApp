@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/patient/features/health_measurements/presentation/models/measurement_model.dart';
+import 'package:medi/features/patient/features/health_measurements/data/models/measurement_model.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/controller/health_measurements/health_measurements_cubit.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/controller/health_measurements/health_measurements_state.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/widgets/add_measurement_bottom_sheet.dart';
@@ -36,9 +36,10 @@ class _HealthMeasurementsView extends StatelessWidget {
     final user = HiveService.getUserData();
     final firstName = user?.firstName.trim() ?? '';
     final lastName = user?.lastName.trim() ?? '';
-    final fullName = <String>[firstName, lastName]
-        .where((String value) => value.isNotEmpty)
-        .join(' ');
+    final fullName = <String>[
+      firstName,
+      lastName,
+    ].where((String value) => value.isNotEmpty).join(' ');
     final displayName = fullName.isNotEmpty
         ? fullName
         : (user?.email.isNotEmpty ?? false)
@@ -70,7 +71,7 @@ class _HealthMeasurementsView extends StatelessWidget {
           ),
           centerTitle: false,
         ),
-    
+
         body: SafeArea(
           child: BlocBuilder<HealthMeasurementsCubit, HealthMeasurementsState>(
             builder: (BuildContext context, HealthMeasurementsState state) {

@@ -37,9 +37,7 @@ class OtpScreen extends StatelessWidget {
               context.showSafeSnackBar(state.message);
               // Navigate to appropriate main view based on role
               context.safeGo(
-                state.role == UserRole.patient
-                    ? '/'
-                    : AppRouter.mainLayout,
+                state.role == UserRole.patient ? '/' : AppRouter.mainLayout,
               );
             }
 

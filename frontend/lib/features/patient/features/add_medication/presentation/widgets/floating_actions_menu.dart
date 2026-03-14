@@ -155,12 +155,7 @@ class FloatingActionItem extends StatelessWidget {
             children: [
               Icon(data.icon, color: AppColors.whiteText, size: AppSizes.sp18),
               SizedBox(width: AppSizes.w8),
-              Text(
-                data.label,
-                style: AppStyles.white14500.copyWith(
-                 
-                ),
-              ),
+              Text(data.label, style: AppStyles.white14500.copyWith()),
             ],
           ),
         ),

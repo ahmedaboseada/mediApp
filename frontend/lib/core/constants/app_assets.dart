@@ -44,6 +44,7 @@ class AppAssets {
   static const String export = '${path}export.svg';
   static const String tablerEdit = '${path}tabler_edit.svg';
   static const String bloodPressure = '${path}hugeicons_blood-pressure.svg';
+  static const String edit = '${path}edit.svg';
 
   // Health measurement icons
   static const String bloodPressureIcon = '${svgPath}blood_pressure.svg';
@@ -66,7 +67,7 @@ class AppAssets {
   static String getMedicineIcon(dynamic medicationType) {
     // Import required: import 'package:medi/features/patient/features/add_medication/presentation/models/medication.dart';
     final typeStr = medicationType.toString().split('.').last;
-    
+
     return switch (typeStr) {
       'pill' => medicineBox,
       'syringe' => injection,

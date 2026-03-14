@@ -224,7 +224,6 @@ class AuthRepoImpl implements AuthRepo {
         return Left(response);
       }
 
-
       final profile = AuthResponseModel.fromJson(
         response as Map<String, dynamic>,
       );
@@ -274,11 +273,8 @@ class AuthRepoImpl implements AuthRepo {
       final dynamic response = await apiService.patch(
         '/users/updateProfile',
         data,
-        headers: {'Content-Type': 'application/json'
-       
-        },
+        headers: {'Content-Type': 'application/json'},
       );
-      
 
       if (response is ServerFailure) {
         return Left(response);

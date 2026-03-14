@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/patient/features/health_measurements/presentation/models/measurement_model.dart';
+import 'package:medi/features/patient/features/health_measurements/data/models/measurement_model.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/widgets/measurement_grid_item.dart';
 
 class HealthHeaderCard extends StatelessWidget {
@@ -22,13 +22,13 @@ class HealthHeaderCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(AppSizes.w24),
       decoration: BoxDecoration(
-         color:AppColors.primary,
+        color: AppColors.primary,
         borderRadius: BorderRadius.circular(AppSizes.r40),
       ),
       child: Column(
         children: [
           Row(
-            children:[
+            children: [
               CircleAvatar(
                 radius: AppSizes.r20,
                 backgroundColor: AppColors.secondary,

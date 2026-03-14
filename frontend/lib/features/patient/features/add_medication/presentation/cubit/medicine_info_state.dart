@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:medi/features/patient/features/add_medication/presentation/models/medication.dart';
+import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 
 class ScheduleItem extends Equatable {
   const ScheduleItem({
@@ -42,7 +42,7 @@ class MedicineInfoState extends Equatable {
     required this.medicineName,
     required this.medicineSubtitle,
     required this.isTaken,
-required this.medicationType,
+    required this.medicationType,
     required this.criticalMode,
     required this.stock,
     required this.expiryDate,
@@ -92,7 +92,7 @@ required this.medicationType,
 
   factory MedicineInfoState.fromMedication(Medication medication) {
     final stockValue = int.tryParse(medication.currentStock) ?? 0;
-    
+
     return MedicineInfoState(
       medicineName: medication.name,
       medicineSubtitle: '${medication.dosage} ${medication.type}',
@@ -100,8 +100,8 @@ required this.medicationType,
       medicationType: medication.medicationType,
       criticalMode: medication.isCriticalMode,
       stock: stockValue,
-      expiryDate: medication.expiryDate.isNotEmpty 
-          ? medication.expiryDate 
+      expiryDate: medication.expiryDate.isNotEmpty
+          ? medication.expiryDate
           : 'N/A',
       schedule: medication.schedule.isNotEmpty
           ? [

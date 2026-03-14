@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:medi/features/patient/features/add_medication/presentation/models/medication.dart';
+import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 
 enum MedicineTab { all, active, chronic }
 

@@ -1,7 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/patient/features/health_measurements/presentation/models/measurement_model.dart';
+import 'package:medi/features/patient/features/health_measurements/data/models/measurement_model.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/controller/health_measurements/health_measurements_state.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/widgets/chart_filter_tabs.dart';
 
@@ -74,7 +74,7 @@ class MeasurementChartCard extends StatelessWidget {
                 return Opacity(opacity: opacity, child: child);
               },
               child: Container(
-                color: Color(0xffEEF4FF) ,
+                color: Color(0xffEEF4FF),
                 height: AppSizes.h200,
                 child: LineChart(
                   _buildChartData(chartModel),
@@ -121,7 +121,10 @@ class MeasurementChartCard extends StatelessWidget {
           return FlLine(color: AppColors.borderColor, strokeWidth: AppSizes.p1);
         },
       ),
-      borderData: FlBorderData(show: true, border: Border.all(color: AppColors.borderColor)),
+      borderData: FlBorderData(
+        show: true,
+        border: Border.all(color: AppColors.borderColor),
+      ),
       titlesData: FlTitlesData(
         rightTitles: const AxisTitles(
           sideTitles: SideTitles(showTitles: false),
@@ -163,7 +166,6 @@ class MeasurementChartCard extends StatelessWidget {
                 AppStrings.monthOct,
                 AppStrings.monthNov,
                 AppStrings.monthDec,
-
               ];
 
               final int index = value.toInt();

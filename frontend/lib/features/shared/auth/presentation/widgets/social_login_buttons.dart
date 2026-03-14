@@ -44,7 +44,7 @@ class SocialLoginButtons extends StatelessWidget {
                     } else {
                       context.go('/home');
                     }
-                    
+
                     // Navigate to home screen or desired screen
                   } else if (state is GoogleLogInFailure) {
                     ScaffoldMessenger.of(context).showSnackBar(

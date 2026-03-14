@@ -5,7 +5,7 @@ import 'package:medi/core/enums/user_role.dart';
 import 'package:medi/core/utils/service_locator.dart';
 //import 'package:medi/features/doctor/features/home/presentation/screens/profile_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_cubit.dart';
-import 'package:medi/features/patient/features/add_medication/presentation/models/medication.dart';
+import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/medicine_info_screen.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/screens/health_measurements_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/controller/profile/profile_cubit.dart';
@@ -268,9 +268,10 @@ class AppRouter {
           child: ChangePasswordScreen(),
         ),
       ),
-      GoRoute(path: healthMeasurements,
-          builder: (context, state) =>  HealthMeasurementsScreen()
-          ),
+      GoRoute(
+        path: healthMeasurements,
+        builder: (context, state) => HealthMeasurementsScreen(),
+      ),
 
       /// ================= PATIENT SHELL =================
       StatefulShellRoute.indexedStack(
@@ -321,7 +322,8 @@ class AppRouter {
                   GoRoute(
                     path: '/medicine/confirmation',
                     builder: (context, state) => const ConfirmationScreen(),
-                  ), GoRoute(
+                  ),
+                  GoRoute(
                     path: '/medicine/info',
                     builder: (context, state) {
                       final medication = state.extra as Medication?;

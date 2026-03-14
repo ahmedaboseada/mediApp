@@ -174,7 +174,6 @@ class _PrivacySecuritySectionState extends State<PrivacySecuritySection> {
           } else {
             HiveService.setTwoFactorEnabled(false);
           }
-         
         } else if (state is ToggleTwoFactorAuthFailure) {
           // Revert to original state on failure
           setState(() {

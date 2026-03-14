@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
 
 class NotesCard extends StatelessWidget {
-  const NotesCard({
-    super.key,
-    required this.notes,
-  });
+  const NotesCard({super.key, required this.notes});
 
   final String notes;
 
@@ -30,9 +27,7 @@ class NotesCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFFFFF9E6),
           borderRadius: BorderRadius.circular(AppSizes.r16),
-          border: Border.all(
-            color: const Color(0xFFFFD60A).withOpacity(0.3),
-          ),
+          border: Border.all(color: const Color(0xFFFFD60A).withOpacity(0.3)),
           boxShadow: [
             BoxShadow(
               color: const Color(0xFFFFD60A).withOpacity(0.1),

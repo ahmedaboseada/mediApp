@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
 
 class SideEffectsCard extends StatelessWidget {
-  const SideEffectsCard({
-    super.key,
-    required this.sideEffects,
-  });
+  const SideEffectsCard({super.key, required this.sideEffects});
 
   final List<String> sideEffects;
 

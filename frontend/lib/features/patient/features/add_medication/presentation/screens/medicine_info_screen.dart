@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/patient/features/add_medication/presentation/models/medication.dart';
+import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_info_cubit.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_info_state.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/critical_mode_card.dart';
@@ -12,6 +13,7 @@ import 'package:medi/features/patient/features/add_medication/presentation/widge
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/schedule_card.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/side_effects_card.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/stock_expiry_card.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/screens/daily_symptoms_screen.dart';
 
 class MedicineInfoScreen extends StatelessWidget {
   const MedicineInfoScreen({super.key, this.medication});
@@ -54,8 +56,6 @@ class _MedicineInfoView extends StatelessWidget {
           physics: const BouncingScrollPhysics(),
           slivers: [
             SliverAppBar(
-              backgroundColor: const Color(0xFFF5F6FA),
-              surfaceTintColor: const Color(0xFFF5F6FA),
               elevation: 0,
               pinned: true,
               centerTitle: true,
@@ -68,7 +68,8 @@ class _MedicineInfoView extends StatelessWidget {
                   color: AppColors.primaryText,
                 ),
               ),
-              actions: const [_AnimatedEditAction()],
+              actions:  [GestureDetector(child: SvgPicture.asset(AppAssets.edit),onTap: () => ,)],
+              actionsPadding: EdgeInsets.only(right: AppSizes.w12),
             ),
             SliverPadding(
               padding: EdgeInsets.fromLTRB(
@@ -79,8 +80,11 @@ class _MedicineInfoView extends StatelessWidget {
               ),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  BlocSelector<MedicineInfoCubit, MedicineInfoState,
-                      (String, String, bool, MedicationType)>(
+                  BlocSelector<
+                    MedicineInfoCubit,
+                    MedicineInfoState,
+                    (String, String, bool, MedicationType)
+                  >(
                     selector: (state) => (
                       state.medicineName,
                       state.medicineSubtitle,
@@ -93,8 +97,18 @@ class _MedicineInfoView extends StatelessWidget {
                         medicineName: viewData.$1,
                         subtitle: viewData.$2,
                         isTaken: viewData.$3,
-                        onTakenChanged:
-                            context.read<MedicineInfoCubit>().toggleMedicineTaken,
+                        onTakenChanged: (bool value) {
+                          context.read<MedicineInfoCubit>().toggleMedicineTaken(
+                            value,
+                          );
+                          if (value) {
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => const DailySymptomsScreen(),
+                              ),
+                            );
+                          }
+                        },
                       );
                     },
                   ),
@@ -104,14 +118,18 @@ class _MedicineInfoView extends StatelessWidget {
                     builder: (context, criticalMode) {
                       return CriticalModeCard(
                         enabled: criticalMode,
-                        onChanged:
-                            context.read<MedicineInfoCubit>().toggleCriticalMode,
+                        onChanged: context
+                            .read<MedicineInfoCubit>()
+                            .toggleCriticalMode,
                       );
                     },
                   ),
                   SizedBox(height: AppSizes.h16),
-                  BlocSelector<MedicineInfoCubit, MedicineInfoState,
-                      (int, String)>(
+                  BlocSelector<
+                    MedicineInfoCubit,
+                    MedicineInfoState,
+                    (int, String)
+                  >(
                     selector: (state) => (state.stock, state.expiryDate),
                     builder: (context, stockData) {
                       return StockExpiryCard(
@@ -123,23 +141,30 @@ class _MedicineInfoView extends StatelessWidget {
                     },
                   ),
                   SizedBox(height: AppSizes.h16),
-                  BlocSelector<MedicineInfoCubit, MedicineInfoState,
-                      List<ScheduleItem>>(
+                  BlocSelector<
+                    MedicineInfoCubit,
+                    MedicineInfoState,
+                    List<ScheduleItem>
+                  >(
                     selector: (state) => state.schedule,
                     builder: (context, schedule) {
                       return ScheduleCard(
                         schedule: schedule,
-                        onAddPressed:
-                            context.read<MedicineInfoCubit>().addScheduleItem,
+                        onAddPressed: context
+                            .read<MedicineInfoCubit>()
+                            .addScheduleItem,
                       );
                     },
                   ),
                   SizedBox(height: AppSizes.h16),
-                  BlocSelector<MedicineInfoCubit, MedicineInfoState,
-                      List<String>>(
+                  BlocSelector<
+                    MedicineInfoCubit,
+                    MedicineInfoState,
+                    List<String>
+                  >(
                     selector: (state) => state.sideEffects,
                     builder: (context, sideEffects) {
-                    //  if (sideEffects.isEmpty) return const SizedBox.shrink();
+                      //  if (sideEffects.isEmpty) return const SizedBox.shrink();
                       return Column(
                         children: [
                           SideEffectsCard(sideEffects: sideEffects),
@@ -148,8 +173,11 @@ class _MedicineInfoView extends StatelessWidget {
                       );
                     },
                   ),
-                  BlocSelector<MedicineInfoCubit, MedicineInfoState,
-                      List<FeedbackLogItem>>(
+                  BlocSelector<
+                    MedicineInfoCubit,
+                    MedicineInfoState,
+                    List<FeedbackLogItem>
+                  >(
                     selector: (state) => state.feedbackLogs,
                     builder: (context, logs) {
                       if (logs.isEmpty) return const SizedBox.shrink();
@@ -228,52 +256,3 @@ class _BackButtonState extends State<_BackButton> {
   }
 }
 
-class _AnimatedEditAction extends StatefulWidget {
-  const _AnimatedEditAction();
-
-  @override
-  State<_AnimatedEditAction> createState() => _AnimatedEditActionState();
-}
-
-class _AnimatedEditActionState extends State<_AnimatedEditAction> {
-  bool _pressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(right: AppSizes.w12),
-      child: GestureDetector(
-        onTapDown: (_) => setState(() => _pressed = true),
-        onTapCancel: () => setState(() => _pressed = false),
-        onTapUp: (_) {
-          setState(() => _pressed = false);
-          // TODO: Navigate to edit screen
-        },
-        child: AnimatedScale(
-          duration: const Duration(milliseconds: 150),
-          scale: _pressed ? 0.88 : 1,
-          child: Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: const Icon(
-              Icons.edit_outlined,
-              size: 20,
-              color: Color(0xFF1F2937),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

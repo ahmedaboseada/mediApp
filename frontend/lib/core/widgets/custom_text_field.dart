@@ -14,6 +14,7 @@ class CustomTextField extends StatefulWidget {
     required this.label,
     this.suffixIcon,
     this.onTap,
+    this.maxLines = 1,
   });
 
   final String label;
@@ -26,6 +27,7 @@ class CustomTextField extends StatefulWidget {
   final Iterable<String>? autofillHints;
   final Widget? suffixIcon;
   final VoidCallback? onTap;
+  final int maxLines;
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
@@ -46,18 +48,21 @@ class _CustomTextFieldState extends State<CustomTextField> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(widget.label, style: AppStyles.black14500),
-        SizedBox(height: AppSizes.h6),
+
         TextFormField(
           // onTapOutside: (_) {
           //   FocusScope.of(context).unfocus();
           // },
           onTap: widget.onTap,
-          textInputAction: TextInputAction.next,
+          textInputAction: widget.maxLines > 1
+              ? TextInputAction.newline
+              : TextInputAction.next,
           autofillHints: widget.autofillHints,
           readOnly: widget.readOnly,
           controller: widget.controller,
           validator: widget.validator,
           keyboardType: widget.keyboardType,
+          maxLines: widget.maxLines,
           obscuringCharacter: '*',
           obscureText: widget.isPassword ? _obscure : false,
           style: AppStyles.black14500.copyWith(color: AppColors.secondaryText),

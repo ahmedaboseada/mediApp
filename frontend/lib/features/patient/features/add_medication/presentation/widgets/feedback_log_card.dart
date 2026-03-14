@@ -3,10 +3,7 @@ import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_info_state.dart';
 
 class FeedbackLogCard extends StatelessWidget {
-  const FeedbackLogCard({
-    super.key,
-    required this.logs,
-  });
+  const FeedbackLogCard({super.key, required this.logs});
 
   final List<FeedbackLogItem> logs;
 

@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_state.dart';
-import 'package:medi/features/patient/features/add_medication/presentation/models/medication.dart';
+import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 
 class MedicineCubit extends Cubit<MedicineState> {
   MedicineCubit() : super(MedicineState.initial(_mockMedications));

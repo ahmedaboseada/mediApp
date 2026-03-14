@@ -80,7 +80,7 @@ class ChangePasswordScreen extends StatelessWidget {
         child: BlocListener<ProfileCubit, ProfileState>(
           listener: (context, state) {
             if (state is ChangePasswordSuccess) {
-             // context.showSafeSnackBar(state.message);
+              // context.showSafeSnackBar(state.message);
               _showChangePasswordDialog(context);
               _currentPasswordController.clear();
               _newPasswordController.clear();
