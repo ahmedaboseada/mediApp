@@ -49,8 +49,6 @@ class _StockExpiryScreenState extends State<StockExpiryScreen> {
         expiryDate: _expiryDateController.text,
         isCriticalMode: _isCriticalModeEnabled,
       );
-
-      ///patient/addMedication/confirmation
       context.push('/medicine/confirmation');
     }
   }
@@ -214,24 +212,8 @@ class _StockExpiryScreenState extends State<StockExpiryScreen> {
                       ),
                       SizedBox(height: AppSizes.h16),
 
-                      // Expiry Date Field
-                      CustomTextField(
-                        label: 'Expiry date',
-                        hintText: 'mm/dd/yyyy',
-                        controller: _expiryDateController,
-                        readOnly: true,
-                        onTap: _selectExpiryDate,
-                        suffixIcon: Icon(
-                          Icons.calendar_today,
-                          color: AppColors.primary,
-                        ),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please select expiry date';
-                          }
-                          return null;
-                        },
-                      ),
+                  
+                    
                       SizedBox(height: AppSizes.h32),
 
                       // Critical Mode Toggle Section

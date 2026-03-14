@@ -6,6 +6,8 @@ import 'package:medi/core/utils/service_locator.dart';
 //import 'package:medi/features/doctor/features/home/presentation/screens/profile_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_cubit.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/screens/daily_symptoms_screen.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/screens/edit_medication_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/medicine_info_screen.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/screens/health_measurements_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/controller/profile/profile_cubit.dart';
@@ -113,6 +115,8 @@ class AppRouter {
   static const String stockExpiryScreen = '/patient/addMedication/stock';
   static const String confirmationScreen =
       '/patient/addMedication/confirmation';
+  static const String dailySymptomsScreen = '/medicine/dailySymptoms';
+  static const String editMedicationScreen = '/patient/editMedication';
   // ========== DOCTOR ROUTES ==========
   static const String doctorLogin = '/login/doctor';
   static const String doctorSignUpScreen = '/signUp/doctor';
@@ -272,6 +276,11 @@ class AppRouter {
         path: healthMeasurements,
         builder: (context, state) => HealthMeasurementsScreen(),
       ),
+      GoRoute(
+        path: editMedicationScreen,
+        builder: (context, state) => const EditMedicationScreen(),
+      ),
+
 
       /// ================= PATIENT SHELL =================
       StatefulShellRoute.indexedStack(
@@ -329,6 +338,14 @@ class AppRouter {
                       final medication = state.extra as Medication?;
                       return MedicineInfoScreen(medication: medication);
                     },
+                  ),
+                  GoRoute(
+                    path: editMedicationScreen,
+                    builder: (context, state) => const EditMedicationScreen(),
+                  ),
+                  GoRoute(
+                    path: dailySymptomsScreen,
+                    builder: (context, state) => const DailySymptomsScreen(),
                   ),
                 ],
               ),

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/home/presentation/widgets/settings_tile.dart';
+import 'package:medi/features/patient/features/profile/presentation/widgets/section_item_tile.dart';
+import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
+import 'package:medi/features/shared/auth/presentation/cubit/log_out/log_out_cubit.dart';
 
 class SettingsSection extends StatelessWidget {
   const SettingsSection({super.key});
@@ -49,6 +53,35 @@ class SettingsSection extends StatelessWidget {
               onTap: () {
                 context.push(AppRouter.accountInformationScreen);
               },
+            ),
+             BlocProvider(
+                      create: (_) => LogOutCubit(getIt<AuthRepoImpl>()),
+                    
+              child: BlocConsumer<LogOutCubit, LogOutState>(
+                listener: (context, state) {
+                 if (state is LogOutSuccess) {
+                    context.go(AppRouter.selectScreen);
+                  } else if (state is LogOutFailure) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(state.error)));
+                  }
+                },
+                builder: (context, state) {
+                  
+                  return SectionItemTile(
+                        title: 'Logout',
+                        trailingIcon:  const Icon(
+                                Icons.arrow_forward_ios,
+                                color: AppColors.primary,
+                                size: 16,
+                              ),
+                        onTap: () {
+                                context.read<LogOutCubit>().logOut();
+                              },
+                      );
+                }
+              ),
             ),
 
             //  SettingsTile(title: 'Notifications', onTap: () {}),

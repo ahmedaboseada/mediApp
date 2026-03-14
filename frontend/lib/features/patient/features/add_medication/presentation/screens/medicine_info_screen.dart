@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_info_cubit.dart';
@@ -68,9 +69,9 @@ class _MedicineInfoView extends StatelessWidget {
                   color: AppColors.primaryText,
                 ),
               ),
-              actions:  [GestureDetector(child: SvgPicture.asset(AppAssets.edit),onTap: () => ,)],
-              actionsPadding: EdgeInsets.only(right: AppSizes.w12),
-            ),
+              actions:  [GestureDetector(child: SvgPicture.asset(AppAssets.edit),onTap: () =>context.push(AppRouter.editMedicationScreen),)],
+              actionsPadding: EdgeInsets.only(right: AppSizes.w12), ),
+            
             SliverPadding(
               padding: EdgeInsets.fromLTRB(
                 AppSizes.w16,
@@ -255,4 +256,3 @@ class _BackButtonState extends State<_BackButton> {
     );
   }
 }
-

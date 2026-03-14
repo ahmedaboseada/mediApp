@@ -1,6 +1,13 @@
 import 'package:medi/core/constants/app_strings.dart';
 
 extension AppValidators on String? {
+  String? validateRequiredField([String? message]) {
+    if (this == null || this!.trim().isEmpty) {
+      return message ?? AppStrings.fieldRequired;
+    }
+    return null;
+  }
+
   String? validateRequired(String message) {
     if (this == null || this!.isEmpty) {
       return message;

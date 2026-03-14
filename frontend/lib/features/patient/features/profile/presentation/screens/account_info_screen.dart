@@ -145,14 +145,6 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
                             ),
 
                             SizedBox(height: AppSizes.h24),
-                            CustomTextField(
-                              hintText: 'Enter email',
-                              label: 'Email Address',
-                              controller: _emailController,
-                              readOnly: !state.isEditing,
-                            ),
-
-                            SizedBox(height: AppSizes.h24),
                             PhoneField(
                               phonecontroller: _phoneController,
                               enabled: state.isEditing,

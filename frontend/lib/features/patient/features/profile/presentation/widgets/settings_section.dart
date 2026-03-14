@@ -59,24 +59,6 @@ class _SettingsSectionState extends State<SettingsSection> {
                     context.push(AppRouter.patientAccountInfoScreen);
                   },
                 ),
-                ToggleTile(
-                  title: 'Notifications',
-                  value: notifications,
-                  onChanged: (value) {
-                    setState(() {
-                      notifications = value;
-                    });
-                  },
-                ),
-                ToggleTile(
-                  title: 'Early Voice Alerts',
-                  value: earlyVoiceAlerts,
-                  onChanged: (value) {
-                    setState(() {
-                      earlyVoiceAlerts = value;
-                    });
-                  },
-                ),
                 SectionItemTile(
                   title: 'Logout',
                   trailingIcon: isLoading
@@ -96,6 +78,25 @@ class _SettingsSectionState extends State<SettingsSection> {
                           context.read<LogOutCubit>().logOut();
                         },
                 ),
+                ToggleTile(
+                  title: 'Notifications',
+                  value: notifications,
+                  onChanged: (value) {
+                    setState(() {
+                      notifications = value;
+                    });
+                  },
+                ),
+                ToggleTile(
+                  title: 'Early Voice Alerts',
+                  value: earlyVoiceAlerts,
+                  onChanged: (value) {
+                    setState(() {
+                      earlyVoiceAlerts = value;
+                    });
+                  },
+                ),
+                
               ],
             ),
           ),

@@ -36,11 +36,7 @@ class ProfileScreen extends StatelessWidget {
                       final name = user != null
                           ? '${user.firstName} ${user.lastName}'.trim()
                           : 'Guest User';
-                      final subtitle = user?.type == 'doctor'
-                          ? (profile?.doctor?.specialization.isNotEmpty == true
-                                ? profile!.doctor!.specialization
-                                : 'No Specialty')
-                          : (user?.email ?? 'Patient');
+                      final subtitle = (user?.email ?? 'Patient');
                       final image = user?.profilePicture.isNotEmpty == true
                           ? user!.profilePicture
                           : null;
