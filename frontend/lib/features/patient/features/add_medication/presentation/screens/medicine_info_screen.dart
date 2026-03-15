@@ -8,9 +8,9 @@ import 'package:medi/features/patient/features/add_medication/presentation/cubit
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_info_state.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/critical_mode_card.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/delete_button.dart';
-import 'package:medi/features/patient/features/add_medication/presentation/widgets/feedback_log_card.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/medicine_header_card.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/notes_card.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/widgets/refill_stock_dialog.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/schedule_card.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/side_effects_card.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/stock_expiry_card.dart';
@@ -142,8 +142,12 @@ class _MedicineInfoView extends StatelessWidget {
                       return StockExpiryCard(
                         stock: stockData.$1,
                         expiryDate: stockData.$2,
-                        onRefill: () =>
-                            context.read<MedicineInfoCubit>().refillStock(),
+                        onRefill: () => showRefillStockDialog(
+                          context,
+                          onSave: (amount) => context
+                              .read<MedicineInfoCubit>()
+                              .refillStock(amount: amount),
+                        ),
                       );
                     },
                   ),
@@ -151,12 +155,15 @@ class _MedicineInfoView extends StatelessWidget {
                   BlocSelector<
                     MedicineInfoCubit,
                     MedicineInfoState,
-                    List<ScheduleItem>
+                    (List<String>, String, String)
                   >(
-                    selector: (state) => state.schedule,
-                    builder: (context, schedule) {
+                    selector: (state) =>
+                        (state.reminders, state.frequency, state.duration),
+                    builder: (context, scheduleData) {
                       return ScheduleCard(
-                        schedule: schedule,
+                        reminders: scheduleData.$1,
+                        frequency: scheduleData.$2,
+                        duration: scheduleData.$3,
                         onAddPressed: context
                             .read<MedicineInfoCubit>()
                             .addScheduleItem,
@@ -175,22 +182,6 @@ class _MedicineInfoView extends StatelessWidget {
                       return Column(
                         children: [
                           SideEffectsCard(sideEffects: sideEffects),
-                          SizedBox(height: AppSizes.h16),
-                        ],
-                      );
-                    },
-                  ),
-                  BlocSelector<
-                    MedicineInfoCubit,
-                    MedicineInfoState,
-                    List<FeedbackLogItem>
-                  >(
-                    selector: (state) => state.feedbackLogs,
-                    builder: (context, logs) {
-                      if (logs.isEmpty) return const SizedBox.shrink();
-                      return Column(
-                        children: [
-                          FeedbackLogCard(logs: logs),
                           SizedBox(height: AppSizes.h16),
                         ],
                       );

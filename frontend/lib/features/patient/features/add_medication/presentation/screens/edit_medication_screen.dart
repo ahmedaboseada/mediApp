@@ -218,15 +218,5 @@ class _EditMedicationScreenState extends State<EditMedicationScreen> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-
-    final user = HiveService.getUserData();
-
-    context.read<UserProfileCubit>().updateProfile(
-      firstName: user?.firstName,
-      lastName: user?.lastName,
-      email: user?.email,
-      phone: user?.phone,
-      gender: user?.gender,
-    );
   }
 }

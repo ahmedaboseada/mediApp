@@ -11,25 +11,39 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
       );
 
   void toggleMedicineTaken(bool value) {
-    emit(state.copyWith(isTaken: value));
+    emit(
+      state.copyWith(medication: state.medication.copyWith(isActive: value)),
+    );
   }
 
   void toggleCriticalMode(bool value) {
-    emit(state.copyWith(criticalMode: value));
+    emit(
+      state.copyWith(
+        medication: state.medication.copyWith(isCriticalMode: value),
+      ),
+    );
   }
 
-  void refillStock({int amount = 15}) {
-    emit(state.copyWith(stock: state.stock + amount));
+  void refillStock({required int amount}) {
+    final updatedStock = state.stock + amount;
+    emit(
+      state.copyWith(
+        medication: state.medication.copyWith(
+          stock: updatedStock,
+          currentStock: updatedStock.toString(),
+        ),
+      ),
+    );
   }
 
   void addScheduleItem() {
-    final item = ScheduleItem(
-      id: 's${state.schedule.length + 1}',
-      time: state.schedule.length.isEven ? '6:00 AM' : '9:00 PM',
-      frequency: 'Daily',
-      duration: 'Ongoing',
+    final reminders = [...state.reminders];
+    reminders.add(reminders.length.isEven ? '6:00 AM' : '9:00 PM');
+    emit(
+      state.copyWith(
+        medication: state.medication.copyWith(reminders: reminders),
+      ),
     );
-    emit(state.copyWith(schedule: [...state.schedule, item]));
   }
 
   void deleteMedication() {

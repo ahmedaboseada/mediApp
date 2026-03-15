@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_info_state.dart';
 
 class ScheduleCard extends StatelessWidget {
   const ScheduleCard({
     super.key,
-    required this.schedule,
+    required this.reminders,
+    required this.frequency,
+    required this.duration,
     required this.onAddPressed,
   });
 
-  final List<ScheduleItem> schedule;
+  final List<String> reminders;
+  final String frequency;
+  final String duration;
   final VoidCallback onAddPressed;
 
   @override
   Widget build(BuildContext context) {
+    final reminderList = reminders.isNotEmpty ? reminders : const ['--:--'];
+
     return TweenAnimationBuilder<double>(
       duration: const Duration(milliseconds: 750),
       tween: Tween(begin: 0.0, end: 1.0),
@@ -61,7 +66,7 @@ class ScheduleCard extends StatelessWidget {
               ],
             ),
             SizedBox(height: AppSizes.h16),
-            ...schedule.asMap().entries.map((entry) {
+            ...reminderList.asMap().entries.map((entry) {
               return TweenAnimationBuilder<double>(
                 duration: Duration(milliseconds: 400 + (entry.key * 100)),
                 tween: Tween(begin: 0.0, end: 1.0),
@@ -74,9 +79,17 @@ class ScheduleCard extends StatelessWidget {
                     ),
                   );
                 },
-                child: _ScheduleItem(item: entry.value),
+                child: _ScheduleItem(time: entry.value, frequency: frequency),
               );
             }),
+            Text(
+              'Duration: $duration',
+              style: TextStyle(
+                fontSize: AppSizes.sp16,
+                fontWeight: FontWeight.w500,
+                color: AppColors.secondaryText,
+              ),
+            ),
           ],
         ),
       ),
@@ -85,59 +98,56 @@ class ScheduleCard extends StatelessWidget {
 }
 
 class _ScheduleItem extends StatelessWidget {
-  const _ScheduleItem({required this.item});
+  const _ScheduleItem({required this.time, required this.frequency});
 
-  final ScheduleItem item;
+  final String time;
+  final String frequency;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(bottom: AppSizes.h12),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.time,
-                  style: TextStyle(
-                    fontSize: AppSizes.sp16,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primaryText,
-                  ),
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSizes.w20,
+          vertical: AppSizes.h12,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.disabledColor,
+          borderRadius: BorderRadius.circular(AppSizes.r80),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                time,
+                style: TextStyle(
+                  fontSize: AppSizes.sp16,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.secondaryText,
                 ),
-                SizedBox(height: AppSizes.h4),
-                Text(
-                  'Duration: ${item.duration}',
-                  style: TextStyle(
-                    fontSize: AppSizes.sp12,
-                    fontWeight: FontWeight.w400,
-                    color: AppColors.secondaryText,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSizes.w12,
-              vertical: AppSizes.h6,
-            ),
-            decoration: BoxDecoration(
-              color: const Color(0xFF2178F3),
-              borderRadius: BorderRadius.circular(AppSizes.r8),
-            ),
-            child: Text(
-              item.frequency,
-              style: TextStyle(
-                fontSize: AppSizes.sp12,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
               ),
             ),
-          ),
-        ],
+            Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSizes.w12,
+                vertical: AppSizes.h6,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(AppSizes.r80),
+              ),
+              child: Text(
+                frequency,
+                style: TextStyle(
+                  fontSize: AppSizes.sp12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.whiteText,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

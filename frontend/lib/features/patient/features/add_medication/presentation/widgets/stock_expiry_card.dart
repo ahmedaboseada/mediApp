@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:medi/core/core.dart';
 
 class StockExpiryCard extends StatelessWidget {
@@ -45,9 +46,10 @@ class StockExpiryCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.inventory_2_outlined,
-                  size: 20,
+                SvgPicture.asset(
+                  AppAssets.medicineBox,
+                  width: 24,
+                  height: 24,
                   color: AppColors.secondaryText,
                 ),
                 SizedBox(width: AppSizes.w8),
@@ -73,20 +75,12 @@ class StockExpiryCard extends StatelessWidget {
                   ),
                 ),
                 SizedBox(width: AppSizes.w12),
-                Expanded(
-                  child: _InfoBlock(
-                    icon: Icons.calendar_today_outlined,
-                    label: 'Expiry Date',
-                    value: expiryDate,
-                    iconColor: const Color(0xFF2178F3),
-                  ),
-                ),
               ],
             ),
             SizedBox(height: AppSizes.h16),
             SizedBox(
               width: double.infinity,
-              child: _RefillButton(onPressed: onRefill),
+              child: PrimaryButton(onPressed: onRefill, text: 'Refill '),
             ),
           ],
         ),
@@ -139,59 +133,6 @@ class _InfoBlock extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _RefillButton extends StatefulWidget {
-  const _RefillButton({required this.onPressed});
-
-  final VoidCallback onPressed;
-
-  @override
-  State<_RefillButton> createState() => _RefillButtonState();
-}
-
-class _RefillButtonState extends State<_RefillButton> {
-  bool _pressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapCancel: () => setState(() => _pressed = false),
-      onTapUp: (_) {
-        setState(() => _pressed = false);
-        widget.onPressed();
-      },
-      child: AnimatedScale(
-        duration: const Duration(milliseconds: 150),
-        scale: _pressed ? 0.97 : 1,
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: AppSizes.h16),
-          decoration: BoxDecoration(
-            color: const Color(0xFF2178F3),
-            borderRadius: BorderRadius.circular(AppSizes.r12),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF2178F3).withOpacity(0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Text(
-              'Refill',
-              style: TextStyle(
-                fontSize: AppSizes.sp16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }

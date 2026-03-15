@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_cubit.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_state.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/widgets/current_stock_field.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/custom_stepper.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/navigation_buttons.dart';
 
@@ -96,116 +97,27 @@ class _StockExpiryScreenState extends State<StockExpiryScreen> {
                         children: [
                           Text('Current stock', style: AppStyles.black14500),
                           SizedBox(height: AppSizes.h6),
-                          TextFormField(
+                          CurrentStockField(
                             controller: _currentStockController,
-                            keyboardType: TextInputType.number,
-                            style: AppStyles.black14500.copyWith(
-                              color: AppColors.primaryText,
-                            ),
-                            decoration: InputDecoration(
-                              filled: true,
-                              fillColor: AppColors.surfaceColor,
-                              hintText: 'e.g, 30',
-                              hintStyle: AppStyles.black14500.copyWith(
-                                color: AppColors.secondaryText,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                  AppSizes.r10,
-                                ),
-                                borderSide: BorderSide(
-                                  color: AppColors.borderColor,
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                  AppSizes.r10,
-                                ),
-                                borderSide: BorderSide(
-                                  color: AppColors.borderColor,
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                  AppSizes.r10,
-                                ),
-                                borderSide: BorderSide(
-                                  color: AppColors.focusedBorderColor,
-                                ),
-                              ),
-                              errorBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                  AppSizes.r10,
-                                ),
-                                borderSide: BorderSide(
-                                  color: AppColors.errorBorderColor,
-                                ),
-                              ),
-                              focusedErrorBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                  AppSizes.r10,
-                                ),
-                                borderSide: BorderSide(
-                                  color: AppColors.errorBorderColor,
-                                ),
-                              ),
-                              suffixIcon: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  GestureDetector(
-                                    onTap: () {
-                                      final currentValue =
-                                          int.tryParse(
-                                            _currentStockController.text,
-                                          ) ??
-                                          0;
-                                      setState(() {
-                                        _currentStockController.text =
-                                            (currentValue + 1).toString();
-                                      });
-                                    },
-                                    child: Icon(
-                                      Icons.arrow_drop_up,
-                                      color: AppColors.primary,
-                                      size: AppSizes.w20,
-                                    ),
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      final currentValue =
-                                          int.tryParse(
-                                            _currentStockController.text,
-                                          ) ??
-                                          0;
-                                      if (currentValue > 0) {
-                                        setState(() {
-                                          _currentStockController.text =
-                                              (currentValue - 1).toString();
-                                        });
-                                      }
-                                    },
-                                    child: Icon(
-                                      Icons.arrow_drop_down,
-                                      color: AppColors.primary,
-                                      size: AppSizes.w20,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: AppSizes.w12,
-                                vertical: AppSizes.h12,
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'Please enter current stock';
+                            onIncrement: () {
+                              final currentValue =
+                                  int.tryParse(_currentStockController.text) ??
+                                  0;
+                              setState(() {
+                                _currentStockController.text =
+                                    (currentValue + 1).toString();
+                              });
+                            },
+                            onDecrement: () {
+                              final currentValue =
+                                  int.tryParse(_currentStockController.text) ??
+                                  0;
+                              if (currentValue > 0) {
+                                setState(() {
+                                  _currentStockController.text =
+                                      (currentValue - 1).toString();
+                                });
                               }
-                              if (int.tryParse(value) == null) {
-                                return 'Please enter a valid number';
-                              }
-                              return null;
                             },
                           ),
                         ],
