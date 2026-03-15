@@ -249,7 +249,10 @@ class AppRouter {
       ),
       GoRoute(
         path: patientAccountInfoScreen,
-        builder: (context, state) => AccountInfoScreen(),
+        builder: (context, state) => BlocProvider(
+          create: (context) => UserProfileCubit(getIt<AuthRepoImpl>()),
+          child: AccountInfoScreen(),
+        ),
       ),
       GoRoute(
         path: patientCaregiverModeScreen,
@@ -280,7 +283,6 @@ class AppRouter {
         path: editMedicationScreen,
         builder: (context, state) => const EditMedicationScreen(),
       ),
-
 
       /// ================= PATIENT SHELL =================
       StatefulShellRoute.indexedStack(

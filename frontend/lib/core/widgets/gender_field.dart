@@ -24,7 +24,7 @@ class GenderField extends StatelessWidget {
         const SizedBox(height: 8),
         DropdownButtonFormField2<String>(
           validator: validator,
-          // value: state.gender.isEmpty ? null : state.gender,
+          value: value.isEmpty ? null : value,
           items: ['male', 'female']
               .map(
                 (item) => DropdownMenuItem(

@@ -69,9 +69,15 @@ class _MedicineInfoView extends StatelessWidget {
                   color: AppColors.primaryText,
                 ),
               ),
-              actions:  [GestureDetector(child: SvgPicture.asset(AppAssets.edit),onTap: () =>context.push(AppRouter.editMedicationScreen),)],
-              actionsPadding: EdgeInsets.only(right: AppSizes.w12), ),
-            
+              actions: [
+                GestureDetector(
+                  child: SvgPicture.asset(AppAssets.edit),
+                  onTap: () => context.push(AppRouter.editMedicationScreen),
+                ),
+              ],
+              actionsPadding: EdgeInsets.only(right: AppSizes.w12),
+            ),
+
             SliverPadding(
               padding: EdgeInsets.fromLTRB(
                 AppSizes.w16,

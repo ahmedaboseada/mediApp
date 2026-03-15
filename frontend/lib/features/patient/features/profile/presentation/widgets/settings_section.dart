@@ -96,7 +96,6 @@ class _SettingsSectionState extends State<SettingsSection> {
                     });
                   },
                 ),
-                
               ],
             ),
           ),

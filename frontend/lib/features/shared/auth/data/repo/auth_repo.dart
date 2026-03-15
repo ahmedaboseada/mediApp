@@ -58,6 +58,7 @@ abstract class AuthRepo {
     String? email,
     String? phone,
     String? gender,
+    String? dob,
     String? profilePicture,
     String? specialization,
     String? clinicName,

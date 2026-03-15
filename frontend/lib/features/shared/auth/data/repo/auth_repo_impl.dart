@@ -252,6 +252,7 @@ class AuthRepoImpl implements AuthRepo {
     String? email,
     String? phone,
     String? gender,
+    String? dob,
     String? profilePicture,
     String? specialization,
     String? clinicName,
@@ -265,6 +266,7 @@ class AuthRepoImpl implements AuthRepo {
       if (email != null) data['email'] = email;
       if (phone != null) data['phone'] = phone;
       if (gender != null) data['gender'] = gender;
+      if (dob != null) data['DOB'] = dob;
       if (profilePicture != null) data['profilePicture'] = profilePicture;
       if (specialization != null) data['specialization'] = specialization;
       if (clinicName != null) data['clinicName'] = clinicName;

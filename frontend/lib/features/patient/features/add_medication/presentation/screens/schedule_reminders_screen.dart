@@ -11,7 +11,8 @@ class ScheduleRemindersScreen extends StatefulWidget {
   const ScheduleRemindersScreen({super.key});
 
   @override
-  State<ScheduleRemindersScreen> createState() => _ScheduleRemindersScreenState();
+  State<ScheduleRemindersScreen> createState() =>
+      _ScheduleRemindersScreenState();
 }
 
 class _ScheduleRemindersScreenState extends State<ScheduleRemindersScreen> {
@@ -19,12 +20,11 @@ class _ScheduleRemindersScreenState extends State<ScheduleRemindersScreen> {
   final _startDateController = TextEditingController();
   final _endDateController = TextEditingController();
   final _timeController = TextEditingController();
-  
+
   String? _selectedFrequency;
   List<String> _reminders = [];
 
   final List<String> _frequencyOptions = [
-    
     'Every day',
     'Every 2 days',
     'Every 3 days',
@@ -51,7 +51,8 @@ class _ScheduleRemindersScreenState extends State<ScheduleRemindersScreen> {
     );
 
     if (selectedDate != null) {
-      controller.text = '${selectedDate.month}/${selectedDate.day}/${selectedDate.year}';
+      controller.text =
+          '${selectedDate.month}/${selectedDate.day}/${selectedDate.year}';
     }
   }
 
@@ -89,28 +90,28 @@ class _ScheduleRemindersScreenState extends State<ScheduleRemindersScreen> {
     });
   }
 
- void _handleNext() {
-  if (_formKey.currentState!.validate()) {
-    if (_selectedFrequency == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select frequency'),
-          backgroundColor: Colors.red,
-        ),
+  void _handleNext() {
+    if (_formKey.currentState!.validate()) {
+      if (_selectedFrequency == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select frequency'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      context.read<MedicationDataCubit>().updateSchedule(
+        frequency: _selectedFrequency!,
+        startDate: _startDateController.text,
+        endDate: _endDateController.text,
+        reminders: _reminders,
       );
-      return;
+
+      context.go('/patient/addMedication/stock');
     }
-
-    context.read<MedicationDataCubit>().updateSchedule(
-      frequency: _selectedFrequency!,
-      startDate: _startDateController.text,
-      endDate: _endDateController.text,
-      reminders: _reminders,
-    );
-
-    context.go('/patient/addMedication/stock');
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -141,10 +142,7 @@ class _ScheduleRemindersScreenState extends State<ScheduleRemindersScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Progress Stepper
-                  CustomStepper(
-                    currentStep: 3,
-                    title: 'Schedule & Reminders',
-                  ),
+                  CustomStepper(currentStep: 3, title: 'Schedule & Reminders'),
                   SizedBox(height: AppSizes.h32),
 
                   // Frequency Dropdown
@@ -264,9 +262,7 @@ class _ScheduleRemindersScreenState extends State<ScheduleRemindersScreen> {
                             ),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(AppSizes.r10),
-                              border: Border.all(
-                                color: AppColors.borderColor,
-                              ),
+                              border: Border.all(color: AppColors.borderColor),
                               color: Colors.white,
                             ),
                             child: Row(

@@ -22,6 +22,7 @@ class HiveService {
   static const String _doctorDataKey = 'doctorData';
   static const String _userRoleKey = 'userRole';
   static const String _onboardingCompletedKey = 'onboardingCompleted';
+  static const String _userCountryKey = 'userCountry';
   static Future<void>? _initFuture;
 
   static Future<void> _ensureInitialized() {
@@ -229,6 +230,11 @@ class HiveService {
     String? gender,
     String? profileImage,
   }) async {
+    final settings = await _openSettingsBox();
+    if (country != null) {
+      await settings.put(_userCountryKey, country);
+    }
+
     final currentUser = getUserData();
     if (currentUser != null) {
       final updatedUser = UserModel(
@@ -238,6 +244,8 @@ class HiveService {
         lastName: lastName ?? currentUser.lastName,
         email: email ?? currentUser.email,
         gender: gender ?? currentUser.gender,
+        dob: dateOfBirth ?? currentUser.dob,
+        phone: phone ?? currentUser.phone,
         twoFA: currentUser.twoFA,
         profilePicture: profileImage ?? currentUser.profilePicture,
         confirmed: currentUser.confirmed,
@@ -293,14 +301,18 @@ class HiveService {
     final user = getUserData();
     if (user == null) return {};
 
+    final country = Hive.isBoxOpen(_settingsBox)
+        ? Hive.box(_settingsBox).get(_userCountryKey) as String?
+        : null;
+
     return {
       'firstName': user.firstName,
       'lastName': user.lastName,
       'email': user.email,
-      'phone': '',
-      'country': '',
-      'dateOfBirth': '',
-      'gender': '',
+      'phone': user.phone,
+      'country': country,
+      'dateOfBirth': user.dob,
+      'gender': user.gender,
       'profileImage': user.profilePicture,
     };
   }

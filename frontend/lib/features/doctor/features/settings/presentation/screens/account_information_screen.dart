@@ -24,6 +24,7 @@ class _AccountInformationScreenState extends State<AccountInformationScreen> {
   final TextEditingController _clinicNameController = TextEditingController();
   final TextEditingController _medicalLicenseController =
       TextEditingController();
+  bool _isSubmitting = false;
 
   String? _selectedPhone;
   String? _selectedGender;
@@ -59,9 +60,17 @@ class _AccountInformationScreenState extends State<AccountInformationScreen> {
     });
   }
 
-  void _saveProfile() {
-    if (_formKey.currentState!.validate()) {
-      context.read<UserProfileCubit>().updateProfile(
+  Future<void> _saveProfile(UserProfileCubit userProfileCubit) async {
+    if (!_formKey.currentState!.validate() || _isSubmitting) {
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      await userProfileCubit.updateProfile(
         firstName: _nameController.text.trim(),
         lastName: _lastNameController.text.trim(),
         email: _emailController.text.trim(),
@@ -71,6 +80,12 @@ class _AccountInformationScreenState extends State<AccountInformationScreen> {
         clinicName: _clinicNameController.text.trim(),
         medicalLicenseId: _medicalLicenseController.text.trim(),
       );
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
     }
   }
 
@@ -85,6 +100,12 @@ class _AccountInformationScreenState extends State<AccountInformationScreen> {
             if (state is UserProfileLoaded) {
               _populateFields(state);
             } else if (state is UserProfileError) {
+              if (mounted) {
+                setState(() {
+                  _isSubmitting = false;
+                });
+              }
+
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
@@ -92,20 +113,33 @@ class _AccountInformationScreenState extends State<AccountInformationScreen> {
                 ),
               );
             } else if (state is UserProfileUpdated) {
+              if (mounted) {
+                setState(() {
+                  _isSubmitting = false;
+                });
+              }
+
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Profile updated successfully'),
                   backgroundColor: Colors.green,
                 ),
               );
-              context.pop();
+              if (context.canPop()) {
+                context.pop();
+              }
             }
           },
           child: BlocBuilder<UserProfileCubit, UserProfileState>(
             builder: (context, state) {
-              if (state is UserProfileLoading) {
+              final isInitialLoading =
+                  state is UserProfileLoading && !_isSubmitting;
+
+              if (isInitialLoading) {
                 return const Center(child: CircularProgressIndicator());
               }
+
+              final isSaving = _isSubmitting && state is UserProfileLoading;
 
               if (state is UserProfileLoaded) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -215,8 +249,22 @@ class _AccountInformationScreenState extends State<AccountInformationScreen> {
                               ),
                               SizedBox(height: AppSizes.h24),
                               PrimaryButton(
-                                onPressed: _saveProfile,
+                                onPressed: isSaving
+                                    ? null
+                                    : () => _saveProfile(
+                                        context.read<UserProfileCubit>(),
+                                      ),
                                 text: 'Save',
+                                child: isSaving
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : null,
                               ),
                             ],
                           ),

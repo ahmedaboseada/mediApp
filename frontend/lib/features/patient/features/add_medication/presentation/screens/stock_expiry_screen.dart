@@ -212,8 +212,6 @@ class _StockExpiryScreenState extends State<StockExpiryScreen> {
                       ),
                       SizedBox(height: AppSizes.h16),
 
-                  
-                    
                       SizedBox(height: AppSizes.h32),
 
                       // Critical Mode Toggle Section

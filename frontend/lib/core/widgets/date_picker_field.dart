@@ -9,11 +9,13 @@ class DatePickerField extends StatefulWidget {
     this.initialDate,
     this.onDateSelected,
     required this.dateController,
+    this.enabled = true,
     this.validator,
   });
   final DateTime? initialDate;
   final Function(DateTime)? onDateSelected;
   final TextEditingController dateController;
+  final bool enabled;
   final String? Function(String?)? validator;
 
   @override
@@ -22,6 +24,10 @@ class DatePickerField extends StatefulWidget {
 
 class _DatePickerFieldState extends State<DatePickerField> {
   Future<void> selectDate() async {
+    if (!widget.enabled) {
+      return;
+    }
+
     DateTime? date = await showDatePicker(
       context: context,
       firstDate: DateTime(1900),
@@ -56,6 +62,7 @@ class _DatePickerFieldState extends State<DatePickerField> {
           SizedBox(height: AppSizes.h8),
           TextFormField(
             controller: widget.dateController,
+            enabled: widget.enabled,
             readOnly: true,
             validator: widget.validator,
             decoration: InputDecoration(
@@ -85,9 +92,7 @@ class _DatePickerFieldState extends State<DatePickerField> {
               ),
 
               suffixIcon: IconButton(
-                onPressed: () {
-                  selectDate();
-                },
+                onPressed: widget.enabled ? selectDate : null,
                 icon: SvgPicture.asset(
                   AppAssets.calendar,
                   height: AppSizes.h24,

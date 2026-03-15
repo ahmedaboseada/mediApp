@@ -54,12 +54,12 @@ class SettingsSection extends StatelessWidget {
                 context.push(AppRouter.accountInformationScreen);
               },
             ),
-             BlocProvider(
-                      create: (_) => LogOutCubit(getIt<AuthRepoImpl>()),
-                    
+            BlocProvider(
+              create: (_) => LogOutCubit(getIt<AuthRepoImpl>()),
+
               child: BlocConsumer<LogOutCubit, LogOutState>(
                 listener: (context, state) {
-                 if (state is LogOutSuccess) {
+                  if (state is LogOutSuccess) {
                     context.go(AppRouter.selectScreen);
                   } else if (state is LogOutFailure) {
                     ScaffoldMessenger.of(
@@ -68,19 +68,18 @@ class SettingsSection extends StatelessWidget {
                   }
                 },
                 builder: (context, state) {
-                  
                   return SectionItemTile(
-                        title: 'Logout',
-                        trailingIcon:  const Icon(
-                                Icons.arrow_forward_ios,
-                                color: AppColors.primary,
-                                size: 16,
-                              ),
-                        onTap: () {
-                                context.read<LogOutCubit>().logOut();
-                              },
-                      );
-                }
+                    title: 'Logout',
+                    trailingIcon: const Icon(
+                      Icons.arrow_forward_ios,
+                      color: AppColors.primary,
+                      size: 16,
+                    ),
+                    onTap: () {
+                      context.read<LogOutCubit>().logOut();
+                    },
+                  );
+                },
               ),
             ),
 
