@@ -46,12 +46,7 @@ class StockExpiryCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                SvgPicture.asset(
-                  AppAssets.medicineBox,
-                  width: 24,
-                  height: 24,
-                  color: AppColors.secondaryText,
-                ),
+               SvgPicture.asset(AppAssets.medicineBox, width: 24, height: 24, color: AppColors.secondaryText),
                 SizedBox(width: AppSizes.w8),
                 Text(
                   'Stock & Expiry',
@@ -68,13 +63,14 @@ class StockExpiryCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: _InfoBlock(
-                    icon: Icons.water_drop_outlined,
+                    icon: SvgPicture.asset(AppAssets.medicineBox, width: 24, height: 24, color: const Color(0xFF2178F3)),
                     label: 'Current Stock',
                     value: '$stock units',
                     iconColor: const Color(0xFF2178F3),
                   ),
                 ),
                 SizedBox(width: AppSizes.w12),
+                
               ],
             ),
             SizedBox(height: AppSizes.h16),
@@ -97,7 +93,7 @@ class _InfoBlock extends StatelessWidget {
     required this.iconColor,
   });
 
-  final IconData icon;
+  final SvgPicture icon;
   final String label;
   final String value;
   final Color iconColor;
@@ -112,7 +108,7 @@ class _InfoBlock extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(icon, color: iconColor, size: 28),
+          icon,
           SizedBox(height: AppSizes.h8),
           Text(
             value,
@@ -137,3 +133,5 @@ class _InfoBlock extends StatelessWidget {
     );
   }
 }
+
+

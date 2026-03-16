@@ -1,76 +1,31 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:medi/core/services/hive_service.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_state.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 
 class MedicineCubit extends Cubit<MedicineState> {
-  MedicineCubit() : super(MedicineState.initial(_mockMedications));
+  MedicineCubit()
+    : super(
+        MedicineState.initial(_filterByTab(HiveService.getMedications(), MedicineTab.all)),
+      );
 
-  static const List<Medication> _mockMedications = [
-    Medication(
-      name: 'Aspirin',
-      type: 'Tablet',
-      dosage: '100mg',
-      frequency: 'Twice daily',
-      reminders: ['8:00 AM', '8:00 PM'],
-      stock: 3,
-      expiryDate: '12/31/2026',
-      stockStatus: MedicationStockStatus.low,
-      isCritical: false,
-      isActive: true,
-      isChronic: false,
-      medicationType: MedicationType.tablet,
-    ),
-    Medication(
-      name: 'Insulin',
-      type: 'Injection',
-      dosage: '10 units',
-      frequency: 'Twice daily',
-      reminders: ['8:00 AM', '8:00 PM'],
-      stock: 15,
-      expiryDate: '1/31/2026',
-      stockStatus: MedicationStockStatus.medium,
-      isCritical: true,
-      isActive: true,
-      isChronic: true,
-      medicationType: MedicationType.syringe,
-    ),
-    Medication(
-      name: 'Paracetamol',
-      type: 'Capsule',
-      dosage: '50mg',
-      frequency: 'Once daily',
-      reminders: ['8:00 AM', '8:00 PM'],
-      stock: 28,
-      expiryDate: '11/31/2026',
-      stockStatus: MedicationStockStatus.good,
-      isCritical: false,
-      isActive: false,
-      isChronic: true,
-      medicationType: MedicationType.pill,
-    ),
-    Medication(
-      name: 'Metformin',
-      type: 'Tablet',
-      dosage: '200mg',
-      frequency: 'Once daily',
-      reminders: ['12:00 AM'],
-      stock: 45,
-      expiryDate: '7/31/2026',
-      stockStatus: MedicationStockStatus.good,
-      isCritical: false,
-      isActive: false,
-      isChronic: true,
-      medicationType: MedicationType.tablet,
-    ),
-  ];
-
-  int get allCount => _mockMedications.length;
+  int get allCount => HiveService.getMedications().length;
 
   int get activeCount =>
-      _mockMedications.where((medication) => medication.isActive).length;
+      HiveService.getMedications().where((m) => m.isActive).length;
 
   int get chronicCount =>
-      _mockMedications.where((medication) => medication.isChronic).length;
+      HiveService.getMedications().where((m) => m.isChronic).length;
+
+  void loadMedications() {
+    final all = HiveService.getMedications();
+    emit(state.copyWith(medications: _filterList(all)));
+  }
+
+  Future<void> addMedication(Medication medication) async {
+    await HiveService.addMedication(medication);
+    loadMedications();
+  }
 
   void changeTab(MedicineTab tab) {
     emit(state.copyWith(selectedTab: tab));
@@ -82,14 +37,20 @@ class MedicineCubit extends Cubit<MedicineState> {
   }
 
   void filterMedications() {
-    final filtered = switch (state.selectedTab) {
-      MedicineTab.all => _mockMedications,
-      MedicineTab.active =>
-        _mockMedications.where((medication) => medication.isActive).toList(),
-      MedicineTab.chronic =>
-        _mockMedications.where((medication) => medication.isChronic).toList(),
-    };
+    final all = HiveService.getMedications();
+    emit(state.copyWith(medications: _filterList(all)));
+  }
 
-    emit(state.copyWith(medications: filtered));
+  List<Medication> _filterList(List<Medication> all) {
+    return _filterByTab(all, state.selectedTab);
+  }
+
+  static List<Medication> _filterByTab(List<Medication> all, MedicineTab tab) {
+    return switch (tab) {
+      MedicineTab.all => all,
+      MedicineTab.active => all.where((m) => m.isActive).toList(),
+      MedicineTab.chronic => all.where((m) => m.isChronic).toList(),
+    };
   }
 }
+

@@ -23,6 +23,7 @@ class _DeleteButtonState extends State<DeleteButton> {
           curve: Curves.easeOutBack,
         ),
         child: AlertDialog(
+          backgroundColor: AppColors.surfaceColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -100,7 +101,7 @@ class _DeleteButtonState extends State<DeleteButton> {
             padding: EdgeInsets.symmetric(vertical: AppSizes.h16),
             decoration: BoxDecoration(
               color: const Color(0xFFFF3B30),
-              borderRadius: BorderRadius.circular(AppSizes.r12),
+              borderRadius: BorderRadius.circular(AppSizes.r80),
               boxShadow: [
                 BoxShadow(
                   color: const Color(0xFFFF3B30).withOpacity(0.3),

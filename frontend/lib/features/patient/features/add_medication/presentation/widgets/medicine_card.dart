@@ -12,7 +12,7 @@ class MedicineCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isCritical = medication.isCritical;
+    final bool isCritical = medication.isCriticalMode;
 
     return InkWell(
       borderRadius: BorderRadius.circular(AppSizes.r20),
@@ -128,7 +128,7 @@ class MedicationInfoRow extends StatelessWidget {
                 ),
               ),
             ),
-            if (medication.isCritical)
+            if (medication.isCriticalMode)
               Container(
                 padding: EdgeInsets.symmetric(
                   horizontal: AppSizes.w8,

@@ -53,157 +53,158 @@ class _MedicineInfoView extends StatelessWidget {
             ),
           );
         },
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            SliverAppBar(
-              elevation: 0,
-              pinned: true,
-              centerTitle: true,
-              leading: _BackButton(),
-              title: Text(
-                'Medicine Info',
-                style: TextStyle(
-                  fontSize: AppSizes.sp18,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.primaryText,
+        child: SafeArea(
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverAppBar(
+                elevation: 0,
+                pinned: true,
+                centerTitle: true,
+                leading: _BackButton(),
+                title: Text(
+                  'Medicine Info',
+                  style: TextStyle(
+                    fontSize: AppSizes.sp18,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryText,
+                  ),
                 ),
+                actions: [
+                  GestureDetector(
+                    child: SvgPicture.asset(AppAssets.edit),
+                    onTap: () => context.push(AppRouter.editMedicationScreen),
+                  ),
+                ],
+                actionsPadding: EdgeInsets.only(right: AppSizes.w12),
               ),
-              actions: [
-                GestureDetector(
-                  child: SvgPicture.asset(AppAssets.edit),
-                  onTap: () => context.push(AppRouter.editMedicationScreen),
+          
+              SliverPadding(
+                padding: EdgeInsets.fromLTRB(
+                  AppSizes.w16,
+                  AppSizes.h8,
+                  AppSizes.w16,
+                  AppSizes.h24,
                 ),
-              ],
-              actionsPadding: EdgeInsets.only(right: AppSizes.w12),
-            ),
-
-            SliverPadding(
-              padding: EdgeInsets.fromLTRB(
-                AppSizes.w16,
-                AppSizes.h8,
-                AppSizes.w16,
-                AppSizes.h24,
-              ),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  BlocSelector<
-                    MedicineInfoCubit,
-                    MedicineInfoState,
-                    (String, String, bool, MedicationType)
-                  >(
-                    selector: (state) => (
-                      state.medicineName,
-                      state.medicineSubtitle,
-                      state.isTaken,
-                      state.medicationType,
-                    ),
-                    builder: (context, viewData) {
-                      return MedicineHeaderCard(
-                        imagePath: AppAssets.getMedicineIcon(viewData.$4),
-                        medicineName: viewData.$1,
-                        subtitle: viewData.$2,
-                        isTaken: viewData.$3,
-                        onTakenChanged: (bool value) {
-                          context.read<MedicineInfoCubit>().toggleMedicineTaken(
-                            value,
-                          );
-                          if (value) {
-                            Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) => const DailySymptomsScreen(),
-                              ),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    BlocSelector<
+                      MedicineInfoCubit,
+                      MedicineInfoState,
+                      (String, String, bool, MedicationType)
+                    >(
+                      selector: (state) => (
+                        state.medicineName,
+                        state.medicineSubtitle,
+                        state.isTaken,
+                        state.medicationType,
+                      ),
+                      builder: (context, viewData) {
+                        return MedicineHeaderCard(
+                          imagePath: AppAssets.getMedicineIcon(viewData.$4),
+                          medicineName: viewData.$1,
+                          subtitle: viewData.$2,
+                          isTaken: viewData.$3,
+                          onTakenChanged: (bool value) {
+                            context.read<MedicineInfoCubit>().toggleMedicineTaken(
+                              value,
                             );
-                          }
-                        },
-                      );
-                    },
-                  ),
-                  SizedBox(height: AppSizes.h16),
-                  BlocSelector<MedicineInfoCubit, MedicineInfoState, bool>(
-                    selector: (state) => state.criticalMode,
-                    builder: (context, criticalMode) {
-                      return CriticalModeCard(
-                        enabled: criticalMode,
-                        onChanged: context
-                            .read<MedicineInfoCubit>()
-                            .toggleCriticalMode,
-                      );
-                    },
-                  ),
-                  SizedBox(height: AppSizes.h16),
-                  BlocSelector<
-                    MedicineInfoCubit,
-                    MedicineInfoState,
-                    (int, String)
-                  >(
-                    selector: (state) => (state.stock, state.expiryDate),
-                    builder: (context, stockData) {
-                      return StockExpiryCard(
-                        stock: stockData.$1,
-                        expiryDate: stockData.$2,
-                        onRefill: () => showRefillStockDialog(
-                          context,
-                          onSave: (amount) => context
+                            if (value) {
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => const DailySymptomsScreen(),
+                                ),
+                              );
+                            }
+                          },
+                        );
+                      },
+                    ),
+                    SizedBox(height: AppSizes.h16),
+                    BlocSelector<MedicineInfoCubit, MedicineInfoState, bool>(
+                      selector: (state) => state.criticalMode,
+                      builder: (context, criticalMode) {
+                        return CriticalModeCard(
+                          enabled: criticalMode,
+                          onChanged: context
                               .read<MedicineInfoCubit>()
-                              .refillStock(amount: amount),
-                        ),
-                      );
-                    },
-                  ),
-                  SizedBox(height: AppSizes.h16),
-                  BlocSelector<
-                    MedicineInfoCubit,
-                    MedicineInfoState,
-                    (List<String>, String, String)
-                  >(
-                    selector: (state) =>
-                        (state.reminders, state.frequency, state.duration),
-                    builder: (context, scheduleData) {
-                      return ScheduleCard(
-                        reminders: scheduleData.$1,
-                        frequency: scheduleData.$2,
-                        duration: scheduleData.$3,
-                        onAddPressed: context
-                            .read<MedicineInfoCubit>()
-                            .addScheduleItem,
-                      );
-                    },
-                  ),
-                  SizedBox(height: AppSizes.h16),
-                  BlocSelector<
-                    MedicineInfoCubit,
-                    MedicineInfoState,
-                    List<String>
-                  >(
-                    selector: (state) => state.sideEffects,
-                    builder: (context, sideEffects) {
-                      //  if (sideEffects.isEmpty) return const SizedBox.shrink();
-                      return Column(
-                        children: [
-                          SideEffectsCard(sideEffects: sideEffects),
-                          SizedBox(height: AppSizes.h16),
-                        ],
-                      );
-                    },
-                  ),
-                  BlocSelector<MedicineInfoCubit, MedicineInfoState, String>(
-                    selector: (state) => state.notes,
-                    builder: (context, notes) {
-                      return NotesCard(notes: notes);
-                    },
-                  ),
-                  SizedBox(height: AppSizes.h24),
-                  DeleteButton(
-                    onConfirmedDelete: () async {
-                      context.read<MedicineInfoCubit>().deleteMedication();
-                    },
-                  ),
-                  SizedBox(height: AppSizes.h24),
-                ]),
+                              .toggleCriticalMode,
+                        );
+                      },
+                    ),
+                    SizedBox(height: AppSizes.h16),
+                    BlocSelector<
+                      MedicineInfoCubit,
+                      MedicineInfoState,
+                      (int, String)
+                    >(
+                      selector: (state) => (state.stock, state.expiryDate),
+                      builder: (context, stockData) {
+                        return StockExpiryCard(
+                          stock: stockData.$1,
+                          expiryDate: stockData.$2,
+                          onRefill: () => showRefillStockDialog(
+                            context,
+                            onSave: (amount) => context
+                                .read<MedicineInfoCubit>()
+                                .refillStock(amount: amount),
+                          ),
+                        );
+                      },
+                    ),
+                    SizedBox(height: AppSizes.h16),
+                    BlocSelector<
+                      MedicineInfoCubit,
+                      MedicineInfoState,
+                      (List<String>, String, String)
+                    >(
+                      selector: (state) =>
+                          (state.reminders, state.frequency, state.duration),
+                      builder: (context, scheduleData) {
+                        return ScheduleCard(
+                          reminders: scheduleData.$1,
+                          frequency: scheduleData.$2,
+                          duration: scheduleData.$3,
+                          onAddPressed: context
+                              .read<MedicineInfoCubit>()
+                              .addScheduleItem,
+                        );
+                      },
+                    ),
+                    SizedBox(height: AppSizes.h16),
+                    BlocSelector<
+                      MedicineInfoCubit,
+                      MedicineInfoState,
+                      List<String>
+                    >(
+                      selector: (state) => state.sideEffects,
+                      builder: (context, sideEffects) {
+                        //  if (sideEffects.isEmpty) return const SizedBox.shrink();
+                        return Column(
+                          children: [
+                            SideEffectsCard(sideEffects: sideEffects),
+                            SizedBox(height: AppSizes.h16),
+                          ],
+                        );
+                      },
+                    ),
+                    BlocSelector<MedicineInfoCubit, MedicineInfoState, String>(
+                      selector: (state) => state.notes,
+                      builder: (context, notes) {
+                        return NotesCard(notes: notes);
+                      },
+                    ),
+                    SizedBox(height: AppSizes.h24),
+                    DeleteButton(
+                      onConfirmedDelete: () async {
+                        context.read<MedicineInfoCubit>().deleteMedication();
+                      },
+                    ),
+                  ]),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -23,7 +23,7 @@ class PatientModelAdapter extends TypeAdapter<PatientModel> {
       allergies: (fields[3] as List).cast<String>(),
       activeIngredients: (fields[4] as List).cast<String>(),
       longTermMedication: (fields[5] as List).cast<String>(),
-      medications: (fields[6] as List).cast<String>(),
+      medications: (fields[6] as List).cast<Medication>(),
       saveOption: fields[7] as bool,
       connectedDoctors: (fields[8] as List).cast<String>(),
       createdAt: fields[9] as String,

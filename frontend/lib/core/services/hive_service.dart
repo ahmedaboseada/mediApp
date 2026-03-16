@@ -1,5 +1,6 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:medi/core/enums/user_role.dart';
+import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 import 'package:medi/features/shared/auth/data/models/auth_response_model.dart';
 import 'package:medi/features/shared/auth/data/models/caregiver_model.dart';
 import 'package:medi/features/shared/auth/data/models/clinic_location_model.dart';
@@ -12,6 +13,8 @@ class HiveService {
   static const String _authBox = 'authBox';
   static const String _userBox = 'userBox';
   static const String _settingsBox = 'settingsBox';
+  static const String _medicationsBox = 'medicationsBox';
+  static const String _medicationsKey = 'medications';
 
   // Keys
   static const String _accessTokenKey = 'accessToken';
@@ -89,6 +92,25 @@ class HiveService {
     await Hive.openBox(_authBox);
     await Hive.openBox(_userBox);
     await Hive.openBox(_settingsBox);
+    await Hive.openBox(_medicationsBox);
+  }
+
+  static Future<Box> _openMedicationsBox() async {
+    await _ensureInitialized();
+    if (!Hive.isBoxOpen(_medicationsBox)) {
+      await Hive.openBox(_medicationsBox);
+    }
+    return Hive.box(_medicationsBox);
+  }
+
+  static String _currentMedicationsKey() {
+    final role = getUserRole();
+    final user = getUserData();
+    if (role != null && user != null && user.id.isNotEmpty) {
+      final roleLabel = role == UserRole.doctor ? 'doctor' : 'patient';
+      return '$_medicationsKey/$roleLabel/${user.id}';
+    }
+    return _medicationsKey;
   }
 
   // ========== TOKEN MANAGEMENT ==========
@@ -348,6 +370,32 @@ class HiveService {
     }
   }
 
+  // ========== MEDICATION MANAGEMENT ==========
+
+  /// Get locally saved medications
+  static List<Medication> getMedications() {
+    if (!Hive.isBoxOpen(_medicationsBox)) return [];
+    final raw = Hive.box(_medicationsBox).get(_currentMedicationsKey());
+    if (raw == null) return [];
+    return (raw as List).map((e) => Medication.fromJson(e as Map)).toList();
+  }
+
+  /// Save the full list of medications
+  static Future<void> saveMedications(List<Medication> medications) async {
+    final box = await _openMedicationsBox();
+    await box.put(
+      _currentMedicationsKey(),
+      medications.map((m) => m.toJson()).toList(),
+    );
+  }
+
+  /// Add a single medication to the saved list
+  static Future<void> addMedication(Medication medication) async {
+    final current = getMedications();
+    current.add(medication);
+    await saveMedications(current);
+  }
+
   // ========== CLEAR ALL DATA ==========
 
   /// Clear all data (logout)
@@ -355,9 +403,11 @@ class HiveService {
     final auth = await _openAuthBox();
     final userBox = await _openUserBox();
     final settings = await _openSettingsBox();
+    final meds = await _openMedicationsBox();
     await auth.clear();
     await userBox.clear();
     await settings.clear();
+    await meds.clear();
   }
 
   /// Close all boxes

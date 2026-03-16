@@ -40,8 +40,7 @@ class SideEffectsCard extends StatelessWidget {
               children: [
                 Icon(
                   Icons.warning_amber_rounded,
-                  size: 20,
-                  color: const Color(0xFFFF3B30),
+                  size: 24,
                 ),
                 SizedBox(width: AppSizes.w8),
                 Text(

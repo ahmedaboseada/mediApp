@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:medi/core/core.dart';
 
 class NotesCard extends StatelessWidget {
@@ -25,47 +26,29 @@ class NotesCard extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(AppSizes.w20),
         decoration: BoxDecoration(
-          color: const Color(0xFFFFF9E6),
+          color: const Color(0xFFFEF5E7),
           borderRadius: BorderRadius.circular(AppSizes.r16),
-          border: Border.all(color: const Color(0xFFFFD60A).withOpacity(0.3)),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFFFD60A).withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          border: Border.all(color: const Color(0xFFFBD89D)),
+         
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.note_alt_outlined,
-                  size: 20,
-                  color: const Color(0xFFFF9500),
-                ),
+                SvgPicture.asset(AppAssets.papers, width: AppSizes.w20, height: AppSizes.h20),
                 SizedBox(width: AppSizes.w8),
                 Text(
                   'Notes',
-                  style: TextStyle(
-                    fontSize: AppSizes.sp16,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF8B6E00),
-                  ),
+                  style: 
+                 AppStyles.black14600.copyWith(fontSize: AppSizes.sp16),
                 ),
               ],
             ),
             SizedBox(height: AppSizes.h12),
             Text(
               notes,
-              style: TextStyle(
-                fontSize: AppSizes.sp14,
-                fontWeight: FontWeight.w400,
-                color: const Color(0xFF5D4E00),
-                height: 1.5,
-              ),
+              style: AppStyles.black14400,
             ),
           ],
         ),

@@ -7,36 +7,19 @@ import 'package:medi/features/patient/features/add_medication/presentation/cubit
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/custom_stepper.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/navigation_buttons.dart';
 
-class ConfirmationScreen extends StatefulWidget {
+class ConfirmationScreen extends StatelessWidget {
   const ConfirmationScreen({super.key});
 
-  @override
-  State<ConfirmationScreen> createState() => _ConfirmationScreenState();
-}
-
-class _ConfirmationScreenState extends State<ConfirmationScreen> {
-  bool _isLoading = false;
-
-  void _handleAddMedication() {
-    // TODO: Call API to add medication
-    setState(() {
-      _isLoading = true;
-    });
-
-    // Simulate API call
-    Future.delayed(const Duration(seconds: 2), () {
-      setState(() {
-        _isLoading = false;
-      });
-
-      // Navigate to success screen or back to home
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Medication added successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    });
+  Future<void> _handleAddMedication(BuildContext context) async {
+    final medication = context.read<MedicationDataCubit>().state.medicationData;
+    await HiveService.addMedication(medication);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Medication added successfully!'),
+        backgroundColor: Colors.green,
+      ),
+    );
+    context.go('/medicine');
   }
 
   @override
@@ -162,9 +145,9 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
                     // Back and Add Buttons
                     NavigationButtons(
                       onBackPressed: () => context.pop(),
-                      nextEnabled: !_isLoading,
-                      onNextPressed: _isLoading ? null : _handleAddMedication,
-                      nextText: _isLoading ? 'Adding...' : 'Add Medication',
+                      nextEnabled: true,
+                      onNextPressed: () => _handleAddMedication(context),
+                      nextText: 'Add Medication',
                     ),
                   ],
                 ),

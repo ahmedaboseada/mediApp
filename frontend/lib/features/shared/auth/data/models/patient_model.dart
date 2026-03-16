@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 import 'package:medi/features/shared/auth/data/models/caregiver_model.dart';
 
 part 'patient_model.g.dart';
@@ -18,7 +19,7 @@ class PatientModel {
   @HiveField(5)
   final List<String> longTermMedication;
   @HiveField(6)
-  final List<String> medications;
+  final List<Medication> medications;
   @HiveField(7)
   final bool saveOption;
   @HiveField(8)
@@ -65,7 +66,9 @@ class PatientModel {
       longTermMedication: List<String>.from(
         json['longTermMedication'] as List? ?? [],
       ),
-      medications: List<String>.from(json['medications'] as List? ?? []),
+      medications: List<Medication>.from(
+        (json['medications'] as List? ?? []).map((e) => Medication.fromJson(e as Map<String, dynamic>)),
+      ),
       saveOption: json['saveOption'] as bool? ?? false,
       connectedDoctors: List<String>.from(
         json['connectedDoctors'] as List? ?? [],
@@ -88,7 +91,7 @@ class PatientModel {
       'allergies': allergies,
       'activeIngredients': activeIngredients,
       'longTermMedication': longTermMedication,
-      'medications': medications,
+      'medications': medications.map((m) => m.toJson()).toList(),
       'saveOption': saveOption,
       'connectedDoctors': connectedDoctors,
       'createdAt': createdAt,
