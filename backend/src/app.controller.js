@@ -13,6 +13,8 @@ import mongoose from 'mongoose';
 import patientRouter from './modules/patientModel/patient.controller.js';
 import doctorRouter from './modules/doctorModel/doctor.controller.js';
 import adminRouter from './modules/adminModel/admin.controller.js';
+import medicineRouter from './modules/medicineModel/medicine.controller.js';
+import healthRouter from './modules/healthModel/health.controller.js';
 
 
 import { startWeeklyAvailabilityReset } from './utils/index.js';
@@ -66,6 +68,8 @@ export const bootstrap = async () => {
     app.use('/patients', patientRouter);
     app.use('/doctors', doctorRouter);
     app.use('/admin', adminRouter);
+    app.use('/medications', medicineRouter);
+    app.use('/health', healthRouter);
 
 
 

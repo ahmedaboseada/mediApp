@@ -1,378 +1,807 @@
 {
-    "info": {
-        "_postman_id": "d04a43b2-7bb3-41bb-b851-9e235e23652a",
-        "name": "MediApp - Patient APIs",
-        "description": "Collection of patient profile and caregiver endpoints",
-        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-        "_exporter_id": "1"
+  "info": {
+    "_postman_id": "d04a43b2-7bb3-41bb-b851-9e235e23652a",
+    "name": "MediApp - Patient APIs",
+    "description": "Collection of patient profile and caregiver endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "1"
+  },
+  "item": [
+    {
+      "name": "Profile Completion",
+      "item": [
+        {
+          "name": "Complete Profile (One Step)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "phone",
+                  "value": "+1234567890",
+                  "type": "text"
+                },
+                {
+                  "key": "yearOfBirth",
+                  "value": "1990",
+                  "type": "text"
+                },
+                {
+                  "key": "gender",
+                  "value": "male",
+                  "type": "text"
+                },
+                {
+                  "key": "chronicConditions[0]",
+                  "value": "Hypertension",
+                  "type": "text"
+                },
+                {
+                  "key": "longTermMedication[0]",
+                  "value": "Aspirin",
+                  "type": "text"
+                },
+                {
+                  "key": "longTermMedication[1]",
+                  "value": "Ibuprofen",
+                  "type": "text"
+                },
+                {
+                  "key": "allergies[0]",
+                  "value": "Penicillin",
+                  "type": "text"
+                },
+                {
+                  "key": "reactionToMedication",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "allergyAlerts",
+                  "value": "true",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/patients/complete",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "patients",
+                "complete"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Complete Basic Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "phone",
+                  "value": "+1234567890",
+                  "type": "text"
+                },
+                {
+                  "key": "yearOfBirth",
+                  "value": "1990",
+                  "type": "text"
+                },
+                {
+                  "key": "gender",
+                  "value": "male",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/patients/complete/basic",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "patients",
+                "complete",
+                "basic"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Complete Health Step 1",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"chronicConditions\": [\"Hypertension\"],\n    \"longTermMedication\": [\"Aspirin\", \"Ibuprofen\"],\n    \"activeIngredients\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/patients/complete/health1",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "patients",
+                "complete",
+                "health1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Complete Health Step 2",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"allergies\": [\"Penicillin\"],\n    \"reactionToMedication\": true,\n    \"allergyAlerts\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/patients/complete/health2",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "patients",
+                "complete",
+                "health2"
+              ]
+            }
+          }
+        }
+      ]
     },
-    "item": [
+    {
+      "name": "Caregiver Logic",
+      "item": [
         {
-            "name": "Profile Completion",
-            "item": [
-                {
-                    "name": "Complete Profile (One Step)",
-                    "request": {
-                        "method": "PATCH",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "bearer {{ACCESS_TOKEN}}"
-                            }
-                        ],
-                        "body": {
-                            "mode": "formdata",
-                            "formdata": [
-                                {
-                                    "key": "avatar",
-                                    "type": "file",
-                                    "src": []
-                                },
-                                {
-                                    "key": "phone",
-                                    "value": "+1234567890",
-                                    "type": "text"
-                                },
-                                {
-                                    "key": "yearOfBirth",
-                                    "value": "1990",
-                                    "type": "text"
-                                },
-                                {
-                                    "key": "gender",
-                                    "value": "male",
-                                    "type": "text"
-                                },
-                                {
-                                    "key": "chronicConditions[0]",
-                                    "value": "Hypertension",
-                                    "type": "text"
-                                },
-                                {
-                                    "key": "longTermMedication[0]",
-                                    "value": "Aspirin",
-                                    "type": "text"
-                                },
-                                {
-                                    "key": "longTermMedication[1]",
-                                    "value": "Ibuprofen",
-                                    "type": "text"
-                                },
-                                {
-                                    "key": "allergies[0]",
-                                    "value": "Penicillin",
-                                    "type": "text"
-                                },
-                                {
-                                    "key": "reactionToMedication",
-                                    "value": "true",
-                                    "type": "text"
-                                },
-                                {
-                                    "key": "allergyAlerts",
-                                    "value": "true",
-                                    "type": "text"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{BASE_URL}}/patients/complete",
-                            "host": [
-                                "{{BASE_URL}}"
-                            ],
-                            "path": [
-                                "patients",
-                                "complete"
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Complete Basic Profile",
-                    "request": {
-                        "method": "PATCH",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "bearer {{ACCESS_TOKEN}}"
-                            }
-                        ],
-                        "body": {
-                            "mode": "formdata",
-                            "formdata": [
-                                {
-                                    "key": "avatar",
-                                    "type": "file",
-                                    "src": []
-                                },
-                                {
-                                    "key": "phone",
-                                    "value": "+1234567890",
-                                    "type": "text"
-                                },
-                                {
-                                    "key": "yearOfBirth",
-                                    "value": "1990",
-                                    "type": "text"
-                                },
-                                {
-                                    "key": "gender",
-                                    "value": "male",
-                                    "type": "text"
-                                }
-                            ]
-                        },
-                        "url": {
-                            "raw": "{{BASE_URL}}/patients/complete/basic",
-                            "host": [
-                                "{{BASE_URL}}"
-                            ],
-                            "path": [
-                                "patients",
-                                "complete",
-                                "basic"
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Complete Health Step 1",
-                    "request": {
-                        "method": "PATCH",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "bearer {{ACCESS_TOKEN}}"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"chronicConditions\": [\"Hypertension\"],\n    \"longTermMedication\": [\"Aspirin\", \"Ibuprofen\"],\n    \"activeIngredients\": []\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "url": {
-                            "raw": "{{BASE_URL}}/patients/complete/health1",
-                            "host": [
-                                "{{BASE_URL}}"
-                            ],
-                            "path": [
-                                "patients",
-                                "complete",
-                                "health1"
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Complete Health Step 2",
-                    "request": {
-                        "method": "PATCH",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "bearer {{ACCESS_TOKEN}}"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"allergies\": [\"Penicillin\"],\n    \"reactionToMedication\": true,\n    \"allergyAlerts\": true\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "url": {
-                            "raw": "{{BASE_URL}}/patients/complete/health2",
-                            "host": [
-                                "{{BASE_URL}}"
-                            ],
-                            "path": [
-                                "patients",
-                                "complete",
-                                "health2"
-                            ]
-                        }
-                    }
+          "name": "Set Caregiving Option",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"caregivingOption\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
                 }
-            ]
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/patients/caregiver/option",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "patients",
+                "caregiver",
+                "option"
+              ]
+            }
+          }
         },
         {
-            "name": "Caregiver Logic",
-            "item": [
-                {
-                    "name": "Set Caregiving Option",
-                    "request": {
-                        "method": "PATCH",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "bearer {{ACCESS_TOKEN}}"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"caregivingOption\": true\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "url": {
-                            "raw": "{{BASE_URL}}/patients/caregiver/option",
-                            "host": [
-                                "{{BASE_URL}}"
-                            ],
-                            "path": [
-                                "patients",
-                                "caregiver",
-                                "option"
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Send Caregiver Request",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "bearer {{ACCESS_TOKEN}}"
-                            }
-                        ],
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"caregiverEmail\": \"caregiver@example.com\",\n    \"relationship\": \"parent\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        },
-                        "url": {
-                            "raw": "{{BASE_URL}}/patients/caregiver/request",
-                            "host": [
-                                "{{BASE_URL}}"
-                            ],
-                            "path": [
-                                "patients",
-                                "caregiver",
-                                "request"
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "List Caregiver Requests (Inbox)",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "bearer {{CAREGIVER_ACCESS_TOKEN}}"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{BASE_URL}}/patients/caregiver/requests",
-                            "host": [
-                                "{{BASE_URL}}"
-                            ],
-                            "path": [
-                                "patients",
-                                "caregiver",
-                                "requests"
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Accept Caregiver Request",
-                    "request": {
-                        "method": "PATCH",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "bearer {{CAREGIVER_ACCESS_TOKEN}}"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{BASE_URL}}/patients/caregiver/requests/:requestId/accept",
-                            "host": [
-                                "{{BASE_URL}}"
-                            ],
-                            "path": [
-                                "patients",
-                                "caregiver",
-                                "requests",
-                                ":requestId",
-                                "accept"
-                            ],
-                            "variable": [
-                                {
-                                    "key": "requestId",
-                                    "value": "65b4c43...",
-                                    "description": "MongoDB Request ID fetched from inbox"
-                                }
-                            ]
-                        }
-                    }
-                },
-                {
-                    "name": "Reject Caregiver Request",
-                    "request": {
-                        "method": "PATCH",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "bearer {{CAREGIVER_ACCESS_TOKEN}}"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{BASE_URL}}/patients/caregiver/requests/:requestId/reject",
-                            "host": [
-                                "{{BASE_URL}}"
-                            ],
-                            "path": [
-                                "patients",
-                                "caregiver",
-                                "requests",
-                                ":requestId",
-                                "reject"
-                            ],
-                            "variable": [
-                                {
-                                    "key": "requestId",
-                                    "value": "65b4c43...",
-                                    "description": "MongoDB Request ID fetched from inbox"
-                                }
-                            ]
-                        }
-                    }
+          "name": "Send Caregiver Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"caregiverEmail\": \"caregiver@example.com\",\n    \"relationship\": \"parent\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
                 }
-            ]
-        }
-    ],
-    "variable": [
-        {
-            "key": "BASE_URL",
-            "value": "http://localhost:8000",
-            "type": "string"
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/patients/caregiver/request",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "patients",
+                "caregiver",
+                "request"
+              ]
+            }
+          }
         },
         {
-            "key": "ACCESS_TOKEN",
-            "value": "REPLACE_WITH_PATIENT_ACCESS_TOKEN",
-            "type": "string"
+          "name": "List Caregiver Requests (Inbox)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{CAREGIVER_ACCESS_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/patients/caregiver/requests",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "patients",
+                "caregiver",
+                "requests"
+              ]
+            }
+          }
         },
         {
-            "key": "CAREGIVER_ACCESS_TOKEN",
-            "value": "REPLACE_WITH_CAREGIVER_ACCESS_TOKEN",
-            "type": "string"
+          "name": "Accept Caregiver Request",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{CAREGIVER_ACCESS_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/patients/caregiver/requests/:requestId/accept",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "patients",
+                "caregiver",
+                "requests",
+                ":requestId",
+                "accept"
+              ],
+              "variable": [
+                {
+                  "key": "requestId",
+                  "value": "65b4c43...",
+                  "description": "MongoDB Request ID fetched from inbox"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reject Caregiver Request",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{CAREGIVER_ACCESS_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/patients/caregiver/requests/:requestId/reject",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "patients",
+                "caregiver",
+                "requests",
+                ":requestId",
+                "reject"
+              ],
+              "variable": [
+                {
+                  "key": "requestId",
+                  "value": "65b4c43...",
+                  "description": "MongoDB Request ID fetched from inbox"
+                }
+              ]
+            }
+          }
         }
-    ]
+      ]
+    },
+    {
+      "name": "Medications",
+      "item": [
+        {
+          "name": "Add Medicine",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Aspirin\",\"type\":\"tablet\",\"frequency\":\"daily\",\"daily\":[\"08:00\",\"20:00\"],\"dosage\":\"10mg\",\"stock\":30}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/medications",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "medications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Critical Weekly Medicine",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Insulin\",\"type\":\"injection\",\"frequency\":\"weekly\",\"weekly\":[{\"day\":\"monday\",\"times\":[\"09:00\"]}],\"dosage\":\"20 units\",\"stock\":5,\"criticalMode\":true,\"status\":\"critical\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/medications",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "medications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Specific Date Medicine",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Amoxicillin\",\"type\":\"syrup\",\"frequency\":\"specific\",\"specific\":[{\"day\":\"2026-06-15\",\"times\":[\"10:00\",\"22:00\"]}],\"dosage\":\"5ml\",\"stock\":1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/medications",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "medications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Chronic Medicine",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Lisinopril\",\"type\":\"capsule\",\"frequency\":\"daily\",\"daily\":[\"08:00\"],\"isChronic\":true,\"notes\":\"Taken for high blood pressure long term\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/medications",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "medications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Medications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/medications",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "medications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Edit Medicine",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Aspirin Extra\",\"type\":\"tablet\",\"frequency\":\"daily\",\"daily\":[\"09:00\",\"21:00\"],\"dosage\":\"20mg\",\"stock\":100}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/medications/{{MED_ID}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "medications",
+                "{{MED_ID}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Medicine",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/medications/{{MED_ID}}",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "medications",
+                "{{MED_ID}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get active medications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/medications?filter=active",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "medications"
+              ],
+              "query": [
+                {
+                  "key": "filter",
+                  "value": "active"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get full schedule",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/medications/schedule",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "medications",
+                "schedule"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark as Taken",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"date\":\"2026-06-15\",\"time\":\"08:00\",\"taken\":true}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/medications/{{MED_ID}}/taken",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "medications",
+                "{{MED_ID}}",
+                "taken"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Daily Log",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"text\":\"Feeling good\",\"level\":\"low\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/medications/{{MED_ID}}/log",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "medications",
+                "{{MED_ID}}",
+                "log"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health & Symptoms",
+      "item": [
+        {
+          "name": "Add Blood Pressure",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"type\":\"blood_pressure\",\"systolic\":120,\"diastolic\":80}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/health/measurements",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "health",
+                "measurements"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Blood Pressures",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/health/measurements?type=blood_pressure",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "health",
+                "measurements"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "blood_pressure"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Symptom Log",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"symptom\":\"Headache\",\"severity\":\"moderate\",\"notes\":\"Mild headache in the morning\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/health/symptoms",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "health",
+                "symptoms"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Symptoms Logs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/health/symptoms",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "health",
+                "symptoms"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "ACCESS_TOKEN",
+      "value": "REPLACE_WITH_PATIENT_ACCESS_TOKEN",
+      "type": "string"
+    },
+    {
+      "key": "CAREGIVER_ACCESS_TOKEN",
+      "value": "REPLACE_WITH_CAREGIVER_ACCESS_TOKEN",
+      "type": "string"
+    }
+  ]
 }

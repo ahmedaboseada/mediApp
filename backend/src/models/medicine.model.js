@@ -54,10 +54,14 @@ const medicineSchema = new Schema(
 
         startDate: { type: Date },
         endDate: { type: Date },
+        expiryDate: { type: Date },
 
         dosage: { type: String, trim: true, maxlength: 120 },
         stock: { type: Number, min: 0 },
+        leftThreshold: { type: Number, default: 10 },
+        isChronic: { type: Boolean, default: false },
 
+        name: { type: String, required: true, trim: true, maxlength: 160 },
         activeIngredient: { type: String, trim: true, maxlength: 160 },
 
         criticalMode: { type: Boolean, default: false },
@@ -76,23 +80,22 @@ const medicineSchema = new Schema(
 );
 
 // enforce shape by frequency
-medicineSchema.pre('validate', function (next) {
+medicineSchema.pre('validate', function () {
     if (this.frequency === medicineFrequency.daily) {
         this.weekly = [];
         this.specific = [];
-        if (!this.daily?.length) return next(new Error('daily required for daily frequency'));
+        if (!this.daily?.length) throw new Error('daily required for daily frequency');
     }
     if (this.frequency === medicineFrequency.weekly) {
         this.daily = [];
         this.specific = [];
-        if (!this.weekly?.length) return next(new Error('weekly required for weekly frequency'));
+        if (!this.weekly?.length) throw new Error('weekly required for weekly frequency');
     }
     if (this.frequency === medicineFrequency.specific) {
         this.daily = [];
         this.weekly = [];
-        if (!this.specific?.length) return next(new Error('specific required for specific frequency'));
+        if (!this.specific?.length) throw new Error('specific required for specific frequency');
     }
-    next();
 });
 
 export default mongoose.model('Medicine', medicineSchema);
