@@ -532,7 +532,13 @@ const publicUser = (u) => ({
 });
 
 const attachTypeDoc = async (user) => {
-    if (user.type === 'patient') return { patient: await patientModel.findOne({ userId: user._id }).lean() };
+    if (user.type === 'patient') {
+        const patient = await patientModel.findOne({ userId: user._id })
+            .populate({ path: 'medications', select: 'name type dosage frequency activeIngredient status isChronic endDate' })
+            .populate({ path: 'longTermMedication', select: 'name type dosage frequency activeIngredient status isChronic endDate' })
+            .lean();
+        return { patient };
+    }
     if (user.type === 'doctor') return { doctor: await doctorModel.findOne({ userId: user._id }).lean() };
     return {};
 };

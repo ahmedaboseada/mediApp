@@ -15,6 +15,7 @@ const healthMeasurementSchema = new Schema(
         value: { type: Number }, // For single values like weight, heart_rate, blood_sugar
         systolic: { type: Number }, // For blood pressure
         diastolic: { type: Number }, // For blood pressure
+        heartRate: { type: Number }, // For combined blood pressure measurements
 
         date: { type: Date, default: Date.now, required: true },
         notes: { type: String, trim: true, maxlength: 500 }

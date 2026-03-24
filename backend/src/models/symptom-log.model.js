@@ -7,7 +7,7 @@ const symptomLogSchema = new Schema(
     {
         patientId: { type: Types.ObjectId, ref: 'Patient', required: true, index: true },
 
-        symptom: { type: String, required: true, trim: true }, // e.g., 'Headache', 'Fatigue', 'Nausea'
+        symptoms: [{ type: String, trim: true }], // e.g., ['Headache', 'Fatigue', 'Nausea']
         severity: {
             type: String,
             enum: ['none', 'mild', 'moderate', 'severe'],

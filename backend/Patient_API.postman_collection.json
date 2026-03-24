@@ -481,6 +481,66 @@
           }
         },
         {
+          "name": "Add Critical Medicine",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Atorvastatin\",\"type\":\"tablet\",\"frequency\":\"daily\",\"daily\":[\"20:00\"],\"criticalMode\":true,\"notes\":\"Testing boolean sync\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/medications",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "medications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add AI Inferred Chronic Medicine",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Metformin\",\"type\":\"tablet\",\"frequency\":\"daily\",\"daily\":[\"12:00\"],\"notes\":\"Should automatically trigger chronic condition assignments in DB\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/medications",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "medications"
+              ]
+            }
+          }
+        },
+        {
           "name": "Get All Medications",
           "request": {
             "method": "GET",
@@ -684,7 +744,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"type\":\"blood_pressure\",\"systolic\":120,\"diastolic\":80}",
+              "raw": "{\"type\":\"blood_pressure\",\"systolic\":120,\"diastolic\":80,\"heartRate\":72}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -732,6 +792,127 @@
           }
         },
         {
+          "name": "Add Heart Rate",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"type\":\"heart_rate\",\"value\":80}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/health/measurements",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "health",
+                "measurements"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Heart Rates",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/health/measurements?type=heart_rate",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "health",
+                "measurements"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "heart_rate"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Blood Sugar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"type\":\"blood_sugar\",\"value\":105,\"notes\":\"Fasting blood sugar\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/health/measurements",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "health",
+                "measurements"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Add Weight",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"type\":\"weight\",\"value\":75.5}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/health/measurements",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "health",
+                "measurements"
+              ]
+            }
+          }
+        },
+        {
           "name": "Add Symptom Log",
           "request": {
             "method": "POST",
@@ -743,7 +924,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"symptom\":\"Headache\",\"severity\":\"moderate\",\"notes\":\"Mild headache in the morning\"}",
+              "raw": "{\"symptoms\":[\"Headache\",\"Fatigue\"],\"severity\":\"moderate\",\"notes\":\"Mild headache in the morning\"}",
               "options": {
                 "raw": {
                   "language": "json"

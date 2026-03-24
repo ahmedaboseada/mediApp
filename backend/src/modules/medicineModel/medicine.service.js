@@ -2,19 +2,25 @@ import { medicineModel, patientModel } from '../../models/index.js';
 import { medicineFrequency, medicineStatus, weekDays } from '../../config/CONSTANTS.js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const enhanceMedicineWithAI = async (medicineId, medicineName) => {
+const enhanceMedicineWithAI = async (medicineId, medicineName, submittedType) => {
     if (!medicineName || !process.env.GEMINI_API_KEY) return;
     try {
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
         const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview", generationConfig: { responseMimeType: "application/json" } });
 
         const prompt = `You are a strict medical pharmacist AI assistant.
-Analyze the following medication brand name or description: "${medicineName}".
+Analyze the following medication brand name or description: "${medicineName}". The user submitted its form/type as "${submittedType}".
 Identify its actual pharmaceutical active chemical ingredient(s). Do not just repeat the brand name.
 For example, if the input is "Panadol" or "Tylenol", the activeIngredient is "Paracetamol" or "Acetaminophen". If input is "Dexazone", the activeIngredient is "Dexamethasone".
+Also determine if this medication is typically prescribed as a long-term "chronic" medication (e.g. for diabetes, hypertension, asthma).
+Finally, verify or correct the medication type. The ONLY valid types are: 'tablet', 'capsule', 'syrup', 'injection', 'drops', 'spray', 'cream', 'other'. If the true form of "${medicineName}" does not match "${submittedType}", output the corrected valid type. Otherwise, output the submitted type.
+
 Respond with a single JSON object containing:
 - "activeIngredient": string (only the chemical active ingredient name)
-- "sideEffects": array of strings (top 3 common possible side effects)`;
+- "sideEffects": array of strings (top 3 common possible side effects)
+- "isChronicAI": boolean (true if it's typically a chronic/long-term medication, else false)
+- "chronicCondition": string or null (if isChronicAI is true, the name of the common chronic condition it treats, e.g. "Hypertension". Otherwise null.)
+- "correctedType": string (must be one of the exact valid types listed above)`;
 
         const result = await model.generateContent(prompt);
         const aiData = JSON.parse(result.response.text());
@@ -23,8 +29,60 @@ Respond with a single JSON object containing:
         if (aiData.activeIngredient) updates.activeIngredient = aiData.activeIngredient;
         if (Array.isArray(aiData.sideEffects) && aiData.sideEffects.length > 0) updates.sideEffects = aiData.sideEffects.slice(0, 3);
         
+        if (aiData.isChronicAI) {
+            updates.isChronic = true;
+            updates.criticalMode = true;
+            updates.status = 'critical';
+        }
+
+        if (aiData.correctedType && aiData.correctedType !== submittedType) {
+            const validTypes = ['tablet', 'capsule', 'syrup', 'injection', 'drops', 'spray', 'cream', 'other'];
+            if (validTypes.includes(aiData.correctedType)) {
+                updates.type = aiData.correctedType;
+            }
+        }
+
         if (Object.keys(updates).length > 0) {
             await medicineModel.findByIdAndUpdate(medicineId, updates);
+        }
+
+        // Update Patient Models
+        const medicine = await medicineModel.findById(medicineId);
+        if (medicine) {
+            const patient = await patientModel.findById(medicine.patientId);
+            if (patient) {
+                let patientUpdated = false;
+
+                if (aiData.activeIngredient) {
+                    if (!patient.activeIngredients) patient.activeIngredients = [];
+                    const normalized = aiData.activeIngredient.toLowerCase().trim();
+                    if (!patient.activeIngredients.some(ing => ing.toLowerCase().trim() === normalized)) {
+                        patient.activeIngredients.push(aiData.activeIngredient.trim());
+                        patientUpdated = true;
+                    }
+                }
+
+                if (medicine.isChronic) {
+                    if (!patient.longTermMedication) patient.longTermMedication = [];
+                    if (!patient.longTermMedication.includes(medicineId)) {
+                        patient.longTermMedication.push(medicineId);
+                        patientUpdated = true;
+                    }
+
+                    if (aiData.chronicCondition) {
+                        if (!patient.chronicConditions) patient.chronicConditions = [];
+                        const normalizedCond = aiData.chronicCondition.toLowerCase().trim();
+                        if (!patient.chronicConditions.some(cond => cond.toLowerCase().trim() === normalizedCond)) {
+                            patient.chronicConditions.push(aiData.chronicCondition.trim());
+                            patientUpdated = true;
+                        }
+                    }
+                }
+
+                if (patientUpdated) {
+                    await patient.save();
+                }
+            }
         }
     } catch (err) {
         console.error("Failed to generate active ingredient with Gemini in BG:", err.message);
@@ -44,6 +102,12 @@ export const addMedicine = async (req, res, next) => {
         sideEffects: req.body.sideEffects || [] 
     };
 
+    if (medicineData.isChronic === true || medicineData.criticalMode === true || medicineData.status === 'critical') {
+        medicineData.isChronic = true;
+        medicineData.criticalMode = true;
+        medicineData.status = 'critical';
+    }
+
     const medicine = await medicineModel.create(medicineData);
 
     // Associate with patient
@@ -51,7 +115,7 @@ export const addMedicine = async (req, res, next) => {
     await patient.save();
     
     // Background AI Task
-    enhanceMedicineWithAI(medicine._id, req.body.name).catch(console.error);
+    enhanceMedicineWithAI(medicine._id, req.body.name, req.body.type).catch(console.error);
 
     res.status(201).json({ message: 'Medicine added successfully', medicine });
 };
@@ -91,6 +155,16 @@ export const updateMedicine = async (req, res, next) => {
 
     const payload = { ...req.body };
 
+    if (payload.isChronic === true || payload.criticalMode === true || payload.status === 'critical') {
+        payload.isChronic = true;
+        payload.criticalMode = true;
+        payload.status = 'critical';
+    } else if (payload.isChronic === false || payload.criticalMode === false) {
+        payload.isChronic = false;
+        payload.criticalMode = false;
+        if (payload.status === 'critical' || !payload.status) payload.status = 'normal';
+    }
+
     const medicine = await medicineModel.findOneAndUpdate(
         { _id: id, patientId: patient._id },
         payload,
@@ -99,9 +173,9 @@ export const updateMedicine = async (req, res, next) => {
 
     if (!medicine) return res.status(404).json({ message: 'Medicine not found' });
 
-    // Background AI Task if name provided
-    if (req.body.name) {
-        enhanceMedicineWithAI(medicine._id, req.body.name).catch(console.error);
+    // Background AI Task if name or type provided
+    if (req.body.name || req.body.type) {
+        enhanceMedicineWithAI(medicine._id, req.body.name || medicine.name, req.body.type || medicine.type).catch(console.error);
     }
 
     res.status(200).json({ message: 'Medicine updated successfully', medicine });

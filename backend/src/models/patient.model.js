@@ -37,7 +37,7 @@ const patientSchema = new Schema(
         chronicConditions: [{ type: String }],
         allergies: [{ type: String }],
         activeIngredients: [{ type: String }],
-        longTermMedication: [{ type: String }],
+        longTermMedication: [{ type: Types.ObjectId, ref: 'Medicine' }],
 
         medications: [{ type: Types.ObjectId, ref: 'Medicine' }],
 
