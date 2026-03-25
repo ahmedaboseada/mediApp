@@ -37,6 +37,7 @@ class MedicationDataCubit extends Cubit<MedicationDataState> {
           medicationName: medicationName,
           type: type,
           dosage: dosage,
+          medicationType: Medication.medicationTypeFromLabel(type),
         ),
         updateType: 'details',
       ),
@@ -65,14 +66,14 @@ class MedicationDataCubit extends Cubit<MedicationDataState> {
 
   // Update stock and expiry
   void updateStockAndExpiry({
-    required String currentStock,
+    required int stock ,
     required String expiryDate,
     required bool isCriticalMode,
   }) {
     emit(
       MedicationDataUpdated(
         medicationData: state.medicationData.copyWith(
-          currentStock: currentStock,
+          stock: stock,
           expiryDate: expiryDate,
           isCriticalMode: isCriticalMode,
         ),
@@ -104,8 +105,8 @@ class MedicationDataCubit extends Cubit<MedicationDataState> {
         return data.copyWith(startDate: value as String);
       case 'endDate':
         return data.copyWith(endDate: value as String);
-      case 'currentStock':
-        return data.copyWith(currentStock: value as String);
+      case 'stock':
+        return data.copyWith(stock: value as int);
       case 'expiryDate':
         return data.copyWith(expiryDate: value as String);
       case 'isCriticalMode':

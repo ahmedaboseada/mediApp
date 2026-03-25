@@ -25,14 +25,11 @@ class MedicineInfoState extends Equatable {
 
   bool get isTaken => medication.isActive;
 
-  MedicationType get medicationType => medication.medicationType;
+  MedicationType get medicationType => medication.resolvedMedicationType;
 
   bool get criticalMode => medication.isCriticalMode;
 
-  int get stock {
-    final parsedCurrentStock = int.tryParse(medication.currentStock);
-    return parsedCurrentStock ?? medication.stock;
-  }
+  int get stock => medication.stock;
 
   String get expiryDate =>
       medication.expiryDate.isNotEmpty ? medication.expiryDate : 'N/A';

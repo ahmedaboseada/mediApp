@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:medi/core/core.dart';
 
 class MedicineHeaderCard extends StatelessWidget {
@@ -16,6 +17,30 @@ class MedicineHeaderCard extends StatelessWidget {
   final bool isTaken;
   final ValueChanged<bool> onTakenChanged;
   final String imagePath;
+
+  Widget _buildMedicationIcon() {
+    if (imagePath.toLowerCase().endsWith('.svg')) {
+      return SvgPicture.asset(
+        imagePath,
+        width: 60,
+        height: 60,
+        colorFilter: ColorFilter.mode(AppColors.whiteText, BlendMode.srcIn),
+        fit: BoxFit.contain,
+      );
+    }
+
+    return Image.asset(
+      imagePath,
+      width: 60,
+      height: 60,
+      fit: BoxFit.contain,
+      errorBuilder: (_, __, ___) => const Icon(
+        Icons.medication_rounded,
+        color: Colors.white,
+        size: 32,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,17 +76,7 @@ class MedicineHeaderCard extends StatelessWidget {
         child: Row(
           children: [
             // Medicine Icon
-            Image.asset(
-              imagePath,
-              width: 64,
-              height: 64,
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => const Icon(
-                Icons.medication_rounded,
-                color: Colors.white,
-                size: 32,
-              ),
-            ),
+            _buildMedicationIcon(),
             SizedBox(width: AppSizes.w16),
             // Medicine Info
             Expanded(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 
 class DeleteButton extends StatefulWidget {
@@ -52,7 +53,7 @@ class _DeleteButtonState extends State<DeleteButton> {
               ),
             ),
             TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
+              onPressed: () => context.pop(true),
               style: TextButton.styleFrom(
                 foregroundColor: const Color(0xFFFF3B30),
               ),
@@ -68,7 +69,6 @@ class _DeleteButtonState extends State<DeleteButton> {
 
     if (confirmed == true && mounted) {
       widget.onConfirmedDelete();
-      Navigator.of(context).pop();
     }
   }
 

@@ -46,7 +46,7 @@ class _StockExpiryScreenState extends State<StockExpiryScreen> {
   void _handleNext() {
     if (_formKey.currentState!.validate()) {
       context.read<MedicationDataCubit>().updateStockAndExpiry(
-        currentStock: _currentStockController.text,
+        stock: int.tryParse(_currentStockController.text) ?? 0,
         expiryDate: _expiryDateController.text,
         isCriticalMode: _isCriticalModeEnabled,
       );

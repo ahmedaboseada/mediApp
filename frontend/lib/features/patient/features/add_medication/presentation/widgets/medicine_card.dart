@@ -33,7 +33,7 @@ class MedicineCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            MedicationHeader(type: medication.medicationType),
+            MedicationHeader(type: medication.resolvedMedicationType),
             SizedBox(width: AppSizes.w12),
             Expanded(
               child: Column(
@@ -67,7 +67,7 @@ class MedicationHeader extends StatelessWidget {
         fit: BoxFit.contain,
       ),
       MedicationType.bottle => SvgPicture.asset(
-        AppAssets.medicineBox,
+        AppAssets.syrupIcon,
         width: AppSizes.w24,
         height: AppSizes.h24,
       ),
@@ -146,7 +146,7 @@ class MedicationInfoRow extends StatelessWidget {
           ],
         ),
         Text(
-          '${medication.dosage} - ${medication.schedule}',
+          '${medication.dosage} - ${medication.frequency}',
           style: AppStyles.secondary12400.copyWith(fontSize: AppSizes.sp14),
         ),
       ],

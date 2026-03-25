@@ -8,6 +8,7 @@ void main() async {
 
   // Initialize Hive before anything else
   await HiveService.init();
+  await LocalNotificationService.init();
 
   setupServiceLocator();
   runApp(const medi());

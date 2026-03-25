@@ -297,7 +297,6 @@ class DioClient {
               error.requestOptions.path != "/users/refreshToken") {
             final requestOptions = error.requestOptions;
 
-            /// لو فيه refresh شغال
             if (_isRefreshing) {
               final completer = Completer<void>();
               _refreshCompleters.add(completer);
@@ -313,14 +312,12 @@ class DioClient {
               return handler.resolve(response);
             }
 
-            /// ابدأ refresh
             _isRefreshing = true;
 
             final refreshed = await _refreshToken();
 
             _isRefreshing = false;
 
-            /// فك الانتظار لكل requests
             for (final completer in _refreshCompleters) {
               completer.complete();
             }

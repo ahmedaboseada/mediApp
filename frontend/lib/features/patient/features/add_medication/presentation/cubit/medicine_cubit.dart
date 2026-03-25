@@ -12,7 +12,7 @@ class MedicineCubit extends Cubit<MedicineState> {
   int get allCount => HiveService.getMedications().length;
 
   int get activeCount =>
-      HiveService.getMedications().where((m) => m.isActive).length;
+      HiveService.getMedications().where(_isMedicationActive).length;
 
   int get chronicCount =>
       HiveService.getMedications().where((m) => m.isChronic).length;
@@ -48,9 +48,30 @@ class MedicineCubit extends Cubit<MedicineState> {
   static List<Medication> _filterByTab(List<Medication> all, MedicineTab tab) {
     return switch (tab) {
       MedicineTab.all => all,
-      MedicineTab.active => all.where((m) => m.isActive).toList(),
+      MedicineTab.active => all.where(_isMedicationActive).toList(),
       MedicineTab.chronic => all.where((m) => m.isChronic).toList(),
     };
+  }
+
+  static bool _isMedicationActive(Medication medication) {
+    final parts = medication.endDate.split('/');
+    if (parts.length != 3) return false;
+
+    final month = int.tryParse(parts[0]);
+    final day = int.tryParse(parts[1]);
+    final year = int.tryParse(parts[2]);
+    if (month == null || day == null || year == null) return false;
+
+    DateTime endDate;
+    try {
+      endDate = DateTime(year, month, day);
+    } catch (_) {
+      return false;
+    }
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    return endDate.isAfter(today);
   }
 }
 

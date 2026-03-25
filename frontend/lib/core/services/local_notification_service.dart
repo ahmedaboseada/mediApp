@@ -1,28 +1,51 @@
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 class LocalNotificationService {
-  // static final LocalNotificationService _instance =
-  //     LocalNotificationService._internal();
+  static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+      static onTap (NotificationResponse notificationResponse) {
+        // notification tap
+      }
+       static onBackgroundTap(NotificationResponse notificationResponse) {
+        // Handle background notification tap
+      }
+  static Future init() async {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    final InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+    await flutterLocalNotificationsPlugin.initialize(
+      settings: initializationSettings,
+      onDidReceiveNotificationResponse: onTap,
+      onDidReceiveBackgroundNotificationResponse: onBackgroundTap,
+    );
+  }
 
-  // factory LocalNotificationService() => _instance;
-
-  // LocalNotificationService._internal();
-
-  // Future<void> initialize() async {
-  //   // Initialize the local notification plugin here
-  //   // For example, you can use flutter_local_notifications package
-  //   // and set up the necessary configurations
-  // }
-
-  // Future<void> showNotification({
-  //   required String title,
-  //   required String body,
-  //   int id = 0,
-  // }) async {
-  //   // Show a local notification with the given title and body
-  //   // You can customize the notification further by adding more parameters
-  // }
+  Future<void> showNotification({
+    required String title,
+    required String body,
+  }) async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+          'your_channel_id',
+          'your_channel_name',
+          channelDescription: 'your_channel_description',
+          importance: Importance.max,
+          priority: Priority.high,
+        );
+    NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+    );
+    await flutterLocalNotificationsPlugin.show(
+      id: 0,
+      title: title,
+      body: body,
+      notificationDetails: platformChannelSpecifics,
+    );
+  }
 }
 
-//1.set up
+//1.set up [initialization, permissions]=> Done.
 //2.basic notification
 //3. repeat notification
 //4.scheduled notification

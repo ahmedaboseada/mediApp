@@ -31,6 +31,7 @@ class _MedicineView extends StatelessWidget {
 
     return Scaffold(
       body: SafeArea(
+        bottom: false,
         child: Stack(
           children: [
             Padding(
@@ -73,10 +74,13 @@ class _MedicineView extends StatelessWidget {
                                 final medication = medications[index];
                                 return MedicineCard(
                                   medication: medication,
-                                  onTap: () => context.push(
-                                    '/medicine/info',
-                                    extra: medication,
-                                  ),
+                                  onTap: () async {
+                                    await context.push(
+                                      '/medicine/info',
+                                      extra: medication,
+                                    );
+                                    cubit.loadMedications();
+                                  },
                                 );
                               },
                             );
@@ -88,7 +92,7 @@ class _MedicineView extends StatelessWidget {
             ),
             Positioned(
               right: AppSizes.w16,
-              bottom: AppSizes.h20,
+              bottom: AppSizes.h160,
               child: const FloatingActionsMenu(),
             ),
           ],

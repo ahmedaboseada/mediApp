@@ -23,7 +23,6 @@ class Medication extends Equatable {
     this.startDate = '',
     this.endDate = '',
     this.reminders = const <String>[],
-    this.currentStock = '',
     this.expiryDate = '',
     this.isCriticalMode = false,
     this.schedule = '',
@@ -43,7 +42,7 @@ class Medication extends Equatable {
   final String startDate;
   final String endDate;
   final List<String> reminders;
-  final String currentStock;
+ // final String currentStock;
   final String schedule;
   final int stock;
   final String expiryDate;
@@ -53,6 +52,37 @@ class Medication extends Equatable {
   final bool isActive;
   final bool isChronic;
   final MedicationType medicationType;
+
+  static MedicationType medicationTypeFromLabel(String? label) {
+    switch (label?.trim().toLowerCase()) {
+      case 'injection':
+        return MedicationType.syringe;
+      case 'syrup':
+        return MedicationType.bottle;
+      case 'tablet':
+        return MedicationType.tablet;
+      case 'capsule':
+        return MedicationType.pill;
+      case 'cream':
+        return MedicationType.cream;
+      case 'drop':
+      case 'drops':
+        return MedicationType.drop;
+      case 'inhaler':
+        return MedicationType.inhaler;
+      case 'ointment':
+        return MedicationType.ointment;
+      default:
+        return MedicationType.pill;
+    }
+  }
+
+  MedicationType get resolvedMedicationType {
+    if (medicationType == MedicationType.pill && type.isNotEmpty) {
+      return medicationTypeFromLabel(type);
+    }
+    return medicationType;
+  }
 
   // Backward-compatible alias used by add-medication flow screens.
   String get medicationName => name;
@@ -87,7 +117,7 @@ class Medication extends Equatable {
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       reminders: reminders ?? this.reminders,
-      currentStock: currentStock ?? this.currentStock,
+     // currentStock: currentStock ?? this.currentStock,
       schedule: schedule ?? this.schedule,
       stock: stock ?? this.stock,
       expiryDate: expiryDate ?? this.expiryDate,
@@ -110,7 +140,7 @@ class Medication extends Equatable {
       'startDate': startDate,
       'endDate': endDate,
       'reminders': reminders,
-      'currentStock': currentStock,
+    //  'currentStock': currentStock,
       'schedule': schedule,
       'stock': stock,
       'expiryDate': expiryDate,
@@ -123,6 +153,14 @@ class Medication extends Equatable {
   }
 
   factory Medication.fromJson(Map<dynamic, dynamic> json) {
+    final medicationTypeIndex = json['medicationType'] as int?;
+    final parsedType =
+      medicationTypeIndex != null &&
+        medicationTypeIndex >= 0 &&
+        medicationTypeIndex < MedicationType.values.length
+      ? MedicationType.values[medicationTypeIndex]
+      : medicationTypeFromLabel(json['type'] as String?);
+
     return Medication(
       selectedMethod: (json['selectedMethod'] as int?) ?? 0,
       name: (json['name'] as String?) ?? '',
@@ -132,7 +170,7 @@ class Medication extends Equatable {
       startDate: (json['startDate'] as String?) ?? '',
       endDate: (json['endDate'] as String?) ?? '',
       reminders: ((json['reminders'] as List?)?.cast<String>()) ?? [],
-      currentStock: (json['currentStock'] as String?) ?? '',
+     // currentStock: (json['currentStock'] as String?) ?? '',
       schedule: (json['schedule'] as String?) ?? '',
       stock: (json['stock'] as int?) ?? 0,
       expiryDate: (json['expiryDate'] as String?) ?? '',
@@ -140,7 +178,7 @@ class Medication extends Equatable {
       stockStatus: MedicationStockStatus.values[(json['stockStatus'] as int?) ?? 2],
       isActive: (json['isActive'] as bool?) ?? false,
       isChronic: (json['isChronic'] as bool?) ?? false,
-      medicationType: MedicationType.values[(json['medicationType'] as int?) ?? 0],
+      medicationType: parsedType,
     );
   }
 
@@ -154,7 +192,7 @@ class Medication extends Equatable {
     startDate,
     endDate,
     reminders,
-    currentStock,
+   // currentStock,
     schedule,
     stock,
     expiryDate,

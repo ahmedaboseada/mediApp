@@ -52,8 +52,12 @@ class _MedicineInfoView extends StatelessWidget {
               margin: EdgeInsets.all(AppSizes.w16),
             ),
           );
+         
+            context.pop();
+          
         },
         child: SafeArea(
+          bottom: false,
           child: CustomScrollView(
             physics: const BouncingScrollPhysics(),
             slivers: [
@@ -73,7 +77,16 @@ class _MedicineInfoView extends StatelessWidget {
                 actions: [
                   GestureDetector(
                     child: SvgPicture.asset(AppAssets.edit),
-                    onTap: () => context.push(AppRouter.editMedicationScreen),
+                    onTap: () async {
+                      final cubit = context.read<MedicineInfoCubit>();
+                      final updated = await context.push<Medication>(
+                        AppRouter.editMedicationScreen,
+                        extra: cubit.state.medication,
+                      );
+                      if (updated != null && context.mounted) {
+                        await cubit.applyEditedMedication(updated);
+                      }
+                    },
                   ),
                 ],
                 actionsPadding: EdgeInsets.only(right: AppSizes.w12),
@@ -145,7 +158,7 @@ class _MedicineInfoView extends StatelessWidget {
                           expiryDate: stockData.$2,
                           onRefill: () => showRefillStockDialog(
                             context,
-                            onSave: (amount) => context
+                            onSave: (amount) async => context
                                 .read<MedicineInfoCubit>()
                                 .refillStock(amount: amount),
                           ),
@@ -197,9 +210,10 @@ class _MedicineInfoView extends StatelessWidget {
                     SizedBox(height: AppSizes.h24),
                     DeleteButton(
                       onConfirmedDelete: () async {
-                        context.read<MedicineInfoCubit>().deleteMedication();
+                        await context.read<MedicineInfoCubit>().deleteMedication();
                       },
                     ),
+                    SizedBox(height: AppSizes.h120),
                   ]),
                 ),
               ),

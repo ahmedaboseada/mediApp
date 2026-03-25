@@ -19,6 +19,10 @@ class ConfirmationScreen extends StatelessWidget {
         backgroundColor: Colors.green,
       ),
     );
+    LocalNotificationService().showNotification(
+      title: 'Medication Added',
+      body: '${medication.medicationName} has been added to your list.',
+    );
     context.go('/medicine');
   }
 
@@ -66,6 +70,7 @@ class ConfirmationScreen extends StatelessWidget {
                           'Medication name',
                           medicationData.medicationName,
                         ),
+                        _buildSummaryItem('Type', medicationData.type),
                         _buildSummaryItem('Dosage', medicationData.dosage),
                         _buildSummaryItem(
                           'Frequency',
@@ -73,7 +78,7 @@ class ConfirmationScreen extends StatelessWidget {
                         ),
                         _buildSummaryItem(
                           'Stock',
-                          '${medicationData.currentStock} units',
+                          '${medicationData.stock} units',
                         ),
                       ],
                     ),

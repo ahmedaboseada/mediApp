@@ -33,7 +33,7 @@ class CustomDropdown extends StatelessWidget {
           child: DropdownButtonFormField<String>(
             dropdownColor: AppColors.whiteText,
             validator: validator,
-            value: value,
+            initialValue: value,
             icon: Transform.rotate(
               angle: 1.5708,
               child: Icon(Icons.chevron_right, color: AppColors.arrow),

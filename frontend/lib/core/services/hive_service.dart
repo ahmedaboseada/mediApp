@@ -396,6 +396,56 @@ class HiveService {
     await saveMedications(current);
   }
 
+  /// Update a medication in the locally saved list.
+  static Future<void> updateMedication({
+    required Medication original,
+    required Medication updated,
+  }) async {
+    final current = getMedications();
+    var index = current.indexWhere((m) => m == original);
+
+    if (index == -1) {
+      index = current.indexWhere(
+        (m) =>
+            m.name == original.name &&
+            m.type == original.type &&
+            m.dosage == original.dosage &&
+            m.startDate == original.startDate &&
+            m.endDate == original.endDate,
+      );
+    }
+
+    if (index == -1) {
+      current.add(updated);
+    } else {
+      current[index] = updated;
+    }
+
+    await saveMedications(current);
+  }
+
+  /// Delete a medication from the locally saved list.
+  static Future<void> deleteMedication(Medication medication) async {
+    final current = getMedications();
+    var index = current.indexWhere((m) => m == medication);
+
+    if (index == -1) {
+      index = current.indexWhere(
+        (m) =>
+            m.name == medication.name &&
+            m.type == medication.type &&
+            m.dosage == medication.dosage &&
+            m.startDate == medication.startDate &&
+            m.endDate == medication.endDate,
+      );
+    }
+
+    if (index != -1) {
+      current.removeAt(index);
+      await saveMedications(current);
+    }
+  }
+
   // ========== CLEAR ALL DATA ==========
 
   /// Clear all data (logout)

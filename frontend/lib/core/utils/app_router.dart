@@ -117,6 +117,7 @@ class AppRouter {
       '/patient/addMedication/confirmation';
   static const String dailySymptomsScreen = '/medicine/dailySymptoms';
   static const String editMedicationScreen = '/patient/editMedication';
+  static const String medicineInfoScreen = '/patient/medicineInfo';
   // ========== DOCTOR ROUTES ==========
   static const String doctorLogin = '/login/doctor';
   static const String doctorSignUpScreen = '/signUp/doctor';
@@ -281,8 +282,14 @@ class AppRouter {
       ),
       GoRoute(
         path: editMedicationScreen,
-        builder: (context, state) => const EditMedicationScreen(),
+        builder: (context, state) => EditMedicationScreen(
+          medication: state.extra as Medication?,
+        ),
       ),
+      GoRoute(path: medicineInfoScreen, builder: (context, state) {
+        final medication = state.extra as Medication?;
+        return MedicineInfoScreen(medication: medication);
+      }),
 
       /// ================= PATIENT SHELL =================
       StatefulShellRoute.indexedStack(
@@ -343,7 +350,9 @@ class AppRouter {
                   ),
                   GoRoute(
                     path: editMedicationScreen,
-                    builder: (context, state) => const EditMedicationScreen(),
+                    builder: (context, state) => EditMedicationScreen(
+                      medication: state.extra as Medication?,
+                    ),
                   ),
                   GoRoute(
                     path: dailySymptomsScreen,

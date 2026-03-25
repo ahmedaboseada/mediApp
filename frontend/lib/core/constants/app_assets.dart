@@ -58,6 +58,7 @@ class AppAssets {
   static const String heartRate = '${path}heartrate.svg';
   static const String injection = '${path}injection.png';
   static const String tabletIcon = '${path}tablet.png';
+  static const String syrupIcon = '${path}syrup.svg';
   static const String medicineBox = '${path}box.svg';
   static const String medicineDrop = '${path}drop.svg';
   static const String medicineCream = '${path}cream.svg';
@@ -70,10 +71,11 @@ class AppAssets {
     final typeStr = medicationType.toString().split('.').last;
 
     return switch (typeStr) {
-      'pill' => medicineBox,
+      'pill' => pills,
       'syringe' => injection,
-      'bottle' => medicineBox,
+      'bottle' => syrupIcon,
       'tablet' => tabletIcon,
+      'syrup' => syrupIcon,
       'cream' => medicineCream,
       'drop' => medicineDrop,
       'inhaler' => medicineInhaler,

@@ -19,7 +19,9 @@ class ProfileScreen extends StatelessWidget {
     return BlocProvider(
       create: (_) => UserProfileCubit(getIt<AuthRepoImpl>())..getMe(),
       child: Scaffold(
+        extendBody: true,
         body: SafeArea(
+          bottom: false,
           child: Padding(
             padding: EdgeInsets.all(AppSizes.w16),
             child: SingleChildScrollView(
@@ -64,6 +66,7 @@ class ProfileScreen extends StatelessWidget {
                   SizedBox(height: AppSizes.h16),
 
                   SupportSection(),
+                  SizedBox(height: AppSizes.h120),
                 ],
               ),
             ),

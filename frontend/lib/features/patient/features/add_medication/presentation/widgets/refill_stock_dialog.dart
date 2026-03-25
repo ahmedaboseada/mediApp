@@ -4,7 +4,7 @@ import 'package:medi/features/patient/features/add_medication/presentation/widge
 
 Future<void> showRefillStockDialog(
   BuildContext context, {
-  required ValueChanged<int> onSave,
+  required Future<void> Function(int) onSave,
 }) async {
   final currentStockController = TextEditingController();
 
@@ -71,10 +71,19 @@ Future<void> showRefillStockDialog(
                     children: [
                       Expanded(
                         child: PrimaryButton(
-                          onPressed: () {
-                            onSave(
-                              int.tryParse(currentStockController.text) ?? 0,
-                            );
+                          onPressed: () async {
+                            final amount =
+                                int.tryParse(currentStockController.text) ?? 0;
+                            if (amount <= 0) {
+                              ScaffoldMessenger.of(dialogContext).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Please enter a valid stock amount'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
+                            }
+                            await onSave(amount);
                             Navigator.of(dialogContext).pop();
                           },
                           text: 'Save',

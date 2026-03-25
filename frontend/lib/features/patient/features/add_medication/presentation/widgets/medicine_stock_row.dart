@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/medicine_status_badge.dart';
@@ -17,7 +18,12 @@ class MedicineStockRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Icon(Icons.account_box, color: AppColors.secondaryText, size: 18),
+        SvgPicture.asset(
+          AppAssets.medicineBox,
+          width: AppSizes.w16,
+          height: AppSizes.h16,
+          colorFilter: ColorFilter.mode(AppColors.primary, BlendMode.srcIn,),
+        ),
         SizedBox(width: AppSizes.w4),
         Text(
           '${AppStrings.stock} $stock',
