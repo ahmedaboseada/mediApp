@@ -276,8 +276,8 @@ export const completeHealth1 = async (req, res) => {
     await patient.save();
 
     // AI Check in background: Extract active ingredients and check interactions
-    if (longTermMedication && longTermMedication.length > 0) {
-        analyzeMedications(patient._id, longTermMedication, patient.allergies || []).catch(console.error);
+    if (resolvedMedicationIds && resolvedMedicationIds.length > 0) {
+        analyzeMedications(patient._id, resolvedMedicationIds, patient.allergies || []).catch(console.error);
     }
 
     return res.status(200).json({ message: 'Health step 1 saved', patient: patient.toObject() });
