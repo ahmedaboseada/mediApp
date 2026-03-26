@@ -178,6 +178,7 @@ import userModel from '../../models/user.model.js';
 import patientModel from '../../models/patient.model.js';
 import caregiverRequestModel from '../../models/caregiver-request.model.js';
 import notificationModel from '../../models/notification.model.js';
+import medicineModel from '../../models/medicine.model.js';
 import { analyzeMedications } from '../../utils/ai.util.js';
 import * as ET from '../../utils/encryption/index.js';
 
@@ -247,7 +248,29 @@ export const completeHealth1 = async (req, res) => {
     const { chronicConditions, longTermMedication, activeIngredients } = req.body;
 
     patient.chronicConditions = chronicConditions;
-    patient.longTermMedication = longTermMedication;
+    
+    const resolvedMedicationIds = [];
+    if (longTermMedication && longTermMedication.length > 0) {
+        for (const medName of longTermMedication) {
+            let existingMed = await medicineModel.findOne({ patientId: patient._id, name: { $regex: new RegExp(`^${medName.trim()}$`, 'i') } });
+            if (!existingMed) {
+                existingMed = await medicineModel.create({
+                    patientId: patient._id,
+                    name: medName.trim(),
+                    type: 'other',
+                    frequency: 'daily',
+                    daily: ['09:00'],
+                    isChronic: true
+                });
+            }
+            resolvedMedicationIds.push(existingMed._id);
+            if (!patient.medications.includes(existingMed._id)) {
+                patient.medications.push(existingMed._id);
+            }
+        }
+    }
+
+    patient.longTermMedication = resolvedMedicationIds;
     patient.activeIngredients = activeIngredients;
 
     await patient.save();
@@ -437,11 +460,35 @@ export const completeProfile = async (req, res) => {
         'chronicConditions',
         'allergies',
         'activeIngredients',
-        'longTermMedication',
         'bloodTypes',
         'emergencyContact',
     ];
     for (const f of fields) if (req.body[f] !== undefined) patch[f] = req.body[f];
+
+    if (req.body.longTermMedication !== undefined) {
+        const resolvedMedicationIds = [];
+        if (req.body.longTermMedication.length > 0) {
+            for (const medName of req.body.longTermMedication) {
+                let existingMed = await medicineModel.findOne({ patientId: patient._id, name: { $regex: new RegExp(`^${medName.trim()}$`, 'i') } });
+                if (!existingMed) {
+                    existingMed = await medicineModel.create({
+                        patientId: patient._id,
+                        name: medName.trim(),
+                        type: 'other',
+                        frequency: 'daily',
+                        daily: ['09:00'],
+                        isChronic: true
+                    });
+                }
+                resolvedMedicationIds.push(existingMed._id);
+                if (!patient.medications.includes(existingMed._id)) {
+                    patient.medications.push(existingMed._id);
+                }
+            }
+        }
+        patch.longTermMedication = resolvedMedicationIds;
+        patch.medications = patient.medications;
+    }
 
     if (req.body.caregivingOption !== undefined) {
         patch['caregiver.caregivingOption'] = !!req.body.caregivingOption;

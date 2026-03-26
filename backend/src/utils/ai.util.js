@@ -1,5 +1,6 @@
 import Notification from '../models/notification.model.js';
 import patientModel from '../models/patient.model.js';
+import Medicine from '../models/medicine.model.js';
 
 /**
  * Calls Gemini API via REST to extract active ingredients and check for interactions/allergies.
@@ -16,9 +17,12 @@ export const analyzeMedications = async (patientId, newMedications, currentAller
         const modelStr = 'gemini-3-flash-preview';
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelStr}:generateContent?key=${apiKey}`;
 
+        const medicines = await Medicine.find({ _id: { $in: newMedications } }).select('name').lean();
+        const medicineNames = medicines.map(m => m.name);
+
         const prompt = `
             You are a medical AI assistant.
-            The patient is taking the following medications: ${newMedications.join(', ')}.
+            The patient is taking the following medications: ${medicineNames.join(', ')}.
             The patient has the following known allergies: ${currentAllergies.join(', ')}.
 
             Please analyze this and return STRICTLY a JSON object with the following schema:
