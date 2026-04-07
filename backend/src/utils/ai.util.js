@@ -41,7 +41,7 @@ export const analyzeMedications = async (patientId, newMedications, currentAller
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: {
-                    responseMimeType: 'application/json'
+                    responseMimeType: 'application/json',
                 }
             })
         });
