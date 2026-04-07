@@ -14,7 +14,7 @@ export const analyzeMedications = async (patientId, newMedications, currentAller
             return;
         }
 
-        const modelStr = 'gemini-2.5-flash';
+        const modelStr = 'gemini-3-flash-preview';
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelStr}:generateContent?key=${apiKey}`;
 
         const medicines = await Medicine.find({ _id: { $in: newMedications } }).select('name').lean();
