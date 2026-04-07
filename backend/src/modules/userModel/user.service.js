@@ -511,7 +511,7 @@ import * as ET from '../../utils/encryption/index.js';
 import * as VT from '../../utils/token/index.js';
 import { otp6 } from '../../utils/index.js';
 import { nanoid } from 'nanoid';
-import { waitUntil } from '@vercel/functions';
+
 
 import { sendEmailEvent, sendOTPEvent, sendEmailChangeConfirmEvent } from '../../utils/sendEmail-events/index.js';
 
@@ -600,11 +600,11 @@ export const signup = async (req, res) => {
         //     tokenId: confirmTokenId // Not supported by EventEmitter
         // });
 
-        waitUntil(sendEmailEvent({
+        sendEmailEvent({
             email: user.email,
             name: `${user.firstName} ${user.lastName}`,
             tokenId: confirmTokenId
-        }));
+        }).catch(console.error);
 
         // tokens
         const tokenId = nanoid();
@@ -651,7 +651,7 @@ export const signin = async (req, res) => {
         await userModel.updateOne({ _id: user._id }, { otp: otpEnc, otpExpires });
 
         // eventEmitter.emit('sendOTP', { email: user.email, otp, name: `${user.firstName} ${user.lastName}` });
-        waitUntil(sendOTPEvent({ email: user.email, otp, name: `${user.firstName} ${user.lastName}` }));
+        sendOTPEvent({ email: user.email, otp, name: `${user.firstName} ${user.lastName}` }).catch(console.error);
 
         const challengeToken = VT.generate2FAToken(user._id, '5m');
         return res.status(200).json({ message: 'OTP sent', requiresOtp: true, challengeToken });
@@ -747,14 +747,14 @@ export const requestEmailChange = async (req, res) => {
     await user.save();
 
     // eventEmitter.emit('sendEmailChangeConfirm', ...
-    waitUntil(sendEmailChangeConfirmEvent({
+    sendEmailChangeConfirmEvent({
         email: user.pendingEmail,
         name: `${user.firstName} ${user.lastName}`,
         userId: user._id,
         oldEmail: user.email,
         newEmail: user.pendingEmail,
         tokenId: emailChangeTokenId
-    }));
+    }).catch(console.error);
 
     return res.status(200).json({ message: 'Confirmation email sent to new email address.' });
 };

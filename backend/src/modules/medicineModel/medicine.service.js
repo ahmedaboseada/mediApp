@@ -6,7 +6,7 @@ const enhanceMedicineWithAI = async (medicineId, medicineName, submittedType) =>
     if (!medicineName || !process.env.GEMINI_API_KEY) return;
     try {
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", generationConfig: { responseMimeType: "application/json" } });
+        const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview", generationConfig: { responseMimeType: "application/json" } });
 
         const prompt = `You are a strict medical pharmacist AI assistant.
 Analyze the following medication brand name or description: "${medicineName}". The user submitted its form/type as "${submittedType}".
@@ -114,8 +114,8 @@ export const addMedicine = async (req, res, next) => {
     patient.medications.push(medicine._id);
     await patient.save();
 
-    // Await AI Task to prevent Vercel from killing the process
-    await enhanceMedicineWithAI(medicine._id, req.body.name, req.body.type).catch(console.error);
+    // Background AI Task (VPS)
+    enhanceMedicineWithAI(medicine._id, req.body.name, req.body.type).catch(console.error);
 
     res.status(201).json({ message: 'Medicine added successfully', medicine });
 };
@@ -173,9 +173,9 @@ export const updateMedicine = async (req, res, next) => {
 
     if (!medicine) return res.status(404).json({ message: 'Medicine not found' });
 
-    // Await AI Task to prevent Vercel from killing the process if name or type provided
+    // Background AI Task (VPS) if name or type provided
     if (req.body.name || req.body.type) {
-        await enhanceMedicineWithAI(medicine._id, req.body.name || medicine.name, req.body.type || medicine.type).catch(console.error);
+        enhanceMedicineWithAI(medicine._id, req.body.name || medicine.name, req.body.type || medicine.type).catch(console.error);
     }
 
     res.status(200).json({ message: 'Medicine updated successfully', medicine });
