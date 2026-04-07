@@ -114,8 +114,8 @@ export const addMedicine = async (req, res, next) => {
     patient.medications.push(medicine._id);
     await patient.save();
 
-    // Background AI Task
-    enhanceMedicineWithAI(medicine._id, req.body.name, req.body.type).catch(console.error);
+    // Await AI Task to prevent Vercel from killing the process
+    await enhanceMedicineWithAI(medicine._id, req.body.name, req.body.type).catch(console.error);
 
     res.status(201).json({ message: 'Medicine added successfully', medicine });
 };
@@ -173,9 +173,9 @@ export const updateMedicine = async (req, res, next) => {
 
     if (!medicine) return res.status(404).json({ message: 'Medicine not found' });
 
-    // Background AI Task if name or type provided
+    // Await AI Task to prevent Vercel from killing the process if name or type provided
     if (req.body.name || req.body.type) {
-        enhanceMedicineWithAI(medicine._id, req.body.name || medicine.name, req.body.type || medicine.type).catch(console.error);
+        await enhanceMedicineWithAI(medicine._id, req.body.name || medicine.name, req.body.type || medicine.type).catch(console.error);
     }
 
     res.status(200).json({ message: 'Medicine updated successfully', medicine });

@@ -275,9 +275,9 @@ export const completeHealth1 = async (req, res) => {
 
     await patient.save();
 
-    // AI Check in background: Extract active ingredients and check interactions
+    // Await AI Check: Extract active ingredients and check interactions
     if (resolvedMedicationIds && resolvedMedicationIds.length > 0) {
-        analyzeMedications(patient._id, resolvedMedicationIds, patient.allergies || []).catch(console.error);
+        await analyzeMedications(patient._id, resolvedMedicationIds, patient.allergies || []).catch(console.error);
     }
 
     return res.status(200).json({ message: 'Health step 1 saved', patient: patient.toObject() });
@@ -302,9 +302,9 @@ export const completeHealth2 = async (req, res) => {
 
     await patient.save();
 
-    // AI Check in background if allergies change
+    // Await AI Check if allergies change
     if (patient.longTermMedication && patient.longTermMedication.length > 0) {
-        analyzeMedications(patient._id, patient.longTermMedication, patient.allergies || []).catch(console.error);
+        await analyzeMedications(patient._id, patient.longTermMedication, patient.allergies || []).catch(console.error);
     }
 
     return res.status(200).json({ message: 'Health step 2 saved', patient: patient.toObject() });
@@ -497,7 +497,7 @@ export const completeProfile = async (req, res) => {
     const updatedPatient = await patientModel.findByIdAndUpdate(patient._id, patch, { new: true }).lean();
 
     if (patch.longTermMedication && patch.longTermMedication.length > 0) {
-        analyzeMedications(updatedPatient._id, patch.longTermMedication, updatedPatient.allergies || []).catch(console.error);
+        await analyzeMedications(updatedPatient._id, patch.longTermMedication, updatedPatient.allergies || []).catch(console.error);
     }
 
     return res.status(200).json({
