@@ -24,11 +24,11 @@ Respond with a single JSON object containing:
 
         const result = await model.generateContent(prompt);
         const aiData = JSON.parse(result.response.text());
-        
+
         const updates = {};
         if (aiData.activeIngredient) updates.activeIngredient = aiData.activeIngredient;
         if (Array.isArray(aiData.sideEffects) && aiData.sideEffects.length > 0) updates.sideEffects = aiData.sideEffects.slice(0, 3);
-        
+
         if (aiData.isChronicAI) {
             updates.isChronic = true;
             updates.criticalMode = true;
@@ -95,11 +95,11 @@ export const addMedicine = async (req, res, next) => {
     const patient = await patientModel.findOne({ userId });
     if (!patient) return res.status(404).json({ message: 'Patient not found' });
 
-    const medicineData = { 
-        ...req.body, 
-        patientId: patient._id, 
-        activeIngredient: req.body.name, 
-        sideEffects: req.body.sideEffects || [] 
+    const medicineData = {
+        ...req.body,
+        patientId: patient._id,
+        activeIngredient: req.body.name,
+        sideEffects: req.body.sideEffects || []
     };
 
     if (medicineData.isChronic === true || medicineData.criticalMode === true || medicineData.status === 'critical') {
@@ -113,7 +113,7 @@ export const addMedicine = async (req, res, next) => {
     // Associate with patient
     patient.medications.push(medicine._id);
     await patient.save();
-    
+
     // Background AI Task
     enhanceMedicineWithAI(medicine._id, req.body.name, req.body.type).catch(console.error);
 
@@ -245,7 +245,7 @@ export const getSchedule = async (req, res, next) => {
 
             schedule.push({
                 medicineId: med._id,
-                name: med.activeIngredient || 'Unnamed Medicine',
+                name: med.name || 'Unnamed Medicine',
                 criticalMode: med.criticalMode,
                 type: med.type,
                 dosage: med.dosage,
