@@ -5,16 +5,12 @@ on:
     branches:
       - main
 
-concurrency:
-  group: production
-  cancel-in-progress: true
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Run deploy.sh on VPS
+      - name: Run deploy script on VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_HOST }}
