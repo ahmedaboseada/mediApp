@@ -53,13 +53,12 @@ export const bootstrap = async () => {
         const state = mongoose.connection.readyState; // 0=disconnected,1=connected,2=connecting,3=disconnecting
         const db =
             state === 1 ? 'connected' : state === 2 ? 'connecting' : state === 3 ? 'disconnecting' : 'disconnected';
-        message = "hi"
         res.status(200).json({
             ok: true,
             service: 'MediProject',
             env: process.env.NODE_ENV,
             db,
-            message,
+            message: "hi",
             timestamp: new Date().toISOString(),
         });
     });
