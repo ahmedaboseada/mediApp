@@ -29,20 +29,6 @@ class _StockExpiryScreenState extends State<StockExpiryScreen> {
     super.dispose();
   }
 
-  Future<void> _selectExpiryDate() async {
-    final selectedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now().add(const Duration(days: 30)),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
-    );
-
-    if (selectedDate != null) {
-      _expiryDateController.text =
-          '${selectedDate.month}/${selectedDate.day}/${selectedDate.year}';
-    }
-  }
-
   void _handleNext() {
     if (_formKey.currentState!.validate()) {
       context.read<MedicationDataCubit>().updateStockAndExpiry(

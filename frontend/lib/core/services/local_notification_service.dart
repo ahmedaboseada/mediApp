@@ -3,10 +3,10 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 class LocalNotificationService {
   static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
-      static onTap (NotificationResponse notificationResponse) {
+      static void onTap (NotificationResponse notificationResponse) {
         // notification tap
       }
-       static onBackgroundTap(NotificationResponse notificationResponse) {
+       static void onBackgroundTap(NotificationResponse notificationResponse) {
         // Handle background notification tap
       }
   static Future init() async {

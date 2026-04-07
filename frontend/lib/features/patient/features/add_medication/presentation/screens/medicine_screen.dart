@@ -15,10 +15,7 @@ class MedicineScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => MedicineCubit(),
-      child: const _MedicineView(),
-    );
+    return const _MedicineView();
   }
 }
 

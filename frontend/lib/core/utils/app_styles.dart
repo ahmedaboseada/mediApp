@@ -67,6 +67,11 @@ class AppStyles {
     fontWeight: FontWeight.w500,
     color: AppColors.whiteText,
   );
+  static TextStyle white12400 = TextStyle(
+    fontSize: AppSizes.sp12,
+    fontWeight: FontWeight.w400,
+    color: AppColors.whiteText,
+  );
 
   // Supporting Text
   static final TextStyle primaryDark12400 = TextStyle(

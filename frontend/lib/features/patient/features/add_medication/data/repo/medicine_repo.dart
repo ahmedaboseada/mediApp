@@ -4,25 +4,39 @@ import 'package:medi/features/patient/features/add_medication/data/models/medica
 
 abstract class MedicineRepo {
   Future<Either<ApiError, String>> addMedicine({
-    required String activeIngredient,
+    required String name,
     required String type,
     required String frequency,
-    required List<String> daily,
-    required String dosage,
-    required int stock,
+    List<String>? daily,
+    List<Map<String, dynamic>>? specific,
+    List<Map<String, dynamic>>? weekly,
+    String? dosage,
+    int? stock,
+    bool? criticalMode,
+    String? notes,
+    bool? isChronic,
+    String? status,
   });
 
   Future<Either<ApiError, String>> addMedicineFromMedication(
     Medication medication,
   );
 
+  Future<Either<ApiError, List<Medication>>> getAllMedications();
+
   Future<Either<ApiError, List<Medication>>> getActiveMedications();
+
+  Future<Either<ApiError, dynamic>> getMedicationSchedule();
 
   Future<Either<ApiError, String>> markAsTaken({
     required String medicationId,
     required String date,
     required String time,
     required bool taken,
+  });
+
+  Future<Either<ApiError, String>> deleteMedication({
+    required String medicationId,
   });
 
   Future<Either<ApiError, String>> addDailyLog({

@@ -33,37 +33,47 @@ class MeasurementGridItem extends StatelessWidget {
                 ),
                 child: Center(child: measurement.icon),
               ),
-              const Spacer(),
-              Column(
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SvgPicture.asset(
-                        AppAssets.heartRate,
-                        width: AppSizes.w14,
-                        height: AppSizes.h14,
-                      ),
-                      SizedBox(width: AppSizes.w4),
-                      Text(
-                        measurement.status,
-                        style: TextStyle(
-                          color: AppColors.whiteText,
-                          fontSize: AppSizes.sp12,
-                          fontWeight: FontWeight.w600,
+              SizedBox(width: AppSizes.w8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SvgPicture.asset(
+                          AppAssets.heartRate,
+                          width: AppSizes.w14,
+                          height: AppSizes.h14,
                         ),
-                      ),
-                    ],
-                  ),
-                  Text(
-                    measurement.value,
-                    style: TextStyle(
-                      color: AppColors.whiteText,
-                      fontSize: AppSizes.sp14,
-                      fontWeight: FontWeight.w700,
+                        SizedBox(width: AppSizes.w4),
+                        Flexible(
+                          child: Text(
+                            measurement.status,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: AppColors.whiteText,
+                              fontSize: AppSizes.sp12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                    Text(
+                      measurement.value,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.end,
+                      style: TextStyle(
+                        color: AppColors.whiteText,
+                        fontSize: AppSizes.sp14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

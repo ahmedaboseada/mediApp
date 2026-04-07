@@ -53,11 +53,15 @@ class AppAssets {
   static const String heartRateIcon = '${svgPath}heart_rate.svg';
   static const String weightScaleIcon = '${svgPath}weight_scale.svg';
   static const String statusNormalIcon = '${svgPath}status_normal.svg';
+  static const String addSymptom = '${path}add_symptom.svg';
 
   // Medicine item icons
+  //syringe.svg
+  static const String syringe = '${path}syringe.svg';
   static const String heartRate = '${path}heartrate.svg';
   static const String injection = '${path}injection.png';
   static const String tabletIcon = '${path}tablet.png';
+  static const String tabletSvgIcon = '${path}tablets.svg';
   static const String syrupIcon = '${path}syrup.svg';
   static const String medicineBox = '${path}box.svg';
   static const String medicineDrop = '${path}drop.svg';
@@ -65,22 +69,22 @@ class AppAssets {
   static const String medicineOintment = '${path}ointment.svg';
   static const String medicineInhaler = '${path}inhaler.svg';
 
-  // Helper method to get medicine icon by type
   static String getMedicineIcon(dynamic medicationType) {
     // Import required: import 'package:medi/features/patient/features/add_medication/presentation/models/medication.dart';
     final typeStr = medicationType.toString().split('.').last;
 
     return switch (typeStr) {
       'pill' => pills,
-      'syringe' => injection,
+      'syringe' => syringe,
       'bottle' => syrupIcon,
-      'tablet' => tabletIcon,
+      'tablet' => tabletSvgIcon,
       'syrup' => syrupIcon,
       'cream' => medicineCream,
-      'drop' => medicineDrop,
+      'drops' => medicineDrop,
       'inhaler' => medicineInhaler,
+      'injection' => syringe,
       'ointment' => medicineOintment,
-      _ => tabletIcon, // default
+      _ => pills, // default
     };
   }
 }

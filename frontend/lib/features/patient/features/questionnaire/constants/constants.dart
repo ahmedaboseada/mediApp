@@ -214,6 +214,8 @@ class QuestionnaireConstants {
     DropdownItem(label: 'Metformin', value: 'Metformin'),
     DropdownItem(label: 'Gliclazide', value: 'Gliclazide'),
     DropdownItem(label: 'Glimepiride', value: 'Glimepiride'),
+    DropdownItem(label: 'Aspirin', value: 'Aspirin'),
+    DropdownItem(label: 'Ibuprofen', value: 'Ibuprofen'),
 
     // -------- Hypertension & Heart --------
     DropdownItem(label: 'Amlodipine', value: 'Amlodipine'),

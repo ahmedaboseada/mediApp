@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/health_measurements/data/models/measurement_model.dart';
+import 'package:medi/features/patient/features/health_measurements/data/repo/logs_repo.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/controller/health_measurements/health_measurements_cubit.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/controller/health_measurements/health_measurements_state.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/widgets/add_measurement_bottom_sheet.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/widgets/health_header_card.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/widgets/measurement_chart_card.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/widgets/measurement_tabs.dart';
+import 'package:medi/features/patient/features/health_measurements/presentation/widgets/symptom_item.dart';
 
 class HealthMeasurementsScreen extends StatelessWidget {
   const HealthMeasurementsScreen({super.key});
@@ -15,7 +19,8 @@ class HealthMeasurementsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<HealthMeasurementsCubit>(
-      create: (BuildContext context) => HealthMeasurementsCubit(),
+      create: (BuildContext context) =>
+          HealthMeasurementsCubit(getIt<LogsRepo>()),
       child: const _HealthMeasurementsView(),
     );
   }
@@ -54,7 +59,7 @@ class _HealthMeasurementsView extends StatelessWidget {
           elevation: 0,
           surfaceTintColor: AppColors.transparentColor,
           leading: IconButton(
-            onPressed: () => Navigator.maybePop(context),
+            onPressed: () => context.pop(),
             icon: Icon(
               Icons.arrow_back_ios_new_rounded,
               size: AppSizes.sp18,
@@ -139,46 +144,108 @@ class _HealthMeasurementsView extends StatelessWidget {
                   else
                     SliverPadding(
                       padding: EdgeInsets.symmetric(horizontal: AppSizes.w16),
-                      sliver: SliverToBoxAdapter(
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: AppSizes.w20,
-                            vertical: AppSizes.h24,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceColor,
-                            borderRadius: BorderRadius.circular(AppSizes.r20),
-                          ),
-                          child: Column(
-                            children: <Widget>[
-                              Icon(
-                                Icons.health_and_safety_rounded,
-                                color: AppColors.primary,
-                                size: AppSizes.sp32,
-                              ),
-                              SizedBox(height: AppSizes.h12),
-                              Text(
-                                AppStrings.symptoms,
-                                style: TextStyle(
-                                  color: AppColors.primaryText,
-                                  fontSize: AppSizes.sp16,
-                                  fontWeight: FontWeight.w700,
+                      sliver: state.symptoms.isEmpty
+                          ? SliverToBoxAdapter(
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: AppSizes.w20,
+                                  vertical: AppSizes.h24,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.surfaceColor,
+                                  borderRadius: BorderRadius.circular(
+                                    AppSizes.r20,
+                                  ),
+                                ),
+                                child: Column(
+                                  children: <Widget>[
+                                    Icon(
+                                      Icons.health_and_safety_rounded,
+                                      color: AppColors.primary,
+                                      size: AppSizes.sp32,
+                                    ),
+                                    SizedBox(height: AppSizes.h12),
+                                    Text(
+                                      AppStrings.symptoms,
+                                      style: TextStyle(
+                                        color: AppColors.primaryText,
+                                        fontSize: AppSizes.sp16,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    SizedBox(height: AppSizes.h8),
+                                    Text(
+                                      AppStrings.noSymptomsTracked,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: AppColors.secondaryText,
+                                        fontSize: AppSizes.sp14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              SizedBox(height: AppSizes.h8),
-                              Text(
-                                AppStrings.noSymptomsTracked,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: AppColors.secondaryText,
-                                  fontSize: AppSizes.sp14,
-                                  fontWeight: FontWeight.w500,
+                            )
+                          : SliverToBoxAdapter(
+                              child: Card(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(AppSizes.r40),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.all(AppSizes.h24),
+
+
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            'Add Symptoms ',
+                                            style: AppStyles.black18500
+                                                .copyWith(
+                                                  fontSize: AppSizes.sp20,
+                                                ),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () {
+                                              context.push(
+                                                AppRouter.dailyHealthLogScreen,
+                                              );
+                                            },
+                                            child: SvgPicture.asset(
+                                              AppAssets.addSymptom,
+                                              width: AppSizes.w24,
+                                              height: AppSizes.h24,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: AppSizes.h16),
+                                      ListView.separated(
+                                        shrinkWrap: true,
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                              return SymptomItem(
+                                                data: state.symptoms[index],
+                                              );
+                                            },
+                                        separatorBuilder:
+                                            (BuildContext context, int index) {
+                                              return SizedBox(
+                                                height: AppSizes.h16,
+                                              );
+                                            },
+                                        itemCount: state.symptoms.length,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                      ),
+                            ),
                     ),
                   SliverToBoxAdapter(child: SizedBox(height: AppSizes.h24)),
                 ],

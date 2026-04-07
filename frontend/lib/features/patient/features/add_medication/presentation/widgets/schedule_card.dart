@@ -1,23 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 
 class ScheduleCard extends StatelessWidget {
   const ScheduleCard({
     super.key,
     required this.reminders,
+    this.scheduleTimes = const <MedicationScheduleTime>[],
     required this.frequency,
     required this.duration,
     required this.onAddPressed,
   });
 
   final List<String> reminders;
+  final List<MedicationScheduleTime> scheduleTimes;
   final String frequency;
   final String duration;
   final VoidCallback onAddPressed;
 
   @override
   Widget build(BuildContext context) {
-    final reminderList = reminders.isNotEmpty ? reminders : const ['--:--'];
+    final entries = scheduleTimes.isNotEmpty
+        ? scheduleTimes
+        : (reminders.isNotEmpty
+              ? reminders
+                  .map(
+                    (time) => MedicationScheduleTime(time: time, taken: false),
+                  )
+                  .toList()
+              : const <MedicationScheduleTime>[
+                  MedicationScheduleTime(time: '--:--', taken: false),
+                ]);
 
     return TweenAnimationBuilder<double>(
       duration: const Duration(milliseconds: 750),
@@ -66,7 +79,7 @@ class ScheduleCard extends StatelessWidget {
               ],
             ),
             SizedBox(height: AppSizes.h16),
-            ...reminderList.asMap().entries.map((entry) {
+            ...entries.asMap().entries.map((entry) {
               return TweenAnimationBuilder<double>(
                 duration: Duration(milliseconds: 400 + (entry.key * 100)),
                 tween: Tween(begin: 0.0, end: 1.0),
@@ -79,7 +92,11 @@ class ScheduleCard extends StatelessWidget {
                     ),
                   );
                 },
-                child: _ScheduleItem(time: entry.value, frequency: frequency),
+                child: _ScheduleItem(
+                  time: entry.value.time,
+                  frequency: frequency,
+                  isTaken: entry.value.taken,
+                ),
               );
             }),
             Text(
@@ -98,10 +115,15 @@ class ScheduleCard extends StatelessWidget {
 }
 
 class _ScheduleItem extends StatelessWidget {
-  const _ScheduleItem({required this.time, required this.frequency});
+  const _ScheduleItem({
+    required this.time,
+    required this.frequency,
+    required this.isTaken,
+  });
 
   final String time;
   final String frequency;
+  final bool isTaken;
 
   @override
   Widget build(BuildContext context) {
@@ -144,6 +166,15 @@ class _ScheduleItem extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                   color: AppColors.whiteText,
                 ),
+              ),
+            ),
+            SizedBox(width: AppSizes.w8),
+            Text(
+              isTaken ? 'Taken' : 'Pending',
+              style: TextStyle(
+                fontSize: AppSizes.sp12,
+                fontWeight: FontWeight.w600,
+                color: isTaken ? Colors.green : AppColors.secondaryText,
               ),
             ),
           ],

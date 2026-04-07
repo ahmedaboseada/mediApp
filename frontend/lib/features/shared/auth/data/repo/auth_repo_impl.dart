@@ -74,6 +74,7 @@ class AuthRepoImpl implements AuthRepo {
       if (response['patient'] != null) {
         final patient = PatientModel.fromJson(response['patient']);
         await HiveService.savePatientData(patient);
+        await HiveService.saveMedications(patient.medications);
       }
       if (response['doctor'] != null) {
         final doctor = DoctorModel.fromJson(response['doctor']);
@@ -235,6 +236,7 @@ class AuthRepoImpl implements AuthRepo {
       }
       if (profile.user.type == 'patient' && profile.patient != null) {
         await HiveService.savePatientData(profile.patient!);
+        await HiveService.saveMedications(profile.patient!.medications);
       }
 
       return Right(profile);
@@ -294,6 +296,7 @@ class AuthRepoImpl implements AuthRepo {
       }
       if (profile.user.type == 'patient' && profile.patient != null) {
         await HiveService.savePatientData(profile.patient!);
+        await HiveService.saveMedications(profile.patient!.medications);
       }
 
       return Right(profile);
@@ -412,6 +415,7 @@ class AuthRepoImpl implements AuthRepo {
       if (response['patient'] != null) {
         final patient = PatientModel.fromJson(response['patient']);
         await HiveService.savePatientData(patient);
+        await HiveService.saveMedications(patient.medications);
       }
 
       // Clear challengeToken after successful verification using Hive

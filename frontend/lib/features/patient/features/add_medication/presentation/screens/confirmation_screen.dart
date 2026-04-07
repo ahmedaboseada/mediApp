@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_cubit.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_cubit.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_state.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/custom_stepper.dart';
@@ -12,18 +13,32 @@ class ConfirmationScreen extends StatelessWidget {
 
   Future<void> _handleAddMedication(BuildContext context) async {
     final medication = context.read<MedicationDataCubit>().state.medicationData;
+    final result = await context.read<MedicineCubit>().addMedication(medication);
     await HiveService.addMedication(medication);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Medication added successfully!'),
-        backgroundColor: Colors.green,
-      ),
+
+    result.fold(
+      (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(error.message),
+            backgroundColor: Colors.red,
+          ),
+        );
+      },
+      (message) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: Colors.green,
+          ),
+        );
+        LocalNotificationService().showNotification(
+          title: 'Medication Added',
+          body: '${medication.medicationName} has been added to your list.',
+        );
+        context.go('/medicine');
+      },
     );
-    LocalNotificationService().showNotification(
-      title: 'Medication Added',
-      body: '${medication.medicationName} has been added to your list.',
-    );
-    context.go('/medicine');
   }
 
   @override

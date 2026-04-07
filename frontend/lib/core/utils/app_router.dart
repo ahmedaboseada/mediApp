@@ -6,9 +6,11 @@ import 'package:medi/core/utils/service_locator.dart';
 //import 'package:medi/features/doctor/features/home/presentation/screens/profile_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_cubit.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_cubit.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/daily_symptoms_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/edit_medication_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/medicine_info_screen.dart';
+import 'package:medi/features/patient/features/health_measurements/presentation/screens/add_daily_log_screen.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/screens/health_measurements_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/controller/profile/profile_cubit.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/account_info_screen.dart';
@@ -135,6 +137,7 @@ class AppRouter {
   static const String allowNotificationScreen = '/doctor/allowNotification';
   static const String doctorAllSetScreen = '/doctorAllSetScreen';
   static const String healthMeasurements = '/healthMeasurements';
+  static const String dailyHealthLogScreen = '/health/dailyLog';
 
   static final router = GoRouter(
     initialLocation: '/',
@@ -281,6 +284,10 @@ class AppRouter {
         builder: (context, state) => HealthMeasurementsScreen(),
       ),
       GoRoute(
+        path: dailyHealthLogScreen,
+        builder: (context, state) => const DailyHealthLogScreen(),
+      ),
+      GoRoute(
         path: editMedicationScreen,
         builder: (context, state) => EditMedicationScreen(
           medication: state.extra as Medication?,
@@ -311,7 +318,10 @@ class AppRouter {
                 builder: (context, state, child) {
                   return BlocProvider(
                     create: (_) => MedicationDataCubit(),
-                    child: child,
+                    child: BlocProvider(
+                      create: (_) => getIt<MedicineCubit>()..loadMedications(),
+                      child: child,
+                    ),
                   );
                 },
                 routes: [
@@ -402,7 +412,6 @@ class AppRouter {
           ),
         ],
       ),
-
       // ========== DOCTOR ROUTES ==========
       GoRoute(
         path: doctorLogin,

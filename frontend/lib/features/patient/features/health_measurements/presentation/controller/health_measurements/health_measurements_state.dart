@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:medi/features/patient/features/health_measurements/data/models/measurement_model.dart';
+import 'package:medi/features/patient/features/health_measurements/data/models/symptom.dart';
 
 enum HealthDashboardTab { measurements, symptoms }
 
@@ -11,6 +12,7 @@ class HealthMeasurementsState extends Equatable {
     required this.selectedChartFilters,
     required this.chartData,
     required this.summaryMeasurements,
+    required this.symptoms,
     required this.isFabOpen,
   });
 
@@ -18,6 +20,7 @@ class HealthMeasurementsState extends Equatable {
   final Map<MeasurementMetric, ChartFilterRange> selectedChartFilters;
   final Map<MeasurementMetric, MeasurementChartModel> chartData;
   final List<MeasurementModel> summaryMeasurements;
+  final List<SymptomModel> symptoms;
   final bool isFabOpen;
 
   HealthMeasurementsState copyWith({
@@ -25,6 +28,7 @@ class HealthMeasurementsState extends Equatable {
     Map<MeasurementMetric, ChartFilterRange>? selectedChartFilters,
     Map<MeasurementMetric, MeasurementChartModel>? chartData,
     List<MeasurementModel>? summaryMeasurements,
+    List<SymptomModel>? symptoms,
     bool? isFabOpen,
   }) {
     return HealthMeasurementsState(
@@ -32,6 +36,7 @@ class HealthMeasurementsState extends Equatable {
       selectedChartFilters: selectedChartFilters ?? this.selectedChartFilters,
       chartData: chartData ?? this.chartData,
       summaryMeasurements: summaryMeasurements ?? this.summaryMeasurements,
+      symptoms: symptoms ?? this.symptoms,
       isFabOpen: isFabOpen ?? this.isFabOpen,
     );
   }
@@ -42,6 +47,7 @@ class HealthMeasurementsState extends Equatable {
     selectedChartFilters,
     chartData,
     summaryMeasurements,
+    symptoms,
     isFabOpen,
   ];
 }

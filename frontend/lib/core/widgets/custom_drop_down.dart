@@ -21,6 +21,12 @@ class CustomDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final uniqueItems = items.toSet().toList();
+    final selectedValue =
+        value != null && uniqueItems.where((item) => item == value).length == 1
+        ? value
+        : null;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -33,7 +39,7 @@ class CustomDropdown extends StatelessWidget {
           child: DropdownButtonFormField<String>(
             dropdownColor: AppColors.whiteText,
             validator: validator,
-            initialValue: value,
+            initialValue: selectedValue,
             icon: Transform.rotate(
               angle: 1.5708,
               child: Icon(Icons.chevron_right, color: AppColors.arrow),
@@ -66,7 +72,7 @@ class CustomDropdown extends StatelessWidget {
                 borderSide: BorderSide(color: AppColors.errorBorderColor),
               ),
             ),
-            items: items
+            items: uniqueItems
                 .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                 .toList(),
             onChanged: (value) {

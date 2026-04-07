@@ -24,13 +24,10 @@ class ServerFailure extends ApiError {
         case DioExceptionType.badCertificate:
           return ServerFailure("Bad Certificate");
         case DioExceptionType.unknown:
-          return ServerFailure("Unexpected error occurred");
-
-        default:
-          if (dioError.message!.contains('SocketException')) {
+          if ((dioError.message ?? '').contains('SocketException')) {
             return ServerFailure("No Internet Connection");
           }
-          return ServerFailure("Something went wrong");
+          return ServerFailure("Unexpected error occurred");
       }
     }
   }

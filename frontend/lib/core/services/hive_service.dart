@@ -87,6 +87,9 @@ class HiveService {
     if (!Hive.isAdapterRegistered(6)) {
       Hive.registerAdapter(CaregiverModelAdapter());
     }
+    if (!Hive.isAdapterRegistered(7)) {
+      Hive.registerAdapter(MedicationAdapter());
+    }
 
     // Open boxes
     await Hive.openBox(_authBox);
@@ -174,6 +177,7 @@ class HiveService {
     if (response.patient != null) {
       await userBox.put(_patientDataKey, response.patient);
       await userBox.delete(_doctorDataKey);
+      await saveMedications(response.patient!.medications);
     }
     if (response.doctor != null) {
       await userBox.put(_doctorDataKey, response.doctor);

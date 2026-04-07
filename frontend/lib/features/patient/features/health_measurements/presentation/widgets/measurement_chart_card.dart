@@ -77,7 +77,7 @@ class MeasurementChartCard extends StatelessWidget {
                 color: Color(0xffEEF4FF),
                 height: AppSizes.h200,
                 child: LineChart(
-                  _buildChartData(chartModel),
+                  _buildChartData(chartModel, selectedRange),
                   duration: const Duration(milliseconds: 500),
                   curve: Curves.easeInOut,
                 ),
@@ -106,10 +106,19 @@ class MeasurementChartCard extends StatelessWidget {
     );
   }
 
-  LineChartData _buildChartData(MeasurementChartModel model) {
+  LineChartData _buildChartData(
+    MeasurementChartModel model,
+    ChartFilterRange range,
+  ) {
+    final maxPointCount = [
+      model.primaryPoints.length,
+      model.secondaryPoints.length,
+    ].reduce((a, b) => a > b ? a : b);
+    final maxX = maxPointCount > 1 ? (maxPointCount - 1).toDouble() : 0.0;
+
     return LineChartData(
       minX: 0,
-      maxX: 6,
+      maxX: maxX,
       minY: 0,
       maxY: 140,
       lineTouchData: const LineTouchData(enabled: true),
@@ -153,30 +162,25 @@ class MeasurementChartCard extends StatelessWidget {
             reservedSize: AppSizes.h24,
             interval: AppSizes.p1,
             getTitlesWidget: (double value, TitleMeta meta) {
-              const List<String> monthLabels = <String>[
-                AppStrings.monthJan,
-                AppStrings.monthFeb,
-                AppStrings.monthMar,
-                AppStrings.monthApr,
-                AppStrings.monthMay,
-                AppStrings.monthJun,
-                AppStrings.monthJul,
-                AppStrings.monthAug,
-                AppStrings.monthSep,
-                AppStrings.monthOct,
-                AppStrings.monthNov,
-                AppStrings.monthDec,
-              ];
-
               final int index = value.toInt();
-              if (index < 0 || index >= monthLabels.length) {
+              final labels = model.xLabels;
+              if (index < 0 || index >= labels.length) {
+                return const SizedBox.shrink();
+              }
+
+              final step = switch (range) {
+                ChartFilterRange.days7 => 1,
+                ChartFilterRange.days30 => 5,
+                ChartFilterRange.days90 => 15,
+              };
+              if (step > 1 && index % step != 0 && index != labels.length - 1) {
                 return const SizedBox.shrink();
               }
 
               return Padding(
                 padding: EdgeInsets.only(top: AppSizes.h8),
                 child: Text(
-                  monthLabels[index],
+                  labels[index],
                   style: TextStyle(
                     color: AppColors.tertiaryText,
                     fontSize: AppSizes.sp10,

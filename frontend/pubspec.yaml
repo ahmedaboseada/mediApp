@@ -34,6 +34,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^9.1.1
+  horizontal_calender_mz: ^0.0.6
   google_places_autocomplete_text_field: ^3.0.0
   latlong_to_place: ^0.0.9
   flutter_facebook_auth: ^7.1.5

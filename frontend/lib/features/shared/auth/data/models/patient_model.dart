@@ -53,26 +53,47 @@ class PatientModel {
   });
 
   factory PatientModel.fromJson(Map<String, dynamic> json) {
+    List<String> parseStringList(dynamic value) {
+      if (value is! List) {
+        return const [];
+      }
+
+      return value
+          .map((item) {
+            if (item is String) {
+              return item;
+            }
+
+            if (item is Map<String, dynamic>) {
+              final name = item['name'];
+              if (name != null) {
+                return name.toString();
+              }
+
+              final id = item['_id'] ?? item['id'];
+              if (id != null) {
+                return id.toString();
+              }
+            }
+
+            return item?.toString();
+          })
+          .whereType<String>()
+          .toList();
+    }
+
     return PatientModel(
       patientId: (json['_id'] ?? '').toString(),
       userId: (json['userId'] ?? '').toString(),
-      chronicConditions: List<String>.from(
-        json['chronicConditions'] as List? ?? [],
-      ),
-      allergies: List<String>.from(json['allergies'] as List? ?? []),
-      activeIngredients: List<String>.from(
-        json['activeIngredients'] as List? ?? [],
-      ),
-      longTermMedication: List<String>.from(
-        json['longTermMedication'] as List? ?? [],
-      ),
+      chronicConditions: parseStringList(json['chronicConditions']),
+      allergies: parseStringList(json['allergies']),
+      activeIngredients: parseStringList(json['activeIngredients']),
+      longTermMedication: parseStringList(json['longTermMedication']),
       medications: List<Medication>.from(
         (json['medications'] as List? ?? []).map((e) => Medication.fromJson(e as Map<String, dynamic>)),
       ),
       saveOption: json['saveOption'] as bool? ?? false,
-      connectedDoctors: List<String>.from(
-        json['connectedDoctors'] as List? ?? [],
-      ),
+      connectedDoctors: parseStringList(json['connectedDoctors']),
       createdAt: (json['createdAt'] ?? '').toString(),
       updatedAt: (json['updatedAt'] ?? '').toString(),
       allergyAlerts: json['allergyAlerts'] as bool? ?? false,

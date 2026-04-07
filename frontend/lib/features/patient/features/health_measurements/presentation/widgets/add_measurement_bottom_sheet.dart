@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/health_measurements/data/models/measurement_model.dart';
+import 'package:medi/features/patient/features/health_measurements/presentation/controller/health_measurements/health_measurements_cubit.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/screens/add_measurement_screen.dart';
 
 void showAddMeasurementBottomSheet(
   BuildContext context, {
   void Function(MeasurementMetric)? onMetricSelected,
 }) {
+  final cubit = context.read<HealthMeasurementsCubit>();
+
   showModalBottomSheet<void>(
     context: context,
     backgroundColor: AppColors.surfaceColor,
@@ -16,15 +20,19 @@ void showAddMeasurementBottomSheet(
     ),
     builder: (BuildContext context) {
       return SafeArea(
-        child: _AddMeasurementSheet(onMetricSelected: onMetricSelected),
+        child: _AddMeasurementSheet(
+          cubit: cubit,
+          onMetricSelected: onMetricSelected,
+        ),
       );
     },
   );
 }
 
 class _AddMeasurementSheet extends StatelessWidget {
-  const _AddMeasurementSheet({this.onMetricSelected});
+  const _AddMeasurementSheet({required this.cubit, this.onMetricSelected});
 
+  final HealthMeasurementsCubit cubit;
   final void Function(MeasurementMetric)? onMetricSelected;
 
   @override
@@ -120,7 +128,10 @@ class _AddMeasurementSheet extends StatelessWidget {
     onMetricSelected?.call(metric);
     navigator.push(
       MaterialPageRoute<void>(
-        builder: (_) => AddMeasurementScreen(initialTab: initialTab),
+        builder: (_) => BlocProvider.value(
+          value: cubit,
+          child: AddMeasurementScreen(initialTab: initialTab),
+        ),
       ),
     );
   }

@@ -1,11 +1,16 @@
+import 'dart:developer';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:dartz/dartz.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/health_measurements/data/models/measurement_model.dart';
+import 'package:medi/features/patient/features/health_measurements/data/models/symptom.dart';
+import 'package:medi/features/patient/features/health_measurements/data/repo/logs_repo.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/controller/health_measurements/health_measurements_state.dart';
 
 class HealthMeasurementsCubit extends Cubit<HealthMeasurementsState> {
-  HealthMeasurementsCubit()
+  HealthMeasurementsCubit(this._logsRepo)
     : super(
         HealthMeasurementsState(
           selectedTab: HealthDashboardTab.measurements,
@@ -16,21 +21,17 @@ class HealthMeasurementsCubit extends Cubit<HealthMeasurementsState> {
             MeasurementMetric.heartRate: ChartFilterRange.days7,
           },
           chartData: <MeasurementMetric, MeasurementChartModel>{
-            MeasurementMetric.bloodPressure: _buildChartModel(
-              metric: MeasurementMetric.bloodPressure,
-              range: ChartFilterRange.days7,
+            MeasurementMetric.bloodPressure: _emptyChartModel(
+              MeasurementMetric.bloodPressure,
             ),
-            MeasurementMetric.bloodSugar: _buildChartModel(
-              metric: MeasurementMetric.bloodSugar,
-              range: ChartFilterRange.days7,
+            MeasurementMetric.bloodSugar: _emptyChartModel(
+              MeasurementMetric.bloodSugar,
             ),
-            MeasurementMetric.bodyWeight: _buildChartModel(
-              metric: MeasurementMetric.bodyWeight,
-              range: ChartFilterRange.days7,
+            MeasurementMetric.bodyWeight: _emptyChartModel(
+              MeasurementMetric.bodyWeight,
             ),
-            MeasurementMetric.heartRate: _buildChartModel(
-              metric: MeasurementMetric.heartRate,
-              range: ChartFilterRange.days7,
+            MeasurementMetric.heartRate: _emptyChartModel(
+              MeasurementMetric.heartRate,
             ),
           },
           summaryMeasurements: <MeasurementModel>[
@@ -79,9 +80,17 @@ class HealthMeasurementsCubit extends Cubit<HealthMeasurementsState> {
               ),
             ),
           ],
+          symptoms: const <SymptomModel>[],
           isFabOpen: false,
         ),
-      );
+      ) {
+    loadMeasurements();
+    loadSymptoms();
+  }
+
+  final LogsRepo _logsRepo;
+  Map<MeasurementMetric, List<Map<String, dynamic>>> _metricDataCache =
+      const <MeasurementMetric, List<Map<String, dynamic>>>{};
 
   void selectTab(HealthDashboardTab tab) {
     emit(state.copyWith(selectedTab: tab));
@@ -98,7 +107,13 @@ class HealthMeasurementsCubit extends Cubit<HealthMeasurementsState> {
 
     final Map<MeasurementMetric, MeasurementChartModel> updatedChartData =
         Map<MeasurementMetric, MeasurementChartModel>.from(state.chartData)
-          ..[metric] = _buildChartModel(metric: metric, range: range);
+          ..[metric] =
+              _buildChartModelFromApi(
+                metric: metric,
+                range: range,
+                rows: _metricDataCache[metric] ?? const <Map<String, dynamic>>[],
+              ) ??
+              _emptyChartModel(metric);
 
     emit(
       state.copyWith(
@@ -119,82 +134,412 @@ class HealthMeasurementsCubit extends Cubit<HealthMeasurementsState> {
     emit(state.copyWith(isFabOpen: false));
   }
 
-  static MeasurementChartModel _buildChartModel({
-    required MeasurementMetric metric,
-    required ChartFilterRange range,
-  }) {
-    final List<double> primary = _mockPrimarySeries[metric]![range]!;
-    final List<double> secondary =
-        _mockSecondarySeries[metric]?[range] ?? const <double>[];
+  Future<void> loadMeasurements() async {
+    final bp = await _logsRepo.getBloodPressures();
+    final sugar = await _logsRepo.getBloodSugars();
+    final weight = await _logsRepo.getWeights();
+    final heart = await _logsRepo.getHeartRates();
 
-    return MeasurementChartModel(
-      metric: metric,
-      primaryPoints: List<ChartPoint>.generate(
-        primary.length,
-        (int index) => ChartPoint(x: index.toDouble(), y: primary[index]),
+    if (isClosed) {
+      return;
+    }
+
+    final bpRows = _extractMeasurements(bp);
+    final heartRows = _extractMeasurements(heart);
+    final metricData = <MeasurementMetric, List<Map<String, dynamic>>>{
+      MeasurementMetric.bloodPressure: bpRows,
+      MeasurementMetric.bloodSugar: _extractMeasurements(sugar),
+      MeasurementMetric.bodyWeight: _extractMeasurements(weight),
+      MeasurementMetric.heartRate: _mergeHeartRateRows(
+        heartRows,
+        _extractHeartRatesFromBloodPressure(bpRows),
       ),
-      secondaryPoints: List<ChartPoint>.generate(
-        secondary.length,
-        (int index) => ChartPoint(x: index.toDouble(), y: secondary[index]),
+    };
+    _metricDataCache = metricData;
+
+    final updatedChartData = <MeasurementMetric, MeasurementChartModel>{};
+
+    for (final metric in MeasurementMetric.values) {
+      final range = state.selectedChartFilters[metric] ?? ChartFilterRange.days7;
+      final model = _buildChartModelFromApi(
+        metric: metric,
+        range: range,
+        rows: metricData[metric] ?? const <Map<String, dynamic>>[],
+      );
+      updatedChartData[metric] = model ?? _emptyChartModel(metric);
+    }
+
+    emit(
+      state.copyWith(
+        chartData: updatedChartData,
+        summaryMeasurements: _buildSummaryMeasurements(metricData),
       ),
     );
   }
 
-  static const Map<MeasurementMetric, Map<ChartFilterRange, List<double>>>
-  _mockPrimarySeries = <MeasurementMetric, Map<ChartFilterRange, List<double>>>{
-    MeasurementMetric.bloodPressure: <ChartFilterRange, List<double>>{
-      ChartFilterRange.days7: <double>[118, 120, 116, 122, 124, 121, 119],
-      ChartFilterRange.days30: <double>[120, 122, 121, 119, 123, 124, 122],
-      ChartFilterRange.days90: <double>[122, 121, 120, 124, 123, 122, 121],
-    },
-    MeasurementMetric.bloodSugar: <ChartFilterRange, List<double>>{
-      ChartFilterRange.days7: <double>[92, 96, 94, 99, 95, 93, 97],
-      ChartFilterRange.days30: <double>[95, 94, 96, 98, 97, 95, 96],
-      ChartFilterRange.days90: <double>[98, 97, 95, 94, 96, 97, 95],
-    },
-    MeasurementMetric.bodyWeight: <ChartFilterRange, List<double>>{
-      ChartFilterRange.days7: <double>[
-        68.5,
-        68.4,
-        68.3,
-        68.1,
-        68.0,
-        67.9,
-        68.0,
-      ],
-      ChartFilterRange.days30: <double>[
-        68.8,
-        68.7,
-        68.5,
-        68.4,
-        68.3,
-        68.2,
-        68.1,
-      ],
-      ChartFilterRange.days90: <double>[
-        69.2,
-        69.0,
-        68.9,
-        68.7,
-        68.6,
-        68.5,
-        68.3,
-      ],
-    },
-    MeasurementMetric.heartRate: <ChartFilterRange, List<double>>{
-      ChartFilterRange.days7: <double>[71, 73, 72, 70, 74, 72, 71],
-      ChartFilterRange.days30: <double>[72, 71, 73, 74, 72, 71, 72],
-      ChartFilterRange.days90: <double>[74, 73, 72, 71, 72, 73, 72],
-    },
-  };
+  Future<Either<ApiError, String>> addBloodPressureMeasurement({
+    required int systolic,
+    required int diastolic,
+    int? heartRate,
+  }) async {
+    final result = await _logsRepo.addBloodPressure(
+      type: 'blood_pressure',
+      systolic: systolic,
+      diastolic: diastolic,
+      heartRate: heartRate,
+    );
+    if (result.isRight()) {
+      await loadMeasurements();
+    }
+    return result;
+  }
 
-  static const Map<MeasurementMetric, Map<ChartFilterRange, List<double>>>
-  _mockSecondarySeries =
-      <MeasurementMetric, Map<ChartFilterRange, List<double>>>{
-        MeasurementMetric.bloodPressure: <ChartFilterRange, List<double>>{
-          ChartFilterRange.days7: <double>[78, 80, 79, 82, 81, 80, 79],
-          ChartFilterRange.days30: <double>[80, 79, 81, 82, 80, 79, 80],
-          ChartFilterRange.days90: <double>[82, 81, 80, 79, 80, 81, 80],
-        },
-      };
+  Future<Either<ApiError, String>> addBloodSugarMeasurement({
+    required int value,
+  }) async {
+    final result = await _logsRepo.addBloodSugar(
+      type: 'blood_sugar',
+      value: value,
+    );
+    if (result.isRight()) {
+      await loadMeasurements();
+    }
+    return result;
+  }
+
+  Future<Either<ApiError, String>> addWeightMeasurement({
+    required double value,
+  }) async {
+    final result = await _logsRepo.addWeight(type: 'weight', value: value);
+    if (result.isRight()) {
+      await loadMeasurements();
+    }
+    return result;
+  }
+
+  List<Map<String, dynamic>> _extractMeasurements(
+    Either<ApiError, dynamic> result,
+  ) {
+    return result.fold((_) => const <Map<String, dynamic>>[], (response) {
+      final rows = response is Map<String, dynamic> ? response['measurements'] : null;
+      if (rows is List) {
+        return _sortMeasurementsByDateDesc(
+          rows.whereType<Map>().map((e) => e.cast<String, dynamic>()).toList(),
+        );
+      }
+      return const <Map<String, dynamic>>[];
+    });
+  }
+
+  List<Map<String, dynamic>> _extractHeartRatesFromBloodPressure(
+    List<Map<String, dynamic>> bloodPressureRows,
+  ) {
+    return bloodPressureRows
+        .where((row) => row['heartRate'] != null)
+        .map(
+          (row) => <String, dynamic>{
+            'date': row['date'],
+            'value': row['heartRate'],
+          },
+        )
+        .toList();
+  }
+
+  List<Map<String, dynamic>> _mergeHeartRateRows(
+    List<Map<String, dynamic>> standaloneRows,
+    List<Map<String, dynamic>> bloodPressureRows,
+  ) {
+    final combined = <Map<String, dynamic>>[
+      ...standaloneRows,
+      ...bloodPressureRows,
+    ];
+    return _sortMeasurementsByDateDesc(combined);
+  }
+
+  List<MeasurementModel> _buildSummaryMeasurements(
+    Map<MeasurementMetric, List<Map<String, dynamic>>> metricData,
+  ) {
+    return <MeasurementModel>[
+      _buildSummaryModel(MeasurementMetric.bloodPressure, metricData),
+      _buildSummaryModel(MeasurementMetric.bloodSugar, metricData),
+      _buildSummaryModel(MeasurementMetric.heartRate, metricData),
+      _buildSummaryModel(MeasurementMetric.bodyWeight, metricData),
+    ];
+  }
+
+  MeasurementModel _buildSummaryModel(
+    MeasurementMetric metric,
+    Map<MeasurementMetric, List<Map<String, dynamic>>> metricData,
+  ) {
+    final rows = metricData[metric] ?? const <Map<String, dynamic>>[];
+    final todayRows = _rowsForToday(rows);
+    final latestToday = todayRows.isNotEmpty
+        ? todayRows.first
+        : const <String, dynamic>{};
+
+    String valueText;
+    switch (metric) {
+      case MeasurementMetric.bloodPressure:
+        final systolic = (latestToday['systolic'] as num?)?.toInt();
+        final diastolic = (latestToday['diastolic'] as num?)?.toInt();
+        valueText = (systolic != null && diastolic != null)
+            ? '$systolic/$diastolic'
+            : 'Not recorded';
+        break;
+      case MeasurementMetric.bloodSugar:
+        final value = (latestToday['value'] as num?)?.toInt();
+        valueText = value != null ? '$value mg/dL' : 'Not recorded';
+        break;
+      case MeasurementMetric.heartRate:
+        final value = (latestToday['value'] as num?)?.toInt();
+        valueText = value != null ? '$value bpm' : 'Not recorded';
+        break;
+      case MeasurementMetric.bodyWeight:
+        final value = (latestToday['value'] as num?)?.toDouble();
+        valueText = value != null ? '$value kg' : 'Not recorded';
+        break;
+    }
+
+    return MeasurementModel(
+      metric: metric,
+      title: _metricTitle(metric),
+      status: AppStrings.normal,
+      value: valueText,
+      icon: SvgPicture.asset(
+        _metricAsset(metric),
+        width: AppSizes.w34,
+        height: AppSizes.h34,
+      ),
+    );
+  }
+
+  List<Map<String, dynamic>> _rowsForToday(List<Map<String, dynamic>> rows) {
+    final today = DateTime.now();
+    final List<Map<String, dynamic>> todayRows = <Map<String, dynamic>>[];
+
+    for (final row in rows) {
+      final parsed = _tryParseDate(row['date']);
+      if (parsed == null) {
+        continue;
+      }
+
+      final localDate = parsed.toLocal();
+      if (localDate.year == today.year &&
+          localDate.month == today.month &&
+          localDate.day == today.day) {
+        todayRows.add(row);
+      }
+    }
+
+    return todayRows;
+  }
+
+  String _metricTitle(MeasurementMetric metric) {
+    switch (metric) {
+      case MeasurementMetric.bloodPressure:
+        return AppStrings.bloodPressure;
+      case MeasurementMetric.bloodSugar:
+        return AppStrings.bloodSugar;
+      case MeasurementMetric.heartRate:
+        return AppStrings.heartRate;
+      case MeasurementMetric.bodyWeight:
+        return AppStrings.weight;
+    }
+  }
+
+  String _metricAsset(MeasurementMetric metric) {
+    switch (metric) {
+      case MeasurementMetric.bloodPressure:
+        return AppAssets.bloodPressure;
+      case MeasurementMetric.bloodSugar:
+        return AppAssets.bloodSugarIcon;
+      case MeasurementMetric.heartRate:
+        return AppAssets.heartRateIcon;
+      case MeasurementMetric.bodyWeight:
+        return AppAssets.weightScaleIcon;
+    }
+  }
+
+  MeasurementChartModel? _buildChartModelFromApi({
+    required MeasurementMetric metric,
+    required ChartFilterRange range,
+    required List<Map<String, dynamic>> rows,
+  }) {
+    if (rows.isEmpty) return null;
+
+    final maxPoints = switch (range) {
+      ChartFilterRange.days7 => 7,
+      ChartFilterRange.days30 => 30,
+      ChartFilterRange.days90 => 90,
+    };
+
+    final selected = _selectRowsByUniqueDay(rows, maxPoints).reversed.toList();
+    final xLabels = selected
+      .map((e) => _buildXAxisLabel(e['date'], range))
+      .toList();
+
+    if (metric == MeasurementMetric.bloodPressure) {
+      final systolic = selected
+          .map((e) => (e['systolic'] as num?)?.toDouble())
+          .whereType<double>()
+          .toList();
+      final diastolic = selected
+          .map((e) => (e['diastolic'] as num?)?.toDouble())
+          .whereType<double>()
+          .toList();
+      if (systolic.isEmpty || diastolic.isEmpty) return null;
+
+      return MeasurementChartModel(
+        metric: metric,
+        primaryPoints: List<ChartPoint>.generate(
+          systolic.length,
+          (i) => ChartPoint(x: i.toDouble(), y: systolic[i]),
+        ),
+        secondaryPoints: List<ChartPoint>.generate(
+          diastolic.length,
+          (i) => ChartPoint(x: i.toDouble(), y: diastolic[i]),
+        ),
+        xLabels: xLabels,
+      );
+    }
+
+    final values = selected
+        .map((e) => (e['value'] as num?)?.toDouble())
+        .whereType<double>()
+        .toList();
+    if (values.isEmpty) return null;
+
+    return MeasurementChartModel(
+      metric: metric,
+      primaryPoints: List<ChartPoint>.generate(
+        values.length,
+        (i) => ChartPoint(x: i.toDouble(), y: values[i]),
+      ),
+      xLabels: xLabels,
+    );
+  }
+
+  List<Map<String, dynamic>> _selectRowsByUniqueDay(
+    List<Map<String, dynamic>> rows,
+    int maxPoints,
+  ) {
+    final byDay = <String, Map<String, dynamic>>{};
+    final noDate = <Map<String, dynamic>>[];
+
+    for (final row in rows) {
+      final key = _dayKey(row['date']);
+      if (key == null) {
+        noDate.add(row);
+        continue;
+      }
+      byDay.putIfAbsent(key, () => row);
+      if (byDay.length >= maxPoints) {
+        break;
+      }
+    }
+
+    final merged = <Map<String, dynamic>>[
+      ...byDay.values,
+      ...noDate,
+    ];
+
+    return merged.take(maxPoints).toList();
+  }
+
+  List<Map<String, dynamic>> _sortMeasurementsByDateDesc(
+    List<Map<String, dynamic>> rows,
+  ) {
+    final sorted = List<Map<String, dynamic>>.from(rows);
+    sorted.sort((left, right) {
+      final leftDate = _tryParseDate(left['date']) ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final rightDate = _tryParseDate(right['date']) ?? DateTime.fromMillisecondsSinceEpoch(0);
+      return rightDate.compareTo(leftDate);
+    });
+    return sorted;
+  }
+
+  String? _dayKey(dynamic rawDate) {
+    final parsed = _tryParseDate(rawDate);
+    if (parsed == null) return null;
+    final y = parsed.year.toString().padLeft(4, '0');
+    final m = parsed.month.toString().padLeft(2, '0');
+    final d = parsed.day.toString().padLeft(2, '0');
+    return '$y-$m-$d';
+  }
+
+  String _buildXAxisLabel(dynamic rawDate, ChartFilterRange range) {
+    final parsed = _tryParseDate(rawDate);
+    if (parsed == null) return '';
+
+    if (range == ChartFilterRange.days7) {
+      return _weekdayShort(parsed.weekday);
+    }
+
+    final day = parsed.day.toString().padLeft(2, '0');
+    final month = parsed.month.toString().padLeft(2, '0');
+    return '$day/$month';
+  }
+
+  DateTime? _tryParseDate(dynamic rawDate) {
+    if (rawDate is! String || rawDate.trim().isEmpty) {
+      return null;
+    }
+    return DateTime.tryParse(rawDate);
+  }
+
+  String _weekdayShort(int weekday) {
+    switch (weekday) {
+      case DateTime.monday:
+        return 'Mon';
+      case DateTime.tuesday:
+        return 'Tue';
+      case DateTime.wednesday:
+        return 'Wed';
+      case DateTime.thursday:
+        return 'Thu';
+      case DateTime.friday:
+        return 'Fri';
+      case DateTime.saturday:
+        return 'Sat';
+      case DateTime.sunday:
+        return 'Sun';
+      default:
+        return '';
+    }
+  }
+  Future<void> loadSymptoms() async {
+    final result = await _logsRepo.getSymptomLogs();
+
+    if (isClosed) {
+      return;
+    }
+
+    result.fold(
+      (error) => log('Error loading symptoms: ${error.message}'),
+      (response) {
+        final rows = response is Map<String, dynamic> ? response['symptoms'] : null;
+        if (rows is List) {
+          final symptoms = rows
+              .whereType<Map>()
+              .map((e) => e.cast<String, dynamic>())
+              .map((json) => SymptomModel.fromJson(json))
+              .toList();
+          if (isClosed) {
+            return;
+          }
+          emit(state.copyWith(symptoms: symptoms));
+        } else {
+          log('Unexpected response format for symptoms: $response');
+        }
+      },
+    );
+  }
+
+  static MeasurementChartModel _emptyChartModel(MeasurementMetric metric) {
+    return MeasurementChartModel(
+      metric: metric,
+      primaryPoints: const <ChartPoint>[],
+      secondaryPoints: const <ChartPoint>[],
+    );
+  }
 }

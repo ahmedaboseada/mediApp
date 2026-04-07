@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/features/patient/features/health_measurements/presentation/controller/health_measurements/health_measurements_cubit.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/widgets/add_measurement_content.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/widgets/add_measurement_tab_selector.dart';
 
@@ -86,13 +88,60 @@ class _AddMeasurementScreenState extends State<AddMeasurementScreen> {
     );
   }
 
-  void _handleSave() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '${AppStrings.addMeasurement} ${AppStrings.save.toLowerCase()}d',
-        ),
-      ),
-    );
+  Future<void> _handleSave() async {
+    final cubit = context.read<HealthMeasurementsCubit>();
+
+    String? validationError;
+
+    if (_selectedTab == AddMeasurementTab.bloodPressure) {
+      final systolic = int.tryParse(_systolicController.text.trim());
+      final diastolic = int.tryParse(_diastolicController.text.trim());
+      final heartRate = int.tryParse(_heartRateController.text.trim());
+
+      if (systolic == null || diastolic == null) {
+        validationError = 'Please enter valid systolic and diastolic values';
+      } else {
+        final result = await cubit.addBloodPressureMeasurement(
+          systolic: systolic,
+          diastolic: diastolic,
+          heartRate: heartRate,
+        );
+        result.fold((error) {
+          validationError = error.message;
+        }, (_) {
+          Navigator.of(context).pop();
+        });
+      }
+    } else if (_selectedTab == AddMeasurementTab.bloodSugar) {
+      final glucose = int.tryParse(_bloodGlucoseController.text.trim());
+      if (glucose == null) {
+        validationError = 'Please enter a valid blood sugar value';
+      } else {
+        final result = await cubit.addBloodSugarMeasurement(value: glucose);
+        result.fold((error) {
+          validationError = error.message;
+        }, (_) {
+          Navigator.of(context).pop();
+        });
+      }
+    } else {
+      final weight = double.tryParse(_weightController.text.trim());
+      if (weight == null) {
+        validationError = 'Please enter a valid weight value';
+      } else {
+        final result = await cubit.addWeightMeasurement(value: weight);
+        result.fold((error) {
+          validationError = error.message;
+        }, (_) {
+          Navigator.of(context).pop();
+        });
+      }
+    }
+
+    if (validationError != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(validationError!)),
+      );
+    }
   }
 }

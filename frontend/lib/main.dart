@@ -10,7 +10,7 @@ void main() async {
   await HiveService.init();
   await LocalNotificationService.init();
 
-  setupServiceLocator();
+  await setupServiceLocator();
   runApp(const medi());
 }
 

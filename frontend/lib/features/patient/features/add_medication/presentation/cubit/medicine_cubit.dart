@@ -1,34 +1,70 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:medi/core/services/hive_service.dart';
+import 'package:dartz/dartz.dart';
+import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_state.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
+import 'package:medi/features/patient/features/add_medication/data/repo/medicine_repo.dart';
 
 class MedicineCubit extends Cubit<MedicineState> {
-  MedicineCubit()
-    : super(
-        MedicineState.initial(_filterByTab(HiveService.getMedications(), MedicineTab.all)),
-      );
+  MedicineCubit(this._medicineRepo)
+    : super(MedicineState.initial(const <Medication>[]));
 
-  int get allCount => HiveService.getMedications().length;
+  final MedicineRepo _medicineRepo;
+  List<Medication> _allMedications = const <Medication>[];
+  List<Medication> _activeMedications = const <Medication>[];
 
-  int get activeCount =>
-      HiveService.getMedications().where(_isMedicationActive).length;
+  int get allCount => _allMedications.length;
 
-  int get chronicCount =>
-      HiveService.getMedications().where((m) => m.isChronic).length;
+  int get activeCount => _activeMedications.isNotEmpty
+      ? _activeMedications.length
+      : _allMedications.where(_isMedicationActive).length;
 
-  void loadMedications() {
-    final all = HiveService.getMedications();
-    emit(state.copyWith(medications: _filterList(all)));
+  int get chronicCount => _allMedications.where((m) => m.isChronic).length;
+
+  Future<void> loadMedications() async {
+    final result = await _medicineRepo.getAllMedications();
+    final medications = result.fold(
+      (_) => HiveService.getMedications(),
+      (items) => items,
+    );
+    _allMedications = medications;
+
+    if (state.selectedTab == MedicineTab.active) {
+      await loadActiveMedications();
+      return;
+    }
+
+    emit(state.copyWith(medications: _filterList(_allMedications)));
   }
 
-  Future<void> addMedication(Medication medication) async {
-    await HiveService.addMedication(medication);
-    loadMedications();
+  Future<void> loadActiveMedications() async {
+    final result = await _medicineRepo.getActiveMedications();
+    final medications = result.fold(
+      (_) => _allMedications.where(_isMedicationActive).toList(),
+      (items) => items,
+    );
+
+    _activeMedications = medications;
+    emit(state.copyWith(medications: medications));
+  }
+
+  Future<Either<ApiError, String>> addMedication(Medication medication) async {
+    final result = await _medicineRepo.addMedicineFromMedication(medication);
+    if (result.isRight()) {
+      await HiveService.addMedication(medication);
+      await loadMedications();
+    }
+    return result;
   }
 
   void changeTab(MedicineTab tab) {
     emit(state.copyWith(selectedTab: tab));
+
+    if (tab == MedicineTab.active) {
+      loadActiveMedications();
+      return;
+    }
+
     filterMedications();
   }
 
@@ -37,8 +73,7 @@ class MedicineCubit extends Cubit<MedicineState> {
   }
 
   void filterMedications() {
-    final all = HiveService.getMedications();
-    emit(state.copyWith(medications: _filterList(all)));
+    emit(state.copyWith(medications: _filterList(_allMedications)));
   }
 
   List<Medication> _filterList(List<Medication> all) {
@@ -54,24 +89,6 @@ class MedicineCubit extends Cubit<MedicineState> {
   }
 
   static bool _isMedicationActive(Medication medication) {
-    final parts = medication.endDate.split('/');
-    if (parts.length != 3) return false;
-
-    final month = int.tryParse(parts[0]);
-    final day = int.tryParse(parts[1]);
-    final year = int.tryParse(parts[2]);
-    if (month == null || day == null || year == null) return false;
-
-    DateTime endDate;
-    try {
-      endDate = DateTime(year, month, day);
-    } catch (_) {
-      return false;
-    }
-
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    return endDate.isAfter(today);
+    return medication.isActive;
   }
 }
-

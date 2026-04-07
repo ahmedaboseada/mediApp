@@ -37,14 +37,21 @@ class MeasurementChartModel extends Equatable {
     required this.metric,
     required this.primaryPoints,
     this.secondaryPoints = const <ChartPoint>[],
+    this.xLabels = const <String>[],
   });
 
   final MeasurementMetric metric;
   final List<ChartPoint> primaryPoints;
   final List<ChartPoint> secondaryPoints;
+  final List<String> xLabels;
 
   bool get hasSecondaryLine => secondaryPoints.isNotEmpty;
 
   @override
-  List<Object?> get props => <Object?>[metric, primaryPoints, secondaryPoints];
+  List<Object?> get props => <Object?>[
+    metric,
+    primaryPoints,
+    secondaryPoints,
+    xLabels,
+  ];
 }

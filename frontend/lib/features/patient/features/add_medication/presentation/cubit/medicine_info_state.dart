@@ -2,18 +2,39 @@ import 'package:equatable/equatable.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 
 class MedicineInfoState extends Equatable {
-  const MedicineInfoState({required this.medication, required this.isDeleted});
+  const MedicineInfoState({
+    required this.medication,
+    required this.isDeleted,
+    required this.isTaken,
+    required this.scheduleTimes,
+    required this.nextScheduleTime,
+  });
 
   factory MedicineInfoState.initial() {
-    return const MedicineInfoState(medication: Medication(), isDeleted: false);
+    return const MedicineInfoState(
+      medication: Medication(),
+      isDeleted: false,
+      isTaken: false,
+      scheduleTimes: <MedicationScheduleTime>[],
+      nextScheduleTime: '',
+    );
   }
 
   factory MedicineInfoState.fromMedication(Medication medication) {
-    return MedicineInfoState(medication: medication, isDeleted: false);
+    return MedicineInfoState(
+      medication: medication,
+      isDeleted: false,
+      isTaken: false,
+      scheduleTimes: <MedicationScheduleTime>[],
+      nextScheduleTime: '',
+    );
   }
 
   final Medication medication;
   final bool isDeleted;
+  final bool isTaken;
+  final List<MedicationScheduleTime> scheduleTimes;
+  final String nextScheduleTime;
 
   String get medicineName => medication.name;
 
@@ -22,8 +43,6 @@ class MedicineInfoState extends Equatable {
 
     return subtitleParts;
   }
-
-  bool get isTaken => medication.isActive;
 
   MedicationType get medicationType => medication.resolvedMedicationType;
 
@@ -55,29 +74,36 @@ class MedicineInfoState extends Equatable {
         .toList();
   }
 
-  String get frequency => medication.frequency.trim().isNotEmpty
-      ? medication.frequency.trim()
-      : 'Daily';
+  String get frequency => medication.frequency.trim();
 
-  String get duration => medication.endDate.trim().isNotEmpty
-      ? medication.endDate.trim()
-      : 'Ongoing';
+  String get duration => medication.endDate.trim();
 
-  List<String> get sideEffects => const [
-    'Hypoglycemia',
-    'Weight gain',
-    'Injection site reaction',
-  ];
+  List<String> get sideEffects => const <String>[];
 
-  String get notes => 'Take before meals. Monitor blood sugar levels closely.';
+  String get notes => '';
 
-  MedicineInfoState copyWith({Medication? medication, bool? isDeleted}) {
+  MedicineInfoState copyWith({
+    Medication? medication,
+    bool? isDeleted,
+    bool? isTaken,
+    List<MedicationScheduleTime>? scheduleTimes,
+    String? nextScheduleTime,
+  }) {
     return MedicineInfoState(
       medication: medication ?? this.medication,
       isDeleted: isDeleted ?? this.isDeleted,
+      isTaken: isTaken ?? this.isTaken,
+      scheduleTimes: scheduleTimes ?? this.scheduleTimes,
+      nextScheduleTime: nextScheduleTime ?? this.nextScheduleTime,
     );
   }
 
   @override
-  List<Object?> get props => [medication, isDeleted];
+  List<Object?> get props => [
+    medication,
+    isDeleted,
+    isTaken,
+    scheduleTimes,
+    nextScheduleTime,
+  ];
 }
