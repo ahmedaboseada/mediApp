@@ -10,6 +10,7 @@ class ScheduleCard extends StatelessWidget {
     required this.frequency,
     required this.duration,
     required this.onAddPressed,
+    required this.onReminderTakenChanged,
   });
 
   final List<String> reminders;
@@ -17,6 +18,7 @@ class ScheduleCard extends StatelessWidget {
   final String frequency;
   final String duration;
   final VoidCallback onAddPressed;
+  final void Function(String time, bool value) onReminderTakenChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -24,10 +26,11 @@ class ScheduleCard extends StatelessWidget {
         ? scheduleTimes
         : (reminders.isNotEmpty
               ? reminders
-                  .map(
-                    (time) => MedicationScheduleTime(time: time, taken: false),
-                  )
-                  .toList()
+                    .map(
+                      (time) =>
+                          MedicationScheduleTime(time: time, taken: false),
+                    )
+                    .toList()
               : const <MedicationScheduleTime>[
                   MedicationScheduleTime(time: '--:--', taken: false),
                 ]);
@@ -96,6 +99,8 @@ class ScheduleCard extends StatelessWidget {
                   time: entry.value.time,
                   frequency: frequency,
                   isTaken: entry.value.taken,
+                  onTakenChanged: (value) =>
+                      onReminderTakenChanged(entry.value.time, value),
                 ),
               );
             }),
@@ -119,11 +124,13 @@ class _ScheduleItem extends StatelessWidget {
     required this.time,
     required this.frequency,
     required this.isTaken,
+    required this.onTakenChanged,
   });
 
   final String time;
   final String frequency;
   final bool isTaken;
+  final ValueChanged<bool> onTakenChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -161,6 +168,8 @@ class _ScheduleItem extends StatelessWidget {
               ),
               child: Text(
                 frequency,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: AppSizes.sp12,
                   fontWeight: FontWeight.w600,
@@ -169,13 +178,11 @@ class _ScheduleItem extends StatelessWidget {
               ),
             ),
             SizedBox(width: AppSizes.w8),
-            Text(
-              isTaken ? 'Taken' : 'Pending',
-              style: TextStyle(
-                fontSize: AppSizes.sp12,
-                fontWeight: FontWeight.w600,
-                color: isTaken ? Colors.green : AppColors.secondaryText,
-              ),
+            CustomToggleSwitch(
+              value: isTaken,
+              onChanged: onTakenChanged,
+              width: 44,
+              height: 24,
             ),
           ],
         ),

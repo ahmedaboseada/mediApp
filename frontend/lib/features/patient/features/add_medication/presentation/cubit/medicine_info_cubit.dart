@@ -20,12 +20,18 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
     loadMedicationSchedule();
   }
 
+  void _emitIfOpen(MedicineInfoState newState) {
+    if (!isClosed) {
+      emit(newState);
+    }
+  }
+
   Future<void> loadMedicationSchedule() async {
     final medicationId = state.medication.id.trim();
     final fallbackTimes = _fallbackScheduleTimes();
 
     if (medicationId.isEmpty) {
-      emit(
+      _emitIfOpen(
         state.copyWith(
           scheduleTimes: fallbackTimes,
           nextScheduleTime: _nextUntakenTime(fallbackTimes),
@@ -38,7 +44,7 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
     final result = await _medicineRepo.getMedicationSchedule();
     result.fold(
       (_) {
-        emit(
+        _emitIfOpen(
           state.copyWith(
             scheduleTimes: fallbackTimes,
             nextScheduleTime: _nextUntakenTime(fallbackTimes),
@@ -57,7 +63,7 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
             : fallbackTimes;
         final nextUntaken = _nextUntakenEntry(resolvedTimes);
 
-        emit(
+        _emitIfOpen(
           state.copyWith(
             scheduleTimes: resolvedTimes,
             nextScheduleTime:
@@ -74,7 +80,7 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
     String? time,
   }) async {
     final previousTaken = state.isTaken;
-    emit(state.copyWith(isTaken: value));
+    _emitIfOpen(state.copyWith(isTaken: value));
 
     if (state.medication.id.trim().isEmpty) {
       return Right('Medication status updated locally');
@@ -82,7 +88,7 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
 
     final selectedTime = (time ?? state.nextScheduleTime).trim();
     if (selectedTime.isEmpty) {
-      emit(state.copyWith(isTaken: previousTaken));
+      _emitIfOpen(state.copyWith(isTaken: previousTaken));
       return Left(
         ServerFailure('Unable to determine the next medication time'),
       );
@@ -100,7 +106,7 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
     );
 
     if (result.isLeft()) {
-      emit(state.copyWith(isTaken: previousTaken));
+      _emitIfOpen(state.copyWith(isTaken: previousTaken));
       return result;
     }
     return result;
@@ -108,20 +114,37 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
 
   void toggleCriticalMode(bool value) {
     final updated = state.medication.copyWith(isCriticalMode: value);
-    emit(state.copyWith(medication: updated));
+    _emitIfOpen(state.copyWith(medication: updated));
     _persistMedication(updated);
   }
 
-  Future<void> refillStock({required int amount}) async {
-    if (amount <= 0) return;
+  Future<Either<ApiError, String>> refillStock({required int amount}) async {
+    if (amount <= 0) {
+      return Left(ServerFailure('Please enter a valid stock amount'));
+    }
+
+    final previous = state.medication;
     final updatedStock = state.stock + amount;
     final updated = state.medication.copyWith(
       stock: updatedStock,
       currentStock: updatedStock.toString(),
       stockStatus: _statusForStock(updatedStock),
     );
-    emit(state.copyWith(medication: updated));
+
+    final medicationId = previous.id.trim();
+    if (medicationId.isNotEmpty) {
+      final result = await _medicineRepo.updateMedicineFromMedication(
+        medicationId: medicationId,
+        medication: updated,
+      );
+      if (result.isLeft()) {
+        return result;
+      }
+    }
+
+    _emitIfOpen(state.copyWith(medication: updated));
     await _persistMedication(updated);
+    return const Right('Stock refilled successfully');
   }
 
   Future<void> _persistMedication(Medication updated) async {
@@ -134,7 +157,7 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
 
   Future<void> applyEditedMedication(Medication updated) async {
     _sourceMedication = updated;
-    emit(state.copyWith(medication: updated));
+    _emitIfOpen(state.copyWith(medication: updated));
   }
 
   MedicationStockStatus _statusForStock(int stock) {
@@ -164,9 +187,12 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
       }
     }
 
+    await LocalNotificationService().cancelMedicationReminders(
+      _sourceMedication,
+    );
     await HiveService.deleteMedication(_sourceMedication);
-    emit(state.copyWith(isDeleted: true));
-    emit(state.copyWith(isDeleted: false));
+    _emitIfOpen(state.copyWith(isDeleted: true));
+    _emitIfOpen(state.copyWith(isDeleted: false));
     return const Right('Medication deleted successfully');
   }
 

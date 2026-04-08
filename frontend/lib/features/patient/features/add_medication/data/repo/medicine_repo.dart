@@ -22,6 +22,27 @@ abstract class MedicineRepo {
     Medication medication,
   );
 
+  Future<Either<ApiError, String>> updateMedicine({
+    required String medicationId,
+    required String name,
+    required String type,
+    required String frequency,
+    List<String>? daily,
+    List<Map<String, dynamic>>? specific,
+    List<Map<String, dynamic>>? weekly,
+    String? dosage,
+    int? stock,
+    bool? criticalMode,
+    String? notes,
+    bool? isChronic,
+    String? status,
+  });
+
+  Future<Either<ApiError, String>> updateMedicineFromMedication({
+    required String medicationId,
+    required Medication medication,
+  });
+
   Future<Either<ApiError, List<Medication>>> getAllMedications();
 
   Future<Either<ApiError, List<Medication>>> getActiveMedications();

@@ -73,6 +73,7 @@ import 'package:medi/features/patient/features/questionnaire/presentation/screen
 import 'package:medi/features/shared/splash/presentation/screens/select_screen.dart';
 import 'package:medi/features/shared/splash/presentation/screens/onboarding_screen.dart';
 import 'package:medi/features/shared/splash/presentation/screens/splash_screen.dart';
+import 'package:medi/main.dart';
 
 class AppRouter {
   // ========== SHARED ROUTES ==========
@@ -140,6 +141,7 @@ class AppRouter {
   static const String dailyHealthLogScreen = '/health/dailyLog';
 
   static final router = GoRouter(
+    navigatorKey: navigatorKey, 
     initialLocation: '/',
     routes: [
       // ========== SHARED/SPLASH ROUTES ==========

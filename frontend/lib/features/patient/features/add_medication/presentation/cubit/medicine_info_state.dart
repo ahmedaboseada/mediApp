@@ -78,7 +78,7 @@ class MedicineInfoState extends Equatable {
 
   String get duration => medication.endDate.trim();
 
-  List<String> get sideEffects => const <String>[];
+  List<String> get sideEffects => medication.sideEffects;
 
   String get notes => '';
 

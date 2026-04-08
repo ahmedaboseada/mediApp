@@ -34,6 +34,7 @@ class Medication extends Equatable {
     this.isActive = false,
     this.isChronic = false,
     this.medicationType = MedicationType.pill,
+    this.sideEffects = const <String>[],
   });
 
   final String id;
@@ -45,16 +46,17 @@ class Medication extends Equatable {
   final String startDate;
   final String endDate;
   final List<String> reminders;
- // final String currentStock;
+  // final String currentStock;
   final String schedule;
   final int stock;
   final String expiryDate;
   final bool isCriticalMode;
   final MedicationStockStatus stockStatus;
- // final bool isCritical;
+  // final bool isCritical;
   final bool isActive;
   final bool isChronic;
   final MedicationType medicationType;
+  final List<String> sideEffects;
 
   static MedicationType medicationTypeFromLabel(String? label) {
     switch (label?.trim().toLowerCase()) {
@@ -111,6 +113,7 @@ class Medication extends Equatable {
     bool? isActive,
     bool? isChronic,
     MedicationType? medicationType,
+    List<String>? sideEffects,
   }) {
     return Medication(
       id: id ?? this.id,
@@ -122,7 +125,7 @@ class Medication extends Equatable {
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       reminders: reminders ?? this.reminders,
-     // currentStock: currentStock ?? this.currentStock,
+      // currentStock: currentStock ?? this.currentStock,
       schedule: schedule ?? this.schedule,
       stock: stock ?? this.stock,
       expiryDate: expiryDate ?? this.expiryDate,
@@ -132,6 +135,7 @@ class Medication extends Equatable {
       isActive: isActive ?? this.isActive,
       isChronic: isChronic ?? this.isChronic,
       medicationType: medicationType ?? this.medicationType,
+      sideEffects: sideEffects ?? this.sideEffects,
     );
   }
 
@@ -146,7 +150,7 @@ class Medication extends Equatable {
       'startDate': startDate,
       'endDate': endDate,
       'reminders': reminders,
-    //  'currentStock': currentStock,
+      //  'currentStock': currentStock,
       'schedule': schedule,
       'stock': stock,
       'expiryDate': expiryDate,
@@ -155,6 +159,7 @@ class Medication extends Equatable {
       'isActive': isActive,
       'isChronic': isChronic,
       'medicationType': medicationType.index,
+      'sideEffects': sideEffects,
     };
   }
 
@@ -164,11 +169,11 @@ class Medication extends Equatable {
     final leftThreshold = (json['leftThreshold'] as num?)?.toInt() ?? 10;
     final stockValue = (json['stock'] as num?)?.toInt() ?? 0;
     final parsedType =
-      medicationTypeIndex != null &&
-        medicationTypeIndex >= 0 &&
-        medicationTypeIndex < MedicationType.values.length
-      ? MedicationType.values[medicationTypeIndex]
-      : medicationTypeFromLabel(json['type'] as String?);
+        medicationTypeIndex != null &&
+            medicationTypeIndex >= 0 &&
+            medicationTypeIndex < MedicationType.values.length
+        ? MedicationType.values[medicationTypeIndex]
+        : medicationTypeFromLabel(json['type'] as String?);
 
     final parsedReminders =
         ((json['daily'] as List?) ?? (json['reminders'] as List?) ?? const [])
@@ -191,7 +196,7 @@ class Medication extends Equatable {
       startDate: (json['startDate'] as String?) ?? '',
       endDate: (json['endDate'] as String?) ?? '',
       reminders: parsedReminders,
-     // currentStock: (json['currentStock'] as String?) ?? '',
+      // currentStock: (json['currentStock'] as String?) ?? '',
       schedule: (json['schedule'] as String?) ?? '',
       stock: stockValue,
       expiryDate: (json['expiryDate'] as String?) ?? '',
@@ -199,14 +204,20 @@ class Medication extends Equatable {
           (json['criticalMode'] as bool?) ??
           (json['isCriticalMode'] as bool?) ??
           false,
-      stockStatus:
-          (json['stockStatus'] is int)
-              ? MedicationStockStatus.values[(json['stockStatus'] as int)
-                  .clamp(0, MedicationStockStatus.values.length - 1)]
-              : parsedStockStatus,
-      isActive: (json['isActive'] as bool?) ?? (status == null ? false : status != 'inactive'),
+      stockStatus: (json['stockStatus'] is int)
+          ? MedicationStockStatus.values[(json['stockStatus'] as int).clamp(
+              0,
+              MedicationStockStatus.values.length - 1,
+            )]
+          : parsedStockStatus,
+      isActive:
+          (json['isActive'] as bool?) ??
+          (status == null ? false : status != 'inactive'),
       isChronic: (json['isChronic'] as bool?) ?? false,
       medicationType: parsedType,
+      sideEffects:
+          (json['sideEffects'] as List?)?.whereType<String>().toList() ??
+          const <String>[],
     );
   }
 
@@ -221,7 +232,7 @@ class Medication extends Equatable {
     startDate,
     endDate,
     reminders,
-   // currentStock,
+    // currentStock,
     schedule,
     stock,
     expiryDate,
@@ -231,6 +242,7 @@ class Medication extends Equatable {
     isActive,
     isChronic,
     medicationType,
+    sideEffects,
   ];
 }
 
@@ -289,13 +301,14 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       isActive: fields[13] as bool? ?? false,
       isChronic: fields[14] as bool? ?? false,
       medicationType: parsedType,
+      sideEffects: (fields[17] as List?)?.cast<String>() ?? const <String>[],
     );
   }
 
   @override
   void write(BinaryWriter writer, Medication obj) {
     writer
-      ..writeByte(17)
+      ..writeByte(18)
       ..writeByte(0)
       ..write(obj.selectedMethod)
       ..writeByte(1)
@@ -327,9 +340,11 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       ..writeByte(14)
       ..write(obj.isChronic)
       ..writeByte(15)
-        ..write(obj.medicationType.index)
-        ..writeByte(16)
-        ..write(obj.id);
+      ..write(obj.medicationType.index)
+      ..writeByte(16)
+      ..write(obj.id)
+      ..writeByte(17)
+      ..write(obj.sideEffects);
   }
 
   @override

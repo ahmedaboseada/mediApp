@@ -13,25 +13,22 @@ class ConfirmationScreen extends StatelessWidget {
 
   Future<void> _handleAddMedication(BuildContext context) async {
     final medication = context.read<MedicationDataCubit>().state.medicationData;
-    final result = await context.read<MedicineCubit>().addMedication(medication);
+    final result = await context.read<MedicineCubit>().addMedication(
+      medication,
+    );
     await HiveService.addMedication(medication);
 
     result.fold(
       (error) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error.message),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(error.message), backgroundColor: Colors.red),
         );
       },
       (message) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor: Colors.green,
-          ),
+          SnackBar(content: Text(message), backgroundColor: Colors.green),
         );
+        LocalNotificationService().scheduleMedicationReminders(medication);
         LocalNotificationService().showNotification(
           title: 'Medication Added',
           body: '${medication.medicationName} has been added to your list.',

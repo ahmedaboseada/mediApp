@@ -7,15 +7,11 @@ class MedicineHeaderCard extends StatelessWidget {
     super.key,
     required this.medicineName,
     required this.subtitle,
-    required this.isTaken,
-    required this.onTakenChanged,
     required this.imagePath,
   });
 
   final String medicineName;
   final String subtitle;
-  final bool isTaken;
-  final ValueChanged<bool> onTakenChanged;
   final String imagePath;
 
   Widget _buildMedicationIcon() {
@@ -34,11 +30,8 @@ class MedicineHeaderCard extends StatelessWidget {
       width: 60,
       height: 60,
       fit: BoxFit.contain,
-      errorBuilder: (_, __, ___) => const Icon(
-        Icons.medication_rounded,
-        color: Colors.white,
-        size: 32,
-      ),
+      errorBuilder: (_, __, ___) =>
+          const Icon(Icons.medication_rounded, color: Colors.white, size: 32),
     );
   }
 
@@ -103,26 +96,6 @@ class MedicineHeaderCard extends StatelessWidget {
                   SizedBox(height: AppSizes.h12),
                 ],
               ),
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                CustomToggleSwitch(
-                  value: isTaken,
-                  onChanged: onTakenChanged,
-                  width: 50,
-                  height: 26,
-                ),
-                SizedBox(height: AppSizes.h4),
-                Text(
-                  isTaken ? 'Taken' : 'Not Taken',
-                  style: TextStyle(
-                    fontSize: AppSizes.sp12,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white.withOpacity(0.95),
-                  ),
-                ),
-              ],
             ),
           ],
         ),

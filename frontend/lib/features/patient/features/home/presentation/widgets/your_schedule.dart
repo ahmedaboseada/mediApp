@@ -25,95 +25,93 @@ class YourSchedule extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppSizes.r24),
           ),
           child: Card(
-              child: Padding(
-                padding:  EdgeInsets.all(AppSizes.h24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                   
-                    HorizontalCalenderMZ(
-                      selectedbgcolor: AppColors.primary,
-                      header:  Text(
+            child: Padding(
+              padding: EdgeInsets.all(AppSizes.h24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  HorizontalCalenderMZ(
+                    selectedbgcolor: AppColors.primary,
+                    header: Text(
                       'Your Schedule',
                       style: AppStyles.black24700.copyWith(
                         fontSize: AppSizes.sp20,
                       ),
                     ),
-                      selectedDate: _selectedDate,
-                      startyear: DateTime.now().year - 2,
-                      endyear: DateTime.now().year + 2,
-                      footer: false,
-                      onDateSelected: (selectedDate) {
-                        _selectedDate.value = selectedDate;
-                        blocContext.read<ScheduleCubit>().selectDate(
-                          selectedDate,
+                    selectedDate: _selectedDate,
+                    startyear: DateTime.now().year - 2,
+                    endyear: DateTime.now().year + 2,
+                    footer: false,
+                    onDateSelected: (selectedDate) {
+                      _selectedDate.value = selectedDate;
+                      blocContext.read<ScheduleCubit>().selectDate(
+                        selectedDate,
+                      );
+                    },
+                  ),
+                  SizedBox(height: AppSizes.h18),
+                  BlocBuilder<ScheduleCubit, ScheduleState>(
+                    builder: (context, state) {
+                      if (state is ScheduleLoading) {
+                        return SizedBox(
+                          height: AppSizes.h120,
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
                         );
-                      },
-                    ),
-                    SizedBox(height: AppSizes.h18),
-                    BlocBuilder<ScheduleCubit, ScheduleState>(
-                      builder: (context, state) {
-                        if (state is ScheduleLoading) {
-                          return SizedBox(
-                            height: AppSizes.h120,
-                            child: const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-                        }
-                
-                        if (state is ScheduleFailure) {
+                      }
+
+                      if (state is ScheduleFailure) {
+                        return Padding(
+                          padding: EdgeInsets.symmetric(vertical: AppSizes.h16),
+                          child: Text(
+                            state.message,
+                            style: AppStyles.secondary12400,
+                          ),
+                        );
+                      }
+
+                      if (state is ScheduleSuccess) {
+                        if (state.medications.isEmpty) {
                           return Padding(
-                            padding: EdgeInsets.symmetric(vertical: AppSizes.h16),
+                            padding: EdgeInsets.symmetric(
+                              vertical: AppSizes.h16,
+                            ),
                             child: Text(
-                              state.message,
+                              'No medication schedule for this day.',
                               style: AppStyles.secondary12400,
                             ),
                           );
                         }
-                
-                        if (state is ScheduleSuccess) {
-                          if (state.medications.isEmpty) {
-                            return Padding(
-                              padding: EdgeInsets.symmetric(
-                                vertical: AppSizes.h16,
-                              ),
-                              child: Text(
-                                'No medication schedule for this day.',
-                                style: AppStyles.secondary12400,
-                              ),
-                            );
-                          }
-                
-                          return SizedBox(
-                            height: AppSizes.h150,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: state.medications.length,
-                              itemBuilder: (context, index) {
-                                final medication = state.medications[index];
-                                return Padding(
-                                  padding: EdgeInsets.only(right: AppSizes.w12),
-                                  child: SizedBox(
-                                    width: AppSizes.w160,
-                                    child: _MedicationScheduleCard(
-                                      medication: medication,
-                                    ),
+
+                        return SizedBox(
+                          height: AppSizes.h150,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: state.medications.length,
+                            itemBuilder: (context, index) {
+                              final medication = state.medications[index];
+                              return Padding(
+                                padding: EdgeInsets.only(right: AppSizes.w12),
+                                child: SizedBox(
+                                  width: AppSizes.w160,
+                                  child: _MedicationScheduleCard(
+                                    medication: medication,
                                   ),
-                                );
-                              },
-                            ),
-                          );
-                        }
-                
-                        return const SizedBox.shrink();
-                      },
-                    ),
-                  ],
-                ),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      }
+
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                ],
               ),
             ),
-          
+          ),
         ),
       ),
     );
@@ -136,24 +134,46 @@ class _MedicationScheduleCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              _buildMedicationIcon(),
-              SizedBox(width: AppSizes.w12),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final textWidth =
+                  (constraints.maxWidth - AppSizes.w24 - AppSizes.w12)
+                      .clamp(0.0, double.infinity)
+                      .toDouble();
+
+              return Row(
                 children: [
-                  Text(
-                    medication.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppStyles.black16400,
+                  SizedBox(
+                    width: AppSizes.w24,
+                    height: AppSizes.h24,
+                    child: _buildMedicationIcon(),
                   ),
-                  SizedBox(height: AppSizes.h4),
-                  Text(medication.dosage, style: AppStyles.secondary12400),
+                  SizedBox(width: AppSizes.w12),
+                  SizedBox(
+                    width: textWidth,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          medication.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppStyles.black16400,
+                        ),
+                        SizedBox(height: AppSizes.h4),
+                        Text(
+                          medication.dosage,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppStyles.secondary12400,
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
-              ),
-            ],
+              );
+            },
           ),
           SizedBox(height: AppSizes.h10),
 
@@ -174,7 +194,7 @@ class _MedicationScheduleCard extends StatelessWidget {
             )
           else
             Expanded(child: SizedBox(height: AppSizes.h8)),
-if(medication.isCritical) SizedBox(height: AppSizes.h4),
+          if (medication.isCritical) SizedBox(height: AppSizes.h4),
           Row(
             children: [
               Container(

@@ -27,59 +27,20 @@ class MedicineRepoImpl implements MedicineRepo {
     String? status,
   }) async {
     try {
-      final data = <String, dynamic>{
-        'name': name,
-        'type': _toApiType(type),
-        'frequency': frequency,
-      };
-
-      final normalizedFrequency = frequency.trim().toLowerCase();
-      switch (normalizedFrequency) {
-        case 'daily':
-          if (daily != null && daily.isNotEmpty) {
-            data['daily'] = _normalizeTimes(daily);
-          }
-          break;
-        case 'specific':
-          if (specific != null && specific.isNotEmpty) {
-            data['specific'] = _normalizeSpecificSchedule(specific);
-          }
-          break;
-        case 'weekly':
-          if (weekly != null && weekly.isNotEmpty) {
-            data['weekly'] = _normalizeWeeklySchedule(weekly);
-          }
-          break;
-        default:
-          if (daily != null && daily.isNotEmpty) {
-            data['daily'] = _normalizeTimes(daily);
-          }
-          if (specific != null && specific.isNotEmpty) {
-            data['specific'] = _normalizeSpecificSchedule(specific);
-          }
-          if (weekly != null && weekly.isNotEmpty) {
-            data['weekly'] = _normalizeWeeklySchedule(weekly);
-          }
-      }
-
-      if (dosage != null && dosage.trim().isNotEmpty) {
-        data['dosage'] = dosage;
-      }
-      if (stock != null) {
-        data['stock'] = stock;
-      }
-      if (criticalMode != null) {
-        data['criticalMode'] = criticalMode;
-      }
-      if (notes != null && notes.trim().isNotEmpty) {
-        data['notes'] = notes;
-      }
-      if (isChronic != null) {
-        data['isChronic'] = isChronic;
-      }
-      if (status != null && status.trim().isNotEmpty) {
-        data['status'] = status;
-      }
+      final data = _buildMedicinePayload(
+        name: name,
+        type: type,
+        frequency: frequency,
+        daily: daily,
+        specific: specific,
+        weekly: weekly,
+        dosage: dosage,
+        stock: stock,
+        criticalMode: criticalMode,
+        notes: notes,
+        isChronic: isChronic,
+        status: status,
+      );
 
       final dynamic response = await apiService.post('/medications', data);
 
@@ -92,6 +53,60 @@ class MedicineRepoImpl implements MedicineRepo {
       final message =
           (response is Map<String, dynamic> ? response['message'] : null) ??
           'Medication added successfully';
+      return Right(message.toString());
+    } on DioException catch (e) {
+      return Left(ServerFailure.fromDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<ApiError, String>> updateMedicine({
+    required String medicationId,
+    required String name,
+    required String type,
+    required String frequency,
+    List<String>? daily,
+    List<Map<String, dynamic>>? specific,
+    List<Map<String, dynamic>>? weekly,
+    String? dosage,
+    int? stock,
+    bool? criticalMode,
+    String? notes,
+    bool? isChronic,
+    String? status,
+  }) async {
+    try {
+      final data = _buildMedicinePayload(
+        name: name,
+        type: type,
+        frequency: frequency,
+        daily: daily,
+        specific: specific,
+        weekly: weekly,
+        dosage: dosage,
+        stock: stock,
+        criticalMode: criticalMode,
+        notes: notes,
+        isChronic: isChronic,
+        status: status,
+      );
+
+      final dynamic response = await apiService.put(
+        '/medications/$medicationId',
+        data,
+      );
+
+      log('Update Medicine Response: ${response.toString()}');
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final message =
+          (response is Map<String, dynamic> ? response['message'] : null) ??
+          'Medication updated successfully';
       return Right(message.toString());
     } on DioException catch (e) {
       return Left(ServerFailure.fromDioError(e));
@@ -114,6 +129,34 @@ class MedicineRepoImpl implements MedicineRepo {
         : null;
 
     return addMedicine(
+      name: medication.name,
+      type: medication.type,
+      frequency: apiFrequency,
+      daily: apiFrequency == 'daily' ? reminders : null,
+      weekly: weeklyPayload,
+      dosage: medication.dosage.trim().isEmpty ? null : medication.dosage,
+      stock: medication.stock == 0 ? null : medication.stock,
+      criticalMode: medication.isCriticalMode,
+      isChronic: medication.isChronic,
+    );
+  }
+
+  @override
+  Future<Either<ApiError, String>> updateMedicineFromMedication({
+    required String medicationId,
+    required Medication medication,
+  }) {
+    final apiFrequency = _toApiFrequency(medication.frequency);
+    final reminders = _normalizeTimes(medication.reminders);
+
+    final weeklyPayload = apiFrequency == 'weekly' && reminders.isNotEmpty
+        ? <Map<String, dynamic>>[
+            {'day': _resolveWeeklyDay(medication.schedule), 'times': reminders},
+          ]
+        : null;
+
+    return updateMedicine(
+      medicationId: medicationId,
       name: medication.name,
       type: medication.type,
       frequency: apiFrequency,
@@ -278,15 +321,95 @@ class MedicineRepoImpl implements MedicineRepo {
   String _toApiFrequency(String value) {
     final normalized = value.trim().toLowerCase();
     switch (normalized) {
+      case 'daily':
+      case 'once daily':
+      case 'twice daily':
       case 'every day':
+      case 'every 2 days':
+      case 'every 3 days':
+      case 'as needed':
         return 'daily';
+      case 'weekly':
       case 'every week':
+      case 'every 2 weeks':
         return 'weekly';
-      case 'every month':
-        return 'monthly';
+      case 'specific':
+        return 'specific';
       default:
-        return normalized;
+        // Backend currently validates frequency against: daily, weekly, specific.
+        return 'daily';
     }
+  }
+
+  Map<String, dynamic> _buildMedicinePayload({
+    required String name,
+    required String type,
+    required String frequency,
+    List<String>? daily,
+    List<Map<String, dynamic>>? specific,
+    List<Map<String, dynamic>>? weekly,
+    String? dosage,
+    int? stock,
+    bool? criticalMode,
+    String? notes,
+    bool? isChronic,
+    String? status,
+  }) {
+    final data = <String, dynamic>{
+      'name': name,
+      'type': _toApiType(type),
+      'frequency': frequency,
+    };
+
+    final normalizedFrequency = frequency.trim().toLowerCase();
+    switch (normalizedFrequency) {
+      case 'daily':
+        if (daily != null && daily.isNotEmpty) {
+          data['daily'] = _normalizeTimes(daily);
+        }
+        break;
+      case 'specific':
+        if (specific != null && specific.isNotEmpty) {
+          data['specific'] = _normalizeSpecificSchedule(specific);
+        }
+        break;
+      case 'weekly':
+        if (weekly != null && weekly.isNotEmpty) {
+          data['weekly'] = _normalizeWeeklySchedule(weekly);
+        }
+        break;
+      default:
+        if (daily != null && daily.isNotEmpty) {
+          data['daily'] = _normalizeTimes(daily);
+        }
+        if (specific != null && specific.isNotEmpty) {
+          data['specific'] = _normalizeSpecificSchedule(specific);
+        }
+        if (weekly != null && weekly.isNotEmpty) {
+          data['weekly'] = _normalizeWeeklySchedule(weekly);
+        }
+    }
+
+    if (dosage != null && dosage.trim().isNotEmpty) {
+      data['dosage'] = dosage;
+    }
+    if (stock != null) {
+      data['stock'] = stock;
+    }
+    if (criticalMode != null) {
+      data['criticalMode'] = criticalMode;
+    }
+    if (notes != null && notes.trim().isNotEmpty) {
+      data['notes'] = notes;
+    }
+    if (isChronic != null) {
+      data['isChronic'] = isChronic;
+    }
+    if (status != null && status.trim().isNotEmpty) {
+      data['status'] = status;
+    }
+
+    return data;
   }
 
   String _toApiType(String value) {

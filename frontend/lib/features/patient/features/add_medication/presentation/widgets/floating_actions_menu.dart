@@ -68,6 +68,7 @@ class MainFloatingButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FloatingActionButton(
+      heroTag: null,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSizes.r80),
       ),

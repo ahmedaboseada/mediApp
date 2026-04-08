@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
+import 'package:medi/features/patient/features/add_medication/data/repo/medicine_repo.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/reminder_time_input_row.dart';
 
 class EditMedicationScreen extends StatefulWidget {
@@ -58,8 +59,9 @@ class _EditMedicationScreenState extends State<EditMedicationScreen> {
     _originalMedication = widget.medication ?? const Medication();
     _nameController.text = _originalMedication.name;
     _dosageController.text = _originalMedication.dosage;
-    _selectedType =
-        _originalMedication.type.isNotEmpty ? _originalMedication.type : null;
+    _selectedType = _originalMedication.type.isNotEmpty
+        ? _originalMedication.type
+        : null;
     _selectedFrequency = _originalMedication.frequency.isNotEmpty
         ? _originalMedication.frequency
         : null;
@@ -100,7 +102,8 @@ class _EditMedicationScreenState extends State<EditMedicationScreen> {
                     CustomTextField(
                       label: 'Medication Name',
                       controller: _nameController,
-                      validator: (String? value) => value.validateRequiredField(),
+                      validator: (String? value) =>
+                          value.validateRequiredField(),
                     ),
                     SizedBox(height: AppSizes.h16),
                     CustomDropdown(
@@ -108,7 +111,8 @@ class _EditMedicationScreenState extends State<EditMedicationScreen> {
                       hint: 'Select type',
                       items: _types,
                       value: _selectedType,
-                      validator: (String? value) => value.validateRequiredField(),
+                      validator: (String? value) =>
+                          value.validateRequiredField(),
                       onChanged: (String value) {
                         setState(() {
                           _selectedType = value;
@@ -119,7 +123,8 @@ class _EditMedicationScreenState extends State<EditMedicationScreen> {
                     CustomTextField(
                       label: 'Dosage',
                       controller: _dosageController,
-                      validator: (String? value) => value.validateRequiredField(),
+                      validator: (String? value) =>
+                          value.validateRequiredField(),
                     ),
                     SizedBox(height: AppSizes.h16),
                     CustomDropdown(
@@ -127,7 +132,8 @@ class _EditMedicationScreenState extends State<EditMedicationScreen> {
                       hint: 'Select frequency',
                       items: _frequencyOptions,
                       value: _selectedFrequency,
-                      validator: (String? value) => value.validateRequiredField(),
+                      validator: (String? value) =>
+                          value.validateRequiredField(),
                       onChanged: (String value) {
                         setState(() {
                           _selectedFrequency = value;
@@ -219,7 +225,32 @@ class _EditMedicationScreenState extends State<EditMedicationScreen> {
       medicationType: Medication.medicationTypeFromLabel(_selectedType),
     );
 
-    await HiveService.updateMedication(original: _originalMedication, updated: updated);
+    final medicationId = _originalMedication.id.trim();
+    if (medicationId.isNotEmpty) {
+      final result = await getIt<MedicineRepo>().updateMedicineFromMedication(
+        medicationId: medicationId,
+        medication: updated,
+      );
+      if (result.isLeft()) {
+        final error = result.swap().getOrElse(
+          () => ServerFailure('Update failed'),
+        );
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error.message), backgroundColor: Colors.red),
+        );
+        return;
+      }
+    }
+
+    await HiveService.updateMedication(
+      original: _originalMedication,
+      updated: updated,
+    );
+    await LocalNotificationService().rescheduleMedicationReminders(
+      previousMedication: _originalMedication,
+      updatedMedication: updated,
+    );
     if (!context.mounted) return;
     context.pop(updated);
   }

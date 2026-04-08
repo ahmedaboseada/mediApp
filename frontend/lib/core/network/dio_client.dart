@@ -269,7 +269,7 @@ import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
 class DioClient {
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: "https://medi-app-dusky.vercel.app",
+      baseUrl: "http://16.16.217.229/",
       headers: {
         //"Content-Type": "application/json",
       },

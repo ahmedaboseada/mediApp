@@ -25,10 +25,8 @@ class MedicineInfoScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => MedicineInfoCubit(
-        getIt<MedicineRepo>(),
-        medication: medication,
-      ),
+      create: (_) =>
+          MedicineInfoCubit(getIt<MedicineRepo>(), medication: medication),
       child: const _MedicineInfoView(),
     );
   }
@@ -56,9 +54,8 @@ class _MedicineInfoView extends StatelessWidget {
               margin: EdgeInsets.all(AppSizes.w16),
             ),
           );
-         
-            context.pop();
-          
+
+          context.pop();
         },
         child: SafeArea(
           bottom: false,
@@ -95,7 +92,7 @@ class _MedicineInfoView extends StatelessWidget {
                 ],
                 actionsPadding: EdgeInsets.only(right: AppSizes.w12),
               ),
-          
+
               SliverPadding(
                 padding: EdgeInsets.fromLTRB(
                   AppSizes.w16,
@@ -108,75 +105,18 @@ class _MedicineInfoView extends StatelessWidget {
                     BlocSelector<
                       MedicineInfoCubit,
                       MedicineInfoState,
-                        (String, String, bool, MedicationType, String, List<MedicationScheduleTime>)
+                      (String, String, MedicationType)
                     >(
                       selector: (state) => (
                         state.medicineName,
                         state.medicineSubtitle,
-                        state.isTaken,
                         state.medicationType,
-                          state.nextScheduleTime,
-                          state.scheduleTimes,
                       ),
                       builder: (context, viewData) {
                         return MedicineHeaderCard(
-                          imagePath: AppAssets.getMedicineIcon(viewData.$4),
+                          imagePath: AppAssets.getMedicineIcon(viewData.$3),
                           medicineName: viewData.$1,
                           subtitle: viewData.$2,
-                          isTaken: viewData.$3,
-                          onTakenChanged: (bool value) async {
-                              final cubit = context.read<MedicineInfoCubit>();
-                              final selectedTime = _nextScheduleTime(
-                                nextScheduleTime: viewData.$5,
-                                scheduleTimes: viewData.$6,
-                                fallbackReminders: cubit.state.reminders,
-                              );
-
-                              if (selectedTime.trim().isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('No schedule time available'),
-                                  ),
-                                );
-                                return;
-                              }
-
-                              if (value) {
-                                final confirmed = await _confirmTakenTime(
-                                  context,
-                                  selectedTime,
-                                );
-                                if (!confirmed || !context.mounted) {
-                                  return;
-                                }
-                              }
-
-                              final result = await cubit.toggleMedicineTaken(
-                                value,
-                                time: selectedTime,
-                              );
-
-                            result.fold((error) {
-                              if (!context.mounted) return;
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(error.message),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
-                            }, (_) {
-                              if (!context.mounted) return;
-                              if (value) {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute<void>(
-                                    builder: (_) => DailySymptomsScreen(
-                                      medicationId: cubit.state.medication.id,
-                                    ),
-                                  ),
-                                );
-                              }
-                            });
-                          },
                         );
                       },
                     ),
@@ -205,9 +145,22 @@ class _MedicineInfoView extends StatelessWidget {
                           expiryDate: stockData.$2,
                           onRefill: () => showRefillStockDialog(
                             context,
-                            onSave: (amount) async => context
-                                .read<MedicineInfoCubit>()
-                                .refillStock(amount: amount),
+                            onSave: (amount) async {
+                              final result = await context
+                                  .read<MedicineInfoCubit>()
+                                  .refillStock(amount: amount);
+
+                              return result.fold((error) {
+                                if (!context.mounted) return false;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(error.message),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                                return false;
+                              }, (_) => true);
+                            },
                           ),
                         );
                       },
@@ -216,21 +169,32 @@ class _MedicineInfoView extends StatelessWidget {
                     BlocSelector<
                       MedicineInfoCubit,
                       MedicineInfoState,
-                      (List<String>, String, String, List<MedicationScheduleTime>)
+                      (
+                        List<String>,
+                        String,
+                        String,
+                        List<MedicationScheduleTime>,
+                      )
                     >(
-                      selector: (state) =>
-                          (
-                            state.reminders,
-                            state.frequency,
-                            state.duration,
-                            state.scheduleTimes,
-                          ),
+                      selector: (state) => (
+                        state.reminders,
+                        state.frequency,
+                        state.duration,
+                        state.scheduleTimes,
+                      ),
                       builder: (context, scheduleData) {
                         return ScheduleCard(
                           reminders: scheduleData.$1,
                           scheduleTimes: scheduleData.$4,
                           frequency: scheduleData.$2,
                           duration: scheduleData.$3,
+                          onReminderTakenChanged: (time, value) async {
+                            await _handleReminderTakenChanged(
+                              context,
+                              time: time,
+                              value: value,
+                            );
+                          },
                           onAddPressed: context
                               .read<MedicineInfoCubit>()
                               .addScheduleItem,
@@ -314,30 +278,48 @@ class _MedicineInfoView extends StatelessWidget {
     return result ?? false;
   }
 
-  String _nextScheduleTime({
-    required String nextScheduleTime,
-    required List<MedicationScheduleTime> scheduleTimes,
-    required List<String> fallbackReminders,
-  }) {
-    if (nextScheduleTime.trim().isNotEmpty) {
-      return nextScheduleTime.trim();
+  Future<void> _handleReminderTakenChanged(
+    BuildContext context, {
+    required String time,
+    required bool value,
+  }) async {
+    final selectedTime = time.trim();
+    if (selectedTime.isEmpty || selectedTime == '--:--') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No schedule time available')),
+      );
+      return;
     }
 
-    final nextUntaken = scheduleTimes.firstWhere(
-      (entry) => !entry.taken,
-      orElse: () => scheduleTimes.isNotEmpty
-          ? scheduleTimes.first
-          : MedicationScheduleTime(
-              time: fallbackReminders.isNotEmpty ? fallbackReminders.first : '',
-              taken: false,
+    if (value) {
+      final confirmed = await _confirmTakenTime(context, selectedTime);
+      if (!confirmed || !context.mounted) {
+        return;
+      }
+    }
+
+    final cubit = context.read<MedicineInfoCubit>();
+    final result = await cubit.toggleMedicineTaken(value, time: selectedTime);
+
+    result.fold(
+      (error) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error.message), backgroundColor: Colors.red),
+        );
+      },
+      (_) {
+        if (!context.mounted) return;
+        if (value) {
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) =>
+                  DailySymptomsScreen(medicationId: cubit.state.medication.id),
             ),
+          );
+        }
+      },
     );
-
-    if (nextUntaken.time.trim().isNotEmpty) {
-      return nextUntaken.time.trim();
-    }
-
-    return fallbackReminders.isNotEmpty ? fallbackReminders.first : '';
   }
 }
 
