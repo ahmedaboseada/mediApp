@@ -49,6 +49,10 @@ abstract class MedicineRepo {
 
   Future<Either<ApiError, dynamic>> getMedicationSchedule();
 
+  Future<Either<ApiError, dynamic>> getMedicationScheduleForDate({
+    required String date,
+  });
+
   Future<Either<ApiError, String>> markAsTaken({
     required String medicationId,
     required String date,

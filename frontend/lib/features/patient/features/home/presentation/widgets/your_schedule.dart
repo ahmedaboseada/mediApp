@@ -96,6 +96,9 @@ class YourSchedule extends StatelessWidget {
                                 child: SizedBox(
                                   width: AppSizes.w160,
                                   child: _MedicationScheduleCard(
+                                    key: ValueKey(
+                                      '${medication.id}-${medication.primaryTime}-${state.selectedDate.toIso8601String()}',
+                                    ),
                                     medication: medication,
                                     selectedDate: state.selectedDate,
                                   ),
@@ -119,8 +122,9 @@ class YourSchedule extends StatelessWidget {
   }
 }
 
-class _MedicationScheduleCard extends StatefulWidget {
+class _MedicationScheduleCard extends StatelessWidget {
   const _MedicationScheduleCard({
+    super.key,
     required this.medication,
     required this.selectedDate,
   });
@@ -128,48 +132,52 @@ class _MedicationScheduleCard extends StatefulWidget {
   final ScheduleMedication medication;
   final DateTime selectedDate;
 
-  @override
-  State<_MedicationScheduleCard> createState() => _MedicationScheduleCardState();
-}
-
-class _MedicationScheduleCardState extends State<_MedicationScheduleCard> {
-  bool _isMuted = false;
-  bool _isCancelling = false;
-
-  Future<void> _cancelReminderForPrimaryTime() async {
-    if (_isMuted || _isCancelling || widget.medication.primaryTime == '--:--') {
+  Future<void> _cancelReminderForPrimaryTime(BuildContext context) async {
+    if (medication.primaryTime == '--:--') {
       return;
     }
 
-    setState(() {
-      _isCancelling = true;
-    });
+    final errorMessage = await context
+        .read<ScheduleCubit>()
+        .cancelPrimaryReminderNotification(medication);
 
-    final cancelled = await LocalNotificationService().cancelSingleReminderByTime(
-      medicationId: widget.medication.id,
-      date: widget.selectedDate,
-      time: widget.medication.primaryTime,
-      isCritical: widget.medication.isCritical,
+    if (!context.mounted) {
+      return;
+    }
+
+    if (errorMessage != null && errorMessage.trim().isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
+    }
+  }
+
+  Future<void> _markPrimaryTimeAsTaken(BuildContext context) async {
+    if (medication.isTaken) {
+      return;
+    }
+
+    final errorMessage = await context.read<ScheduleCubit>().markPrimaryTimeAsTaken(
+      medication,
     );
 
-    if (!mounted) {
+    if (!context.mounted) {
       return;
     }
 
-    setState(() {
-      _isCancelling = false;
-      _isMuted = cancelled;
-    });
-
-    if (!cancelled) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Unable to cancel this reminder time.')),
-      );
+    if (errorMessage != null && errorMessage.trim().isNotEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(errorMessage)));
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isMuted = context.select<ScheduleCubit, bool>(
+      (cubit) => cubit.isPrimaryReminderMuted(medication),
+    );
+
     return Container(
       padding: EdgeInsets.all(AppSizes.w14),
       decoration: BoxDecoration(
@@ -201,14 +209,14 @@ class _MedicationScheduleCardState extends State<_MedicationScheduleCard> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Text(
-                          widget.medication.name,
+                          medication.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppStyles.black16400,
                         ),
                         SizedBox(height: AppSizes.h4),
                         Text(
-                          widget.medication.dosage,
+                          medication.dosage,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppStyles.secondary12400,
@@ -222,7 +230,7 @@ class _MedicationScheduleCardState extends State<_MedicationScheduleCard> {
           ),
           SizedBox(height: AppSizes.h10),
 
-          if (widget.medication.isCritical)
+          if (medication.isCritical)
             Container(
               padding: EdgeInsets.symmetric(
                 horizontal: AppSizes.w10,
@@ -239,7 +247,7 @@ class _MedicationScheduleCardState extends State<_MedicationScheduleCard> {
             )
           else
             Expanded(child: SizedBox(height: AppSizes.h8)),
-          if (widget.medication.isCritical) SizedBox(height: AppSizes.h4),
+          if (medication.isCritical) SizedBox(height: AppSizes.h4),
           Row(
             children: [
               Container(
@@ -266,10 +274,12 @@ class _MedicationScheduleCardState extends State<_MedicationScheduleCard> {
                       ),
                       child: Center(
                         child: InkWell(
-                          onTap: _cancelReminderForPrimaryTime,
+                          onTap: () => _cancelReminderForPrimaryTime(context),
                           borderRadius: BorderRadius.circular(AppSizes.r24),
                           child: Icon(
-                            _isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                            isMuted
+                                ? Icons.volume_off_rounded
+                                : Icons.volume_up_rounded,
                             color: AppColors.primaryDark,
                             size: AppSizes.h10,
                           ),
@@ -278,22 +288,26 @@ class _MedicationScheduleCardState extends State<_MedicationScheduleCard> {
                     ),
                     SizedBox(width: AppSizes.w8),
                     Text(
-                      widget.medication.primaryTime,
+                      medication.primaryTime,
                       style: AppStyles.primaryDark12400,
                     ),
                   ],
                 ),
               ),
               SizedBox(width: AppSizes.w8),
-              CircleAvatar(
-                radius: AppSizes.r20,
-                backgroundColor: widget.medication.isTaken
-                    ? AppColors.success
-                    : AppColors.greyLight,
-                child: Icon(
-                  Icons.check,
-                  color: AppColors.surfaceColor,
-                  size: AppSizes.sp20,
+              InkWell(
+                onTap: () => _markPrimaryTimeAsTaken(context),
+                borderRadius: BorderRadius.circular(AppSizes.r20),
+                child: CircleAvatar(
+                  radius: AppSizes.r20,
+                  backgroundColor: medication.isTaken
+                      ? AppColors.success
+                      : AppColors.greyLight,
+                  child: Icon(
+                    Icons.check,
+                    color: AppColors.surfaceColor,
+                    size: AppSizes.sp20,
+                  ),
                 ),
               ),
             ],
@@ -304,7 +318,7 @@ class _MedicationScheduleCardState extends State<_MedicationScheduleCard> {
   }
 
   Widget _buildMedicationIcon() {
-    final iconPath = AppAssets.getMedicineIcon(widget.medication.type);
+    final iconPath = AppAssets.getMedicineIcon(medication.type);
 
     if (iconPath.toLowerCase().endsWith('.svg')) {
       return SvgPicture.asset(

@@ -41,7 +41,13 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
       return;
     }
 
-    final result = await _medicineRepo.getMedicationSchedule();
+    final now = DateTime.now();
+    final date =
+        '${now.year.toString().padLeft(4, '0')}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+
+    final result = await _medicineRepo.getMedicationScheduleForDate(
+      date: date,
+    );
     result.fold(
       (_) {
         _emitIfOpen(

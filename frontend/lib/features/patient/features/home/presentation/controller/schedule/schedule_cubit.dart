@@ -1,12 +1,18 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/add_medication/data/repo/medicine_repo.dart';
 
 part 'schedule_state.dart';
 
 class ScheduleCubit extends Cubit<ScheduleState> {
   ScheduleCubit(this._medicineRepo)
-    : super(ScheduleInitial(selectedDate: _dateOnly(DateTime.now())));
+    : super(
+        ScheduleInitial(
+          selectedDate: _dateOnly(DateTime.now()),
+          mutedReminderKeys: const <String>{},
+        ),
+      );
 
   final MedicineRepo _medicineRepo;
 
@@ -16,15 +22,23 @@ class ScheduleCubit extends Cubit<ScheduleState> {
 
   Future<void> selectDate(DateTime selectedDate) async {
     final date = _dateOnly(selectedDate);
-    emit(ScheduleLoading(selectedDate: date));
+    emit(
+      ScheduleLoading(
+        selectedDate: date,
+        mutedReminderKeys: state.mutedReminderKeys,
+      ),
+    );
 
-    final result = await _medicineRepo.getMedicationSchedule();
+    final result = await _medicineRepo.getMedicationScheduleForDate(
+      date: _isoDate(date),
+    );
 
     result.fold(
       (error) {
         emit(
           ScheduleFailure(
             selectedDate: date,
+            mutedReminderKeys: state.mutedReminderKeys,
             message: error.message.isEmpty
                 ? 'Failed to load medication schedule'
                 : error.message,
@@ -33,9 +47,83 @@ class ScheduleCubit extends Cubit<ScheduleState> {
       },
       (response) {
         final medications = _extractMedicationSchedule(response, date);
-        emit(ScheduleSuccess(selectedDate: date, medications: medications));
+        emit(
+          ScheduleSuccess(
+            selectedDate: date,
+            mutedReminderKeys: state.mutedReminderKeys,
+            medications: medications,
+          ),
+        );
       },
     );
+  }
+
+  bool isPrimaryReminderMuted(ScheduleMedication medication) {
+    final key = _reminderKey(
+      medicationId: medication.id,
+      date: state.selectedDate,
+      time: medication.primaryTime,
+    );
+    return state.mutedReminderKeys.contains(key);
+  }
+
+  Future<String?> cancelPrimaryReminderNotification(
+    ScheduleMedication medication,
+  ) async {
+    final time = medication.primaryTime.trim();
+    if (time.isEmpty || time == '--:--') {
+      return 'Unable to determine reminder time';
+    }
+
+    final cancelled = await LocalNotificationService().cancelSingleReminderByTime(
+      medicationId: medication.id,
+      date: state.selectedDate,
+      time: time,
+      isCritical: medication.isCritical,
+    );
+
+    if (!cancelled) {
+      return 'Unable to cancel this reminder time.';
+    }
+
+    final mutedKeys = Set<String>.from(state.mutedReminderKeys)
+      ..add(
+        _reminderKey(
+          medicationId: medication.id,
+          date: state.selectedDate,
+          time: time,
+        ),
+      );
+    _emitCurrentWithMutedKeys(mutedKeys);
+    return null;
+  }
+
+  Future<String?> markPrimaryTimeAsTaken(ScheduleMedication medication) async {
+    final medicationId = medication.id.trim();
+    final time = medication.primaryTime.trim();
+
+    if (medicationId.isEmpty || time.isEmpty || time == '--:--') {
+      return 'Unable to determine medication or time';
+    }
+
+    final result = await _medicineRepo.markAsTaken(
+      medicationId: medicationId,
+      date: _isoDate(state.selectedDate),
+      time: time,
+      taken: true,
+    );
+
+    if (result.isLeft()) {
+      return result.fold(
+        (error) => error.message.isEmpty
+            ? 'Unable to mark medication as taken'
+            : error.message,
+        (_) => null,
+      );
+    }
+
+    await selectDate(state.selectedDate);
+    return null;
   }
 
   static DateTime _dateOnly(DateTime value) {
@@ -278,5 +366,55 @@ class ScheduleCubit extends Cubit<ScheduleState> {
     }
 
     return (hour * 60) + minute;
+  }
+
+  String _reminderKey({
+    required String medicationId,
+    required DateTime date,
+    required String time,
+  }) {
+    return '${medicationId.trim()}|${_isoDate(date)}|${time.trim()}';
+  }
+
+  void _emitCurrentWithMutedKeys(Set<String> mutedKeys) {
+    final selectedDate = state.selectedDate;
+    if (state is ScheduleSuccess) {
+      emit(
+        ScheduleSuccess(
+          selectedDate: selectedDate,
+          mutedReminderKeys: mutedKeys,
+          medications: (state as ScheduleSuccess).medications,
+        ),
+      );
+      return;
+    }
+
+    if (state is ScheduleFailure) {
+      emit(
+        ScheduleFailure(
+          selectedDate: selectedDate,
+          mutedReminderKeys: mutedKeys,
+          message: (state as ScheduleFailure).message,
+        ),
+      );
+      return;
+    }
+
+    if (state is ScheduleLoading) {
+      emit(
+        ScheduleLoading(
+          selectedDate: selectedDate,
+          mutedReminderKeys: mutedKeys,
+        ),
+      );
+      return;
+    }
+
+    emit(
+      ScheduleInitial(
+        selectedDate: selectedDate,
+        mutedReminderKeys: mutedKeys,
+      ),
+    );
   }
 }

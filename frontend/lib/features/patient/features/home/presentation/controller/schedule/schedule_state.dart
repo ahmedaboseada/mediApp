@@ -1,41 +1,56 @@
 part of 'schedule_cubit.dart';
 
 sealed class ScheduleState extends Equatable {
-  const ScheduleState({required this.selectedDate});
+  const ScheduleState({
+    required this.selectedDate,
+    this.mutedReminderKeys = const <String>{},
+  });
 
   final DateTime selectedDate;
+  final Set<String> mutedReminderKeys;
 
   @override
-  List<Object?> get props => [selectedDate];
+  List<Object?> get props => [selectedDate, mutedReminderKeys];
 }
 
 final class ScheduleInitial extends ScheduleState {
-  const ScheduleInitial({required super.selectedDate});
+  const ScheduleInitial({
+    required super.selectedDate,
+    super.mutedReminderKeys,
+  });
 }
 
 final class ScheduleLoading extends ScheduleState {
-  const ScheduleLoading({required super.selectedDate});
+  const ScheduleLoading({
+    required super.selectedDate,
+    super.mutedReminderKeys,
+  });
 }
 
 final class ScheduleSuccess extends ScheduleState {
   const ScheduleSuccess({
     required super.selectedDate,
+    super.mutedReminderKeys,
     required this.medications,
   });
 
   final List<ScheduleMedication> medications;
 
   @override
-  List<Object?> get props => [selectedDate, medications];
+  List<Object?> get props => [selectedDate, medications, mutedReminderKeys];
 }
 
 final class ScheduleFailure extends ScheduleState {
-  const ScheduleFailure({required super.selectedDate, required this.message});
+  const ScheduleFailure({
+    required super.selectedDate,
+    super.mutedReminderKeys,
+    required this.message,
+  });
 
   final String message;
 
   @override
-  List<Object?> get props => [selectedDate, message];
+  List<Object?> get props => [selectedDate, message, mutedReminderKeys];
 }
 
 class ScheduleMedication extends Equatable {
@@ -64,7 +79,7 @@ class ScheduleMedication extends Equatable {
     if (untaken.isNotEmpty) {
       return untaken.first.time;
     }
-    return times.first.time;
+    return times.last.time;
   }
 
   bool get isTaken {

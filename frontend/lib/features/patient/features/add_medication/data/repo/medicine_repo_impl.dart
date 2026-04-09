@@ -229,6 +229,30 @@ class MedicineRepoImpl implements MedicineRepo {
   }
 
   @override
+  Future<Either<ApiError, dynamic>> getMedicationScheduleForDate({
+    required String date,
+  }) async {
+    try {
+      final encodedDate = Uri.encodeQueryComponent(date);
+      final dynamic response = await apiService.get(
+        '/medications/schedule?date=$encodedDate',
+      );
+
+      log('Get Medication Schedule (date=$date) Response: ${response.toString()}');
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      return Right(response);
+    } on DioException catch (e) {
+      return Left(ServerFailure.fromDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<ApiError, String>> markAsTaken({
     required String medicationId,
     required String date,
