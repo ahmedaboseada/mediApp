@@ -10,10 +10,10 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Hive before anything else
   await HiveService.init();
-  
+
   // Initialize notifications with error handling for missing plugins
   try {
     await LocalNotificationService.init();
@@ -22,7 +22,7 @@ void main() async {
   } catch (e) {
     debugPrint('Unexpected error during notification init: $e');
   }
-  
+
   // Initialize alarm manager with error handling
   try {
     await AndroidAlarmManager.initialize();
@@ -31,14 +31,16 @@ void main() async {
   } catch (e) {
     debugPrint('Unexpected error during alarm manager init: $e');
   }
-  
+
   // Initialize Alarm package (includes flutter_fgbg) with error handling
   try {
     await Alarm.init();
     await LocalNotificationService.cleanupLegacyWarningAlarms();
     debugPrint('✓ Alarm package initialized successfully');
   } on MissingPluginException catch (e) {
-    debugPrint('Alarm plugin initialization failed (flutter_fgbg unavailable): $e');
+    debugPrint(
+      'Alarm plugin initialization failed (flutter_fgbg unavailable): $e',
+    );
   } catch (e) {
     debugPrint('Unexpected error during alarm init: $e');
   }

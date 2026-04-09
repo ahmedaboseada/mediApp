@@ -12,7 +12,7 @@ class AppColors {
   static const Color secondary = Color(0xFFD3E6FF);
   static const Color background = Color(0xFFF5F7FB);
   static const Color accent = Color(0xFF00C853);
-   
+
   // Border colors
   static const Color borderColor = Color(0xFFE1E3E5);
   static const Color focusedBorderColor = Color(0xFF2178F3);

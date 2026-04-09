@@ -106,11 +106,14 @@ class _AddMeasurementScreenState extends State<AddMeasurementScreen> {
           diastolic: diastolic,
           heartRate: heartRate,
         );
-        result.fold((error) {
-          validationError = error.message;
-        }, (_) {
-          Navigator.of(context).pop();
-        });
+        result.fold(
+          (error) {
+            validationError = error.message;
+          },
+          (_) {
+            Navigator.of(context).pop();
+          },
+        );
       }
     } else if (_selectedTab == AddMeasurementTab.bloodSugar) {
       final glucose = int.tryParse(_bloodGlucoseController.text.trim());
@@ -118,11 +121,14 @@ class _AddMeasurementScreenState extends State<AddMeasurementScreen> {
         validationError = 'Please enter a valid blood sugar value';
       } else {
         final result = await cubit.addBloodSugarMeasurement(value: glucose);
-        result.fold((error) {
-          validationError = error.message;
-        }, (_) {
-          Navigator.of(context).pop();
-        });
+        result.fold(
+          (error) {
+            validationError = error.message;
+          },
+          (_) {
+            Navigator.of(context).pop();
+          },
+        );
       }
     } else {
       final weight = double.tryParse(_weightController.text.trim());
@@ -130,18 +136,21 @@ class _AddMeasurementScreenState extends State<AddMeasurementScreen> {
         validationError = 'Please enter a valid weight value';
       } else {
         final result = await cubit.addWeightMeasurement(value: weight);
-        result.fold((error) {
-          validationError = error.message;
-        }, (_) {
-          Navigator.of(context).pop();
-        });
+        result.fold(
+          (error) {
+            validationError = error.message;
+          },
+          (_) {
+            Navigator.of(context).pop();
+          },
+        );
       }
     }
 
     if (validationError != null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(validationError!)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(validationError!)));
     }
   }
 }

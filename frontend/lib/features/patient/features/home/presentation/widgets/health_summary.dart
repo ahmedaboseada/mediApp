@@ -17,7 +17,7 @@ class HealthSummary extends StatelessWidget {
       create: (_) => HealthMeasurementsCubit(getIt<LogsRepo>()),
       child: Card(
         child: Padding(
-          padding:  EdgeInsets.all(AppSizes.w24),
+          padding: EdgeInsets.all(AppSizes.w24),
           child: BlocBuilder<HealthMeasurementsCubit, HealthMeasurementsState>(
             builder: (BuildContext context, HealthMeasurementsState state) {
               final bloodPressure = _measurementFor(
@@ -42,7 +42,8 @@ class HealthSummary extends StatelessWidget {
                         ),
                       ),
                       TextButton(
-                        onPressed: () => context.push(AppRouter.healthMeasurements),
+                        onPressed: () =>
+                            context.push(AppRouter.healthMeasurements),
                         child: Text(
                           'View All',
                           style: AppStyles.primaryDark12400.copyWith(
@@ -60,7 +61,7 @@ class HealthSummary extends StatelessWidget {
                           title: bloodPressure?.title ?? 'Blood Pressure',
                           value: bloodPressure?.value ?? 'Not recorded',
                           status: bloodPressure?.status ?? 'No data',
-                          leadingIcon:AppAssets.heartRateIcon,
+                          leadingIcon: AppAssets.heartRateIcon,
                         ),
                       ),
                       SizedBox(width: AppSizes.w16),

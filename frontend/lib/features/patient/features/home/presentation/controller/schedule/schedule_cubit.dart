@@ -75,12 +75,13 @@ class ScheduleCubit extends Cubit<ScheduleState> {
       return 'Unable to determine reminder time';
     }
 
-    final cancelled = await LocalNotificationService().cancelSingleReminderByTime(
-      medicationId: medication.id,
-      date: state.selectedDate,
-      time: time,
-      isCritical: medication.isCritical,
-    );
+    final cancelled = await LocalNotificationService()
+        .cancelSingleReminderByTime(
+          medicationId: medication.id,
+          date: state.selectedDate,
+          time: time,
+          isCritical: medication.isCritical,
+        );
 
     if (!cancelled) {
       return 'Unable to cancel this reminder time.';
@@ -411,10 +412,7 @@ class ScheduleCubit extends Cubit<ScheduleState> {
     }
 
     emit(
-      ScheduleInitial(
-        selectedDate: selectedDate,
-        mutedReminderKeys: mutedKeys,
-      ),
+      ScheduleInitial(selectedDate: selectedDate, mutedReminderKeys: mutedKeys),
     );
   }
 }

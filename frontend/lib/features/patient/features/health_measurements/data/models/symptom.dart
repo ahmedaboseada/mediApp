@@ -14,7 +14,8 @@ class SymptomModel {
   final DateTime? date;
 
   factory SymptomModel.fromJson(Map<String, dynamic> json) {
-    final symptoms = (json['symptoms'] as List?)
+    final symptoms =
+        (json['symptoms'] as List?)
             ?.whereType<String>()
             .map((e) => e.trim())
             .where((e) => e.isNotEmpty)
@@ -30,7 +31,9 @@ class SymptomModel {
       allSymptoms: symptoms,
       severity: severity,
       notes: notes,
-      date: rawDate == null || rawDate.isEmpty ? null : DateTime.tryParse(rawDate),
+      date: rawDate == null || rawDate.isEmpty
+          ? null
+          : DateTime.tryParse(rawDate),
     );
   }
 }

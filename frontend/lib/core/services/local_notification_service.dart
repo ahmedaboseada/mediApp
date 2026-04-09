@@ -169,11 +169,10 @@ class LocalNotificationService {
   static Future<void> cleanupLegacyWarningAlarms() async {
     try {
       final alarms = await Alarm.getAlarms();
-      final legacyWarningIds =
-          alarms
-              .where((alarm) => alarm.warningNotificationOnKill)
-              .map((alarm) => alarm.id)
-              .toList();
+      final legacyWarningIds = alarms
+          .where((alarm) => alarm.warningNotificationOnKill)
+          .map((alarm) => alarm.id)
+          .toList();
 
       for (final id in legacyWarningIds) {
         await Alarm.stop(id);
@@ -388,9 +387,10 @@ class LocalNotificationService {
         .toList();
     await prefs.setStringList(storageKey, ids);
 
-    final criticalIds = (prefs.getStringList(criticalStorageKey) ?? const <String>[])
-        .where((value) => value != id.toString())
-        .toList();
+    final criticalIds =
+        (prefs.getStringList(criticalStorageKey) ?? const <String>[])
+            .where((value) => value != id.toString())
+            .toList();
     if (criticalIds.isEmpty) {
       await prefs.remove(criticalStorageKey);
     } else {

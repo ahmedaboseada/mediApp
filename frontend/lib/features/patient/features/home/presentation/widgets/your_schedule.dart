@@ -146,9 +146,9 @@ class _MedicationScheduleCard extends StatelessWidget {
     }
 
     if (errorMessage != null && errorMessage.trim().isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(errorMessage)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(errorMessage)));
     }
   }
 
@@ -157,9 +157,9 @@ class _MedicationScheduleCard extends StatelessWidget {
       return;
     }
 
-    final errorMessage = await context.read<ScheduleCubit>().markPrimaryTimeAsTaken(
-      medication,
-    );
+    final errorMessage = await context
+        .read<ScheduleCubit>()
+        .markPrimaryTimeAsTaken(medication);
 
     if (!context.mounted) {
       return;

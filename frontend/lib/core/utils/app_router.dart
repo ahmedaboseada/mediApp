@@ -141,7 +141,7 @@ class AppRouter {
   static const String dailyHealthLogScreen = '/health/dailyLog';
 
   static final router = GoRouter(
-    navigatorKey: navigatorKey, 
+    navigatorKey: navigatorKey,
     initialLocation: '/',
     routes: [
       // ========== SHARED/SPLASH ROUTES ==========
@@ -291,14 +291,16 @@ class AppRouter {
       ),
       GoRoute(
         path: editMedicationScreen,
-        builder: (context, state) => EditMedicationScreen(
-          medication: state.extra as Medication?,
-        ),
+        builder: (context, state) =>
+            EditMedicationScreen(medication: state.extra as Medication?),
       ),
-      GoRoute(path: medicineInfoScreen, builder: (context, state) {
-        final medication = state.extra as Medication?;
-        return MedicineInfoScreen(medication: medication);
-      }),
+      GoRoute(
+        path: medicineInfoScreen,
+        builder: (context, state) {
+          final medication = state.extra as Medication?;
+          return MedicineInfoScreen(medication: medication);
+        },
+      ),
 
       /// ================= PATIENT SHELL =================
       StatefulShellRoute.indexedStack(

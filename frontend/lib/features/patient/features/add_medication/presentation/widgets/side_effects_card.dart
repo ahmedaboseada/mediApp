@@ -38,10 +38,7 @@ class SideEffectsCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.warning_amber_rounded,
-                  size: 24,
-                ),
+                Icon(Icons.warning_amber_rounded, size: 24),
                 SizedBox(width: AppSizes.w8),
                 Text(
                   'Potential Side Effects',

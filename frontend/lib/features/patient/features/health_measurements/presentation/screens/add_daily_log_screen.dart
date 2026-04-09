@@ -10,8 +10,6 @@ import 'package:medi/features/patient/features/health_measurements/data/repo/log
 class DailyHealthLogScreen extends StatefulWidget {
   const DailyHealthLogScreen({super.key});
 
-  
-
   @override
   State<DailyHealthLogScreen> createState() => _DailyHealthLogScreenState();
 }
@@ -120,19 +118,19 @@ class _DailyHealthLogScreenState extends State<DailyHealthLogScreen> {
 
     if (!mounted) return;
 
-    result.fold((error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(error.message),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }, (message) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
-      Navigator.of(context).pop();
-    });
+    result.fold(
+      (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error.message), backgroundColor: Colors.red),
+        );
+      },
+      (message) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
+        Navigator.of(context).pop();
+      },
+    );
   }
 
   String _severityLevel(double value) {

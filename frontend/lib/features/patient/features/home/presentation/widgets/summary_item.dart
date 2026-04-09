@@ -5,10 +5,10 @@ import 'package:medi/core/core.dart';
 class SummaryItem extends StatelessWidget {
   const SummaryItem({
     super.key,
-   required this.title ,
-    required this.value ,
+    required this.title,
+    required this.value,
     this.status = 'Normal',
-    required this.leadingIcon ,
+    required this.leadingIcon,
     this.leadingIconColor = const Color(0xFFD91646),
     this.valueColor = AppColors.primaryDark,
     this.statusColor = const Color(0xFF31B857),
@@ -39,7 +39,10 @@ class SummaryItem extends StatelessWidget {
             children: <Widget>[
               SvgPicture.asset(
                 leadingIcon,
-                colorFilter: ColorFilter.mode(leadingIconColor, BlendMode.srcIn),
+                colorFilter: ColorFilter.mode(
+                  leadingIconColor,
+                  BlendMode.srcIn,
+                ),
                 width: AppSizes.w20,
                 height: AppSizes.h20,
               ),
@@ -49,7 +52,7 @@ class SummaryItem extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: AppStyles.black14400
+                  style: AppStyles.black14400,
                 ),
               ),
             ],
@@ -57,15 +60,14 @@ class SummaryItem extends StatelessWidget {
           SizedBox(height: AppSizes.h10),
           Text(
             value,
-            style:AppStyles.primaryDark12400.copyWith(
+            style: AppStyles.primaryDark12400.copyWith(
               fontWeight: FontWeight.w600,
             ),
-
           ),
           SizedBox(height: AppSizes.h10),
           Row(
             children: <Widget>[
-             SvgPicture.asset(
+              SvgPicture.asset(
                 AppAssets.heartRate,
                 colorFilter: ColorFilter.mode(statusColor, BlendMode.srcIn),
                 width: AppSizes.w12,
@@ -74,9 +76,7 @@ class SummaryItem extends StatelessWidget {
               SizedBox(width: AppSizes.w12),
               Text(
                 status,
-                style: AppStyles.black10600.copyWith(
-                  color: statusColor,
-                ),
+                style: AppStyles.black10600.copyWith(color: statusColor),
               ),
             ],
           ),

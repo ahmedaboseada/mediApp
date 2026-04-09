@@ -190,16 +190,18 @@ class _HealthMeasurementsView extends StatelessWidget {
                           : SliverToBoxAdapter(
                               child: Card(
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(AppSizes.r40),
+                                  borderRadius: BorderRadius.circular(
+                                    AppSizes.r40,
+                                  ),
                                 ),
                                 child: Padding(
                                   padding: EdgeInsets.all(AppSizes.h24),
 
-
                                   child: Column(
                                     children: [
                                       Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
                                             'Add Symptoms ',

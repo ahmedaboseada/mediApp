@@ -90,7 +90,9 @@ class PatientModel {
       activeIngredients: parseStringList(json['activeIngredients']),
       longTermMedication: parseStringList(json['longTermMedication']),
       medications: List<Medication>.from(
-        (json['medications'] as List? ?? []).map((e) => Medication.fromJson(e as Map<String, dynamic>)),
+        (json['medications'] as List? ?? []).map(
+          (e) => Medication.fromJson(e as Map<String, dynamic>),
+        ),
       ),
       saveOption: json['saveOption'] as bool? ?? false,
       connectedDoctors: parseStringList(json['connectedDoctors']),
