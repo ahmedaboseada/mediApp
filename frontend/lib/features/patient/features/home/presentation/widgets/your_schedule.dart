@@ -97,6 +97,7 @@ class YourSchedule extends StatelessWidget {
                                   width: AppSizes.w160,
                                   child: _MedicationScheduleCard(
                                     medication: medication,
+                                    selectedDate: state.selectedDate,
                                   ),
                                 ),
                               );
@@ -118,10 +119,54 @@ class YourSchedule extends StatelessWidget {
   }
 }
 
-class _MedicationScheduleCard extends StatelessWidget {
-  const _MedicationScheduleCard({required this.medication});
+class _MedicationScheduleCard extends StatefulWidget {
+  const _MedicationScheduleCard({
+    required this.medication,
+    required this.selectedDate,
+  });
 
   final ScheduleMedication medication;
+  final DateTime selectedDate;
+
+  @override
+  State<_MedicationScheduleCard> createState() => _MedicationScheduleCardState();
+}
+
+class _MedicationScheduleCardState extends State<_MedicationScheduleCard> {
+  bool _isMuted = false;
+  bool _isCancelling = false;
+
+  Future<void> _cancelReminderForPrimaryTime() async {
+    if (_isMuted || _isCancelling || widget.medication.primaryTime == '--:--') {
+      return;
+    }
+
+    setState(() {
+      _isCancelling = true;
+    });
+
+    final cancelled = await LocalNotificationService().cancelSingleReminderByTime(
+      medicationId: widget.medication.id,
+      date: widget.selectedDate,
+      time: widget.medication.primaryTime,
+      isCritical: widget.medication.isCritical,
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _isCancelling = false;
+      _isMuted = cancelled;
+    });
+
+    if (!cancelled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unable to cancel this reminder time.')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -156,14 +201,14 @@ class _MedicationScheduleCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Text(
-                          medication.name,
+                          widget.medication.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppStyles.black16400,
                         ),
                         SizedBox(height: AppSizes.h4),
                         Text(
-                          medication.dosage,
+                          widget.medication.dosage,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppStyles.secondary12400,
@@ -177,7 +222,7 @@ class _MedicationScheduleCard extends StatelessWidget {
           ),
           SizedBox(height: AppSizes.h10),
 
-          if (medication.isCritical)
+          if (widget.medication.isCritical)
             Container(
               padding: EdgeInsets.symmetric(
                 horizontal: AppSizes.w10,
@@ -194,13 +239,13 @@ class _MedicationScheduleCard extends StatelessWidget {
             )
           else
             Expanded(child: SizedBox(height: AppSizes.h8)),
-          if (medication.isCritical) SizedBox(height: AppSizes.h4),
+          if (widget.medication.isCritical) SizedBox(height: AppSizes.h4),
           Row(
             children: [
               Container(
                 padding: EdgeInsets.symmetric(
-                  horizontal: AppSizes.w10,
-                  vertical: AppSizes.h8,
+                  horizontal: AppSizes.w8,
+                  vertical: AppSizes.h4,
                 ),
                 decoration: BoxDecoration(
                   color: AppColors.lightBackground,
@@ -210,14 +255,30 @@ class _MedicationScheduleCard extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.volume_up_rounded,
-                      color: AppColors.primaryDark,
-                      size: AppSizes.h10,
+                    Container(
+                      constraints: BoxConstraints(
+                        maxWidth: AppSizes.w24,
+                        maxHeight: AppSizes.h24,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.whiteText,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: InkWell(
+                          onTap: _cancelReminderForPrimaryTime,
+                          borderRadius: BorderRadius.circular(AppSizes.r24),
+                          child: Icon(
+                            _isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                            color: AppColors.primaryDark,
+                            size: AppSizes.h10,
+                          ),
+                        ),
+                      ),
                     ),
                     SizedBox(width: AppSizes.w8),
                     Text(
-                      medication.primaryTime,
+                      widget.medication.primaryTime,
                       style: AppStyles.primaryDark12400,
                     ),
                   ],
@@ -226,7 +287,7 @@ class _MedicationScheduleCard extends StatelessWidget {
               SizedBox(width: AppSizes.w8),
               CircleAvatar(
                 radius: AppSizes.r20,
-                backgroundColor: medication.isTaken
+                backgroundColor: widget.medication.isTaken
                     ? AppColors.success
                     : AppColors.greyLight,
                 child: Icon(
@@ -243,7 +304,7 @@ class _MedicationScheduleCard extends StatelessWidget {
   }
 
   Widget _buildMedicationIcon() {
-    final iconPath = AppAssets.getMedicineIcon(medication.type);
+    final iconPath = AppAssets.getMedicineIcon(widget.medication.type);
 
     if (iconPath.toLowerCase().endsWith('.svg')) {
       return SvgPicture.asset(
