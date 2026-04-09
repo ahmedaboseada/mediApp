@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:medi/core/network/api_error.dart';
 
 class ServerFailure extends ApiError {
-  ServerFailure(super.message);
+  ServerFailure(super.message, [super.errors]);
   factory ServerFailure.fromDioError(DioException dioError) {
     {
       switch (dioError.type) {
@@ -24,13 +24,10 @@ class ServerFailure extends ApiError {
         case DioExceptionType.badCertificate:
           return ServerFailure("Bad Certificate");
         case DioExceptionType.unknown:
-          return ServerFailure("Unexpected error occurred");
-
-        default:
-          if (dioError.message!.contains('SocketException')) {
+          if ((dioError.message ?? '').contains('SocketException')) {
             return ServerFailure("No Internet Connection");
           }
-          return ServerFailure("Something went wrong");
+          return ServerFailure("Unexpected error occurred");
       }
     }
   }
@@ -57,7 +54,10 @@ class ServerFailure extends ApiError {
     }
 
     if (response['message'] is String) {
-      return ServerFailure(response['message']);
+      final errors = response['errors'] is List
+          ? List<String>.from(response['errors'])
+          : <String>[];
+      return ServerFailure(response['message'], errors);
     }
 
     if (response['errors'] is Map<String, dynamic>) {
