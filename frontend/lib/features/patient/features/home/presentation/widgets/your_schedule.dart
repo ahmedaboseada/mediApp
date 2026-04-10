@@ -12,7 +12,6 @@ class YourSchedule extends StatelessWidget {
   final ValueNotifier<DateTime?> _selectedDate = ValueNotifier<DateTime?>(
     DateTime.now(),
   );
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ScheduleCubit>(

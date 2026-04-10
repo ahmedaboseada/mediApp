@@ -23,6 +23,7 @@ class AppColors {
   static const Color primaryText = Color(0xFF1F2937);
   static const Color secondaryText = Color(0xFF5F6C75);
   static const Color tertiaryText = Color(0xFF999999);
+  static const Color quaternaryText = Color(0xFF6B7280);
   static const Color whiteText = Color(0xFFFFFFFF);
   static const Color splashBackground = Color(0xFFF0F0F0);
 

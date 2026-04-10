@@ -46,6 +46,7 @@ class AppAssets {
   static const String bloodPressure = '${path}hugeicons_blood-pressure.svg';
   static const String edit = '${path}edit.svg';
   static const String papers = '${path}papers.svg';
+  static const String chat = '${path}Chat.svg';
 
   // Health measurement icons
   static const String bloodPressureIcon = '${svgPath}blood_pressure.svg';
@@ -68,6 +69,7 @@ class AppAssets {
   static const String medicineCream = '${path}cream.svg';
   static const String medicineOintment = '${path}ointment.svg';
   static const String medicineInhaler = '${path}inhaler.svg';
+
 
   static String getMedicineIcon(dynamic medicationType) {
     // Import required: import 'package:medi/features/patient/features/add_medication/presentation/models/medication.dart';
