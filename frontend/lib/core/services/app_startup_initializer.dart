@@ -77,7 +77,8 @@ class AppStartupInitializer {
       debugPrint(message);
       errors.add(message);
     } on PlatformException catch (e) {
-      final message = '$stepName failed (platform error): ${e.message ?? e.code}';
+      final message =
+          '$stepName failed (platform error): ${e.message ?? e.code}';
       debugPrint(message);
       errors.add(message);
     } catch (e) {

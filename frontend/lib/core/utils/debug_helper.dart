@@ -8,7 +8,10 @@ import 'package:medi/core/services/local_notification_service.dart';
 ///   3. Check console output for reminder IDs and fire times
 ///   4. Wrap in kDebugMode or dev-flag check for production builds
 class DebugScheduleHelper extends StatefulWidget {
-  const DebugScheduleHelper({super.key, this.position = DebugPosition.bottomRight});
+  const DebugScheduleHelper({
+    super.key,
+    this.position = DebugPosition.bottomRight,
+  });
 
   final DebugPosition position;
 
@@ -16,12 +19,7 @@ class DebugScheduleHelper extends StatefulWidget {
   State<DebugScheduleHelper> createState() => _DebugScheduleHelperState();
 }
 
-enum DebugPosition {
-  topRight,
-  topLeft,
-  bottomRight,
-  bottomLeft,
-}
+enum DebugPosition { topRight, topLeft, bottomRight, bottomLeft }
 
 class _DebugScheduleHelperState extends State<DebugScheduleHelper> {
   bool _showDebug = false;
@@ -30,19 +28,23 @@ class _DebugScheduleHelperState extends State<DebugScheduleHelper> {
   Widget build(BuildContext context) {
     if (!_showDebug) {
       return Positioned(
-        right: widget.position == DebugPosition.bottomRight ||
+        right:
+            widget.position == DebugPosition.bottomRight ||
                 widget.position == DebugPosition.topRight
             ? 16
             : null,
-        left: widget.position == DebugPosition.bottomLeft ||
+        left:
+            widget.position == DebugPosition.bottomLeft ||
                 widget.position == DebugPosition.topLeft
             ? 16
             : null,
-        bottom: widget.position == DebugPosition.bottomRight ||
+        bottom:
+            widget.position == DebugPosition.bottomRight ||
                 widget.position == DebugPosition.bottomLeft
             ? 16
             : null,
-        top: widget.position == DebugPosition.topRight ||
+        top:
+            widget.position == DebugPosition.topRight ||
                 widget.position == DebugPosition.topLeft
             ? 16
             : null,

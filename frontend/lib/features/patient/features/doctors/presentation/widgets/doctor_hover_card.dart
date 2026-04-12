@@ -103,7 +103,7 @@ class _DoctorHoverCardState extends State<DoctorHoverCard> {
                 widget.specialty,
                 style: AppStyles.tertiary14500.copyWith(
                   fontSize: AppSizes.sp16,
-                  color: subtitleColor
+                  color: subtitleColor,
                 ),
               ),
               SizedBox(height: AppSizes.h20),
@@ -125,7 +125,9 @@ class _DoctorHoverCardState extends State<DoctorHoverCard> {
                             SizedBox(width: AppSizes.w8),
                             Text(
                               widget.rating.toStringAsFixed(1),
-                              style: AppStyles.black14500.copyWith(color: titleColor),
+                              style: AppStyles.black14500.copyWith(
+                                color: titleColor,
+                              ),
                             ),
                           ],
                         ),
@@ -133,7 +135,7 @@ class _DoctorHoverCardState extends State<DoctorHoverCard> {
                         Text(
                           '${widget.reviewsCount} Reviews',
                           style: AppStyles.tertiary40012.copyWith(
-                            color: subtitleColor
+                            color: subtitleColor,
                           ),
                         ),
                       ],

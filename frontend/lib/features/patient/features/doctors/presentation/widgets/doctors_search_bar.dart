@@ -36,7 +36,7 @@ class DoctorsSearchBar extends StatelessWidget {
                       hintText: 'Search for doctors',
                       hintStyle: AppStyles.tertiary14500,
                       border: OutlineInputBorder(
-                        borderRadius:  BorderRadius.all(Radius.circular(40)),
+                        borderRadius: BorderRadius.all(Radius.circular(40)),
                         borderSide: BorderSide.none,
                       ),
                       enabledBorder: OutlineInputBorder(

@@ -25,7 +25,8 @@ import 'package:medi/features/patient/features/add_medication/presentation/scree
 import 'package:medi/features/patient/features/add_medication/presentation/screens/stock_expiry_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/confirmation_screen.dart';
 import 'package:medi/features/patient/features/doctors/data/models/doctor_summary.dart';
-import 'package:medi/features/patient/features/doctors/presentation/screens/book_appointment_placeholder_screen.dart';
+import 'package:medi/features/patient/features/doctors/presentation/screens/patient_details_screen.dart';
+import 'package:medi/features/patient/features/doctors/presentation/screens/select_package_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/browse_doctors_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/doctor_profile_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/search_doctors_screen.dart';
@@ -128,6 +129,8 @@ class AppRouter {
   static const String medicineInfoScreen = '/patient/medicineInfo';
   static const String doctorProfileScreen = '/doctors/profile';
   static const String doctorBookAppointmentScreen = '/doctors/profile/book';
+  static const String patientDetailsScreen =
+      '/doctors/profile/book/patient-details';
   // ========== DOCTOR ROUTES ==========
   static const String doctorLogin = '/login/doctor';
   static const String doctorSignUpScreen = '/signUp/doctor';
@@ -403,10 +406,15 @@ class AppRouter {
                     routes: [
                       GoRoute(
                         path: 'book',
-                        builder: (context, state) =>
-                            BookAppointmentPlaceholderScreen(
-                              doctor: state.extra as DoctorSummary?,
-                            ),
+                        builder: (context, state) => SelectPackageScreen(
+                          doctor: state.extra as DoctorSummary?,
+                        ),
+                        routes: [
+                          GoRoute(
+                            path: 'patient-details',
+                            builder: (context, state) => const PatientDetailsScreen(),
+                          ),
+                        ],
                       ),
                     ],
                   ),

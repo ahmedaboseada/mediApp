@@ -168,17 +168,17 @@ class LocalNotificationService {
   }
 
   /// Debug utility to print all scheduled reminders and their fire times.
-  /// 
+  ///
   /// Prints:
   ///   - Current time
   ///   - All active alarms from Alarm package with ID and fire-in duration
   ///   - All saved reminder IDs from SharedPreferences
-  /// 
+  ///
   /// Usage:
   ///   1. Call from code: LocalNotificationService.printScheduledRemindersDebug()
   ///   2. Or add DebugScheduleHelper() to your screen's Stack
   ///   3. Check console output (debugPrint) for reminder details
-  /// 
+  ///
   /// Example output:
   ///   === SCHEDULED REMINDERS DEBUG ===
   ///   Current time: 2026-04-10T14:30:00...
@@ -213,9 +213,11 @@ class LocalNotificationService {
       debugPrint('\n--- SharedPreferences Saved Reminder IDs ---');
       final allKeys = prefs.getKeys();
       final reminderKeys = allKeys
-          .where((k) =>
-              k.startsWith(_storagePrefix) ||
-              k.startsWith(_criticalStoragePrefix))
+          .where(
+            (k) =>
+                k.startsWith(_storagePrefix) ||
+                k.startsWith(_criticalStoragePrefix),
+          )
           .toList();
       if (reminderKeys.isEmpty) {
         debugPrint('No saved reminder IDs.');

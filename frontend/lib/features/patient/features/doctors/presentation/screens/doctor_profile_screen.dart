@@ -7,10 +7,7 @@ import 'package:medi/features/patient/features/doctors/presentation/widgets/doct
 import 'package:medi/features/patient/features/doctors/presentation/widgets/doctor_profile_header.dart';
 
 class DoctorProfileScreen extends StatefulWidget {
-  const DoctorProfileScreen({
-    super.key,
-    this.doctor,
-  });
+  const DoctorProfileScreen({super.key, this.doctor});
 
   final DoctorSummary? doctor;
 
@@ -29,16 +26,19 @@ class DoctorProfileScreen extends StatefulWidget {
 
 class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
   late final ValueNotifier<DateTime?> _selectedDate;
+  late final ValueNotifier<String?> _selectedTimeSlot;
 
   @override
   void initState() {
     super.initState();
     _selectedDate = ValueNotifier<DateTime?>(DateTime.now());
+    _selectedTimeSlot = ValueNotifier<String?>(null);
   }
 
   @override
   void dispose() {
     _selectedDate.dispose();
+    _selectedTimeSlot.dispose();
     super.dispose();
   }
 
@@ -89,7 +89,8 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                         },
                       ),
                       selectedbgcolor: AppColors.primary,
-                      unselectedbgcolor: AppColors.background,
+                      unselectedbgcolor:
+                          AppColors.medicineTabUnselectedCountBackground,
                       seldaynamecolor: AppColors.whiteText,
                       seldaynumbercolor: AppColors.primary,
                       unseldaynamecolor: AppColors.tertiaryText,
@@ -103,11 +104,15 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                       ),
                     ),
                     SizedBox(height: AppSizes.h24),
-                    const DoctorAvailabilitySection(
+                    DoctorAvailabilitySection(
                       timeSlots: DoctorProfileScreen._timeSlots,
+                      selectedTimeSlot: _selectedTimeSlot,
+                      onTimeSlotSelected: (timeSlot) {
+                        _selectedTimeSlot.value = timeSlot;
+                      },
                     ),
-                    
-                   SizedBox(height: AppSizes.h24),
+
+                    SizedBox(height: AppSizes.h24),
                     SizedBox(
                       width: double.infinity,
                       child: PrimaryButton(

@@ -53,10 +53,7 @@ class DoctorMonthDaysStrip extends StatelessWidget {
                 padding: EdgeInsets.only(
                   right: index == days.length - 1 ? 0 : AppSizes.w8,
                 ),
-                child: _DayPill(
-                  dayLabel: days[index],
-                  isSelected: isSelected,
-                ),
+                child: _DayPill(dayLabel: days[index], isSelected: isSelected),
               );
             }),
           ),
@@ -67,10 +64,7 @@ class DoctorMonthDaysStrip extends StatelessWidget {
 }
 
 class _DayPill extends StatelessWidget {
-  const _DayPill({
-    required this.dayLabel,
-    required this.isSelected,
-  });
+  const _DayPill({required this.dayLabel, required this.isSelected});
 
   final String dayLabel;
   final bool isSelected;

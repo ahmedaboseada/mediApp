@@ -72,7 +72,6 @@ class BrowseDoctorsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-             
               const DoctorsSearchBar(),
               SizedBox(height: AppSizes.h32),
               Expanded(
@@ -93,7 +92,8 @@ class BrowseDoctorsScreen extends StatelessWidget {
                       rating: doctor.rating,
                       reviewsCount: doctor.reviewsCount,
                       imageAsset: doctor.imageAsset,
-                      onTap: () => context.push('/doctors/profile', extra: doctor),
+                      onTap: () =>
+                          context.push('/doctors/profile', extra: doctor),
                     );
                   },
                 ),

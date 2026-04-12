@@ -26,9 +26,7 @@ class DoctorProfileHeader extends StatelessWidget {
       ),
       child: Container(
         padding: EdgeInsets.all(AppSizes.w16),
-        decoration: BoxDecoration(
-          color: const Color(0xFFDDE8F8),
-        ),
+        decoration: BoxDecoration(color: const Color(0xFFDDE8F8)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -85,7 +83,9 @@ class DoctorProfileHeader extends StatelessWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: AppColors.surfaceColor,
-                                borderRadius: BorderRadius.circular(AppSizes.r20),
+                                borderRadius: BorderRadius.circular(
+                                  AppSizes.r20,
+                                ),
                               ),
                               child: Text(
                                 'ID:32157832',
@@ -147,11 +147,7 @@ class DoctorProfileHeader extends StatelessWidget {
 }
 
 class _CircleIconButton extends StatelessWidget {
-  const _CircleIconButton({
-    required this.icon,
-    this.onTap,
-    this.iconColor,
-  });
+  const _CircleIconButton({required this.icon, this.onTap, this.iconColor});
 
   final IconData icon;
   final VoidCallback? onTap;
