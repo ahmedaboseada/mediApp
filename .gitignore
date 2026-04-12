@@ -1,1 +1,5 @@
 node_modules
+.env
+out.txt
+.gemini
+.DS_Store
