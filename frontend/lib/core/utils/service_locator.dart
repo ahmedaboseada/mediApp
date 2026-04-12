@@ -87,11 +87,15 @@ Future<void> setupServiceLocator() async {
     getIt.registerLazySingleton<AudioPlayerService>(() => AudioPlayerService());
   }
   if (!getIt.isRegistered<GetSoundsUseCase>()) {
-    getIt.registerLazySingleton<GetSoundsUseCase>(() => GetSoundsUseCase(getIt()));
+    getIt.registerLazySingleton<GetSoundsUseCase>(
+      () => GetSoundsUseCase(getIt()),
+    );
   }
 
   if (!getIt.isRegistered<SaveSoundUseCase>()) {
-    getIt.registerLazySingleton<SaveSoundUseCase>(() => SaveSoundUseCase(getIt()));
+    getIt.registerLazySingleton<SaveSoundUseCase>(
+      () => SaveSoundUseCase(getIt()),
+    );
   }
 
   if (!getIt.isRegistered<PreviewSoundUseCase>()) {

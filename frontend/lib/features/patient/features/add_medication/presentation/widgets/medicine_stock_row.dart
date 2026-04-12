@@ -22,7 +22,7 @@ class MedicineStockRow extends StatelessWidget {
           AppAssets.medicineBox,
           width: AppSizes.w16,
           height: AppSizes.h16,
-          colorFilter: ColorFilter.mode(AppColors.primary, BlendMode.srcIn,),
+          colorFilter: ColorFilter.mode(AppColors.primary, BlendMode.srcIn),
         ),
         SizedBox(width: AppSizes.w4),
         Text(

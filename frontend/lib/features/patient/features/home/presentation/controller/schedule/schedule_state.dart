@@ -14,17 +14,11 @@ sealed class ScheduleState extends Equatable {
 }
 
 final class ScheduleInitial extends ScheduleState {
-  const ScheduleInitial({
-    required super.selectedDate,
-    super.mutedReminderKeys,
-  });
+  const ScheduleInitial({required super.selectedDate, super.mutedReminderKeys});
 }
 
 final class ScheduleLoading extends ScheduleState {
-  const ScheduleLoading({
-    required super.selectedDate,
-    super.mutedReminderKeys,
-  });
+  const ScheduleLoading({required super.selectedDate, super.mutedReminderKeys});
 }
 
 final class ScheduleSuccess extends ScheduleState {

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
@@ -14,6 +16,7 @@ class _SplashScreenState extends State<SplashScreen>
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
+
   @override
   void initState() {
     super.initState();
@@ -28,12 +31,36 @@ class _SplashScreenState extends State<SplashScreen>
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
     _animationController.forward();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_initializeAndNavigate());
+    });
+  }
+
+  Future<void> _initializeAndNavigate() async {
+    final startedAt = DateTime.now();
+    final initResult = await AppStartupInitializer.initializeCoreServices();
+
+    // Keep splash visible briefly for smoother transition and branding.
+    const minSplashDuration = Duration(milliseconds: 1200);
+    final elapsed = DateTime.now().difference(startedAt);
+    if (elapsed < minSplashDuration) {
+      await Future<void>.delayed(minSplashDuration - elapsed);
+    }
+
+    if (initResult.hadFailures) {
+      for (final error in initResult.errors) {
+        debugPrint(error);
+      }
+    }
+
+    if (!mounted) return;
+
+    AppStartupInitializer.initializeDeferredServices();
     _navigateToNextScreen();
   }
 
-  Future<void> _navigateToNextScreen() async {
-    await Future.delayed(const Duration(seconds: 3));
-
+  void _navigateToNextScreen() {
     if (!mounted) return;
 
     final accessToken = HiveService.getAccessToken();
@@ -42,24 +69,24 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (accessToken != null && accessToken.isNotEmpty) {
       // User is logged in, go to home based on role
-      if (mounted) {
-        if (userRole == UserRole.doctor) {
-          context.go(AppRouter.mainLayout);
-        } else {
-          context.go('/home');
-        }
+      if (userRole == UserRole.doctor) {
+        context.go(AppRouter.mainLayout);
+      } else {
+        context.go('/home');
       }
     } else if (!isOnboardingCompleted) {
       // First time user, show onboarding
-      if (mounted) {
-        context.go(AppRouter.onboardingScreen);
-      }
+      context.go(AppRouter.onboardingScreen);
     } else {
       // Onboarding completed but not logged in, show welcome/sign in
-      if (mounted) {
-        context.go(AppRouter.selectScreen);
-      }
+      context.go(AppRouter.selectScreen);
     }
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   @override

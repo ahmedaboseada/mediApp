@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
 
 class SeverityBadge extends StatelessWidget {
-  const SeverityBadge({super.key,  required this.severity});
+  const SeverityBadge({super.key, required this.severity});
 
   final String severity;
 
@@ -20,10 +20,7 @@ class SeverityBadge extends StatelessWidget {
         color: style.$1,
         borderRadius: BorderRadius.circular(AppSizes.r200),
       ),
-      child: Text(
-        style.$2,
-        style:AppStyles.white12400,
-      ),
+      child: Text(style.$2, style: AppStyles.white12400),
     );
   }
 
@@ -39,7 +36,10 @@ class SeverityBadge extends StatelessWidget {
       case 'none':
         return (const Color(0xFF2BBF5B), 'none');
       default:
-        return (const Color(0xFF8A94A6), severity.isEmpty ? 'Unknown' : severity);
+        return (
+          const Color(0xFF8A94A6),
+          severity.isEmpty ? 'Unknown' : severity,
+        );
     }
   }
 }

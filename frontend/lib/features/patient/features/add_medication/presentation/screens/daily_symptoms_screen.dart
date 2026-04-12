@@ -123,7 +123,9 @@ class _DailySymptomsScreenState extends State<DailySymptomsScreen> {
       if (_selectedSymptoms.isNotEmpty) _selectedSymptoms.join(', '),
       if (_notesController.text.trim().isNotEmpty) _notesController.text.trim(),
     ];
-    final text = textParts.isEmpty ? 'Daily symptoms logged' : textParts.join(' | ');
+    final text = textParts.isEmpty
+        ? 'Daily symptoms logged'
+        : textParts.join(' | ');
 
     final result = await repo.addDailyLog(
       medicationId: widget.medicationId,
@@ -133,19 +135,19 @@ class _DailySymptomsScreenState extends State<DailySymptomsScreen> {
 
     if (!mounted) return;
 
-    result.fold((error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(error.message),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }, (message) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
-      Navigator.of(context).pop();
-    });
+    result.fold(
+      (error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error.message), backgroundColor: Colors.red),
+        );
+      },
+      (message) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(message)));
+        Navigator.of(context).pop();
+      },
+    );
   }
 
   String _severityLevel(double value) {

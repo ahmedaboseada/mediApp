@@ -42,5 +42,7 @@ export 'enums/user_role.dart';
 
 // Services
 export 'services/audio_player_service.dart';
+export 'services/app_startup_initializer.dart';
+export 'services/alarm_service.dart';
 export 'services/local_notification_service.dart';
 export 'services/hive_service.dart';

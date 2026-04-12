@@ -29,27 +29,26 @@ class NotesCard extends StatelessWidget {
           color: const Color(0xFFFEF5E7),
           borderRadius: BorderRadius.circular(AppSizes.r16),
           border: Border.all(color: const Color(0xFFFBD89D)),
-         
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                SvgPicture.asset(AppAssets.papers, width: AppSizes.w20, height: AppSizes.h20),
+                SvgPicture.asset(
+                  AppAssets.papers,
+                  width: AppSizes.w20,
+                  height: AppSizes.h20,
+                ),
                 SizedBox(width: AppSizes.w8),
                 Text(
                   'Notes',
-                  style: 
-                 AppStyles.black14600.copyWith(fontSize: AppSizes.sp16),
+                  style: AppStyles.black14600.copyWith(fontSize: AppSizes.sp16),
                 ),
               ],
             ),
             SizedBox(height: AppSizes.h12),
-            Text(
-              notes,
-              style: AppStyles.black14400,
-            ),
+            Text(notes, style: AppStyles.black14400),
           ],
         ),
       ),

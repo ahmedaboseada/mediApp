@@ -111,7 +111,8 @@ class HealthMeasurementsCubit extends Cubit<HealthMeasurementsState> {
               _buildChartModelFromApi(
                 metric: metric,
                 range: range,
-                rows: _metricDataCache[metric] ?? const <Map<String, dynamic>>[],
+                rows:
+                    _metricDataCache[metric] ?? const <Map<String, dynamic>>[],
               ) ??
               _emptyChartModel(metric);
 
@@ -160,7 +161,8 @@ class HealthMeasurementsCubit extends Cubit<HealthMeasurementsState> {
     final updatedChartData = <MeasurementMetric, MeasurementChartModel>{};
 
     for (final metric in MeasurementMetric.values) {
-      final range = state.selectedChartFilters[metric] ?? ChartFilterRange.days7;
+      final range =
+          state.selectedChartFilters[metric] ?? ChartFilterRange.days7;
       final model = _buildChartModelFromApi(
         metric: metric,
         range: range,
@@ -221,7 +223,9 @@ class HealthMeasurementsCubit extends Cubit<HealthMeasurementsState> {
     Either<ApiError, dynamic> result,
   ) {
     return result.fold((_) => const <Map<String, dynamic>>[], (response) {
-      final rows = response is Map<String, dynamic> ? response['measurements'] : null;
+      final rows = response is Map<String, dynamic>
+          ? response['measurements']
+          : null;
       if (rows is List) {
         return _sortMeasurementsByDateDesc(
           rows.whereType<Map>().map((e) => e.cast<String, dynamic>()).toList(),
@@ -375,8 +379,8 @@ class HealthMeasurementsCubit extends Cubit<HealthMeasurementsState> {
 
     final selected = _selectRowsByUniqueDay(rows, maxPoints).reversed.toList();
     final xLabels = selected
-      .map((e) => _buildXAxisLabel(e['date'], range))
-      .toList();
+        .map((e) => _buildXAxisLabel(e['date'], range))
+        .toList();
 
     if (metric == MeasurementMetric.bloodPressure) {
       final systolic = selected
@@ -438,10 +442,7 @@ class HealthMeasurementsCubit extends Cubit<HealthMeasurementsState> {
       }
     }
 
-    final merged = <Map<String, dynamic>>[
-      ...byDay.values,
-      ...noDate,
-    ];
+    final merged = <Map<String, dynamic>>[...byDay.values, ...noDate];
 
     return merged.take(maxPoints).toList();
   }
@@ -451,8 +452,11 @@ class HealthMeasurementsCubit extends Cubit<HealthMeasurementsState> {
   ) {
     final sorted = List<Map<String, dynamic>>.from(rows);
     sorted.sort((left, right) {
-      final leftDate = _tryParseDate(left['date']) ?? DateTime.fromMillisecondsSinceEpoch(0);
-      final rightDate = _tryParseDate(right['date']) ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final leftDate =
+          _tryParseDate(left['date']) ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final rightDate =
+          _tryParseDate(right['date']) ??
+          DateTime.fromMillisecondsSinceEpoch(0);
       return rightDate.compareTo(leftDate);
     });
     return sorted;
@@ -507,6 +511,7 @@ class HealthMeasurementsCubit extends Cubit<HealthMeasurementsState> {
         return '';
     }
   }
+
   Future<void> loadSymptoms() async {
     final result = await _logsRepo.getSymptomLogs();
 
@@ -514,25 +519,26 @@ class HealthMeasurementsCubit extends Cubit<HealthMeasurementsState> {
       return;
     }
 
-    result.fold(
-      (error) => log('Error loading symptoms: ${error.message}'),
-      (response) {
-        final rows = response is Map<String, dynamic> ? response['symptoms'] : null;
-        if (rows is List) {
-          final symptoms = rows
-              .whereType<Map>()
-              .map((e) => e.cast<String, dynamic>())
-              .map((json) => SymptomModel.fromJson(json))
-              .toList();
-          if (isClosed) {
-            return;
-          }
-          emit(state.copyWith(symptoms: symptoms));
-        } else {
-          log('Unexpected response format for symptoms: $response');
+    result.fold((error) => log('Error loading symptoms: ${error.message}'), (
+      response,
+    ) {
+      final rows = response is Map<String, dynamic>
+          ? response['symptoms']
+          : null;
+      if (rows is List) {
+        final symptoms = rows
+            .whereType<Map>()
+            .map((e) => e.cast<String, dynamic>())
+            .map((json) => SymptomModel.fromJson(json))
+            .toList();
+        if (isClosed) {
+          return;
         }
-      },
-    );
+        emit(state.copyWith(symptoms: symptoms));
+      } else {
+        log('Unexpected response format for symptoms: $response');
+      }
+    });
   }
 
   static MeasurementChartModel _emptyChartModel(MeasurementMetric metric) {

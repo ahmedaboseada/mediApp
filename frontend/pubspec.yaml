@@ -37,7 +37,6 @@ dependencies:
   horizontal_calender_mz: ^0.0.6
   google_places_autocomplete_text_field: ^3.0.0
   latlong_to_place: ^0.0.9
-  flutter_facebook_auth: ^7.1.5
   flutter_local_notifications: ^20.0.0
   flutter_screenutil: ^5.9.3
   flutter_svg: ^2.2.3

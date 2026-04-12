@@ -4,10 +4,7 @@ import 'package:medi/features/patient/features/health_measurements/data/models/s
 import 'package:medi/features/patient/features/health_measurements/presentation/widgets/severity_badge.dart';
 
 class SymptomItem extends StatelessWidget {
-  const SymptomItem({
-    super.key,
-    required this.data,
-  });
+  const SymptomItem({super.key, required this.data});
 
   final SymptomModel data;
 
@@ -31,7 +28,9 @@ class SymptomItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      data.allSymptoms.isNotEmpty ? data.allSymptoms.first : 'None',
+                      data.allSymptoms.isNotEmpty
+                          ? data.allSymptoms.first
+                          : 'None',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -58,7 +57,9 @@ class SymptomItem extends StatelessWidget {
           ),
           SizedBox(height: AppSizes.h14),
           Text(
-            data.notes.isNotEmpty ? data.notes : _symptomsFallback(data.allSymptoms),
+            data.notes.isNotEmpty
+                ? data.notes
+                : _symptomsFallback(data.allSymptoms),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
@@ -91,4 +92,3 @@ class SymptomItem extends StatelessWidget {
     return symptoms.join(', ');
   }
 }
-

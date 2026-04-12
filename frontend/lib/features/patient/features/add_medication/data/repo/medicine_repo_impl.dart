@@ -238,7 +238,9 @@ class MedicineRepoImpl implements MedicineRepo {
         '/medications/schedule?date=$encodedDate',
       );
 
-      log('Get Medication Schedule (date=$date) Response: ${response.toString()}');
+      log(
+        'Get Medication Schedule (date=$date) Response: ${response.toString()}',
+      );
 
       if (response is ServerFailure) {
         return Left(response);

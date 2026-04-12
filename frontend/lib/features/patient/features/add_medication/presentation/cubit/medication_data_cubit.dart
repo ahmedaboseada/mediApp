@@ -66,7 +66,7 @@ class MedicationDataCubit extends Cubit<MedicationDataState> {
 
   // Update stock and expiry
   void updateStockAndExpiry({
-    required int stock ,
+    required int stock,
     required String expiryDate,
     required bool isCriticalMode,
   }) {

@@ -50,8 +50,9 @@ class LogsRepoImpl implements LogsRepo {
   @override
   Future<Either<ApiError, dynamic>> getBloodPressures() async {
     try {
-      final dynamic response =
-          await apiService.get('/health/measurements?type=blood_pressure');
+      final dynamic response = await apiService.get(
+        '/health/measurements?type=blood_pressure',
+      );
 
       log('Get Blood Pressures Response: ${response.toString()}');
 
@@ -100,8 +101,9 @@ class LogsRepoImpl implements LogsRepo {
   @override
   Future<Either<ApiError, dynamic>> getHeartRates() async {
     try {
-      final dynamic response =
-          await apiService.get('/health/measurements?type=heart_rate');
+      final dynamic response = await apiService.get(
+        '/health/measurements?type=heart_rate',
+      );
 
       log('Get Heart Rates Response: ${response.toString()}');
 
@@ -155,8 +157,9 @@ class LogsRepoImpl implements LogsRepo {
   @override
   Future<Either<ApiError, dynamic>> getBloodSugars() async {
     try {
-      final dynamic response =
-          await apiService.get('/health/measurements?type=blood_sugar');
+      final dynamic response = await apiService.get(
+        '/health/measurements?type=blood_sugar',
+      );
 
       log('Get Blood Sugars Response: ${response.toString()}');
 
@@ -205,7 +208,9 @@ class LogsRepoImpl implements LogsRepo {
   @override
   Future<Either<ApiError, dynamic>> getWeights() async {
     try {
-      final dynamic response = await apiService.get('/health/measurements?type=weight');
+      final dynamic response = await apiService.get(
+        '/health/measurements?type=weight',
+      );
 
       log('Get Weights Response: ${response.toString()}');
 
@@ -228,16 +233,9 @@ class LogsRepoImpl implements LogsRepo {
     required String notes,
   }) async {
     try {
-      final data = {
-        'symptoms': symptoms,
-        'severity': severity,
-        'notes': notes,
-      };
+      final data = {'symptoms': symptoms, 'severity': severity, 'notes': notes};
 
-      final dynamic response = await apiService.post(
-        '/health/symptoms',
-        data,
-      );
+      final dynamic response = await apiService.post('/health/symptoms', data);
 
       log('Add Symptom Log Response: ${response.toString()}');
 

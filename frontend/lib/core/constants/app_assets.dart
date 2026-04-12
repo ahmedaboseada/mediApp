@@ -46,7 +46,9 @@ class AppAssets {
   static const String bloodPressure = '${path}hugeicons_blood-pressure.svg';
   static const String edit = '${path}edit.svg';
   static const String papers = '${path}papers.svg';
-
+  static const String chat = '${path}Chat.svg';
+  static const String video = '${path}video.svg';
+  static const String offline = '${path}offline.svg';
   // Health measurement icons
   static const String bloodPressureIcon = '${svgPath}blood_pressure.svg';
   static const String bloodSugarIcon = '${svgPath}blood_sugar.svg';

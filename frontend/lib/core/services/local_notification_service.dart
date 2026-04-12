@@ -4,9 +4,9 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:medi/core/widgets/alarm_notification.dart';
+import 'package:medi/core/services/alarm_service.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 import 'package:medi/main.dart';
-import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -52,6 +52,7 @@ Future<void> onAlarmFired(AlarmSettings alarmSettings) async {
 }
 
 class LocalNotificationService {
+  static const AlarmService _alarmService = AlarmService();
   static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   static const String _channelId = 'medicine_reminders';
@@ -166,14 +167,81 @@ class LocalNotificationService {
     _isInitialized = true;
   }
 
+  /// Debug utility to print all scheduled reminders and their fire times.
+  ///
+  /// Prints:
+  ///   - Current time
+  ///   - All active alarms from Alarm package with ID and fire-in duration
+  ///   - All saved reminder IDs from SharedPreferences
+  ///
+  /// Usage:
+  ///   1. Call from code: LocalNotificationService.printScheduledRemindersDebug()
+  ///   2. Or add DebugScheduleHelper() to your screen's Stack
+  ///   3. Check console output (debugPrint) for reminder details
+  ///
+  /// Example output:
+  ///   === SCHEDULED REMINDERS DEBUG ===
+  ///   Current time: 2026-04-10T14:30:00...
+  ///   --- Alarm Package Alarms ---
+  ///   Active alarms: 3
+  ///   ID: 123456, Time: 2026-04-10T16:05:00..., FiresIn: 1h 35m
+  ///   ...
+  static Future<void> printScheduledRemindersDebug() async {
+    try {
+      await init();
+      debugPrint('=== SCHEDULED REMINDERS DEBUG ===');
+
+      final prefs = await SharedPreferences.getInstance();
+      final now = DateTime.now();
+      debugPrint('Current time: ${now.toIso8601String()}');
+
+      debugPrint('\n--- Alarm Package Alarms ---');
+      final alarms = await Alarm.getAlarms();
+      if (alarms.isEmpty) {
+        debugPrint('No alarms scheduled.');
+      } else {
+        debugPrint('Active alarms: ${alarms.length}');
+        for (final alarm in alarms) {
+          final fireIn = alarm.dateTime.difference(now);
+          debugPrint(
+            '  ID: ${alarm.id}, Time: ${alarm.dateTime.toIso8601String()}, '
+            'FiresIn: ${fireIn.inHours}h ${fireIn.inMinutes % 60}m',
+          );
+        }
+      }
+
+      debugPrint('\n--- SharedPreferences Saved Reminder IDs ---');
+      final allKeys = prefs.getKeys();
+      final reminderKeys = allKeys
+          .where(
+            (k) =>
+                k.startsWith(_storagePrefix) ||
+                k.startsWith(_criticalStoragePrefix),
+          )
+          .toList();
+      if (reminderKeys.isEmpty) {
+        debugPrint('No saved reminder IDs.');
+      } else {
+        debugPrint('Saved reminder entries: ${reminderKeys.length}');
+        for (final key in reminderKeys) {
+          final ids = prefs.getStringList(key) ?? <String>[];
+          debugPrint('  Key: $key, IDs: ${ids.length} ($ids)');
+        }
+      }
+
+      debugPrint('=== END DEBUG ===\n');
+    } catch (e) {
+      debugPrint('Debug print failed: $e');
+    }
+  }
+
   static Future<void> cleanupLegacyWarningAlarms() async {
     try {
       final alarms = await Alarm.getAlarms();
-      final legacyWarningIds =
-          alarms
-              .where((alarm) => alarm.warningNotificationOnKill)
-              .map((alarm) => alarm.id)
-              .toList();
+      final legacyWarningIds = alarms
+          .where((alarm) => alarm.warningNotificationOnKill)
+          .map((alarm) => alarm.id)
+          .toList();
 
       for (final id in legacyWarningIds) {
         await Alarm.stop(id);
@@ -187,6 +255,14 @@ class LocalNotificationService {
     } catch (e) {
       debugPrint('Legacy warning-alarm cleanup failed: $e');
     }
+  }
+
+  static Future<void> optimizeAlarmStateOnStartup() async {
+    await _alarmService.cleanupAlarms(
+      retainUpcomingFor: const Duration(days: 7),
+      maxStops: 180,
+      stopAllIfTooManyInvalid: true,
+    );
   }
 
   Future<void> showNotification({
@@ -206,22 +282,21 @@ class LocalNotificationService {
     );
   }
 
-  Future<void> scheduleWithAlarmManager(
+  Future<void> scheduleWithLocalNotifications(
     Medication medication,
     DateTime time,
     int id,
   ) async {
-    await AndroidAlarmManager.oneShotAt(
-      time,
-      id,
-      alarmCallback,
-      exact: true,
-      wakeup: true,
-      rescheduleOnReboot: true,
-      params: {
-        "name": medication.name,
-        "isCritical": medication.isCriticalMode,
-      },
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      id: id,
+      title: medication.isCriticalMode
+          ? 'CRITICAL: ${medication.name}'
+          : 'Medicine Reminder',
+      body: 'It\'s time to take ${medication.name}.',
+      scheduledDate: tz.TZDateTime.from(time, tz.local),
+      notificationDetails: _notificationDetails,
+      payload: medication.name,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
   }
 
@@ -229,6 +304,7 @@ class LocalNotificationService {
     Medication medication,
     DateTime time,
     int id,
+    Set<int>? knownActiveIds,
   ) async {
     final settings = AlarmSettings(
       id: id,
@@ -252,8 +328,13 @@ class LocalNotificationService {
       ),
     );
 
-    await Alarm.set(alarmSettings: settings);
-    debugPrint('✓ Alarm scheduled for ${medication.name} at $time (ID: $id)');
+    final scheduled = await _alarmService.scheduleAlarm(
+      settings: settings,
+      knownActiveIds: knownActiveIds,
+    );
+    if (scheduled) {
+      debugPrint('✓ Alarm scheduled for ${medication.name} at $time (ID: $id)');
+    }
   }
 
   Future<void> scheduleMedicationReminders(Medication medication) async {
@@ -272,6 +353,8 @@ class LocalNotificationService {
     final criticalStorageKey = _criticalStorageKeyForMedication(medication);
     final scheduledIds = <String>[];
     final criticalIds = <String>[];
+    final activeAlarms = await _alarmService.getActiveAlarms();
+    final knownActiveIds = activeAlarms.map((alarm) => alarm.id).toSet();
 
     for (final reminderTime in reminderTimes) {
       final id = _notificationIdFor(storageKey, reminderTime);
@@ -290,14 +373,19 @@ class LocalNotificationService {
       // );
       if (medication.isCriticalMode) {
         try {
-          await scheduleWithAlarmPackage(medication, reminderTime, id);
+          await scheduleWithAlarmPackage(
+            medication,
+            reminderTime,
+            id,
+            knownActiveIds,
+          );
           criticalIds.add(id.toString());
         } on MissingPluginException {
           // Fallback to local notification path when alarm plugin is unavailable.
-          await scheduleWithAlarmManager(medication, reminderTime, id);
+          await scheduleWithLocalNotifications(medication, reminderTime, id);
         }
       } else {
-        await scheduleWithAlarmManager(medication, reminderTime, id);
+        await scheduleWithLocalNotifications(medication, reminderTime, id);
       }
     }
 
@@ -342,9 +430,8 @@ class LocalNotificationService {
 
     for (final id in ids) {
       await flutterLocalNotificationsPlugin.cancel(id: id);
-      await AndroidAlarmManager.cancel(id);
       if (shouldTreatAllAsCritical || criticalIds.contains(id)) {
-        await Alarm.stop(id);
+        await _alarmService.cancelAlarm(id);
       }
     }
 
@@ -388,9 +475,10 @@ class LocalNotificationService {
         .toList();
     await prefs.setStringList(storageKey, ids);
 
-    final criticalIds = (prefs.getStringList(criticalStorageKey) ?? const <String>[])
-        .where((value) => value != id.toString())
-        .toList();
+    final criticalIds =
+        (prefs.getStringList(criticalStorageKey) ?? const <String>[])
+            .where((value) => value != id.toString())
+            .toList();
     if (criticalIds.isEmpty) {
       await prefs.remove(criticalStorageKey);
     } else {
@@ -398,9 +486,8 @@ class LocalNotificationService {
     }
 
     await flutterLocalNotificationsPlugin.cancel(id: id);
-    await AndroidAlarmManager.cancel(id);
     if (isCritical) {
-      await Alarm.stop(id);
+      await _alarmService.cancelAlarm(id);
     }
 
     return true;
@@ -665,40 +752,4 @@ class LocalNotificationService {
 
     return (hour, minute);
   }
-}
-
-//1.set up [initialization, permissions]=> Done.
-//2.basic notification
-//3. repeat notification
-//4.scheduled notification
-
-@pragma('vm:entry-point')
-void alarmCallback(int id, Map<String, dynamic> params) async {
-  final name = params['name'] ?? "Medicine";
-  final isCritical = params['isCritical'] == true;
-
-  final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-
-  final androidDetails = AndroidNotificationDetails(
-    isCritical ? 'critical_medicine_reminders_alarm_v2' : 'medicine_reminders',
-    isCritical ? 'Critical Medicine Alerts' : 'Medicine Reminders',
-    importance: Importance.max,
-    priority: Priority.max,
-    fullScreenIntent: isCritical,
-    category: isCritical
-        ? AndroidNotificationCategory.alarm
-        : AndroidNotificationCategory.reminder,
-    autoCancel: !isCritical,
-    ongoing: isCritical,
-  );
-
-  final details = NotificationDetails(android: androidDetails);
-
-  await flutterLocalNotificationsPlugin.show(
-    id: id,
-    title: isCritical ? 'CRITICAL: $name' : 'Medicine Reminder',
-    body: 'Time to take your medicine',
-    notificationDetails: details,
-    payload: name,
-  );
 }
