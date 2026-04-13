@@ -1,0 +1,252 @@
+import bookingModel from '../../models/booking.model.js';
+import doctorModel from '../../models/doctor.model.js';
+import patientModel from '../../models/patient.model.js';
+import notificationModel from '../../models/notification.model.js';
+
+// --- Time Helpers ---
+const timeToMins = (t) => {
+    const [h, m] = t.split(':').map(Number);
+    return h * 60 + m;
+};
+const minsToTime = (m) => {
+    const hh = Math.floor(m / 60).toString().padStart(2, '0');
+    const mm = (m % 60).toString().padStart(2, '0');
+    return `${hh}:${mm}`;
+};
+
+export const getDoctorSlots = async (req, res) => {
+    const { doctorId } = req.params;
+    const { date } = req.query;
+
+    const doc = await doctorModel.findById(doctorId).lean();
+    if (!doc) return res.status(404).json({ message: 'Doctor not found' });
+    // Note: status check if you want them to be 'approved' only
+    // if (doc.status !== 'approved') return res.status(403).json({ message: 'Doctor is not available' });
+
+    const reqDate = new Date(date);
+    if (isNaN(reqDate)) return res.status(400).json({ message: 'Invalid Date' });
+
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const dayName = days[reqDate.getUTCDay()];
+
+    if (!doc.workingDays?.includes(dayName)) {
+        return res.status(200).json({ slots: [] }); // Doctor doesn't work this day
+    }
+
+    const startOfDay = new Date(reqDate);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+    const endOfDay = new Date(startOfDay);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+
+    const existingBookings = await bookingModel.find({
+        doctorId,
+        'date.date': { $gte: startOfDay, $lte: endOfDay },
+        status: { $in: ['upcoming', 'completed'] }
+    }).lean();
+
+    if (doc.maxDailyPatients && existingBookings.length >= doc.maxDailyPatients) {
+        return res.status(200).json({ slots: [] }); // Fully booked
+    }
+
+    const duration = doc.consultationDuration || 30; // fallback default
+    const reservedTimes = existingBookings.map(b => b.date.time);
+
+    let slots = [];
+    if (doc.workingHours && doc.workingHours.length > 0) {
+        for (const block of doc.workingHours) {
+            const startMins = timeToMins(block.startHour);
+            const endMins = timeToMins(block.endHour);
+
+            // iterate exact slots fitting the duration
+            for (let t = startMins; t + duration <= endMins; t += duration) {
+                const timeStr = minsToTime(t);
+                if (!reservedTimes.includes(timeStr)) {
+                    slots.push(timeStr);
+                }
+            }
+        }
+    }
+
+    return res.status(200).json({ slots });
+};
+
+export const createBooking = async (req, res) => {
+    // 1. Context Resolution
+    const patientUserId = req.user.id;
+    const patient = await patientModel.findOne({ userId: patientUserId });
+    if (!patient) return res.status(404).json({ message: 'Patient profile required' });
+
+    const { doctorId, date, time, packageType, bookingFor, patientAge, patientGender, problem, paymentMethod } = req.body;
+
+    const doc = await doctorModel.findById(doctorId).lean();
+    if (!doc) return res.status(404).json({ message: 'Doctor not found' });
+
+    // 2. Validate Package / Appointment Type
+    if (doc.appointmentTypes && doc.appointmentTypes.length > 0) {
+        if (!doc.appointmentTypes.includes(packageType)) {
+            return res.status(400).json({ message: `Doctor does not support '${packageType}' package` });
+        }
+    }
+
+    // 3. Double Booking / Validation Checks
+    const reqDate = new Date(date);
+    const dayName = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][reqDate.getUTCDay()];
+    
+    if (!doc.workingDays?.includes(dayName)) {
+        return res.status(400).json({ message: 'Doctor does not work on this day' });
+    }
+
+    const startOfDay = new Date(reqDate); startOfDay.setUTCHours(0, 0, 0, 0);
+    const endOfDay = new Date(startOfDay); endOfDay.setUTCHours(23, 59, 59, 999);
+
+    const existingBookings = await bookingModel.find({
+        doctorId,
+        'date.date': { $gte: startOfDay, $lte: endOfDay },
+        status: { $in: ['upcoming', 'completed'] }
+    }).lean();
+
+    if (doc.maxDailyPatients && existingBookings.length >= doc.maxDailyPatients) {
+        return res.status(400).json({ message: 'Doctor is fully booked for this day' });
+    }
+
+    const isTaken = existingBookings.some(b => b.date.time === time);
+    if (isTaken) {
+        return res.status(409).json({ message: 'This slot is already reserved.' });
+    }
+
+    // 4. Booking Object Creation
+    const booking = await bookingModel.create({
+        patientId: patient._id,
+        doctorId: doc._id,
+        date: { date: startOfDay, time },
+        duration: doc.consultationDuration || 30,
+        packageType,
+        bookingFor,
+        patientAge,
+        patientGender,
+        problem,
+        paymentMethod: paymentMethod || 'cash_on_site',
+        price: doc.consultationPrice || 0, // Fallback if schema doesn't have it defined
+        status: 'upcoming',
+        clinicAddress: doc.clinicAddress || ''
+    });
+
+    // 5. Connect mappings (if appropriate to embed locally)
+    if (!patient.connectedDoctors.find(d => String(d.doctorId) === String(doc._id))) {
+        patient.connectedDoctors.push({ doctorId: doc._id, status: 'approved' });
+        await patient.save();
+    }
+
+    await notificationModel.create({
+        type: 'bookingReschedule', // generic scheduling trigger template
+        header: 'New Appointment',
+        message: `Your appointment is confirmed for ${date} at ${time}.`,
+        userId: patientUserId,
+    });
+
+    return res.status(201).json({ message: 'Booking confirmed!', booking });
+};
+
+export const getMyBookingsAsPatient = async (req, res) => {
+    const patientUserId = req.user.id;
+    const patient = await patientModel.findOne({ userId: patientUserId });
+    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+    const bookings = await bookingModel.find({ patientId: patient._id })
+        .populate('doctorId') // Optional: map out doctor public profile fields
+        .sort({ 'date.date': -1, 'date.time': -1 })
+        .lean();
+
+    return res.status(200).json({ bookings });
+};
+
+export const getMyBookingsAsDoctor = async (req, res) => {
+    const doctorUserId = req.user.id;
+    const doc = await doctorModel.findOne({ userId: doctorUserId });
+    if (!doc) return res.status(404).json({ message: 'Doctor not found' });
+
+    const bookings = await bookingModel.find({ doctorId: doc._id })
+        .populate('patientId')
+        .sort({ 'date.date': -1, 'date.time': -1 })
+        .lean();
+
+    return res.status(200).json({ bookings });
+};
+
+export const cancelBooking = async (req, res) => {
+    const userId = req.user.id;
+    const { id } = req.params;
+    const { cancelledReason } = req.body;
+
+    const patient = await patientModel.findOne({ userId });
+    // Assuming UI flows only allow user themselves to trigger this, strict check:
+    const booking = await bookingModel.findById(id);
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+
+    if (String(booking.patientId) !== String(patient?._id)) {
+        return res.status(403).json({ message: 'Access denied' });
+    }
+
+    if (booking.status === 'cancelled' || booking.status === 'completed') {
+        return res.status(400).json({ message: `Cannot cancel a ${booking.status} booking.` });
+    }
+
+    booking.status = 'cancelled';
+    booking.cancelledReason = cancelledReason;
+    await booking.save();
+
+    await notificationModel.create({
+        type: 'bookingCancel',
+        header: 'Appointment Cancelled',
+        message: `Your appointment has been cancelled successfully.`,
+        userId: userId,
+    });
+
+    return res.status(200).json({ message: 'Booking cancelled successfully', booking });
+};
+
+// Rescheduling essentially acts as a cancel + book or just mutation
+export const rescheduleBooking = async (req, res) => {
+    const patientUserId = req.user.id;
+    const { id } = req.params;
+    const { date, time } = req.body;
+
+    const patient = await patientModel.findOne({ userId: patientUserId });
+    const booking = await bookingModel.findById(id);
+    
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+    if (String(booking.patientId) !== String(patient?._id)) return res.status(403).json({ message: 'Access denied' });
+    if (booking.status !== 'upcoming') return res.status(400).json({ message: 'Only upcoming bookings can be rescheduled.' });
+
+    const doc = await doctorModel.findById(booking.doctorId).lean();
+    
+    // Validate the new requested slot
+    const reqDate = new Date(date);
+    const dayName = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][reqDate.getUTCDay()];
+    if (!doc.workingDays?.includes(dayName)) return res.status(400).json({ message: 'Doctor does not work on this day' });
+
+    const startOfDay = new Date(reqDate); startOfDay.setUTCHours(0, 0, 0, 0);
+    const endOfDay = new Date(startOfDay); endOfDay.setUTCHours(23, 59, 59, 999);
+
+    const existingBookings = await bookingModel.find({
+        doctorId: doc._id,
+        'date.date': { $gte: startOfDay, $lte: endOfDay },
+        status: { $in: ['upcoming', 'completed'] },
+        _id: { $ne: booking._id } // exclude current booking
+    }).lean();
+
+    const isTaken = existingBookings.some(b => b.date.time === time);
+    if (isTaken) return res.status(409).json({ message: 'This slot is already reserved.' });
+
+    booking.date = { date: startOfDay, time };
+    await booking.save();
+
+    await notificationModel.create({
+        type: 'bookingReschedule',
+        header: 'Appointment Rescheduled',
+        message: `Your appointment was rescheduled to ${date} at ${time}.`,
+        userId: patientUserId,
+    });
+
+    return res.status(200).json({ message: 'Booking rescheduled successfully', booking });
+};

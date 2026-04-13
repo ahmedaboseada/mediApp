@@ -66,6 +66,9 @@
 
 import doctorModel from '../../models/doctor.model.js';
 import userModel from '../../models/user.model.js';
+import patientModel from '../../models/patient.model.js';
+import notificationModel from '../../models/notification.model.js';
+import medicineModel from '../../models/medicine.model.js';
 import * as ET from '../../utils/encryption/index.js';
 
 const publicUser = (u) => ({
@@ -228,4 +231,105 @@ export const completeProfile = async (req, res) => {
         user: publicUser(updatedUser),
         doctor: updatedDoctor,
     });
+};
+
+export const updateSchedule = async (req, res) => {
+    const userId = req.user.id;
+    const { err, doc } = await assertDoctor(userId);
+    if (err) return res.status(err.status).json({ message: err.message });
+
+    // Normalize UI choice "Clinic Visit" into backend internal 'in-person'
+    const patch = { ...req.body };
+    if (patch.appointmentTypes) {
+        patch.appointmentTypes = patch.appointmentTypes.map(type => 
+            type === 'Clinic Visit' ? 'in-person' : type
+        );
+    }
+
+    const updatedDoc = await doctorModel.findByIdAndUpdate(doc._id, patch, { new: true }).lean();
+    return res.status(200).json({ message: 'Schedule & Availability saved', doctor: updatedDoc });
+};
+
+export const acceptPatient = async (req, res) => {
+    const userId = req.user.id;
+    const { patientId } = req.params;
+
+    const { err, doc } = await assertDoctor(userId);
+    if (err) return res.status(err.status).json({ message: err.message });
+
+    const patient = await patientModel.findById(patientId);
+    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+    // update doctor's side
+    let docConn = doc.connectedPatients?.find(c => String(c.patientId) === String(patient._id));
+    if (!docConn) {
+        return res.status(400).json({ message: 'No pending request found from this patient' });
+    }
+    if (docConn.status === 'approved') {
+        return res.status(400).json({ message: 'Patient is already approved' });
+    }
+    
+    // Using doc object from db not lean: assertDoctor returned `doc` which is a mongoose doc
+    doc.connectedPatients = doc.connectedPatients.map(c => 
+        String(c.patientId) === String(patient._id) ? { ...c, status: 'approved' } : c
+    );
+    await doc.save();
+
+    // update patient's side
+    let patConn = patient.connectedDoctors?.find(c => String(c.doctorId) === String(doc._id));
+    if (patConn) {
+        patient.connectedDoctors = patient.connectedDoctors.map(c =>
+            String(c.doctorId) === String(doc._id) ? { ...c, status: 'approved' } : c
+        );
+        await patient.save();
+    }
+
+    await notificationModel.create({
+        type: 'doctorRequestAccepted',
+        header: 'Request Approved!',
+        message: 'Your doctor request has been approved.',
+        userId: patient.userId,
+    });
+
+    return res.status(200).json({ message: 'Patient approved successfully!' });
+};
+
+export const listConnectedPatients = async (req, res) => {
+    const userId = req.user.id;
+    const { err, doc } = await assertDoctor(userId);
+    if (err) return res.status(err.status).json({ message: err.message });
+
+    // Extract approved patient ids
+    const approvedPatientIds = doc.connectedPatients?.filter(c => c.status === 'approved').map(c => c.patientId) || [];
+
+    if (approvedPatientIds.length === 0) {
+        return res.status(200).json({ patients: [] });
+    }
+
+    // Populate patient info deeply
+    const patients = await patientModel.find({ _id: { $in: approvedPatientIds } })
+        .populate({ path: 'userId', select: 'firstName lastName profilePicture phone age gender' })
+        .populate({ path: 'medications', select: 'status isChronic' })
+        .lean();
+
+    // Compute UI health Badge mapping
+    const enrichedPatients = patients.map(p => {
+        let healthBadge = 'Normal Status';
+        
+        // Priority 1: Check for critical mode medications
+        const hasCriticalMeds = p.medications?.some(m => m.status === 'critical');
+        if (hasCriticalMeds) {
+            healthBadge = 'Critical';
+        } else if (p.healthMeasurements?.sys || p.healthMeasurements?.glucose) {
+             // simplified pseudo-abnormal check for demonstration
+            healthBadge = 'Abnormal';
+        }
+
+        return {
+            ...p,
+            healthBadge
+        };
+    });
+
+    return res.status(200).json({ patients: enrichedPatients });
 };

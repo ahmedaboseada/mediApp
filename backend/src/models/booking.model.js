@@ -21,7 +21,10 @@ const bookingSchema = new Schema(
 
         duration: { type: Number, min: 15, max: 240 },
 
-        packageType: { type: String, trim: true, maxlength: 120 },
+        packageType: { type: String, enum: ['online', 'in-person'] }, // strict validation
+        bookingFor: { type: String, trim: true, default: 'Self' },
+        patientAge: { type: Number },
+        patientGender: { type: String },
 
         problem: { type: String, trim: true, maxlength: 1200 },
 

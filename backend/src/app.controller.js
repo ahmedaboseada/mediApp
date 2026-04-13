@@ -15,6 +15,7 @@ import doctorRouter from './modules/doctorModel/doctor.controller.js';
 import adminRouter from './modules/adminModel/admin.controller.js';
 import medicineRouter from './modules/medicineModel/medicine.controller.js';
 import healthRouter from './modules/healthModel/health.controller.js';
+import bookingRouter from './modules/bookingModel/booking.routes.js';
 
 
 import { startWeeklyAvailabilityReset } from './utils/index.js';
@@ -58,6 +59,7 @@ export const bootstrap = async () => {
             service: 'MediProject',
             env: process.env.NODE_ENV,
             db,
+            message: "hello world!",
             timestamp: new Date().toISOString(),
         });
     });
@@ -69,6 +71,7 @@ export const bootstrap = async () => {
     app.use('/admin', adminRouter);
     app.use('/medications', medicineRouter);
     app.use('/health', healthRouter);
+    app.use('/bookings', bookingRouter);
 
 
 

@@ -60,3 +60,9 @@ export const requestIdSchema = {
         requestId: joi.string().hex().length(24).required(),
     }),
 };
+
+export const connectDoctorSchema = {
+    body: joi.object({
+        doctorId: joi.string().hex().length(24).required(),
+    }),
+};

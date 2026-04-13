@@ -37,4 +37,11 @@ doctorRouter.patch('/complete/license', ...cloudinaryUploadAvatarAndCover({ fold
 // single unified completion step
 doctorRouter.patch('/complete', ...cloudinaryUploadAvatarAndCover({ folder: 'doctors' }), validation(DVS.completeProfileSchema), DS.completeProfile);
 
+// screens: doctor schedule settings (post-onboarding update)
+doctorRouter.patch('/schedule', validation(DVS.updateScheduleSchema), DS.updateSchedule);
+
+// screens: patient connections & dashboard
+doctorRouter.patch('/patients/accept/:patientId', validation(DVS.patientIdSchema), DS.acceptPatient);
+doctorRouter.get('/patients', DS.listConnectedPatients);
+
 export default doctorRouter;

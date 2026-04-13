@@ -76,3 +76,19 @@ export const completeProfileSchema = {
         licenseImage: joi.string().uri().allow('', null),
     }),
 };
+
+export const updateScheduleSchema = {
+    body: joi.object({
+        workingDays: joi.array().items(joi.string()).min(1),
+        workingHours: joi.array().items(joi.object({ startHour: joi.string().required(), endHour: joi.string().required() })).min(1),
+        consultationDuration: joi.number().valid(15, 30, 45, 60),
+        appointmentTypes: joi.array().items(joi.string().valid('in-person', 'online', 'Clinic Visit')),
+        maxDailyPatients: joi.number().integer().min(1).max(500),
+    }),
+};
+
+export const patientIdSchema = {
+    params: joi.object({
+        patientId: joi.string().hex().length(24).required(),
+    }),
+};

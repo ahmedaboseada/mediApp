@@ -1,0 +1,164 @@
+{
+    "info": {
+        "_postman_id": "aa111db0-23bb-4ab4-b7e6-281fd2e2f694",
+        "name": "Doctor System & Booking Sprint",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "1. Schedule Setup",
+            "item": [
+                {
+                    "name": "Update Schedule Settings",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            { "key": "Authorization", "value": "bearer {{doctor_token}}", "type": "text" }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"workingDays\": [\"monday\", \"tuesday\", \"wednesday\"],\n  \"workingHours\": [{\"startHour\": \"09:00\", \"endHour\": \"15:00\"}],\n  \"consultationDuration\": 30,\n  \"appointmentTypes\": [\"Clinic Visit\", \"online\"],\n  \"maxDailyPatients\": 20\n}",
+                            "options": { "raw": { "language": "json" } }
+                        },
+                        "url": { "raw": "{{BASE_URL}}/doctors/schedule", "host": ["{{BASE_URL}}"], "path": ["doctors", "schedule"] }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "2. Connection Flow",
+            "item": [
+                {
+                    "name": "Patient Connects to Doctor",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            { "key": "Authorization", "value": "bearer {{patient_token}}", "type": "text" }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"doctorId\": \"{{doctor_object_id}}\"\n}",
+                            "options": { "raw": { "language": "json" } }
+                        },
+                        "url": { "raw": "{{BASE_URL}}/patients/connect-doctor", "host": ["{{BASE_URL}}"], "path": ["patients", "connect-doctor"] }
+                    }
+                },
+                {
+                    "name": "Doctor Accepts Patient",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            { "key": "Authorization", "value": "bearer {{doctor_token}}", "type": "text" }
+                        ],
+                        "url": { "raw": "{{BASE_URL}}/doctors/patients/accept/{{patient_object_id}}", "host": ["{{BASE_URL}}"], "path": ["doctors", "patients", "accept", "{{patient_object_id}}"] }
+                    }
+                },
+                {
+                    "name": "Get Connected Doctors (Patient View)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            { "key": "Authorization", "value": "bearer {{patient_token}}", "type": "text" }
+                        ],
+                        "url": { "raw": "{{BASE_URL}}/patients/connected-doctors", "host": ["{{BASE_URL}}"], "path": ["patients", "connected-doctors"] }
+                    }
+                },
+                {
+                    "name": "Get Connected Patients (Doctor View)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            { "key": "Authorization", "value": "bearer {{doctor_token}}", "type": "text" }
+                        ],
+                        "url": { "raw": "{{BASE_URL}}/doctors/patients", "host": ["{{BASE_URL}}"], "path": ["doctors", "patients"] }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "3. Booking Workflows",
+            "item": [
+                {
+                    "name": "Get Doctor Time Slots",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{BASE_URL}}/bookings/slots/{{doctor_object_id}}?date=2026-06-15",
+                            "host": ["{{BASE_URL}}"],
+                            "path": ["bookings", "slots", "{{doctor_object_id}}"],
+                            "query": [
+                                { "key": "date", "value": "2026-06-15" }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Appointment (In-Person)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            { "key": "Authorization", "value": "bearer {{patient_token}}", "type": "text" }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"doctorId\": \"{{doctor_object_id}}\",\n  \"date\": \"2026-06-15T00:00:00.000Z\",\n  \"time\": \"10:00\",\n  \"packageType\": \"in-person\",\n  \"bookingFor\": \"Self\",\n  \"patientAge\": 24,\n  \"patientGender\": \"male\",\n  \"problem\": \"Regular checkup\",\n  \"paymentMethod\": \"cash\"\n}",
+                            "options": { "raw": { "language": "json" } }
+                        },
+                        "url": { "raw": "{{BASE_URL}}/bookings", "host": ["{{BASE_URL}}"], "path": ["bookings"] }
+                    }
+                },
+                {
+                    "name": "Get Patient's Active Bookings",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            { "key": "Authorization", "value": "bearer {{patient_token}}", "type": "text" }
+                        ],
+                        "url": { "raw": "{{BASE_URL}}/bookings/patient", "host": ["{{BASE_URL}}"], "path": ["bookings", "patient"] }
+                    }
+                },
+                {
+                    "name": "Get Doctor's Dashboard Bookings",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            { "key": "Authorization", "value": "bearer {{doctor_token}}", "type": "text" }
+                        ],
+                        "url": { "raw": "{{BASE_URL}}/bookings/doctor", "host": ["{{BASE_URL}}"], "path": ["bookings", "doctor"] }
+                    }
+                },
+                {
+                    "name": "Reschedule Booking",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            { "key": "Authorization", "value": "bearer {{patient_token}}", "type": "text" }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"date\": \"2026-06-16T00:00:00.000Z\",\n  \"time\": \"14:30\"\n}",
+                            "options": { "raw": { "language": "json" } }
+                        },
+                        "url": { "raw": "{{BASE_URL}}/bookings/{{booking_object_id}}/reschedule", "host": ["{{BASE_URL}}"], "path": ["bookings", "{{booking_object_id}}", "reschedule"] }
+                    }
+                },
+                {
+                    "name": "Cancel Booking",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            { "key": "Authorization", "value": "bearer {{patient_token}}", "type": "text" }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"cancelledReason\": \"Unexpected Work schedule change\"\n}",
+                            "options": { "raw": { "language": "json" } }
+                        },
+                        "url": { "raw": "{{BASE_URL}}/bookings/{{booking_object_id}}/cancel", "host": ["{{BASE_URL}}"], "path": ["bookings", "{{booking_object_id}}", "cancel"] }
+                    }
+                }
+            ]
+        }
+    ]
+}

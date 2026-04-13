@@ -664,6 +664,34 @@
           }
         },
         {
+          "name": "Get Schedule For Specific Date",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "bearer {{ACCESS_TOKEN}}"
+              }
+            ],
+            "url": {
+              "raw": "{{BASE_URL}}/medications/schedule?date=2026-04-10",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "medications",
+                "schedule"
+              ],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2026-04-10"
+                }
+              ]
+            }
+          }
+        },
+        {
           "name": "Mark as Taken",
           "request": {
             "method": "PATCH",
