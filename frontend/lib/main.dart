@@ -3,8 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/core/utils/app_them.dart';
 
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() {
-  setupServiceLocator();
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const medi());
 }
 
@@ -22,6 +24,7 @@ class medi extends StatelessWidget {
           theme: lightTheme,
           //ThemeData(scaffoldBackgroundColor: Color(0xFFF5F7FB)), new login suignup pages
           debugShowCheckedModeBanner: false,
+
           routerConfig: AppRouter.router,
         );
       },

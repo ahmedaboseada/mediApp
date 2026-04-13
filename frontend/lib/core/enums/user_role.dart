@@ -1,7 +1,5 @@
-enum UserRole {
-  doctor,
-  patient,
-}
+enum UserRole { doctor, patient }
+
 extension UserRoleExtension on UserRole {
   String get routeName {
     switch (this) {
@@ -11,6 +9,7 @@ extension UserRoleExtension on UserRole {
         return 'patient';
     }
   }
+
   String get title {
     switch (this) {
       case UserRole.doctor:

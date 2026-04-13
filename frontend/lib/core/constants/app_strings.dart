@@ -9,6 +9,7 @@ class AppStrings {
 
   //sign in screen
   static const String emailHint = "Email";
+  static const String emailAddressLabel = "Email Address";
   static const String passwordHint = "Password";
   static const String confirmPasswordHint = "Confirm password";
   static const String welcomeBack = "Welcome back, you've been missed";
@@ -57,7 +58,7 @@ class AppStrings {
   // Set Password Screen
   static const String updatePassword = "Update Password";
   static const String newPasswordMessage =
-      "Your new password must be different from previously used one.";
+      "Your new password must be different \nfrom previously used one.";
   static const String createNewPassword = "Create New Password";
 
   // Sign Up Screen
@@ -74,6 +75,8 @@ class AppStrings {
       "Profile Completed Successfully";
   static const String startMedicalRemindingJourney =
       "Let's start your medical reminding journey";
+  static const String startHelpingPatientsJourney =
+      "Let’s set your working hours";
   static const String letsStart = "Let's Start";
 
   // General
@@ -81,6 +84,47 @@ class AppStrings {
       "Please describe your material case";
   static const String forgotPassword = "Forgot Password?";
   static const String rememberMe = "Remember me";
+  static const String measurements = "Measurements";
+  static const String symptoms = "Symptoms";
+  static const String normal = "Normal";
+  static const String bloodPressure = "Blood Pressure";
+  static const String heartRate = "Heart Rate";
+  static const String bloodSugar = "Blood Sugar";
+  static const String weight = "Weight";
+  static const String bodyWeightKg = "Body Weight (kg)";
+  static const String bloodPressureValue = "80 / 120";
+  static const String bloodSugarValue = "95 mg/dL";
+  static const String heartRateValue = "72 bpm";
+  static const String weightValue = "68 kg";
+  static const String userAhmed = "Ahmed";
+  static const String days7 = "7 Days";
+  static const String days30 = "30 Days";
+  static const String days90 = "90 Days";
+  static const String systolic = "Systolic";
+  static const String diastolic = "Diastolic";
+  static const String addMeasurement = "Add Measurement";
+  static const String addMeasurements = "Add Measurements";
+  static const String addBloodPressure = "Add Blood Pressure";
+  static const String addBloodSugar = "Add Blood Sugar";
+  static const String addHeartRate = "Add Heart Rate";
+  static const String addWeight = "Add Weight";
+  static const String bloodGlucose = "Blood Glucose";
+  static const String normalRange = "Normal range:";
+  static const String tips = "Tips:";
+  static const String noSymptomsTracked =
+      "No symptoms tracked yet. Start adding your first symptom update.";
+  static const String monthJan = "JAN";
+  static const String monthFeb = "FEB";
+  static const String monthMar = "MAR";
+  static const String monthApr = "APR";
+  static const String monthMay = "MAY";
+  static const String monthJun = "JUN";
+  static const String monthJul = "JUL";
+  static const String monthAug = "AUG";
+  static const String monthSep = "SEP";
+  static const String monthOct = "OCT";
+  static const String monthNov = "NOV";
+  static const String monthDec = "DEC";
   static const String orContinueWith = "Or continue with";
   static const String dontHaveAccount = "Don't have an account?";
   static const String alreadyHaveAccount = "Already have an account?";
@@ -119,4 +163,115 @@ class AppStrings {
   static const String invitationSent = "Invitation Sent!";
   static const String invitationSentMessage =
       "We’ve sent an invite to to email@example.com\n Once they accept, you can manage their\n medications.";
+  // Complete Profile Screen
+  static const String completeYourProfile = "Complete Your Profile";
+  static const String fillPersonalInformation =
+      "Please Fill your personal information below";
+  static const String completeProfileButton = "Complete Profile";
+
+  // Doctor Complete Profile Screen
+  static const String specialization = "Specialization*";
+  static const String specializationHint = "Cardiology";
+  static const String clinicHospitalName = "Clinic / Hospital Name";
+  static const String clinicHospitalHint = "Info";
+  static const String medicalLicenseNumber = "Medical License Number";
+  static const String medicalLicenseHint = "MD123456";
+  static const String gender = "Gender*";
+  static const String genderHint = "Select";
+  static const String male = "Male";
+  static const String female = "Female";
+  static const String other = "Other";
+  static const String phoneNumber = "Phone Number*";
+  static const String phoneNumberHint = "Enter Phone Number";
+  static const String next = "Next";
+
+  // Doctor Appointment Availability
+  static const String appointmentAvailabilityTitle =
+      "Tell us when you're available\n to accept appointments.";
+  static const String appointmentAvailabilitySubtitle =
+      "Don't worry, you can edit it later";
+  static const String workingDaysQuestion = "Which days do you usually work?";
+  static const String consultationLengthLabel =
+      "How long is each consultation?";
+  static const String selectTime = "Select Time";
+  static const String appointmentScheduleNote =
+      "This helps us schedule your appointments accurately.";
+  static const List<String> consultationDurations = [
+    "15 min",
+    "30 min",
+    "45 min",
+    "60 min",
+  ];
+  static const String appointmentTypeTitle =
+      "How you'd like to consult\n your patients";
+
+  // Button Text
+  static const String continueText = "Continue";
+  static const String saveChanges = "Save Changes";
+  static const String cancel = "Cancel";
+  static const String done = "Done";
+  static const String save = "Save";
+
+  // Validation Messages
+  static const String fieldRequired = "This field is required";
+  static const String pleaseSelectGender = "Please select a gender";
+  static const String pleaseEnterPhoneNumber = "Please enter phone number";
+
+  // Allow Location Screen
+  static const String clinicLocationTitle =
+      "What is Your Clinic or Hospital\nLocation?";
+  static const String clinicLocationSubtitle =
+      "We need to know your current location\nto provide it to your patients";
+  static const String allowLocationAccess = "Allow Location Access";
+  static const String enterLocationManually = "Enter Location Manually";
+
+  // Payout & Withdrawal
+  static const String currentBalance = "Current Balance";
+  static const String availableForWithdrawal = "Available for withdrawal";
+
+  // Notifications
+  static const String stayUpdated = "Stay Updated";
+  static const String turnOnNotifications =
+      "Turn on notifications so you never miss\n important updates and patient requests.";
+  static const String allowNotifications = "Allow Notifications";
+  static const String noThanks = "No thanks, I’ll take the risk";
+  static const String youAreAllSet =
+      "You’re all set. Let’s follow up your patients";
+  static const String okay = "Okay";
+  static const String pickYourReminderTone = "Pick your reminder tone";
+  static const String forWhatMattersMostChooseASoundYouWontIgnore =
+      "For what matters most, choose a sound \nyou won’t ignore.";
+  static const String youCanAlwaysChangeThisLater =
+      "You can always change this later in Settings.";
+  static const String letsTakeSomeInfoAboutYourHealth =
+      "Let’s take some info about\n your health";
+  static const String
+  thisHelpsUsGiveYouSaferMedicationRemindersAndAvoidPossibleRisks =
+      "This helps us give you safer medication reminders\n and avoid possible risks.";
+  static const String imReady = "I’m ready!";
+
+  static const String allSet = 'You’re all set';
+  static const String letsAddYourFirstMedication =
+      " Let’s add your first medication.";
+  static const String addMedication = "Add Medication";
+
+  // Medicine Screen
+  static const String medicine = 'Medicine';
+  static const String searchMedications = 'Search Medications';
+  static const String all = 'All';
+  static const String active = 'Active';
+  static const String chronic = 'Chronic';
+  static const String exportHealthReport = 'Export Health Report';
+  static const String medicationSearch = 'Medication Search';
+  static const String generateQr = 'Generate QR';
+  static const String chatBot = 'Chat bot';
+  static const String critical = 'Critical';
+  static const String stock = 'Stock';
+  static const String expiryPrefix = 'EXP:';
+  static const String low = 'Low';
+  static const String medium = 'Medium';
+  static const String good = 'Good';
+
+  // Health Measurements Screen
+  static const String healthMeasurements = 'Health Measurements';
 }

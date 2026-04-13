@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:medi/core/core.dart';
 
 class PrimaryButton extends StatelessWidget {
-  const PrimaryButton( {
+  const PrimaryButton({
     super.key,
     this.backgroundColor = AppColors.primary,
     this.textColor = Colors.white,
@@ -24,10 +24,9 @@ class PrimaryButton extends StatelessWidget {
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor,
-        disabledBackgroundColor: AppColors.disabledColor,
-
+        side: BorderSide(color: AppColors.primary, width: 1.w),
         shape: RoundedRectangleBorder(borderRadius: borderRadius),
-        padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 40.w),
+        padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 20.w),
         elevation: 0,
       ),
       child:

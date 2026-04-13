@@ -5,7 +5,9 @@ class AppSizes {
   static double get w2 => 2.w;
   static double get w4 => 4.w;
   static double get w8 => 8.w;
+  static double get w10 => 10.w;
   static double get w12 => 12.w;
+  static double get w14 => 14.w;
   static double get w16 => 16.w;
   static double get w18 => 18.w;
   static double get w20 => 20.w;
@@ -22,6 +24,7 @@ class AppSizes {
   static double get w80 => 80.w;
   static double get w120 => 120.w;
   static double get w160 => 160.w;
+  static double get w168 => 168.w;
   static double get w200 => 200.w;
   static double get w250 => 250.w;
   static double get w260 => 260.w;
@@ -32,6 +35,7 @@ class AppSizes {
   static double get h8 => 8.h;
   static double get h10 => 10.h;
   static double get h12 => 12.h;
+  static double get h14 => 14.h;
   static double get h16 => 16.h;
   static double get h18 => 18.h;
   static double get h20 => 20.h;
@@ -43,14 +47,22 @@ class AppSizes {
   static double get h40 => 40.h;
   static double get h48 => 48.h;
   static double get h70 => 70.h;
+  static double get h80 => 80.h;
   static double get h86 => 86.h;
   static double get h120 => 120.h;
+  static double get h134 => 134.h;
+  static double get h140 => 140.h;
+  static double get h150 => 150.h;
   static double get h160 => 160.h;
+  static double get h170 => 170.h;
+  static double get h180 => 180.h;
+  static double get h188 => 188.h;
   static double get h196 => 196.h;
   static double get h200 => 200.h;
   static double get h250 => 250.h;
   static double get h270 => 270.h;
   static double get h300 => 300.h;
+  static double get h370 => 370.h;
   static double get h450 => 450.h;
 
   static double get h50 => 50.h;
@@ -66,7 +78,9 @@ class AppSizes {
   static double get r16 => 16.r;
   static double get r20 => 20.r;
   static double get r24 => 24.r;
+  static double get r28 => 28.r;
   static double get r32 => 32.r;
+  static double get r40 => 40.r;
   static double get r80 => 80.r;
   static double get r200 => 200.r;
 
