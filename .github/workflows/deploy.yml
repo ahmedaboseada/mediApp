@@ -18,5 +18,5 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd ~/mediApp
-            chmod +x deploy.sh
-            ./deploy.sh
+            chmod +x /var/scripts/deploy.sh
+            /var/scripts/deploy.sh
