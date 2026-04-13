@@ -59,7 +59,6 @@ export const bootstrap = async () => {
             service: 'MediProject',
             env: process.env.NODE_ENV,
             db,
-            message: "hello world2!",
             timestamp: new Date().toISOString(),
         });
     });
