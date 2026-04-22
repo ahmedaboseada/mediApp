@@ -47,3 +47,11 @@ export const rescheduleBooking = async (req, res, next) => {
         next(err);
     }
 };
+
+export const getBookingDetails = async (req, res, next) => {
+    try {
+        await bookingService.getBookingDetails(req, res);
+    } catch (err) {
+        next(err);
+    }
+};

@@ -274,12 +274,15 @@ export const markAsTaken = async (req, res, next) => {
     let dateLogIdx = medicine.dates.findIndex(d => new Date(d.date).getTime() === targetDate.getTime());
 
     let isStatusChangedToTaken = false;
+    let isStatusChangedToUntaken = false;
 
     if (dateLogIdx > -1) {
         let timeLogIdx = medicine.dates[dateLogIdx].times.findIndex(t => t.time === time);
         if (timeLogIdx > -1) {
             if (!medicine.dates[dateLogIdx].times[timeLogIdx].taken && taken) {
                 isStatusChangedToTaken = true;
+            } else if (medicine.dates[dateLogIdx].times[timeLogIdx].taken && !taken) {
+                isStatusChangedToUntaken = true;
             }
             medicine.dates[dateLogIdx].times[timeLogIdx].taken = taken;
         } else {
@@ -300,6 +303,15 @@ export const markAsTaken = async (req, res, next) => {
     if (isStatusChangedToTaken && medicine.stock > 0) {
         medicine.stock -= 1;
 
+        if (medicine.stock <= medicine.leftThreshold) {
+            restockAlert = true;
+        }
+    } else if (isStatusChangedToUntaken) {
+        // Increase stock back if changed to untaken
+        if (medicine.stock !== undefined && medicine.stock !== null) {
+            medicine.stock += 1;
+        }
+        
         if (medicine.stock <= medicine.leftThreshold) {
             restockAlert = true;
         }

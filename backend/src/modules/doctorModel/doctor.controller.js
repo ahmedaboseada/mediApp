@@ -25,6 +25,10 @@ import { cloudinaryUploadAvatarAndCover } from '../../middlewares/cloudinary.js'
 const doctorRouter = Router();
 
 doctorRouter.use(verifyToken);
+
+// Directory is accessible to any verified user (patients looking for doctors)
+doctorRouter.get('/directory', DS.getDoctorDirectory);
+
 doctorRouter.use(restrictTo(['doctor']));
 
 // screens: doctor onboarding
@@ -41,7 +45,9 @@ doctorRouter.patch('/complete', ...cloudinaryUploadAvatarAndCover({ folder: 'doc
 doctorRouter.patch('/schedule', validation(DVS.updateScheduleSchema), DS.updateSchedule);
 
 // screens: patient connections & dashboard
+doctorRouter.post('/patients/connect-patient', validation(DVS.patientIdBodySchema), DS.connectPatient);
 doctorRouter.patch('/patients/accept/:patientId', validation(DVS.patientIdSchema), DS.acceptPatient);
+doctorRouter.patch('/patients/reject/:patientId', validation(DVS.patientIdSchema), DS.rejectPatient);
 doctorRouter.get('/patients', DS.listConnectedPatients);
 
 export default doctorRouter;

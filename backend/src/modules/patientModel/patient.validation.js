@@ -6,7 +6,7 @@ export const completeBasicSchema = {
         yearOfBirth: joi.number().integer().min(1900).max(new Date().getFullYear()).required(),
         gender: joi.string().valid('male', 'female').required(),
         profilePicture: joi.string().uri().allow('', null),
-    }),
+    }).unknown(true),
 };
 
 export const completeHealth1Schema = {
@@ -39,7 +39,7 @@ export const completeProfileSchema = {
         allergies: joi.array().items(joi.string()).default([]),
         reactionToMedication: joi.boolean().required(),
         allergyAlerts: joi.boolean().required(),
-    }),
+    }).unknown(true),
 };
 
 export const caregiverOptionSchema = {
@@ -63,6 +63,12 @@ export const requestIdSchema = {
 
 export const connectDoctorSchema = {
     body: joi.object({
+        doctorId: joi.string().hex().length(24).required(),
+    }),
+};
+
+export const doctorIdSchema = {
+    params: joi.object({
         doctorId: joi.string().hex().length(24).required(),
     }),
 };

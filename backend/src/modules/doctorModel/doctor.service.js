@@ -83,6 +83,17 @@ const publicUser = (u) => ({
     twoFA: u.twoFA,
     profilePicture: u.profilePicture,
     confirmed: u.confirmed,
+    pendingEmail: u.pendingEmail,
+    pendingEmailRequestedAt: u.pendingEmailRequestedAt,
+    emailChangeTokenId: u.emailChangeTokenId,
+    phone: u.phone,
+    yearOfBirth: u.yearOfBirth,
+    chronicConditions: u.chronicConditions,
+    longTermMedication: u.longTermMedication,
+    activeIngredients: u.activeIngredients,
+    allergies: u.allergies,
+    reactionToMedication: u.reactionToMedication,
+    allergyAlerts: u.allergyAlerts,
 });
 
 const assertDoctor = async (userId) => {
@@ -241,13 +252,54 @@ export const updateSchedule = async (req, res) => {
     // Normalize UI choice "Clinic Visit" into backend internal 'in-person'
     const patch = { ...req.body };
     if (patch.appointmentTypes) {
-        patch.appointmentTypes = patch.appointmentTypes.map(type => 
+        patch.appointmentTypes = patch.appointmentTypes.map(type =>
             type === 'Clinic Visit' ? 'in-person' : type
         );
     }
 
     const updatedDoc = await doctorModel.findByIdAndUpdate(doc._id, patch, { new: true }).lean();
     return res.status(200).json({ message: 'Schedule & Availability saved', doctor: updatedDoc });
+};
+
+export const getDoctorDirectory = async (req, res) => {
+    // patient accesses this to browse all doctors
+    const doctors = await doctorModel.find({ status: 'approved' })
+        .populate({ path: 'userId', select: 'firstName lastName profilePicture phone gender' })
+        .lean();
+
+    return res.status(200).json({ doctors });
+};
+
+export const connectPatient = async (req, res) => {
+    const doctorUserId = req.user.id;
+    const { patientId } = req.body;
+
+    const { err, doc } = await assertDoctor(doctorUserId);
+    if (err) return res.status(err.status).json({ message: err.message });
+
+    const patient = await patientModel.findById(patientId);
+    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+    const existingDocConn = doc.connectedPatients?.find(c => String(c.patientId) === patientId);
+    if (existingDocConn) return res.status(400).json({ message: `Connection already ${existingDocConn.status}` });
+
+    doc.connectedPatients.push({ patientId: patient._id, status: 'pending' });
+    await doc.save();
+
+    const existingPatientConn = patient.connectedDoctors?.find(c => String(c.doctorId) === String(doc._id));
+    if (!existingPatientConn) {
+        patient.connectedDoctors.push({ doctorId: doc._id, status: 'pending' });
+        await patient.save();
+    }
+
+    await notificationModel.create({
+        type: 'patientAdditionRequest',
+        header: 'New Doctor Request',
+        message: 'A doctor has requested to connect with you.',
+        userId: patient.userId,
+    });
+
+    return res.status(200).json({ message: 'Access request sent to patient' });
 };
 
 export const acceptPatient = async (req, res) => {
@@ -268,9 +320,9 @@ export const acceptPatient = async (req, res) => {
     if (docConn.status === 'approved') {
         return res.status(400).json({ message: 'Patient is already approved' });
     }
-    
+
     // Using doc object from db not lean: assertDoctor returned `doc` which is a mongoose doc
-    doc.connectedPatients = doc.connectedPatients.map(c => 
+    doc.connectedPatients = doc.connectedPatients.map(c =>
         String(c.patientId) === String(patient._id) ? { ...c, status: 'approved' } : c
     );
     await doc.save();
@@ -294,6 +346,29 @@ export const acceptPatient = async (req, res) => {
     return res.status(200).json({ message: 'Patient approved successfully!' });
 };
 
+export const rejectPatient = async (req, res) => {
+    const userId = req.user.id;
+    const { patientId } = req.params;
+
+    const { err, doc } = await assertDoctor(userId);
+    if (err) return res.status(err.status).json({ message: err.message });
+
+    const patient = await patientModel.findById(patientId);
+    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+    // remove from doctor's pending list completely
+    doc.connectedPatients = doc.connectedPatients.filter(c => String(c.patientId) !== String(patient._id));
+    await doc.save();
+
+    // remove from patient's pending list
+    if (patient.connectedDoctors) {
+        patient.connectedDoctors = patient.connectedDoctors.filter(c => String(c.doctorId) !== String(doc._id));
+        await patient.save();
+    }
+
+    return res.status(200).json({ message: 'Patient request rejected successfully!' });
+};
+
 export const listConnectedPatients = async (req, res) => {
     const userId = req.user.id;
     const { err, doc } = await assertDoctor(userId);
@@ -315,13 +390,13 @@ export const listConnectedPatients = async (req, res) => {
     // Compute UI health Badge mapping
     const enrichedPatients = patients.map(p => {
         let healthBadge = 'Normal Status';
-        
+
         // Priority 1: Check for critical mode medications
         const hasCriticalMeds = p.medications?.some(m => m.status === 'critical');
         if (hasCriticalMeds) {
             healthBadge = 'Critical';
         } else if (p.healthMeasurements?.sys || p.healthMeasurements?.glucose) {
-             // simplified pseudo-abnormal check for demonstration
+            // simplified pseudo-abnormal check for demonstration
             healthBadge = 'Abnormal';
         }
 

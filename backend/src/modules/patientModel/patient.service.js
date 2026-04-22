@@ -179,6 +179,7 @@ import patientModel from '../../models/patient.model.js';
 import caregiverRequestModel from '../../models/caregiver-request.model.js';
 import notificationModel from '../../models/notification.model.js';
 import medicineModel from '../../models/medicine.model.js';
+import doctorModel from '../../models/doctor.model.js';
 import { analyzeMedications } from '../../utils/ai.util.js';
 import * as ET from '../../utils/encryption/index.js';
 
@@ -194,6 +195,17 @@ const publicUser = (u) => ({
     twoFA: u.twoFA,
     profilePicture: u.profilePicture,
     confirmed: u.confirmed,
+    pendingEmail: u.pendingEmail,
+    pendingEmailRequestedAt: u.pendingEmailRequestedAt,
+    emailChangeTokenId: u.emailChangeTokenId,
+    phone: u.phone,
+    yearOfBirth: u.yearOfBirth,
+    chronicConditions: u.chronicConditions,
+    longTermMedication: u.longTermMedication,
+    activeIngredients: u.activeIngredients,
+    allergies: u.allergies,
+    reactionToMedication: u.reactionToMedication,
+    allergyAlerts: u.allergyAlerts,
 });
 
 const calcDOBAndAge = (year) => {
@@ -248,7 +260,7 @@ export const completeHealth1 = async (req, res) => {
     const { chronicConditions, longTermMedication, activeIngredients } = req.body;
 
     patient.chronicConditions = chronicConditions;
-    
+
     const resolvedMedicationIds = [];
     if (longTermMedication && longTermMedication.length > 0) {
         for (const medName of longTermMedication) {
@@ -477,6 +489,83 @@ export const listConnectedDoctors = async (req, res) => {
     return res.status(200).json({ doctors: approved });
 };
 
+export const listDoctorRequests = async (req, res) => {
+    const patientUserId = req.user.id;
+    const patient = await patientModel.findOne({ userId: patientUserId })
+        .populate({
+            path: 'connectedDoctors.doctorId',
+            populate: { path: 'userId', select: 'firstName lastName profilePicture phone' }
+        }).lean();
+
+    if (!patient) return res.status(404).json({ message: 'Patient profile not found' });
+
+    // Only return those pending
+    const pendingRequests = patient.connectedDoctors
+        .filter(c => c.status === 'pending')
+        .map(c => c.doctorId);
+
+    return res.status(200).json({ requests: pendingRequests });
+};
+
+export const acceptDoctor = async (req, res) => {
+    const patientUserId = req.user.id;
+    const { doctorId } = req.params;
+
+    const patient = await patientModel.findOne({ userId: patientUserId });
+    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+    const doc = await doctorModel.findById(doctorId);
+    if (!doc) return res.status(404).json({ message: 'Doctor not found' });
+
+    // update patient's side
+    let patConn = patient.connectedDoctors?.find(c => String(c.doctorId) === String(doc._id));
+    if (!patConn) return res.status(400).json({ message: 'No connection request found' });
+    if (patConn.status === 'approved') return res.status(400).json({ message: 'Already approved' });
+
+    patient.connectedDoctors = patient.connectedDoctors.map(c =>
+        String(c.doctorId) === String(doc._id) ? { ...c, status: 'approved' } : c
+    );
+    await patient.save();
+
+    // update doctor's side
+    let docConn = doc.connectedPatients?.find(c => String(c.patientId) === String(patient._id));
+    if (docConn) {
+        doc.connectedPatients = doc.connectedPatients.map(c =>
+            String(c.patientId) === String(patient._id) ? { ...c, status: 'approved' } : c
+        );
+        await doc.save();
+    }
+
+    await notificationModel.create({
+        type: 'patientRequestAccepted',
+        header: 'Patient Request Approved!',
+        message: 'A patient has approved your access request.',
+        userId: doc.userId,
+    });
+
+    return res.status(200).json({ message: 'Doctor approved successfully!' });
+};
+
+export const rejectDoctor = async (req, res) => {
+    const patientUserId = req.user.id;
+    const { doctorId } = req.params;
+
+    const patient = await patientModel.findOne({ userId: patientUserId });
+    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+    const doc = await doctorModel.findById(doctorId);
+    // If doc doesn't exist, we can still remove the request locally
+    if (doc) {
+        doc.connectedPatients = doc.connectedPatients?.filter(c => String(c.patientId) !== String(patient._id));
+        await doc.save();
+    }
+
+    patient.connectedDoctors = patient.connectedDoctors?.filter(c => String(c.doctorId) !== String(doctorId));
+    await patient.save();
+
+    return res.status(200).json({ message: 'Doctor request rejected successfully!' });
+};
+
 export const completeProfile = async (req, res) => {
     const userId = req.user.id;
 
@@ -521,7 +610,7 @@ export const completeProfile = async (req, res) => {
     ];
     for (const f of fields) {
         if (req.body[f] !== undefined) {
-             patch[f] = parseArray(req.body[f]);
+            patch[f] = parseArray(req.body[f]);
         }
     }
 
@@ -529,7 +618,7 @@ export const completeProfile = async (req, res) => {
     if (req.body.emergencyContact !== undefined) {
         let ec = req.body.emergencyContact;
         if (typeof ec === 'string') {
-            try { ec = JSON.parse(ec); } catch (e) {}
+            try { ec = JSON.parse(ec); } catch (e) { }
         }
         patch.emergencyContact = ec;
     }

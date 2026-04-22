@@ -529,6 +529,17 @@ const publicUser = (u) => ({
     twoFA: u.twoFA,
     profilePicture: u.profilePicture,
     confirmed: u.confirmed,
+    pendingEmail: u.pendingEmail,
+    pendingEmailRequestedAt: u.pendingEmailRequestedAt,
+    emailChangeTokenId: u.emailChangeTokenId,
+    phone: u.phone,
+    yearOfBirth: u.yearOfBirth,
+    chronicConditions: u.chronicConditions,
+    longTermMedication: u.longTermMedication,
+    activeIngredients: u.activeIngredients,
+    allergies: u.allergies,
+    reactionToMedication: u.reactionToMedication,
+    allergyAlerts: u.allergyAlerts,
 });
 
 const attachTypeDoc = async (user) => {

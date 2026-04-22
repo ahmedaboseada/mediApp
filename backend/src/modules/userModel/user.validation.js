@@ -9,7 +9,6 @@ export const signupSchema = {
         lastName: joi.string().min(2).max(60).required(),
         username: joi.string(),
         email: joi.string().email().required(),
-
         password: joi.string()
             .required()
             .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/)

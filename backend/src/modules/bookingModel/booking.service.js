@@ -162,15 +162,55 @@ export const getMyBookingsAsPatient = async (req, res) => {
 
 export const getMyBookingsAsDoctor = async (req, res) => {
     const doctorUserId = req.user.id;
+    const { date } = req.query;
+
     const doc = await doctorModel.findOne({ userId: doctorUserId });
     if (!doc) return res.status(404).json({ message: 'Doctor not found' });
 
-    const bookings = await bookingModel.find({ doctorId: doc._id })
+    let filter = { doctorId: doc._id };
+    
+    if (date) {
+        const reqDate = new Date(date);
+        if (!isNaN(reqDate)) {
+            const startOfDay = new Date(reqDate); startOfDay.setUTCHours(0, 0, 0, 0);
+            const endOfDay = new Date(startOfDay); endOfDay.setUTCHours(23, 59, 59, 999);
+            filter['date.date'] = { $gte: startOfDay, $lte: endOfDay };
+        }
+    }
+
+    const bookings = await bookingModel.find(filter)
         .populate('patientId')
         .sort({ 'date.date': -1, 'date.time': -1 })
         .lean();
 
     return res.status(200).json({ bookings });
+};
+
+export const getBookingDetails = async (req, res) => {
+    const userId = req.user.id;
+    const { id } = req.params;
+
+    const booking = await bookingModel.findById(id)
+        .populate('patientId')
+        .populate('doctorId')
+        .lean();
+
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+
+    // Ensure the requester is either the bound patient or the bound doctor
+    let authorized = false;
+    
+    // Check if user is the patient
+    const patient = await patientModel.findOne({ userId });
+    if (patient && String(booking.patientId._id || booking.patientId) === String(patient._id)) authorized = true;
+
+    // Check if user is the doctor
+    const doc = await doctorModel.findOne({ userId });
+    if (doc && String(booking.doctorId._id || booking.doctorId) === String(doc._id)) authorized = true;
+
+    if (!authorized) return res.status(403).json({ message: 'Access denied' });
+
+    return res.status(200).json({ booking });
 };
 
 export const cancelBooking = async (req, res) => {

@@ -9,7 +9,7 @@ export const completeStep1Schema = {
         phone: joi.string().required(),
         gender: joi.string().valid('male', 'female').required(),
         profilePicture: joi.string().uri().allow('', null),
-    }),
+    }).unknown(true),
 };
 
 export const completeLocationSchema = {
@@ -74,7 +74,7 @@ export const completeProfileSchema = {
         maxDailyPatients: joi.number().integer().min(1).max(500).required(),
 
         licenseImage: joi.string().uri().allow('', null),
-    }),
+    }).unknown(true),
 };
 
 export const updateScheduleSchema = {
@@ -89,6 +89,12 @@ export const updateScheduleSchema = {
 
 export const patientIdSchema = {
     params: joi.object({
+        patientId: joi.string().hex().length(24).required(),
+    }),
+};
+
+export const patientIdBodySchema = {
+    body: joi.object({
         patientId: joi.string().hex().length(24).required(),
     }),
 };

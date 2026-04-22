@@ -61,10 +61,11 @@ patientRouter.post('/caregiver/request', validation(PVS.caregiverRequestSchema),
 // If caregiver can be any type, remove restrictTo(['patient']) and enforce inside service.
 patientRouter.get('/caregiver/requests', PS.listCaregiverRequests);
 patientRouter.patch('/caregiver/requests/:requestId/accept', validation(PVS.requestIdSchema), PS.acceptCaregiverRequest);
-patientRouter.patch('/caregiver/requests/:requestId/reject', validation(PVS.requestIdSchema), PS.rejectCaregiverRequest);
-
 // doctor connections
 patientRouter.post('/connect-doctor', validation(PVS.connectDoctorSchema), PS.connectDoctor);
 patientRouter.get('/connected-doctors', PS.listConnectedDoctors);
+patientRouter.get('/doctor-requests', PS.listDoctorRequests);
+patientRouter.patch('/connected-doctors/accept/:doctorId', validation(PVS.doctorIdSchema), PS.acceptDoctor);
+patientRouter.patch('/connected-doctors/reject/:doctorId', validation(PVS.doctorIdSchema), PS.rejectDoctor);
 
 export default patientRouter;
