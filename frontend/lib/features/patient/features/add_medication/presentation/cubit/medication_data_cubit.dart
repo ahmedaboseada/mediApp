@@ -50,6 +50,8 @@ class MedicationDataCubit extends Cubit<MedicationDataState> {
     required String startDate,
     required String endDate,
     required List<String> reminders,
+    List<Map<String, dynamic>> weeklySchedule = const <Map<String, dynamic>>[],
+    List<Map<String, dynamic>> specificSchedule = const <Map<String, dynamic>>[],
   }) {
     emit(
       MedicationDataUpdated(
@@ -58,6 +60,8 @@ class MedicationDataCubit extends Cubit<MedicationDataState> {
           startDate: startDate,
           endDate: endDate,
           reminders: reminders,
+          weeklySchedule: weeklySchedule,
+          specificSchedule: specificSchedule,
         ),
         updateType: 'schedule',
       ),
@@ -113,6 +117,10 @@ class MedicationDataCubit extends Cubit<MedicationDataState> {
         return data.copyWith(isCriticalMode: value as bool);
       case 'reminders':
         return data.copyWith(reminders: value as List<String>);
+      case 'weeklySchedule':
+        return data.copyWith(weeklySchedule: value as List<Map<String, dynamic>>);
+      case 'specificSchedule':
+        return data.copyWith(specificSchedule: value as List<Map<String, dynamic>>);
       default:
         return data;
     }

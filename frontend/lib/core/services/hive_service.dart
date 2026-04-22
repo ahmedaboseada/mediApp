@@ -25,6 +25,7 @@ class HiveService {
   static const String _doctorDataKey = 'doctorData';
   static const String _userRoleKey = 'userRole';
   static const String _onboardingCompletedKey = 'onboardingCompleted';
+  static const String _completeProfileRequiredKey = 'completeProfileRequired';
   static const String _userCountryKey = 'userCountry';
   static Future<void>? _initFuture;
 
@@ -317,6 +318,29 @@ class HiveService {
     return Hive.box(
           _settingsBox,
         ).get(_onboardingCompletedKey, defaultValue: false)
+        as bool;
+  }
+
+  // ========== COMPLETE PROFILE FLOW MANAGEMENT ==========
+
+  /// Mark complete profile as required.
+  static Future<void> markCompleteProfileAsRequired() async {
+    final settings = await _openSettingsBox();
+    await settings.put(_completeProfileRequiredKey, true);
+  }
+
+  /// Mark complete profile as completed.
+  static Future<void> markCompleteProfileAsCompleted() async {
+    final settings = await _openSettingsBox();
+    await settings.put(_completeProfileRequiredKey, false);
+  }
+
+  /// Check if complete profile flow is required.
+  static bool isCompleteProfileRequired() {
+    if (!Hive.isBoxOpen(_settingsBox)) return false;
+    return Hive.box(
+          _settingsBox,
+        ).get(_completeProfileRequiredKey, defaultValue: false)
         as bool;
   }
 

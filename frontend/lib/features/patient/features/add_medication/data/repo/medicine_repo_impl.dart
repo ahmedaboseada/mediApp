@@ -122,10 +122,11 @@ class MedicineRepoImpl implements MedicineRepo {
     final apiFrequency = _toApiFrequency(medication.frequency);
     final reminders = _normalizeTimes(medication.reminders);
 
-    final weeklyPayload = apiFrequency == 'weekly' && reminders.isNotEmpty
-        ? <Map<String, dynamic>>[
-            {'day': _resolveWeeklyDay(medication.schedule), 'times': reminders},
-          ]
+    final specificPayload = apiFrequency == 'specific'
+        ? _resolveSpecificPayload(medication)
+        : null;
+    final weeklyPayload = apiFrequency == 'weekly'
+        ? _resolveWeeklyPayload(medication)
         : null;
 
     return addMedicine(
@@ -133,6 +134,7 @@ class MedicineRepoImpl implements MedicineRepo {
       type: medication.type,
       frequency: apiFrequency,
       daily: apiFrequency == 'daily' ? reminders : null,
+      specific: specificPayload,
       weekly: weeklyPayload,
       dosage: medication.dosage.trim().isEmpty ? null : medication.dosage,
       stock: medication.stock == 0 ? null : medication.stock,
@@ -149,10 +151,11 @@ class MedicineRepoImpl implements MedicineRepo {
     final apiFrequency = _toApiFrequency(medication.frequency);
     final reminders = _normalizeTimes(medication.reminders);
 
-    final weeklyPayload = apiFrequency == 'weekly' && reminders.isNotEmpty
-        ? <Map<String, dynamic>>[
-            {'day': _resolveWeeklyDay(medication.schedule), 'times': reminders},
-          ]
+    final specificPayload = apiFrequency == 'specific'
+        ? _resolveSpecificPayload(medication)
+        : null;
+    final weeklyPayload = apiFrequency == 'weekly'
+        ? _resolveWeeklyPayload(medication)
         : null;
 
     return updateMedicine(
@@ -161,6 +164,7 @@ class MedicineRepoImpl implements MedicineRepo {
       type: medication.type,
       frequency: apiFrequency,
       daily: apiFrequency == 'daily' ? reminders : null,
+      specific: specificPayload,
       weekly: weeklyPayload,
       dosage: medication.dosage.trim().isEmpty ? null : medication.dosage,
       stock: medication.stock == 0 ? null : medication.stock,
@@ -390,30 +394,32 @@ class MedicineRepoImpl implements MedicineRepo {
     final normalizedFrequency = frequency.trim().toLowerCase();
     switch (normalizedFrequency) {
       case 'daily':
-        if (daily != null && daily.isNotEmpty) {
-          data['daily'] = _normalizeTimes(daily);
-        }
+        data['daily'] = _normalizeTimes(daily ?? const <String>[]);
+        data['weekly'] = <Map<String, dynamic>>[];
+        data['specific'] = <Map<String, dynamic>>[];
         break;
       case 'specific':
-        if (specific != null && specific.isNotEmpty) {
-          data['specific'] = _normalizeSpecificSchedule(specific);
-        }
+        data['daily'] = <String>[];
+        data['weekly'] = <Map<String, dynamic>>[];
+        data['specific'] = _normalizeSpecificSchedule(
+          specific ?? const <Map<String, dynamic>>[],
+        );
         break;
       case 'weekly':
-        if (weekly != null && weekly.isNotEmpty) {
-          data['weekly'] = _normalizeWeeklySchedule(weekly);
-        }
+        data['daily'] = <String>[];
+        data['specific'] = <Map<String, dynamic>>[];
+        data['weekly'] = _normalizeWeeklySchedule(
+          weekly ?? const <Map<String, dynamic>>[],
+        );
         break;
       default:
-        if (daily != null && daily.isNotEmpty) {
-          data['daily'] = _normalizeTimes(daily);
-        }
-        if (specific != null && specific.isNotEmpty) {
-          data['specific'] = _normalizeSpecificSchedule(specific);
-        }
-        if (weekly != null && weekly.isNotEmpty) {
-          data['weekly'] = _normalizeWeeklySchedule(weekly);
-        }
+        data['daily'] = _normalizeTimes(daily ?? const <String>[]);
+        data['specific'] = _normalizeSpecificSchedule(
+          specific ?? const <Map<String, dynamic>>[],
+        );
+        data['weekly'] = _normalizeWeeklySchedule(
+          weekly ?? const <Map<String, dynamic>>[],
+        );
     }
 
     if (dosage != null && dosage.trim().isNotEmpty) {
@@ -483,6 +489,36 @@ class MedicineRepoImpl implements MedicineRepo {
     return allowedDays.contains(normalized) ? normalized : 'monday';
   }
 
+  List<Map<String, dynamic>>? _resolveWeeklyPayload(Medication medication) {
+    if (medication.weeklySchedule.isNotEmpty) {
+      return _normalizeWeeklySchedule(medication.weeklySchedule);
+    }
+    final reminders = _normalizeTimes(medication.reminders);
+    if (reminders.isEmpty) {
+      return null;
+    }
+
+    return <Map<String, dynamic>>[
+      {'day': _resolveWeeklyDay(medication.schedule), 'times': reminders},
+    ];
+  }
+
+  List<Map<String, dynamic>>? _resolveSpecificPayload(Medication medication) {
+    if (medication.specificSchedule.isNotEmpty) {
+      return _normalizeSpecificSchedule(medication.specificSchedule);
+    }
+
+    final reminders = _normalizeTimes(medication.reminders);
+    final specificDate = _normalizeSpecificDate(medication.startDate);
+    if (specificDate.isEmpty || reminders.isEmpty) {
+      return null;
+    }
+
+    return <Map<String, dynamic>>[
+      {'day': specificDate, 'times': reminders},
+    ];
+  }
+
   List<String> _normalizeTimes(List<String> times) {
     return times.map(_normalizeApiTime).where((t) => t.isNotEmpty).toList();
   }
@@ -504,13 +540,47 @@ class MedicineRepoImpl implements MedicineRepo {
     List<Map<String, dynamic>> specific,
   ) {
     return specific.map((item) {
+      final rawDay = item['day']?.toString() ?? item['date']?.toString() ?? '';
       final rawTimes = item['times'];
       final parsedTimes = rawTimes is List
           ? rawTimes.whereType<String>().toList()
           : const <String>[];
 
-      return {...item, 'times': _normalizeTimes(parsedTimes)};
+      return {
+        ...item,
+        'day': _normalizeSpecificDate(rawDay),
+        'times': _normalizeTimes(parsedTimes),
+      };
     }).toList();
+  }
+
+  String _normalizeSpecificDate(String raw) {
+    final value = raw.trim();
+    if (value.isEmpty) {
+      return '';
+    }
+
+    final iso = DateTime.tryParse(value);
+    if (iso != null) {
+      final month = iso.month.toString().padLeft(2, '0');
+      final day = iso.day.toString().padLeft(2, '0');
+      return '${iso.year}-$month-$day';
+    }
+
+    final mmddyyyy = RegExp(r'^(\d{1,2})/(\d{1,2})/(\d{4})$');
+    final match = mmddyyyy.firstMatch(value);
+    if (match == null) {
+      return value;
+    }
+
+    final month = int.tryParse(match.group(1)!);
+    final day = int.tryParse(match.group(2)!);
+    final year = int.tryParse(match.group(3)!);
+    if (month == null || day == null || year == null) {
+      return value;
+    }
+
+    return '$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
   }
 
   String _normalizeApiTime(String raw) {

@@ -18,6 +18,7 @@ class MedicationDataInitial extends MedicationDataState {
           startDate: '',
           endDate: '',
           reminders: [],
+          specificSchedule: [],
           stock: 0,
           expiryDate: '',
           isCriticalMode: false,

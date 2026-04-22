@@ -29,6 +29,7 @@ class ApiEndpoints {
   static const String doctorSpecializations = '/doctor/specializations';
   static const String doctorVerification = '/doctor/verification';
   static const String doctorLicense = '/doctor/license';
+  static const String doctorAppointments = '/doctor/appointments';
 
   // ========== PATIENT ENDPOINTS ==========
   static const String patientProfile = '/patient/profile';

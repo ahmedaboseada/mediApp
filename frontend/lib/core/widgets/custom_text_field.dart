@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:medi/core/core.dart';
 
 class CustomTextField extends StatefulWidget {
@@ -14,6 +15,10 @@ class CustomTextField extends StatefulWidget {
     required this.label,
     this.suffixIcon,
     this.onTap,
+    this.onChanged,
+    this.focusNode,
+    this.inputFormatters,
+    this.textInputAction,
     this.maxLines = 1,
   });
 
@@ -27,6 +32,10 @@ class CustomTextField extends StatefulWidget {
   final Iterable<String>? autofillHints;
   final Widget? suffixIcon;
   final VoidCallback? onTap;
+  final ValueChanged<String>? onChanged;
+  final FocusNode? focusNode;
+  final List<TextInputFormatter>? inputFormatters;
+  final TextInputAction? textInputAction;
   final int maxLines;
 
   @override
@@ -54,9 +63,14 @@ class _CustomTextFieldState extends State<CustomTextField> {
           //   FocusScope.of(context).unfocus();
           // },
           onTap: widget.onTap,
-          textInputAction: widget.maxLines > 1
-              ? TextInputAction.newline
-              : TextInputAction.next,
+          onChanged: widget.onChanged,
+          focusNode: widget.focusNode,
+          inputFormatters: widget.inputFormatters,
+          textInputAction:
+              widget.textInputAction ??
+              (widget.maxLines > 1
+                  ? TextInputAction.newline
+                  : TextInputAction.next),
           autofillHints: widget.autofillHints,
           readOnly: widget.readOnly,
           controller: widget.controller,

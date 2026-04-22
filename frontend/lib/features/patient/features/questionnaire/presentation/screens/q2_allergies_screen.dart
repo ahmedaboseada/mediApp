@@ -17,6 +17,35 @@ class Q2AllergiesScreen extends StatefulWidget {
 class _Q2AllergiesScreenState extends State<Q2AllergiesScreen> {
   bool hasReactionToMedication = false;
   bool allergyAlerts = false;
+  final TextEditingController _allergyOtherController = TextEditingController();
+  List<String> _selectedAllergies = const <String>[];
+
+  bool _containsOther(List<String> values) {
+    return values.any((value) => value.trim().toLowerCase() == 'other');
+  }
+
+  List<String> _composeWithOther({
+    required List<String> selected,
+    required String otherValue,
+  }) {
+    final cleaned = selected
+        .map((value) => value.trim())
+        .where((value) => value.isNotEmpty && value.toLowerCase() != 'other')
+        .toList();
+
+    final other = otherValue.trim();
+    if (other.isNotEmpty) {
+      cleaned.add(other);
+    }
+
+    return cleaned;
+  }
+
+  @override
+  void dispose() {
+    _allergyOtherController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,77 +71,106 @@ class _Q2AllergiesScreenState extends State<Q2AllergiesScreen> {
         },
         builder: (context, state) {
           return SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: AppSizes.h16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    AppStrings.hangTight,
-                    style: AppStyles.primary70024.copyWith(
-                      fontSize: AppSizes.sp22,
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: AppSizes.h16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      AppStrings.hangTight,
+                      style: AppStyles.primary70024.copyWith(
+                        fontSize: AppSizes.sp22,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  Image.asset(AppAssets.addInfo, height: AppSizes.h270),
-                  QTextFieldBoolean(
-                    onSelectionChange: (value) {
-                      setState(() {
-                        hasReactionToMedication = value;
-                      });
-                      cubit.updateAllergies(value);
-                      print(value);
-                    },
-                    label: AppStrings.reactionToMedication,
-                  ),
-
-                  if (hasReactionToMedication) ...[
-                    SizedBox(height: AppSizes.h16),
-                    QTextField(
-                      onSelectionChange: (List<String> selectedList) {
-                        cubit.updateAllergyList(selectedList);
-                        print(selectedList);
+                    Image.asset(AppAssets.addInfo, height: AppSizes.h270),
+                    QTextFieldBoolean(
+                      onSelectionChange: (value) {
+                        setState(() {
+                          hasReactionToMedication = value;
+                        });
+                        cubit.updateAllergies(value);
+                        print(value);
                       },
-                      items: QuestionnaireConstants().allergies,
-
-                      label: AppStrings.allergiesOrSensitivities,
+                      label: AppStrings.reactionToMedication,
                     ),
-                  ],
-
-                  SizedBox(height: AppSizes.h16),
-                  QTextFieldBoolean(
-                    singleSelect: true,
-                    onSelectionChange: (value) {
-                      setState(() {
-                        allergyAlerts = value;
-                      });
-                      cubit.updateAllergyAlerts(value);
-                      print(value);
-                    },
-
-                    label: AppStrings.allergyAlerts,
-                  ),
-                  Expanded(child: SizedBox(height: AppSizes.h24)),
-                  const OnboardingProgress(step: 1),
-                  SizedBox(height: AppSizes.h12),
-                  PrimaryButton(
-                    text: 'Next',
-                    onPressed: state.isLoading
-                        ? null
-                        : () => cubit.completeHealthStep2(),
-                    child: state.isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
+              
+                    if (hasReactionToMedication) ...[
+                      SizedBox(height: AppSizes.h16),
+                      QTextField(
+                        onSelectionChange: (List<String> selectedList) {
+                          setState(() {
+                            _selectedAllergies = selectedList;
+                            if (!_containsOther(selectedList)) {
+                              _allergyOtherController.clear();
+                            }
+                          });
+                          cubit.updateAllergyList(
+                            _composeWithOther(
+                              selected: _selectedAllergies,
+                              otherValue: _allergyOtherController.text,
                             ),
-                          )
-                        : null,
-                  ),
-                  SizedBox(height: AppSizes.h12),
-                ],
+                          );
+                          print(selectedList);
+                        },
+                        items: QuestionnaireConstants().allergies,
+              
+                        label: AppStrings.allergiesOrSensitivities,
+                      ),
+                      if (_containsOther(_selectedAllergies)) ...[
+                        SizedBox(height: AppSizes.h8),
+                        CustomTextField(
+                          controller: _allergyOtherController,
+                          onChanged: (_) {
+                            cubit.updateAllergyList(
+                              _composeWithOther(
+                                selected: _selectedAllergies,
+                                otherValue: _allergyOtherController.text,
+                              ),
+                            );
+                          },
+                          label: 'Please specify other allergy',
+                          hintText: 'Please specify other allergy',
+                        ),
+                      ],
+                    ],
+              
+                    SizedBox(height: AppSizes.h16),
+                    QTextFieldBoolean(
+                      singleSelect: true,
+                      onSelectionChange: (value) {
+                        setState(() {
+                          allergyAlerts = value;
+                        });
+                        cubit.updateAllergyAlerts(value);
+                        print(value);
+                      },
+              
+                      label: AppStrings.allergyAlerts,
+                    ),
+                    SizedBox(height: AppSizes.h24),
+                    const OnboardingProgress(step: 1),
+                    SizedBox(height: AppSizes.h12),
+                    PrimaryButton(
+                      text: 'Next',
+                      onPressed: state.isLoading
+                          ? null
+                          : () => cubit.completeHealthStep2(),
+                      child: state.isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : null,
+                    ),
+                    SizedBox(height: AppSizes.h12),
+                  ],
+                ),
               ),
             ),
           );

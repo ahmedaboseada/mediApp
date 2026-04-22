@@ -66,8 +66,18 @@ class _SplashScreenState extends State<SplashScreen>
     final accessToken = HiveService.getAccessToken();
     final userRole = HiveService.getUserRole();
     final isOnboardingCompleted = HiveService.isOnboardingCompleted();
+    final isCompleteProfileRequired = HiveService.isCompleteProfileRequired();
 
     if (accessToken != null && accessToken.isNotEmpty) {
+      if (isCompleteProfileRequired) {
+        context.go(
+          userRole == UserRole.doctor
+              ? AppRouter.doctorCompleteProfile
+              : AppRouter.completeProfile,
+        );
+        return;
+      }
+
       // User is logged in, go to home based on role
       if (userRole == UserRole.doctor) {
         context.go(AppRouter.mainLayout);

@@ -15,6 +15,18 @@ class PhoneField extends StatelessWidget {
   final TextEditingController? phonecontroller;
   final String? Function(String?)? validator;
 
+  PhoneNumber _initialValue() {
+    final String phoneNumber = phonecontroller?.text.trim() ?? '';
+    if (phoneNumber.isNotEmpty) {
+      return PhoneNumber(
+        isoCode: 'EG',
+        phoneNumber: phoneNumber,
+      );
+    }
+
+    return PhoneNumber(isoCode: 'EG');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -26,7 +38,7 @@ class PhoneField extends StatelessWidget {
         InternationalPhoneNumberInput(
           validator: validator,
           textFieldController: phonecontroller,
-          initialValue: PhoneNumber(isoCode: 'EG'),
+          initialValue: _initialValue(),
 
           selectorConfig: SelectorConfig(
             selectorType: PhoneInputSelectorType.DROPDOWN,

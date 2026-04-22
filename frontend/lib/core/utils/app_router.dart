@@ -25,12 +25,22 @@ import 'package:medi/features/patient/features/add_medication/presentation/scree
 import 'package:medi/features/patient/features/add_medication/presentation/screens/stock_expiry_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/confirmation_screen.dart';
 import 'package:medi/features/patient/features/doctors/data/models/doctor_summary.dart';
+import 'package:medi/features/patient/features/doctors/data/models/appointment_review_data.dart';
+import 'package:medi/features/patient/features/doctors/presentation/screens/review_summary_screen.dart';
+import 'package:medi/features/patient/features/doctors/presentation/screens/payment_success_screen.dart';
+import 'package:medi/features/patient/features/doctors/presentation/screens/my_appointment_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/patient_details_screen.dart';
+import 'package:medi/features/patient/features/doctors/presentation/screens/add_card_screen.dart';
+import 'package:medi/features/patient/features/doctors/presentation/screens/payment_method_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/select_package_screen.dart';
+import 'package:medi/features/patient/features/doctors/presentation/cubits/booking_cubit.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/browse_doctors_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/doctor_profile_screen.dart';
+import 'package:medi/features/patient/features/doctors/presentation/screens/my_bookings_screen.dart';
+import 'package:medi/features/patient/features/doctors/presentation/screens/cancel_booking_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/search_doctors_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/profile_screen.dart';
+import 'package:medi/features/patient/features/questionnaire/presentation/screens/take_info_screen.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/complete_profile/complete_profile_cubit.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/forget_password/forget_password_cubit.dart';
@@ -59,6 +69,7 @@ import 'package:medi/features/doctor/features/complete_profile/presentation/scre
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/upload_license_screen.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/widgets/q_flow.dart';
 import 'package:medi/features/doctor/features/home/presentation/screens/main_layout.dart';
+import 'package:medi/features/doctor/features/patients/presentation/screens/add_patient_screen.dart';
 import 'package:medi/features/doctor/features/settings/presentation/controller/cubit/schedule_cubit.dart';
 import 'package:medi/features/doctor/features/settings/presentation/screens/account_information_screen.dart';
 import 'package:medi/features/doctor/features/settings/presentation/screens/payout_withdrawal_screen.dart';
@@ -75,7 +86,6 @@ import 'package:medi/features/patient/features/questionnaire/presentation/screen
 import 'package:medi/features/patient/features/questionnaire/presentation/screens/invitation_send_screen.dart';
 import 'package:medi/features/patient/features/questionnaire/presentation/screens/q3_caregiver_mode_screen.dart';
 import 'package:medi/features/patient/features/questionnaire/questionnaire_flow.dart';
-import 'package:medi/features/patient/features/questionnaire/presentation/screens/take_info_screen.dart';
 import 'package:medi/features/shared/splash/presentation/screens/select_screen.dart';
 import 'package:medi/features/shared/splash/presentation/screens/onboarding_screen.dart';
 import 'package:medi/features/shared/splash/presentation/screens/splash_screen.dart';
@@ -131,6 +141,17 @@ class AppRouter {
   static const String doctorBookAppointmentScreen = '/doctors/profile/book';
   static const String patientDetailsScreen =
       '/doctors/profile/book/patient-details';
+  static const String patientPaymentMethodScreen =
+      '/doctors/profile/book/patient-details/payment-method';
+  static const String patientAddCardScreen =
+      '/doctors/profile/book/patient-details/payment-method/add-card';
+  static const String patientReviewSummaryScreen =
+      '/doctors/profile/book/patient-details/payment-method/review-summary';
+  static const String patientPaymentSuccessScreen =
+      '/doctors/profile/book/patient-details/payment-method/review-summary/success';
+  static const String patientMyAppointmentScreen =
+      '/doctors/profile/book/patient-details/payment-method/review-summary/success/my-appointment';
+  static const String patientCancelBookingScreen = '/doctors/cancel-booking';
   // ========== DOCTOR ROUTES ==========
   static const String doctorLogin = '/login/doctor';
   static const String doctorSignUpScreen = '/signUp/doctor';
@@ -147,6 +168,7 @@ class AppRouter {
   static const String uploadLicenseScreen = '/doctor/uploadLicense';
   static const String allowNotificationScreen = '/doctor/allowNotification';
   static const String doctorAllSetScreen = '/doctorAllSetScreen';
+  static const String addPatientScreen = '/doctor/addPatient';
   static const String healthMeasurements = '/healthMeasurements';
   static const String dailyHealthLogScreen = '/health/dailyLog';
 
@@ -209,12 +231,7 @@ class AppRouter {
           );
         },
       ),
-      GoRoute(
-        path: takeInfoScreen,
-        builder: (context, state) {
-          return const TakeInfoScreen();
-        },
-      ),
+
 
       GoRoute(
         path: notificationSoundScreen,
@@ -225,6 +242,12 @@ class AppRouter {
             value: cubit,
             child: const NotificationSoundScreen(),
           );
+        },
+      ),
+      GoRoute(
+        path: takeInfoScreen,
+        builder: (context, state) {
+          return const TakeInfoScreen();
         },
       ),
 
@@ -395,24 +418,101 @@ class AppRouter {
                 builder: (context, state) => const BrowseDoctorsScreen(),
                 routes: [
                   GoRoute(
+                    path: 'my-bookings',
+                    builder: (context, state) => const MyBookingsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'cancel-booking',
+                    builder: (context, state) => const CancelBookingScreen(),
+                  ),
+                  GoRoute(
+                    path: 'browse',
+                    builder: (context, state) => const BrowseDoctorsScreen(),
+                  ),
+                  GoRoute(
                     path: 'search',
                     builder: (context, state) => const SearchDoctorsScreen(),
                   ),
-                  GoRoute(
-                    path: 'profile',
-                    builder: (context, state) => DoctorProfileScreen(
-                      doctor: state.extra as DoctorSummary?,
+                  ShellRoute(
+                    builder: (context, state, child) => BlocProvider(
+                      create: (context) => BookingCubit(),
+                      child: child,
                     ),
                     routes: [
                       GoRoute(
-                        path: 'book',
-                        builder: (context, state) => SelectPackageScreen(
+                        path: 'profile',
+                        builder: (context, state) => DoctorProfileScreen(
                           doctor: state.extra as DoctorSummary?,
                         ),
                         routes: [
                           GoRoute(
-                            path: 'patient-details',
-                            builder: (context, state) => const PatientDetailsScreen(),
+                            path: 'book',
+                            builder: (context, state) => SelectPackageScreen(
+                              doctor: state.extra as DoctorSummary?,
+                            ),
+                            routes: [
+                              GoRoute(
+                                path: 'patient-details',
+                                builder: (context, state) =>
+                                    PatientDetailsScreen(
+                                      initialData:
+                                          state.extra as AppointmentReviewData?,
+                                    ),
+                                routes: [
+                                  GoRoute(
+                                    path: 'payment-method',
+                                    builder: (context, state) =>
+                                        PaymentMethodScreen(
+                                          initialData:
+                                              state.extra
+                                                  as AppointmentReviewData?,
+                                        ),
+                                    routes: [
+                                      GoRoute(
+                                        path: 'add-card',
+                                        builder: (context, state) =>
+                                            AddCardScreen(
+                                              initialData:
+                                                  state.extra
+                                                      as AppointmentReviewData?,
+                                            ),
+                                      ),
+                                      GoRoute(
+                                        path: 'review-summary',
+                                        builder: (context, state) =>
+                                            ReviewSummaryScreen(
+                                              reviewData:
+                                                  state.extra
+                                                      as AppointmentReviewData?,
+                                            ),
+                                        routes: [
+                                          GoRoute(
+                                            path: 'success',
+                                            builder: (context, state) =>
+                                                PaymentSuccessScreen(
+                                                  reviewData:
+                                                      state.extra
+                                                          as AppointmentReviewData?,
+                                                ),
+                                            routes: [
+                                              GoRoute(
+                                                path: 'my-appointment',
+                                                builder: (context, state) =>
+                                                    MyAppointmentScreen(
+                                                      reviewData:
+                                                          state.extra
+                                                              as AppointmentReviewData?,
+                                                    ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -518,6 +618,10 @@ class AppRouter {
       GoRoute(
         path: allowNotificationScreen,
         builder: (context, state) => AllowNotificationScreen(),
+      ),
+      GoRoute(
+        path: addPatientScreen,
+        builder: (context, state) => const AddPatientScreen(),
       ),
       GoRoute(
         path: doctorAllSetScreen,

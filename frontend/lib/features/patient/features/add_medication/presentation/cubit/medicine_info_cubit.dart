@@ -84,18 +84,39 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
     String? time,
   }) async {
     final previousTaken = state.isTaken;
-    _emitIfOpen(state.copyWith(isTaken: value));
-
-    if (state.medication.id.trim().isEmpty) {
-      return Right('Medication status updated locally');
-    }
+    final previousScheduleTimes = state.scheduleTimes;
+    final previousNextScheduleTime = state.nextScheduleTime;
 
     final selectedTime = (time ?? state.nextScheduleTime).trim();
     if (selectedTime.isEmpty) {
-      _emitIfOpen(state.copyWith(isTaken: previousTaken));
       return Left(
         ServerFailure('Unable to determine the next medication time'),
       );
+    }
+
+    final baseTimes = state.scheduleTimes.isNotEmpty
+        ? state.scheduleTimes
+        : _fallbackScheduleTimes();
+    final updatedScheduleTimes = baseTimes
+        .map((entry) {
+          if (entry.time.trim() == selectedTime) {
+            return entry.copyWith(taken: value);
+          }
+          return entry;
+        })
+        .toList();
+    final nextUntaken = _nextUntakenEntry(updatedScheduleTimes);
+
+    _emitIfOpen(
+      state.copyWith(
+        isTaken: value,
+        scheduleTimes: updatedScheduleTimes,
+        nextScheduleTime: nextUntaken?.time ?? selectedTime,
+      ),
+    );
+
+    if (state.medication.id.trim().isEmpty) {
+      return Right('Medication status updated locally');
     }
 
     final now = DateTime.now();
@@ -110,7 +131,13 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
     );
 
     if (result.isLeft()) {
-      _emitIfOpen(state.copyWith(isTaken: previousTaken));
+      _emitIfOpen(
+        state.copyWith(
+          isTaken: previousTaken,
+          scheduleTimes: previousScheduleTimes,
+          nextScheduleTime: previousNextScheduleTime,
+        ),
+      );
       return result;
     }
     return result;

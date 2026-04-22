@@ -269,7 +269,7 @@ import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
 class DioClient {
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: "http://16.16.217.229/",
+      baseUrl: "http://35.246.202.219:8000/",
       headers: {
         //"Content-Type": "application/json",
       },

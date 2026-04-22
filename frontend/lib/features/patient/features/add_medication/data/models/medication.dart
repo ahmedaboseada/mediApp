@@ -25,6 +25,8 @@ class Medication extends Equatable {
     this.startDate = '',
     this.endDate = '',
     this.reminders = const <String>[],
+    this.weeklySchedule = const <Map<String, dynamic>>[],
+    this.specificSchedule = const <Map<String, dynamic>>[],
     this.expiryDate = '',
     this.isCriticalMode = false,
     this.schedule = '',
@@ -46,6 +48,8 @@ class Medication extends Equatable {
   final String startDate;
   final String endDate;
   final List<String> reminders;
+  final List<Map<String, dynamic>> weeklySchedule;
+  final List<Map<String, dynamic>> specificSchedule;
   // final String currentStock;
   final String schedule;
   final int stock;
@@ -103,6 +107,8 @@ class Medication extends Equatable {
     String? startDate,
     String? endDate,
     List<String>? reminders,
+    List<Map<String, dynamic>>? weeklySchedule,
+    List<Map<String, dynamic>>? specificSchedule,
     String? currentStock,
     String? schedule,
     int? stock,
@@ -125,6 +131,8 @@ class Medication extends Equatable {
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       reminders: reminders ?? this.reminders,
+      weeklySchedule: weeklySchedule ?? this.weeklySchedule,
+      specificSchedule: specificSchedule ?? this.specificSchedule,
       // currentStock: currentStock ?? this.currentStock,
       schedule: schedule ?? this.schedule,
       stock: stock ?? this.stock,
@@ -150,6 +158,8 @@ class Medication extends Equatable {
       'startDate': startDate,
       'endDate': endDate,
       'reminders': reminders,
+      'weeklySchedule': weeklySchedule,
+      'specificSchedule': specificSchedule,
       //  'currentStock': currentStock,
       'schedule': schedule,
       'stock': stock,
@@ -180,6 +190,22 @@ class Medication extends Equatable {
             .whereType<String>()
             .toList();
 
+    final parsedWeeklySchedule =
+        ((json['weekly'] as List?) ??
+                (json['weeklySchedule'] as List?) ??
+                const [])
+            .whereType<Map>()
+            .map((item) => Map<String, dynamic>.from(item))
+            .toList();
+
+    final parsedSpecificSchedule =
+      ((json['specific'] as List?) ??
+          (json['specificSchedule'] as List?) ??
+          const [])
+        .whereType<Map>()
+        .map((item) => Map<String, dynamic>.from(item))
+        .toList();
+
     final parsedStockStatus = stockValue <= leftThreshold
         ? MedicationStockStatus.low
         : (stockValue <= leftThreshold * 2
@@ -196,6 +222,8 @@ class Medication extends Equatable {
       startDate: (json['startDate'] as String?) ?? '',
       endDate: (json['endDate'] as String?) ?? '',
       reminders: parsedReminders,
+      weeklySchedule: parsedWeeklySchedule,
+      specificSchedule: parsedSpecificSchedule,
       // currentStock: (json['currentStock'] as String?) ?? '',
       schedule: (json['schedule'] as String?) ?? '',
       stock: stockValue,
@@ -232,6 +260,8 @@ class Medication extends Equatable {
     startDate,
     endDate,
     reminders,
+    weeklySchedule,
+    specificSchedule,
     // currentStock,
     schedule,
     stock,

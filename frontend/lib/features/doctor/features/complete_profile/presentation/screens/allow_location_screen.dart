@@ -56,14 +56,17 @@ class AllowLocationScreen extends StatelessWidget {
                 SizedBox(height: AppSizes.h40),
 
                 BlocConsumer<LocationCubit, LocationState>(
-                  listener: (context, state) {
+                  listener: (context, state) async {
                     if (state is LocationFailure) {
                       ScaffoldMessenger.of(
                         context,
                       ).showSnackBar(SnackBar(content: Text(state.error)));
                     }
                     if (state is LocationSuccess) {
-                      // Navigate or save data
+                      await HiveService.markCompleteProfileAsCompleted();
+                      if (!context.mounted) {
+                        return;
+                      }
                       context.go(AppRouter.doctorProfileCompletedScreen);
                     }
                   },

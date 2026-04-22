@@ -19,6 +19,7 @@ class AlarmService {
 
   static const Duration _defaultRetentionWindow = Duration(days: 7);
   static const int _defaultMaxStopsPerRun = 180;
+  static const Duration _minimumPastAgeToStop = Duration(minutes: 5);
 
   Future<List<AlarmSettings>> getActiveAlarms({
     DateTime? now,
@@ -91,12 +92,13 @@ class AlarmService {
     try {
       final alarms = await Alarm.getAlarms();
       final beforeCount = alarms.length;
+      final safePastCutoff = reference.subtract(_minimumPastAgeToStop);
 
       _debugLog('Alarm cleanup before: $beforeCount');
 
       final invalidIds = <int>[];
       for (final alarm in alarms) {
-        final isPast = !alarm.dateTime.isAfter(reference);
+        final isPast = alarm.dateTime.isBefore(safePastCutoff);
         final isTooFar = alarm.dateTime.isAfter(keepUntil);
         if (alarm.warningNotificationOnKill || isPast || isTooFar) {
           invalidIds.add(alarm.id);

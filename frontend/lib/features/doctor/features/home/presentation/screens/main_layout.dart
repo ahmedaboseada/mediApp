@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/home/presentation/cubit/cubit/home_nav_cubit_cubit.dart';
 import 'package:medi/features/doctor/features/home/presentation/screens/chat_screen.dart';
-import 'package:medi/features/doctor/features/home/presentation/screens/patient_screen.dart';
 import 'package:medi/features/doctor/features/home/presentation/screens/profile_screen.dart';
 import 'package:medi/features/doctor/features/home/presentation/screens/home_screen.dart';
+import 'package:medi/features/doctor/features/patients/presentation/screens/patients_screen.dart';
 
 class MainDoctorView extends StatelessWidget {
   const MainDoctorView({super.key});
@@ -28,7 +28,7 @@ class _MainLayoutView extends StatelessWidget {
 
     final navItems = [
       NavItem(icon: AppAssets.home, label: "Home", index: 0),
-      NavItem(icon: AppAssets.docs, label: "Doctor", index: 1),
+      NavItem(icon: AppAssets.docs, label: "Patients", index: 1),
       NavItem(icon: AppAssets.chats, label: "Chat", index: 2),
       NavItem(icon: AppAssets.profile, label: "Profile", index: 3),
     ];
@@ -39,7 +39,7 @@ class _MainLayoutView extends StatelessWidget {
         builder: (context, tab) {
           return switch (tab) {
             HomeTab.home => HomeScreen(),
-            HomeTab.doctor => const PatientScreen(),
+            HomeTab.doctor => const PatientsScreen(),
             HomeTab.chat => const ChatScreen(),
             HomeTab.profile => const ProfileScreen(),
           };

@@ -56,8 +56,9 @@ class SignUpScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: BlocConsumer<RegisterCubit, RegisterState>(
-          listener: (context, state) {
+          listener: (context, state) async {
             if (state is RegisterSuccess) {
+              await HiveService.markCompleteProfileAsRequired();
               context.showSafeSnackBar(state.message);
               context.safeGo(
                 role == UserRole.patient

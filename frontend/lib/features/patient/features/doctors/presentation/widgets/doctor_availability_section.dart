@@ -19,7 +19,7 @@ class DoctorAvailabilitySection extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.all(AppSizes.w16),
       decoration: BoxDecoration(
-        color: const Color(0xFFE9EDF3),
+        color: AppColors.background,
         borderRadius: BorderRadius.circular(AppSizes.r32),
       ),
       child: Column(

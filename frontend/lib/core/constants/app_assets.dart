@@ -19,6 +19,8 @@ class AppAssets {
   static const String avatar3 = '${path}person3.png';
   static const String lineEdit = '${path}line_edit.svg';
   static const String calendar = '${path}calendar.svg';
+  static const String dollarCircle = '${path}dollar_circle.svg';
+  static const String timer = '${path}timer.svg';
   static const String chats = '${path}chats.svg';
   static const String connectedDoctors = '${path}connected_doctors.svg';
   static const String profile = '${path}profile.svg';
@@ -49,6 +51,10 @@ class AppAssets {
   static const String chat = '${path}Chat.svg';
   static const String video = '${path}video.svg';
   static const String offline = '${path}offline.svg';
+  static const String paypal = '${path}paypal.svg';
+  static const String card = '${path}card.svg';
+  static const String check = '${path}check.svg';
+  static const String location = '${path}location.svg';
   // Health measurement icons
   static const String bloodPressureIcon = '${svgPath}blood_pressure.svg';
   static const String bloodSugarIcon = '${svgPath}blood_sugar.svg';

@@ -22,14 +22,14 @@ class _MedicationDetailsScreenState extends State<MedicationDetailsScreen> {
   String? _selectedType;
 
   final List<String> _medicationTypes = [
-    'Tablet',
-    'Capsule',
-    'Syrup',
-    'Injection',
-    'Drop',
-    'Cream',
-    'Ointment',
-    'Inhaler',
+    'tablet',
+    'capsule',
+    'syrup',
+    'injection',
+    'drop',
+    'cream',
+    'ointment',
+    'inhaler',
   ];
 
   @override

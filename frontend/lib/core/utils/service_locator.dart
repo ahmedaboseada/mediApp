@@ -6,7 +6,13 @@ import 'package:medi/features/patient/features/add_medication/data/repo/medicine
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_cubit.dart';
 import 'package:medi/features/doctor/features/complete_profile/data/repo/doctor_complete_profile_repo.dart';
 import 'package:medi/features/doctor/features/complete_profile/data/repo/doctor_complete_profile_repo_impl.dart';
+import 'package:medi/features/doctor/features/home/data/repo/appointments_repository.dart';
+import 'package:medi/features/doctor/features/home/data/repo/appointments_repository_impl.dart';
+import 'package:medi/features/doctor/features/home/presentation/cubit/appointments_cubit.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
+import 'package:medi/features/doctor/features/patients/data/repo/patients_repository.dart';
+import 'package:medi/features/doctor/features/patients/data/repo/patients_repository_impl.dart';
+import 'package:medi/features/doctor/features/patients/presentation/cubit/patients_cubit.dart';
 import 'package:medi/features/patient/features/notification_sound/data/datasources/local_sound_datasource.dart';
 import 'package:medi/features/patient/features/notification_sound/data/datasources/local_sound_datasource_impl.dart';
 import 'package:medi/features/patient/features/health_measurements/data/repo/logs_repo.dart';
@@ -67,6 +73,26 @@ Future<void> setupServiceLocator() async {
   if (!getIt.isRegistered<DoctorCompleteProfileRepo>()) {
     getIt.registerLazySingleton<DoctorCompleteProfileRepo>(
       () => DoctorCompleteProfileRepoImpl(getIt<ApiService>()),
+    );
+  }
+  if (!getIt.isRegistered<AppointmentsRepository>()) {
+    getIt.registerLazySingleton<AppointmentsRepository>(
+      () => AppointmentsRepositoryImpl(getIt<ApiService>()),
+    );
+  }
+  if (!getIt.isRegistered<AppointmentsCubit>()) {
+    getIt.registerFactory<AppointmentsCubit>(
+      () => AppointmentsCubit(getIt<AppointmentsRepository>()),
+    );
+  }
+  if (!getIt.isRegistered<PatientsRepository>()) {
+    getIt.registerLazySingleton<PatientsRepository>(
+      () => PatientsRepositoryImpl(),
+    );
+  }
+  if (!getIt.isRegistered<PatientsCubit>()) {
+    getIt.registerFactory<PatientsCubit>(
+      () => PatientsCubit(getIt<PatientsRepository>()),
     );
   }
   final sharedPreferences = await SharedPreferences.getInstance();

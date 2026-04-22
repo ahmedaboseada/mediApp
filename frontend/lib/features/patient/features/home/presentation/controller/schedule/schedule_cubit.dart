@@ -99,6 +99,41 @@ class ScheduleCubit extends Cubit<ScheduleState> {
     return null;
   }
 
+  Future<String?> togglePrimaryReminderNotification(
+    ScheduleMedication medication,
+  ) async {
+    final time = medication.primaryTime.trim();
+    if (time.isEmpty || time == '--:--') {
+      return 'Unable to determine reminder time';
+    }
+
+    final key = _reminderKey(
+      medicationId: medication.id,
+      date: state.selectedDate,
+      time: time,
+    );
+
+    if (state.mutedReminderKeys.contains(key)) {
+      final restored = await LocalNotificationService().restoreSingleReminderByTime(
+        medicationId: medication.id,
+        medicationName: medication.name,
+        date: state.selectedDate,
+        time: time,
+        isCritical: medication.isCritical,
+      );
+
+      if (!restored) {
+        return 'Unable to restore this reminder time.';
+      }
+
+      final mutedKeys = Set<String>.from(state.mutedReminderKeys)..remove(key);
+      _emitCurrentWithMutedKeys(mutedKeys);
+      return null;
+    }
+
+    return cancelPrimaryReminderNotification(medication);
+  }
+
   Future<String?> markPrimaryTimeAsTaken(ScheduleMedication medication) async {
     final medicationId = medication.id.trim();
     final time = medication.primaryTime.trim();

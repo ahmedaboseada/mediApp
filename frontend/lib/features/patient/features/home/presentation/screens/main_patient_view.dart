@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/features/patient/features/home/presentation/controller/schedule/home_schedule_refresh_bus.dart';
 
 class MainPatientView extends StatelessWidget {
   const MainPatientView({super.key, required this.shell});
@@ -25,6 +26,9 @@ class MainPatientView extends StatelessWidget {
         currentIndex: shell.currentIndex,
         onTap: (index) {
           shell.goBranch(index, initialLocation: index == shell.currentIndex);
+          if (index == 0) {
+            HomeScheduleRefreshBus.notifyRefresh();
+          }
         },
         selectedColor: AppColors.primary,
       ),
