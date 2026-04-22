@@ -2,6 +2,7 @@ import 'package:medi/features/shared/auth/data/models/auth_response_model.dart';
 
 abstract class UserProfileState {
   const UserProfileState();
+  AuthResponseModel? get profile => null;
 }
 
 class UserProfileInitial extends UserProfileState {
@@ -13,6 +14,7 @@ class UserProfileLoading extends UserProfileState {
 }
 
 class UserProfileLoaded extends UserProfileState {
+  @override
   final AuthResponseModel profile;
 
   const UserProfileLoaded(this.profile);
@@ -25,6 +27,7 @@ class UserProfileError extends UserProfileState {
 }
 
 class UserProfileUpdated extends UserProfileState {
+  @override
   final AuthResponseModel profile;
 
   const UserProfileUpdated(this.profile);

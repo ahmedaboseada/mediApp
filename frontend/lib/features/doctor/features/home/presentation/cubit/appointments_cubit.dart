@@ -29,6 +29,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
 
     result.fold(
       (error) {
+        if (isClosed) return;
         emit(
           state.copyWith(
             status: AppointmentsStatus.failure,
@@ -37,6 +38,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
         );
       },
       (appointments) {
+        if (isClosed) return;
         emit(
           state.copyWith(
             status: appointments.isEmpty

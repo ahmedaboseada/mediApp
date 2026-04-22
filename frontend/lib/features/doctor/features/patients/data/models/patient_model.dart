@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
 
-enum PatientStatus {
-  normal,
-  abnormal,
-  critical,
-  missedMeds,
-}
+enum PatientStatus { normal, abnormal, critical, missedMeds }
 
 class PatientModel {
   const PatientModel({
@@ -17,6 +12,7 @@ class PatientModel {
     required this.bloodType,
     required this.status,
     required this.avatarAsset,
+    required this.phone,
   });
 
   final String id;
@@ -26,6 +22,7 @@ class PatientModel {
   final String bloodType;
   final PatientStatus status;
   final String avatarAsset;
+  final String phone;
 
   factory PatientModel.fromJson(Map<String, dynamic> json) {
     return PatientModel(
@@ -35,9 +32,9 @@ class PatientModel {
       gender: (json['gender'] ?? 'M').toString(),
       bloodType: (json['bloodType'] ?? 'O+').toString(),
       status: _statusFromString(json['status'] ?? 'normal'),
-      avatarAsset:
-          (json['avatarAsset'] ?? json['avatar'] ?? AppAssets.avatar1)
-              .toString(),
+      avatarAsset: (json['avatarAsset'] ?? json['avatar'] ?? AppAssets.avatar1)
+          .toString(),
+      phone: (json['phone'] ?? 'Unknown').toString(),
     );
   }
 

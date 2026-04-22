@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/features/patient/features/profile/presentation/widgets/profile_qr.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
 class UserInfoScetion extends StatelessWidget {
@@ -8,6 +9,7 @@ class UserInfoScetion extends StatelessWidget {
     super.key,
     required this.name,
     required this.specialty,
+    required this.userId,
     this.networkImageUrl,
     this.localImagePath,
     this.isLoading = false,
@@ -18,7 +20,7 @@ class UserInfoScetion extends StatelessWidget {
   final String? networkImageUrl;
   final String? localImagePath;
   final bool isLoading;
-
+  final String userId ; 
   @override
   Widget build(BuildContext context) {
     return Skeletonizer(
@@ -48,6 +50,9 @@ class UserInfoScetion extends StatelessWidget {
               ),
             ],
           ),
+            Spacer(),
+            //put the user id in the qr data
+          ProfileQR(qrData: userId),
         ],
       ),
     );

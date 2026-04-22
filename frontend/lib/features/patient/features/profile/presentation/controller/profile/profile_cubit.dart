@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/features/patient/features/profile/data/models/caregiver_request_model.dart';
+import 'package:medi/features/patient/features/profile/data/models/doctor_request_model.dart';
 import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
 import 'package:meta/meta.dart';
 
@@ -125,6 +126,54 @@ class ProfileCubit extends Cubit<ProfileState> {
       (message) async {
         emit(CaregiverRequestActionSuccess(message));
         await listCaregiverRequests();
+      },
+    );
+  }
+
+  Future<void> listDoctorRequests() async {
+    emit(DoctorRequestsLoading());
+
+    final result = await profileRepo.listDoctorRequests();
+
+    result.fold(
+      (failure) =>
+          emit(DoctorRequestsFailure(failure.message, failure.errors)),
+      (requests) => emit(DoctorRequestsSuccess(requests)),
+    );
+  }
+
+  Future<void> acceptDoctorRequest({required String doctorId}) async {
+    emit(DoctorRequestActionLoading());
+
+    final result = await profileRepo.acceptDoctorRequest(
+      doctorId: doctorId,
+    );
+
+    await result.fold(
+      (failure) async {
+        emit(DoctorRequestActionFailure(failure.message, failure.errors));
+      },
+      (message) async {
+        emit(DoctorRequestActionSuccess(message));
+        await listDoctorRequests();
+      },
+    );
+  }
+
+  Future<void> rejectDoctorRequest({required String doctorId}) async {
+    emit(DoctorRequestActionLoading());
+
+    final result = await profileRepo.rejectDoctorRequest(
+      doctorId: doctorId,
+    );
+
+    await result.fold(
+      (failure) async {
+        emit(DoctorRequestActionFailure(failure.message, failure.errors));
+      },
+      (message) async {
+        emit(DoctorRequestActionSuccess(message));
+        await listDoctorRequests();
       },
     );
   }

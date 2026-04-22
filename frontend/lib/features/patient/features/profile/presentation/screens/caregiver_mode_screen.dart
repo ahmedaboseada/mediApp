@@ -3,9 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/profile/data/models/caregiver_request_model.dart';
+import 'package:medi/features/patient/features/profile/data/models/doctor_request_model.dart';
 import 'package:medi/features/patient/features/profile/presentation/controller/profile/profile_cubit.dart';
 import 'package:medi/features/patient/features/profile/presentation/widgets/caregiving_request_card.dart';
 import 'package:medi/features/patient/features/profile/presentation/widgets/caretaker_card.dart';
+import 'package:medi/features/patient/features/profile/presentation/widgets/doctor_request_card.dart';
 
 class CaregiverModeScreen extends StatefulWidget {
   const CaregiverModeScreen({super.key});
@@ -16,6 +18,7 @@ class CaregiverModeScreen extends StatefulWidget {
 
 class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
   List<CaregiverRequestModel> caregivingRequests = [];
+  List<DoctorRequestModel> doctorRequests = [];
 
   final List<Map<String, String>> caretakers = [
     {
@@ -36,6 +39,7 @@ class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
   void initState() {
     super.initState();
     context.read<ProfileCubit>().listCaregiverRequests();
+    context.read<ProfileCubit>().listDoctorRequests();
   }
 
   String _formatRequestedOn(DateTime? date) {
@@ -69,6 +73,18 @@ class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
             ).showSnackBar(SnackBar(content: Text(state.message)));
           }
 
+          if (state is DoctorRequestsSuccess) {
+            setState(() {
+              doctorRequests = state.requests;
+            });
+          }
+
+          if (state is DoctorRequestActionSuccess) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
+          }
+
           if (state is CaregiverRequestsFailure) {
             ScaffoldMessenger.of(
               context,
@@ -80,9 +96,23 @@ class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
               context,
             ).showSnackBar(SnackBar(content: Text(state.message)));
           }
+
+          if (state is DoctorRequestsFailure) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
+          }
+
+          if (state is DoctorRequestActionFailure) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
+          }
         },
         builder: (context, state) {
-          final isActionLoading = state is CaregiverRequestActionLoading;
+          final isActionLoading =
+              state is CaregiverRequestActionLoading ||
+              state is DoctorRequestActionLoading;
           return SingleChildScrollView(
             child: Padding(
               padding: EdgeInsets.all(AppSizes.w16),
@@ -126,6 +156,47 @@ class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
                                     .rejectCaregiverRequest(
                                       requestId: request.id,
                                     );
+                              },
+                      );
+                    }),
+                  SizedBox(height: AppSizes.h32),
+                  Text(
+                    'Doctor Connection Requests',
+                    style: AppStyles.black18500,
+                  ),
+                  SizedBox(height: AppSizes.h16),
+                  if (state is DoctorRequestsLoading)
+                    const Center(child: CircularProgressIndicator())
+                  else if (doctorRequests.isEmpty)
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: AppSizes.h32),
+                      child: Center(
+                        child: Text(
+                          'No pending doctor requests',
+                          style: AppStyles.secondary12400,
+                        ),
+                      ),
+                    )
+                  else
+                    ...doctorRequests.map((request) {
+                      return DoctorRequestCard(
+                        name: 'Dr. ${request.firstName} ${request.lastName}',
+                        specialty: request.specialization,
+                        clinicName: request.clinicName,
+                        profilePicture: request.profilePicture,
+                        onAccept: isActionLoading
+                            ? () {}
+                            : () {
+                                context
+                                    .read<ProfileCubit>()
+                                    .acceptDoctorRequest(doctorId: request.id);
+                              },
+                        onReject: isActionLoading
+                            ? () {}
+                            : () {
+                                context
+                                    .read<ProfileCubit>()
+                                    .rejectDoctorRequest(doctorId: request.id);
                               },
                       );
                     }),

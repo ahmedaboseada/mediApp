@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/profile/data/models/caregiver_request_model.dart';
+import 'package:medi/features/patient/features/profile/data/models/doctor_request_model.dart';
 import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
 
 class ProfileRepoImpl implements ProfileRepo {
@@ -278,4 +279,99 @@ class ProfileRepoImpl implements ProfileRepo {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<ApiError, List<DoctorRequestModel>>> listDoctorRequests() async {
+    try {
+      final token = HiveService.getAccessToken();
+      final headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      };
+
+      final response = await apiService.get(
+        '/patients/doctor-requests',
+        headers: headers,
+      );
+      log('List Doctor Requests Response: ${response.toString()}');
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final requestsJson = (response['requests'] as List<dynamic>? ?? []);
+      final requests = requestsJson
+          .whereType<Map<String, dynamic>>()
+          .map(DoctorRequestModel.fromJson)
+          .toList();
+
+      return Right(requests);
+    } on DioException catch (e) {
+      return Left(ServerFailure.fromDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<ApiError, String>> acceptDoctorRequest({
+    required String doctorId,
+  }) async {
+    try {
+      final token = HiveService.getAccessToken();
+      final headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      };
+
+      final response = await apiService.patch(
+        '/patients/connected-doctors/accept/$doctorId',
+        {},
+        headers: headers,
+      );
+        log('Accept Doctor Request Response: ${response.toString()}');
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final message = response['message'] ?? 'Doctor request accepted';
+      return Right(message.toString());
+    } on DioException catch (e) {
+      return Left(ServerFailure.fromDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<ApiError, String>> rejectDoctorRequest({
+    required String doctorId,
+  }) async {
+    try {
+      final token = HiveService.getAccessToken();
+      final headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      };
+
+      final response = await apiService.patch(
+        '/patients/connected-doctors/reject/$doctorId',
+        {},
+        headers: headers,
+      );
+      log('Reject Doctor Request Response: ${response.toString()}');
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final message = response['message'] ?? 'Doctor request rejected';
+      return Right(message.toString());
+    } on DioException catch (e) {
+      return Left(ServerFailure.fromDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }
+

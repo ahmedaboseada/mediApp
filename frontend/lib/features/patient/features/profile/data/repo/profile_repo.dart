@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/profile/data/models/caregiver_request_model.dart';
+import 'package:medi/features/patient/features/profile/data/models/doctor_request_model.dart';
 
 abstract class ProfileRepo {
   Future<Either<ApiError, String>> changePassword({
@@ -29,5 +30,15 @@ abstract class ProfileRepo {
 
   Future<Either<ApiError, String>> rejectCaregiverRequest({
     required String requestId,
+  });
+
+  Future<Either<ApiError, List<DoctorRequestModel>>> listDoctorRequests();
+
+  Future<Either<ApiError, String>> acceptDoctorRequest({
+    required String doctorId,
+  });
+
+  Future<Either<ApiError, String>> rejectDoctorRequest({
+    required String doctorId,
   });
 }

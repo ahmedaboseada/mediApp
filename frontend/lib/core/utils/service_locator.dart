@@ -13,6 +13,7 @@ import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
 import 'package:medi/features/doctor/features/patients/data/repo/patients_repository.dart';
 import 'package:medi/features/doctor/features/patients/data/repo/patients_repository_impl.dart';
 import 'package:medi/features/doctor/features/patients/presentation/cubit/patients_cubit.dart';
+import 'package:medi/features/doctor/features/patients/presentation/cubit/add_patient_cubit.dart';
 import 'package:medi/features/patient/features/notification_sound/data/datasources/local_sound_datasource.dart';
 import 'package:medi/features/patient/features/notification_sound/data/datasources/local_sound_datasource_impl.dart';
 import 'package:medi/features/patient/features/health_measurements/data/repo/logs_repo.dart';
@@ -87,12 +88,17 @@ Future<void> setupServiceLocator() async {
   }
   if (!getIt.isRegistered<PatientsRepository>()) {
     getIt.registerLazySingleton<PatientsRepository>(
-      () => PatientsRepositoryImpl(),
+      () => PatientsRepositoryImpl(getIt<ApiService>()),
     );
   }
   if (!getIt.isRegistered<PatientsCubit>()) {
     getIt.registerFactory<PatientsCubit>(
       () => PatientsCubit(getIt<PatientsRepository>()),
+    );
+  }
+  if (!getIt.isRegistered<AddPatientCubit>()) {
+    getIt.registerFactory<AddPatientCubit>(
+      () => AddPatientCubit(getIt<PatientsRepository>()),
     );
   }
   final sharedPreferences = await SharedPreferences.getInstance();

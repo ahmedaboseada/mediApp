@@ -30,9 +30,7 @@ class ProfileScreen extends StatelessWidget {
                   BlocBuilder<UserProfileCubit, UserProfileState>(
                     builder: (context, state) {
                       final isLoading = state is UserProfileLoading;
-                      final profile = state is UserProfileLoaded
-                          ? state.profile
-                          : null;
+                      final profile = state.profile;
                       final user = profile?.user;
 
                       final name = user != null
@@ -48,6 +46,7 @@ class ProfileScreen extends StatelessWidget {
                         specialty: subtitle,
                         networkImageUrl: image,
                         isLoading: isLoading,
+                        userId: profile?.patient?.patientId ?? '',
                       );
                     },
                   ),

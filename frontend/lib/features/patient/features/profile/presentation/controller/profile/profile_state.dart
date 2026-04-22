@@ -109,3 +109,33 @@ final class CaregiverRequestActionFailure extends ProfileState {
 
   CaregiverRequestActionFailure(this.message, [this.errors = const []]);
 }
+
+final class DoctorRequestsLoading extends ProfileState {}
+
+final class DoctorRequestsSuccess extends ProfileState {
+  final List<DoctorRequestModel> requests;
+
+  DoctorRequestsSuccess(this.requests);
+}
+
+final class DoctorRequestsFailure extends ProfileState {
+  final String message;
+  final List<String> errors;
+
+  DoctorRequestsFailure(this.message, [this.errors = const []]);
+}
+
+final class DoctorRequestActionLoading extends ProfileState {}
+
+final class DoctorRequestActionSuccess extends ProfileState {
+  final String message;
+
+  DoctorRequestActionSuccess(this.message);
+}
+
+final class DoctorRequestActionFailure extends ProfileState {
+  final String message;
+  final List<String> errors;
+
+  DoctorRequestActionFailure(this.message, [this.errors = const []]);
+}

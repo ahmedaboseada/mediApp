@@ -2,9 +2,13 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/patients/data/models/patient_model.dart';
+import 'dart:developer';
 import 'package:medi/features/doctor/features/patients/data/repo/patients_repository.dart';
 
 class PatientsRepositoryImpl implements PatientsRepository {
+  PatientsRepositoryImpl(this._apiService);
+
+  final ApiService _apiService;
   // Mock data - replace with API calls when backend is ready
   static const List<PatientModel> _mockPatients = [
     PatientModel(
@@ -15,6 +19,7 @@ class PatientsRepositoryImpl implements PatientsRepository {
       bloodType: 'A+',
       status: PatientStatus.critical,
       avatarAsset: AppAssets.avatar1,
+      phone: '(20) 1289576249',
     ),
     PatientModel(
       id: '2',
@@ -24,6 +29,7 @@ class PatientsRepositoryImpl implements PatientsRepository {
       bloodType: 'O-',
       status: PatientStatus.abnormal,
       avatarAsset: AppAssets.avatar2,
+      phone: '(20) 1289576249',
     ),
     PatientModel(
       id: '3',
@@ -33,6 +39,7 @@ class PatientsRepositoryImpl implements PatientsRepository {
       bloodType: 'A+',
       status: PatientStatus.missedMeds,
       avatarAsset: AppAssets.avatar3,
+      phone: '(20) 1289576249',
     ),
     PatientModel(
       id: '4',
@@ -42,6 +49,7 @@ class PatientsRepositoryImpl implements PatientsRepository {
       bloodType: 'B+',
       status: PatientStatus.normal,
       avatarAsset: AppAssets.avatar2,
+      phone: '(20) 1289576249',
     ),
     PatientModel(
       id: '5',
@@ -51,6 +59,7 @@ class PatientsRepositoryImpl implements PatientsRepository {
       bloodType: 'AB+',
       status: PatientStatus.normal,
       avatarAsset: AppAssets.avatar1,
+      phone: '(20) 1289576249',
     ),
     PatientModel(
       id: '6',
@@ -60,6 +69,7 @@ class PatientsRepositoryImpl implements PatientsRepository {
       bloodType: 'A-',
       status: PatientStatus.abnormal,
       avatarAsset: AppAssets.avatar2,
+      phone: '(20) 1289576249',
     ),
   ];
 
@@ -77,17 +87,17 @@ class PatientsRepositoryImpl implements PatientsRepository {
       if (searchQuery != null && searchQuery.isNotEmpty) {
         final query = searchQuery.toLowerCase();
         patients = patients
-            .where((patient) =>
-                patient.name.toLowerCase().contains(query) ||
-                patient.id.toLowerCase().contains(query))
+            .where(
+              (patient) =>
+                  patient.name.toLowerCase().contains(query) ||
+                  patient.id.toLowerCase().contains(query),
+            )
             .toList();
       }
 
       return Right(patients);
     } catch (e) {
-      return Left(
-        ServerFailure('Failed to fetch patients: ${e.toString()}'),
-      );
+      return Left(ServerFailure('Failed to fetch patients: ${e.toString()}'));
     }
   }
 
@@ -103,15 +113,30 @@ class PatientsRepositoryImpl implements PatientsRepository {
       );
 
       return Right(patient);
-    }on DioException catch (e) {
-      return Left(
-        ServerFailure('Failed to fetch patient: ${e.message}'),
-      );
+    } on DioException catch (e) {
+      return Left(ServerFailure('Failed to fetch patient: ${e.message}'));
+    } catch (e) {
+      return Left(ServerFailure('Patient not found'));
     }
-     catch (e) {
-      return Left(
-        ServerFailure('Patient not found'),
+  }
+
+  @override
+  Future<Either<ApiError, void>> sendAddRequest(String patientId) async {
+    try {
+      final response = await _apiService.post(
+        '/doctors/patients/connect-patient',
+        {'patientId': patientId},
       );
+      
+      log('sendAddRequest response: $response');
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+      
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
     }
   }
 }
