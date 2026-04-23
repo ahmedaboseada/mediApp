@@ -75,7 +75,7 @@ import * as ET from '../../utils/encryption/index.js';
 const publicUser = async (u) => {
     let decryptedPhone = u.phone;
     if (u.phone) {
-        try { decryptedPhone = await ET.decrypt(u.phone); } catch (err) {}
+        try { decryptedPhone = await ET.decrypt(u.phone); } catch (err) { }
     }
     return {
         id: String(u._id),
@@ -276,7 +276,7 @@ export const getDoctorDirectory = async (req, res) => {
 
     for (const doc of doctors) {
         if (doc.userId && doc.userId.phone) {
-            try { doc.userId.phone = await ET.decrypt(doc.userId.phone); } catch (err) {}
+            try { doc.userId.phone = await ET.decrypt(doc.userId.phone); } catch (err) { }
         }
     }
 
@@ -397,7 +397,7 @@ export const listConnectedPatients = async (req, res) => {
     // Populate patient info deeply
     const patients = await patientModel.find({ _id: { $in: approvedPatientIds } })
         .populate({ path: 'userId', select: 'firstName lastName profilePicture email phone age gender' })
-        .populate({ path: 'medications', select: 'status isChronic dosage frequency startDate endDate name isCritical' })
+        .populate({ path: 'medications', select: 'status isChronic dosage frequency startDate endDate name isCritical type stock' })
         .lean();
 
     // Fetch all health measurements for these patients
@@ -420,7 +420,7 @@ export const listConnectedPatients = async (req, res) => {
         }
 
         if (p.userId && p.userId.phone) {
-            try { p.userId.phone = await ET.decrypt(p.userId.phone); } catch (err) {}
+            try { p.userId.phone = await ET.decrypt(p.userId.phone); } catch (err) { }
         }
 
         enrichedPatients.push({
