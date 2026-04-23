@@ -517,30 +517,36 @@ import { sendEmailEvent, sendOTPEvent, sendEmailChangeConfirmEvent } from '../..
 
 const isAdminPrefix = (user) => user?.type === 'admin';
 
-const publicUser = (u) => ({
-    id: String(u._id),
-    type: u.type,
-    firstName: u.firstName,
-    lastName: u.lastName,
-    email: u.email,
-    DOB: u.DOB,
-    age: u.age,
-    gender: u.gender,
-    twoFA: u.twoFA,
-    profilePicture: u.profilePicture,
-    confirmed: u.confirmed,
-    pendingEmail: u.pendingEmail,
-    pendingEmailRequestedAt: u.pendingEmailRequestedAt,
-    emailChangeTokenId: u.emailChangeTokenId,
-    phone: u.phone,
-    yearOfBirth: u.yearOfBirth,
-    chronicConditions: u.chronicConditions,
-    longTermMedication: u.longTermMedication,
-    activeIngredients: u.activeIngredients,
-    allergies: u.allergies,
-    reactionToMedication: u.reactionToMedication,
-    allergyAlerts: u.allergyAlerts,
-});
+const publicUser = async (u) => {
+    let decryptedPhone = u.phone;
+    if (u.phone) {
+        try { decryptedPhone = await ET.decrypt(u.phone); } catch (err) {}
+    }
+    return {
+        id: String(u._id),
+        type: u.type,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        email: u.email,
+        DOB: u.DOB,
+        age: u.age,
+        gender: u.gender,
+        twoFA: u.twoFA,
+        profilePicture: u.profilePicture,
+        confirmed: u.confirmed,
+        pendingEmail: u.pendingEmail,
+        pendingEmailRequestedAt: u.pendingEmailRequestedAt,
+        emailChangeTokenId: u.emailChangeTokenId,
+        phone: decryptedPhone,
+        yearOfBirth: u.yearOfBirth,
+        chronicConditions: u.chronicConditions,
+        longTermMedication: u.longTermMedication,
+        activeIngredients: u.activeIngredients,
+        allergies: u.allergies,
+        reactionToMedication: u.reactionToMedication,
+        allergyAlerts: u.allergyAlerts,
+    };
+};
 
 const attachTypeDoc = async (user) => {
     if (user.type === 'patient') {
@@ -630,7 +636,7 @@ export const signup = async (req, res) => {
         // Return only correct type data
         const payload = {
             message: "User created successfully. Please confirm your email.",
-            user: publicUser(user),
+            user: await publicUser(user),
             accessToken,
             refreshToken,
         };
@@ -676,7 +682,7 @@ export const signin = async (req, res) => {
 
     return res.status(200).json({
         message: 'User Logged In Successfully',
-        user: publicUser(user),
+        user: await publicUser(user),
         ...typeDoc,
         accessToken,
         refreshToken,
@@ -712,7 +718,7 @@ export const signinWithOtp = async (req, res) => {
 
     return res.status(200).json({
         message: 'User Logged In Successfully',
-        user: publicUser(user),
+        user: await publicUser(user),
         ...typeDoc,
         accessToken,
         refreshToken,
@@ -834,7 +840,7 @@ export const getMe = async (req, res) => {
 
     const typeDoc = await attachTypeDoc(user);
 
-    return res.status(200).json({ user: publicUser(user), ...typeDoc });
+    return res.status(200).json({ user: await publicUser(user), ...typeDoc });
 };
 
 export const logout = async (req, res) => {
@@ -983,7 +989,7 @@ export const getProfileForAll = async (req, res) => {
 
     const typeDoc = await attachTypeDoc(user);
 
-    return res.status(200).json({ user: publicUser(user), ...typeDoc });
+    return res.status(200).json({ user: await publicUser(user), ...typeDoc });
 };
 
 export const updateProfile = async (req, res) => {
@@ -999,7 +1005,7 @@ export const updateProfile = async (req, res) => {
 
     const typeDoc = await attachTypeDoc(user);
 
-    return res.status(200).json({ message: 'Profile Updated Successfully', user: publicUser(user), ...typeDoc });
+    return res.status(200).json({ message: 'Profile Updated Successfully', user: await publicUser(user), ...typeDoc });
 };
 
 export const resendConfirmEmail = async (req, res) => {
@@ -1128,7 +1134,7 @@ export const googleAuth = async (req, res) => {
 
         return res.status(200).json({
             message: 'Google Auth Successful',
-            user: publicUser(user),
+            user: await publicUser(user),
             ...(await attachTypeDoc(user)),
             accessToken,
             refreshToken,

@@ -183,30 +183,36 @@ import doctorModel from '../../models/doctor.model.js';
 import { analyzeMedications } from '../../utils/ai.util.js';
 import * as ET from '../../utils/encryption/index.js';
 
-const publicUser = (u) => ({
-    id: String(u._id),
-    type: u.type,
-    firstName: u.firstName,
-    lastName: u.lastName,
-    email: u.email,
-    DOB: u.DOB,
-    age: u.age,
-    gender: u.gender,
-    twoFA: u.twoFA,
-    profilePicture: u.profilePicture,
-    confirmed: u.confirmed,
-    pendingEmail: u.pendingEmail,
-    pendingEmailRequestedAt: u.pendingEmailRequestedAt,
-    emailChangeTokenId: u.emailChangeTokenId,
-    phone: u.phone,
-    yearOfBirth: u.yearOfBirth,
-    chronicConditions: u.chronicConditions,
-    longTermMedication: u.longTermMedication,
-    activeIngredients: u.activeIngredients,
-    allergies: u.allergies,
-    reactionToMedication: u.reactionToMedication,
-    allergyAlerts: u.allergyAlerts,
-});
+const publicUser = async (u) => {
+    let decryptedPhone = u.phone;
+    if (u.phone) {
+        try { decryptedPhone = await ET.decrypt(u.phone); } catch (err) {}
+    }
+    return {
+        id: String(u._id),
+        type: u.type,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        email: u.email,
+        DOB: u.DOB,
+        age: u.age,
+        gender: u.gender,
+        twoFA: u.twoFA,
+        profilePicture: u.profilePicture,
+        confirmed: u.confirmed,
+        pendingEmail: u.pendingEmail,
+        pendingEmailRequestedAt: u.pendingEmailRequestedAt,
+        emailChangeTokenId: u.emailChangeTokenId,
+        phone: decryptedPhone,
+        yearOfBirth: u.yearOfBirth,
+        chronicConditions: u.chronicConditions,
+        longTermMedication: u.longTermMedication,
+        activeIngredients: u.activeIngredients,
+        allergies: u.allergies,
+        reactionToMedication: u.reactionToMedication,
+        allergyAlerts: u.allergyAlerts,
+    };
+};
 
 const calcDOBAndAge = (year) => {
     const y = Number(year);
@@ -243,7 +249,7 @@ export const completeBasic = async (req, res) => {
 
     await user.save();
 
-    return res.status(200).json({ message: 'Basic profile completed', user: publicUser(user) });
+    return res.status(200).json({ message: 'Basic profile completed', user: await publicUser(user) });
 };
 
 // Screen: health step 1
@@ -486,6 +492,12 @@ export const listConnectedDoctors = async (req, res) => {
     // Only return those approved
     const approved = patient.connectedDoctors.filter(c => c.status === 'approved').map(c => c.doctorId);
 
+    for (const doc of approved) {
+        if (doc && doc.userId && doc.userId.phone) {
+            try { doc.userId.phone = await ET.decrypt(doc.userId.phone); } catch (err) {}
+        }
+    }
+
     return res.status(200).json({ doctors: approved });
 };
 
@@ -503,6 +515,12 @@ export const listDoctorRequests = async (req, res) => {
     const pendingRequests = patient.connectedDoctors
         .filter(c => c.status === 'pending')
         .map(c => c.doctorId);
+
+    for (const doc of pendingRequests) {
+        if (doc && doc.userId && doc.userId.phone) {
+            try { doc.userId.phone = await ET.decrypt(doc.userId.phone); } catch (err) {}
+        }
+    }
 
     return res.status(200).json({ requests: pendingRequests });
 };
@@ -661,7 +679,7 @@ export const completeProfile = async (req, res) => {
 
     return res.status(200).json({
         message: 'Profile completed',
-        user: publicUser(user),
+        user: await publicUser(user),
         patient: updatedPatient,
     });
 };

@@ -71,30 +71,36 @@ import notificationModel from '../../models/notification.model.js';
 import medicineModel from '../../models/medicine.model.js';
 import * as ET from '../../utils/encryption/index.js';
 
-const publicUser = (u) => ({
-    id: String(u._id),
-    type: u.type,
-    firstName: u.firstName,
-    lastName: u.lastName,
-    email: u.email,
-    DOB: u.DOB,
-    age: u.age,
-    gender: u.gender,
-    twoFA: u.twoFA,
-    profilePicture: u.profilePicture,
-    confirmed: u.confirmed,
-    pendingEmail: u.pendingEmail,
-    pendingEmailRequestedAt: u.pendingEmailRequestedAt,
-    emailChangeTokenId: u.emailChangeTokenId,
-    phone: u.phone,
-    yearOfBirth: u.yearOfBirth,
-    chronicConditions: u.chronicConditions,
-    longTermMedication: u.longTermMedication,
-    activeIngredients: u.activeIngredients,
-    allergies: u.allergies,
-    reactionToMedication: u.reactionToMedication,
-    allergyAlerts: u.allergyAlerts,
-});
+const publicUser = async (u) => {
+    let decryptedPhone = u.phone;
+    if (u.phone) {
+        try { decryptedPhone = await ET.decrypt(u.phone); } catch (err) {}
+    }
+    return {
+        id: String(u._id),
+        type: u.type,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        email: u.email,
+        DOB: u.DOB,
+        age: u.age,
+        gender: u.gender,
+        twoFA: u.twoFA,
+        profilePicture: u.profilePicture,
+        confirmed: u.confirmed,
+        pendingEmail: u.pendingEmail,
+        pendingEmailRequestedAt: u.pendingEmailRequestedAt,
+        emailChangeTokenId: u.emailChangeTokenId,
+        phone: decryptedPhone,
+        yearOfBirth: u.yearOfBirth,
+        chronicConditions: u.chronicConditions,
+        longTermMedication: u.longTermMedication,
+        activeIngredients: u.activeIngredients,
+        allergies: u.allergies,
+        reactionToMedication: u.reactionToMedication,
+        allergyAlerts: u.allergyAlerts,
+    };
+};
 
 const assertDoctor = async (userId) => {
     const user = await userModel.findById(userId);
@@ -129,7 +135,7 @@ export const completeStep1 = async (req, res) => {
     doc.medicalLicenseId = req.body.medicalLicenseId;
     await doc.save();
 
-    return res.status(200).json({ message: 'Step 1 saved', user: publicUser(user), doctor: doc.toObject() });
+    return res.status(200).json({ message: 'Step 1 saved', user: await publicUser(user), doctor: doc.toObject() });
 };
 
 // Screen: location
@@ -239,7 +245,7 @@ export const completeProfile = async (req, res) => {
 
     return res.status(200).json({
         message: 'Doctor profile updated',
-        user: publicUser(updatedUser),
+        user: await publicUser(updatedUser),
         doctor: updatedDoctor,
     });
 };
@@ -266,6 +272,12 @@ export const getDoctorDirectory = async (req, res) => {
     const doctors = await doctorModel.find({ status: 'approved' })
         .populate({ path: 'userId', select: 'firstName lastName profilePicture phone gender' })
         .lean();
+
+    for (const doc of doctors) {
+        if (doc.userId && doc.userId.phone) {
+            try { doc.userId.phone = await ET.decrypt(doc.userId.phone); } catch (err) {}
+        }
+    }
 
     return res.status(200).json({ doctors });
 };
@@ -383,12 +395,14 @@ export const listConnectedPatients = async (req, res) => {
 
     // Populate patient info deeply
     const patients = await patientModel.find({ _id: { $in: approvedPatientIds } })
-        .populate({ path: 'userId', select: 'firstName lastName profilePicture phone age gender' })
-        .populate({ path: 'medications', select: 'status isChronic' })
+        .populate({ path: 'userId', select: 'firstName lastName profilePicture email phone age gender' })
+        .populate({ path: 'medications', select: 'status isChronic dosage frequency startDate endDate name isCritical' })
+        .populate({ path: 'healthMeasurements' })
         .lean();
 
-    // Compute UI health Badge mapping
-    const enrichedPatients = patients.map(p => {
+    // Compute UI health Badge mapping and decrypt phone
+    const enrichedPatients = [];
+    for (const p of patients) {
         let healthBadge = 'Normal Status';
 
         // Priority 1: Check for critical mode medications
@@ -400,11 +414,15 @@ export const listConnectedPatients = async (req, res) => {
             healthBadge = 'Abnormal';
         }
 
-        return {
+        if (p.userId && p.userId.phone) {
+            try { p.userId.phone = await ET.decrypt(p.userId.phone); } catch (err) {}
+        }
+
+        enrichedPatients.push({
             ...p,
             healthBadge
-        };
-    });
+        });
+    }
 
     return res.status(200).json({ patients: enrichedPatients });
 };

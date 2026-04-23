@@ -23,7 +23,7 @@ describe('Medicine Service', () => {
 
     beforeEach(() => {
         req = {
-            user: { _id: 'user123' },
+            user: { id: 'user123' },
             body: {},
             query: {},
             params: {}
@@ -37,7 +37,7 @@ describe('Medicine Service', () => {
     });
 
     it('should add a medicine', async () => {
-        req.body = { activeIngredient: 'Aspirin', type: 'tablet', frequency: 'daily' };
+        req.body = { name: 'Aspirin', type: 'tablet', frequency: 'daily' };
 
         const mockPatient = { _id: 'patient123', medications: { push: jest.fn() }, save: jest.fn() };
         models.patientModel.findOne.mockResolvedValue(mockPatient);
@@ -48,7 +48,7 @@ describe('Medicine Service', () => {
         await MS.addMedicine(req, res, next);
 
         expect(models.patientModel.findOne).toHaveBeenCalledWith({ userId: 'user123' });
-        expect(models.medicineModel.create).toHaveBeenCalledWith({ ...req.body, patientId: 'patient123' });
+        expect(models.medicineModel.create).toHaveBeenCalledWith({ ...req.body, patientId: 'patient123', activeIngredient: 'Aspirin', sideEffects: [] });
         expect(mockPatient.medications.push).toHaveBeenCalledWith('med123');
         expect(mockPatient.save).toHaveBeenCalled();
         expect(res.status).toHaveBeenCalledWith(201);

@@ -1,4 +1,5 @@
 import doctorModel from '../../models/doctor.model.js';
+import * as ET from '../../utils/encryption/index.js';
 
 export const getPendingDoctors = async (req, res) => {
     try {
@@ -7,6 +8,12 @@ export const getPendingDoctors = async (req, res) => {
             .select('-licenseImage') // do not leak encrypted image immediately unless requested
             .populate('userId', 'firstName lastName email profilePicture phone gender')
             .lean();
+
+        for (const doc of doctors) {
+            if (doc && doc.userId && doc.userId.phone) {
+                try { doc.userId.phone = await ET.decrypt(doc.userId.phone); } catch (err) {}
+            }
+        }
 
         return res.status(200).json({ message: 'Pending doctors retrieved successfully', data: doctors });
     } catch (err) {
