@@ -25,9 +25,11 @@ class PatientTagChip extends StatelessWidget {
           SizedBox(width: AppSizes.w4),
           Text(
             text,
+            // overflow: TextOverflow.ellipsis,
+            maxLines: 2,
             style: AppStyles.black14400.copyWith(
               color: const Color(0xFFFF3D3D),
-              fontSize: AppSizes.sp16,
+              fontSize: AppSizes.sp12,
             ),
           ),
         ],

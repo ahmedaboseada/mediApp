@@ -3,11 +3,7 @@ import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/patients/data/models/patient_model.dart';
 
 class PatientCard extends StatelessWidget {
-  const PatientCard({
-    super.key,
-    required this.patient,
-    this.onViewProfile,
-  });
+  const PatientCard({super.key, required this.patient, this.onViewProfile});
 
   final PatientModel patient;
   final VoidCallback? onViewProfile;
@@ -18,7 +14,6 @@ class PatientCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surfaceColor,
         borderRadius: BorderRadius.circular(AppSizes.r40),
-      
       ),
       padding: EdgeInsets.all(AppSizes.w16),
       child: Column(
@@ -29,19 +24,18 @@ class PatientCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: AppSizes.r20,
-                backgroundImage: AssetImage(patient.avatarAsset),
+                backgroundImage: NetworkImage(patient.avatarAsset),
               ),
               SizedBox(width: AppSizes.w12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      patient.name,
-                      style: AppStyles.black14600,
-                    ),
+                    Text(patient.name, style: AppStyles.black14600),
                     Text(
                       'ID: ${patient.id}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: AppStyles.secondary12400,
                     ),
                   ],
@@ -76,7 +70,7 @@ class PatientCard extends StatelessWidget {
             width: double.infinity,
             child: PrimaryButton(
               onPressed: onViewProfile,
-             
+
               child: Text('View Profile', style: AppStyles.white14500),
             ),
           ),
@@ -104,14 +98,8 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: AppStyles.secondary12400,
-          ),
-          Text(
-            value,
-            style: AppStyles.black14500,
-          ),
+          Text(label, style: AppStyles.secondary12400),
+          Text(value, style: AppStyles.black14500),
         ],
       ),
     );
@@ -129,35 +117,32 @@ class _StatusBadge extends StatelessWidget {
     final statusLabel = patient.statusLabel;
 
     return Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: AppSizes.w4,
-          vertical: AppSizes.h4,
-        ),
-        decoration: BoxDecoration(
-          border: Border.all(color: statusColor, width: 1.5),
-          borderRadius: BorderRadius.circular(AppSizes.r20),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: AppSizes.w8,
-              height: AppSizes.w8,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: statusColor,
-              ),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSizes.w4,
+        vertical: AppSizes.h4,
+      ),
+      decoration: BoxDecoration(
+        border: Border.all(color: statusColor, width: 1.5),
+        borderRadius: BorderRadius.circular(AppSizes.r20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: AppSizes.w8,
+            height: AppSizes.w8,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: statusColor,
             ),
-            SizedBox(width: AppSizes.w8),
-            Text(
-              statusLabel,
-              style: AppStyles.secondary12400.copyWith(
-                color: statusColor,
-              ),
-            ),
-          ],
-        ),
-      
+          ),
+          SizedBox(width: AppSizes.w8),
+          Text(
+            statusLabel,
+            style: AppStyles.secondary12400.copyWith(color: statusColor),
+          ),
+        ],
+      ),
     );
   }
 }

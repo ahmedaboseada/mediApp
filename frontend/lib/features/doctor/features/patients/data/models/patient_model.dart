@@ -13,6 +13,8 @@ class PatientModel {
     required this.status,
     required this.avatarAsset,
     required this.phone,
+    this.allergies = const [],
+    this.chronicConditions = const [],
   });
 
   final String id;
@@ -23,18 +25,42 @@ class PatientModel {
   final PatientStatus status;
   final String avatarAsset;
   final String phone;
+  final List<String> allergies;
+  final List<String> chronicConditions;
 
   factory PatientModel.fromJson(Map<String, dynamic> json) {
+    if (json.containsKey('userId') && json['userId'] is Map<String, dynamic>) {
+      final user = json['userId'] as Map<String, dynamic>;
+      final firstName = user['firstName'] ?? '';
+      final lastName = user['lastName'] ?? '';
+      final name = '$firstName $lastName'.trim();
+      
+      return PatientModel(
+        id: (json['_id'] ?? 'Unknown').toString(),
+        name: name.isNotEmpty ? name : 'Unknown',
+        age: user['age'] ?? 0,
+        gender: (user['gender'] ?? 'M').toString(),
+        bloodType: (user['bloodType'] ?? 'O+').toString(),
+        status: _statusFromString(json['healthBadge'] ?? 'normal'),
+        avatarAsset: (user['profilePicture'] ?? AppAssets.avatar1).toString(),
+        phone: (user['phone'] ?? 'Unknown').toString(),
+        allergies: List<String>.from(json['allergies'] ?? []),
+        chronicConditions: List<String>.from(json['chronicConditions'] ?? []),
+      );
+    }
+
     return PatientModel(
-      id: (json['id'] ?? 'Unknown').toString(),
+      id: (json['id'] ?? json['_id'] ?? 'Unknown').toString(),
       name: (json['name'] ?? 'Unknown').toString(),
       age: json['age'] ?? 0,
       gender: (json['gender'] ?? 'M').toString(),
       bloodType: (json['bloodType'] ?? 'O+').toString(),
-      status: _statusFromString(json['status'] ?? 'normal'),
-      avatarAsset: (json['avatarAsset'] ?? json['avatar'] ?? AppAssets.avatar1)
+      status: _statusFromString(json['status'] ?? json['healthBadge'] ?? 'normal'),
+      avatarAsset: (json['avatarAsset'] ?? json['avatar'] ?? json['profilePicture'] ?? AppAssets.avatar1)
           .toString(),
       phone: (json['phone'] ?? 'Unknown').toString(),
+      allergies: List<String>.from(json['allergies'] ?? []),
+      chronicConditions: List<String>.from(json['chronicConditions'] ?? []),
     );
   }
 
@@ -46,6 +72,7 @@ class PatientModel {
         return PatientStatus.abnormal;
       case 'missedmeds':
       case 'missed_meds':
+      case 'missed meds':
         return PatientStatus.missedMeds;
       default:
         return PatientStatus.normal;

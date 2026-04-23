@@ -43,7 +43,7 @@ class PatientProfileHeader extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: AppSizes.r32,
-              backgroundImage: AssetImage(patient.avatarAsset),
+              backgroundImage: NetworkImage(patient.avatarAsset),
             ),
             SizedBox(width: AppSizes.w16),
             Expanded(

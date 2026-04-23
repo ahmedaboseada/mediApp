@@ -102,10 +102,16 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                         child: Wrap(
                           spacing: AppSizes.w8,
                           runSpacing: AppSizes.h8,
-                          children: const [
-                            PatientTagChip(text: 'Penicillin'),
-                            PatientTagChip(text: 'Peanuts'),
-                          ],
+                          children: widget.patient.allergies.isNotEmpty
+                              ? widget.patient.allergies
+                                  .map((a) => PatientTagChip(text: a))
+                                  .toList()
+                              : [
+                                  Text(
+                                    'No known allergies',
+                                    style: AppStyles.secondary12400,
+                                  )
+                                ],
                         ),
                       ),
                       SizedBox(height: AppSizes.h16),
@@ -115,10 +121,16 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                         child: Wrap(
                           spacing: AppSizes.w8,
                           runSpacing: AppSizes.h8,
-                          children: const [
-                            PatientTagChip(text: 'Hypertension'),
-                            PatientTagChip(text: 'Type 2 Diabetes'),
-                          ],
+                          children: widget.patient.chronicConditions.isNotEmpty
+                              ? widget.patient.chronicConditions
+                                  .map((c) => PatientTagChip(text: c))
+                                  .toList()
+                              : [
+                                  Text(
+                                    'No medical history',
+                                    style: AppStyles.secondary12400,
+                                  )
+                                ],
                         ),
                       ),
                     ],

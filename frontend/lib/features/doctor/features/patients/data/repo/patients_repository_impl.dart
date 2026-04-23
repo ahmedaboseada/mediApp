@@ -78,24 +78,35 @@ class PatientsRepositoryImpl implements PatientsRepository {
     String? searchQuery,
   }) async {
     try {
-      // Simulate API delay
-      await Future.delayed(const Duration(milliseconds: 800));
+      final response = await _apiService.get('/doctors/patients');
 
-      List<PatientModel> patients = List.from(_mockPatients);
-
-      // Filter by search query if provided
-      if (searchQuery != null && searchQuery.isNotEmpty) {
-        final query = searchQuery.toLowerCase();
-        patients = patients
-            .where(
-              (patient) =>
-                  patient.name.toLowerCase().contains(query) ||
-                  patient.id.toLowerCase().contains(query),
-            )
-            .toList();
+      if (response is ServerFailure) {
+        return Left(response);
       }
 
-      return Right(patients);
+      if (response is Map<String, dynamic> &&
+          response.containsKey('patients')) {
+        final List<dynamic> patientsData = response['patients'];
+        List<PatientModel> patients = patientsData
+            .map((data) => PatientModel.fromJson(data as Map<String, dynamic>))
+            .toList();
+
+        // Filter by search query if provided
+        if (searchQuery != null && searchQuery.isNotEmpty) {
+          final query = searchQuery.toLowerCase();
+          patients = patients
+              .where(
+                (patient) =>
+                    patient.name.toLowerCase().contains(query) ||
+                    patient.id.toLowerCase().contains(query),
+              )
+              .toList();
+        }
+
+        return Right(patients);
+      }
+
+      return Left(ServerFailure('Unexpected response format'));
     } catch (e) {
       return Left(ServerFailure('Failed to fetch patients: ${e.toString()}'));
     }
@@ -127,13 +138,13 @@ class PatientsRepositoryImpl implements PatientsRepository {
         '/doctors/patients/connect-patient',
         {'patientId': patientId},
       );
-      
+
       log('sendAddRequest response: $response');
 
       if (response is ServerFailure) {
         return Left(response);
       }
-      
+
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
