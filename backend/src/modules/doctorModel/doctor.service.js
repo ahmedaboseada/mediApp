@@ -69,6 +69,7 @@ import userModel from '../../models/user.model.js';
 import patientModel from '../../models/patient.model.js';
 import notificationModel from '../../models/notification.model.js';
 import medicineModel from '../../models/medicine.model.js';
+import healthMeasurementModel from '../../models/health-measurement.model.js';
 import * as ET from '../../utils/encryption/index.js';
 
 const publicUser = async (u) => {
@@ -397,19 +398,23 @@ export const listConnectedPatients = async (req, res) => {
     const patients = await patientModel.find({ _id: { $in: approvedPatientIds } })
         .populate({ path: 'userId', select: 'firstName lastName profilePicture email phone age gender' })
         .populate({ path: 'medications', select: 'status isChronic dosage frequency startDate endDate name isCritical' })
-        .populate({ path: 'healthMeasurements' })
         .lean();
+
+    // Fetch all health measurements for these patients
+    const allMeasurements = await healthMeasurementModel.find({ patientId: { $in: approvedPatientIds } }).sort({ date: -1 }).lean();
 
     // Compute UI health Badge mapping and decrypt phone
     const enrichedPatients = [];
     for (const p of patients) {
         let healthBadge = 'Normal Status';
 
+        const pMeasurements = allMeasurements.filter(m => String(m.patientId) === String(p._id));
+
         // Priority 1: Check for critical mode medications
         const hasCriticalMeds = p.medications?.some(m => m.status === 'critical');
         if (hasCriticalMeds) {
             healthBadge = 'Critical';
-        } else if (p.healthMeasurements?.sys || p.healthMeasurements?.glucose) {
+        } else if (pMeasurements.some(m => (m.systolic && m.systolic > 130) || (m.diastolic && m.diastolic > 85) || (m.value && m.type === 'blood_sugar' && m.value > 120))) {
             // simplified pseudo-abnormal check for demonstration
             healthBadge = 'Abnormal';
         }
@@ -420,6 +425,7 @@ export const listConnectedPatients = async (req, res) => {
 
         enrichedPatients.push({
             ...p,
+            healthMeasurements: pMeasurements,
             healthBadge
         });
     }
