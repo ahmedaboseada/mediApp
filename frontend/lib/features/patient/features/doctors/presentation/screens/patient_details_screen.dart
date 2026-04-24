@@ -59,14 +59,35 @@ class PatientDetailsScreen extends StatelessWidget {
                         CustomTextField(
                           label: 'your Age',
                           hintText: 'Enter your age',
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            final age = int.tryParse(value);
+                            if (age != null) {
+                              context.read<BookingCubit>().updatePatientDetails(
+                                age: age,
+                              );
+                            }
+                          },
                         ),
                         SizedBox(height: AppSizes.h18),
-                        GenderField(value: ''),
+                        GenderField(
+                          value: state.appointmentReviewData.patientGender,
+                          onGenderChanged: (value) {
+                            context.read<BookingCubit>().updatePatientDetails(
+                              gender: value,
+                            );
+                          },
+                        ),
                         SizedBox(height: AppSizes.h18),
                         CustomTextField(
                           label: 'Write Your Problem',
                           hintText: 'Write here...',
                           maxLines: 7,
+                          onChanged: (value) {
+                            context.read<BookingCubit>().updatePatientDetails(
+                              problem: value,
+                            );
+                          },
                         ),
                         SizedBox(height: AppSizes.h24),
                         PrimaryButton(

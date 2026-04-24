@@ -47,7 +47,7 @@ class ProfileScreen extends StatelessWidget {
                         specialty: subtitle,
                         networkImageUrl: image,
                         isLoading: isLoading,
-                        userId: profile?.user?.id ?? '',
+                        userId: profile?.user.id ?? '',
                       );
                     },
                   ),

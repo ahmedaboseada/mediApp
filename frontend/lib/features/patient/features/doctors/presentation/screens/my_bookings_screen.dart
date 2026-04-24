@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/patient/features/doctors/data/models/doctor_summary.dart';
+import 'package:medi/features/patient/features/doctors/data/models/booking_model.dart';
+import 'package:medi/features/patient/features/doctors/data/repo/doctors_repo.dart';
+import 'package:medi/features/patient/features/doctors/presentation/cubits/my_bookings_cubit.dart';
+import 'package:medi/features/patient/features/doctors/presentation/cubits/my_bookings_state.dart';
 import 'package:medi/features/patient/features/doctors/presentation/widgets/add_review_dialog.dart';
 import 'package:medi/features/patient/features/doctors/presentation/widgets/appointment_card.dart';
 import 'package:medi/features/patient/features/doctors/presentation/widgets/reschedule_appointment_dialog.dart';
@@ -35,124 +39,152 @@ class _MyBookingsScreenState extends State<MyBookingsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(
-        title: 'My Booking',
-        actionIcon: Icons.search,
-        onpressed: () {},
-      ),
-      body: Column(
-        children: [
-          TabBar(
-            controller: _tabController,
-            labelColor: AppColors.primary,
-            unselectedLabelColor: AppColors.secondaryText,
-            indicatorColor: AppColors.primary,
-            indicatorWeight: 3,
-            tabs: const [
-              Tab(text: 'Upcoming'),
-              Tab(text: 'Completed'),
-              Tab(text: 'Cancelled'),
-            ],
-          ),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
+    return BlocProvider(
+      create: (context) =>
+          MyBookingsCubit(doctorsRepository: getIt<DoctorsRepository>())
+            ..fetchBookings(),
+      child: Builder(
+        builder: (context) {
+          return Scaffold(
+            appBar: CustomAppBar(
+              title: 'My Booking',
+              actionIcon: Icons.search,
+              onpressed: () {},
+            ),
+            body: Column(
               children: [
-                // Upcoming Appointments
-                _buildAppointmentsList(
-                  appointments: _upcomingAppointments,
-                  emptyMessage: 'No upcoming appointments',
+                TabBar(
+                  controller: _tabController,
+                  labelColor: AppColors.primary,
+                  unselectedLabelColor: AppColors.secondaryText,
+                  indicatorColor: AppColors.primary,
+                  indicatorWeight: 3,
+                  tabs: const [
+                    Tab(text: 'Upcoming'),
+                    Tab(text: 'Completed'),
+                    Tab(text: 'Cancelled'),
+                  ],
                 ),
-                // Completed Appointments
-                _buildAppointmentsList(
-                  appointments: _completedAppointments,
-                  emptyMessage: 'No completed appointments',
-                ),
-                // Cancelled Appointments
-                _buildAppointmentsList(
-                  appointments: _cancelledAppointments,
-                  emptyMessage: 'No cancelled appointments',
+                Expanded(
+                  child: BlocBuilder<MyBookingsCubit, MyBookingsState>(
+                    builder: (context, state) {
+                      if (state is MyBookingsLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      if (state is MyBookingsFailure) {
+                        return Center(child: Text(state.message));
+                      }
+
+                      if (state is MyBookingsSuccess) {
+                        final upcoming = state.bookings
+                            .where((b) => b.status.toLowerCase() == 'upcoming')
+                            .toList();
+                        final completed = state.bookings
+                            .where((b) => b.status.toLowerCase() == 'completed')
+                            .toList();
+                        final cancelled = state.bookings
+                            .where((b) => b.status.toLowerCase() == 'cancelled')
+                            .toList();
+
+                        return TabBarView(
+                          controller: _tabController,
+                          children: [
+                            _buildAppointmentsList(
+                              context,
+                              appointments: upcoming,
+                              emptyMessage: 'No upcoming appointments',
+                            ),
+                            _buildAppointmentsList(
+                              context,
+                              appointments: completed,
+                              emptyMessage: 'No completed appointments',
+                            ),
+                            _buildAppointmentsList(
+                              context,
+                              appointments: cancelled,
+                              emptyMessage: 'No cancelled appointments',
+                            ),
+                          ],
+                        );
+                      }
+
+                      return const SizedBox.shrink();
+                    },
+                  ),
                 ),
               ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildAppointmentsList({
-    required List<AppointmentInfo> appointments,
+  Widget _buildAppointmentsList(
+    BuildContext context, {
+    required List<BookingModel> appointments,
     required String emptyMessage,
   }) {
     if (appointments.isEmpty) {
       return Center(child: Text(emptyMessage, style: AppStyles.secondary12400));
     }
 
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(AppSizes.w16),
-      child: Column(
-        children: [
-          ...appointments.map(
-            (appointment) => Padding(
-              padding: EdgeInsets.only(bottom: AppSizes.h12),
-              child: AppointmentCard(
-                appointment: appointment,
-                onSecondaryActionPressed: () {
-                  _handleSecondaryAction(appointment);
-                },
-                onPrimaryActionPressed: () {
-                  _handlePrimaryAction(appointment);
-                },
+    return RefreshIndicator(
+      onRefresh: () => context.read<MyBookingsCubit>().fetchBookings(),
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.all(AppSizes.w16),
+        child: Column(
+          children: [
+            ...appointments.map(
+              (appointment) => Padding(
+                padding: EdgeInsets.only(bottom: AppSizes.h12),
+                child: AppointmentCard(
+                  appointment: appointment,
+                  onSecondaryActionPressed: () {
+                    _handleSecondaryAction(context, appointment);
+                  },
+                  onPrimaryActionPressed: () {
+                    _handlePrimaryAction(context, appointment);
+                  },
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  void _handleSecondaryAction(AppointmentInfo appointment) {
-    if (appointment.status == 'upcoming') {
-      context.push(AppRouter.patientCancelBookingScreen);
-      return;
-    }
-
-    if (appointment.status == 'completed') {
+  void _handleSecondaryAction(BuildContext context, BookingModel appointment) {
+    if (appointment.status.toLowerCase() == 'upcoming') {
       context.push(
-        AppRouter.doctorProfileScreen,
-        extra: appointment.doctorName,
+        AppRouter.patientCancelBookingScreen,
+        extra: {
+          'booking': appointment,
+          'cubit': context.read<MyBookingsCubit>(),
+        },
       );
       return;
     }
 
-    final action = appointment.status == 'upcoming' ? 'Cancel' : 'Re-Book';
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$action tapped for ${appointment.doctorName}')),
-    );
+    if (appointment.status.toLowerCase() == 'completed') {
+      context.push(AppRouter.doctorProfileScreen, extra: appointment.doctor);
+      return;
+    }
   }
 
-  // DoctorModel _mapAppointmentDoctor(AppointmentInfo appointment) {
-  //   return DoctorModel(
-  //     id: appointment.doctorName.toLowerCase().replaceAll(' ', '_'),
-  //     name: appointment.doctorName,
-  //     specialty: 'General Physician',
-  //     rating: 4.8,
-  //     reviewsCount: 82,
-  //     imageAsset: AppAssets.avatar1,
-  //   );
-  // }
-
-  void _handlePrimaryAction(AppointmentInfo appointment) {
-    if (appointment.status == 'upcoming') {
+  void _handlePrimaryAction(BuildContext context, BookingModel appointment) {
+    if (appointment.status.toLowerCase() == 'upcoming') {
       showDialog<void>(
         context: context,
         builder: (context) {
           return RescheduleAppointmentDialog(
-            doctorName: appointment.doctorName,
+            doctorName:
+                'Dr. ${appointment.doctor.user.firstName} ${appointment.doctor.user.lastName}',
             onReschedule: () {
-              _showTopSuccessBanner('New appointment added');
+              _showTopSuccessBanner(context, 'New appointment added');
             },
           );
         },
@@ -168,7 +200,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen>
     );
   }
 
-  void _showTopSuccessBanner(String message) {
+  void _showTopSuccessBanner(BuildContext context, String message) {
     _successOverlayEntry?.remove();
 
     final overlay = Overlay.maybeOf(context);
@@ -199,64 +231,4 @@ class _MyBookingsScreenState extends State<MyBookingsScreen>
       _successOverlayEntry = null;
     });
   }
-
-  // Sample data
-  static final List<AppointmentInfo> _upcomingAppointments = [
-    AppointmentInfo(
-      dateTime: 'Aug 25, 2026 - 10:00 AM',
-      doctorName: 'Dr. Jenny William',
-      location: 'G8502 Preston Rd. Inglewood',
-      bookingId: '#DR452SA54',
-      remindMe: true,
-      status: 'upcoming',
-    ),
-    AppointmentInfo(
-      dateTime: 'Aug 25, 2026 - 10:00 AM',
-      doctorName: 'Dr. Guy Hawkins',
-      location: 'G8502 Preston Rd. Inglewood',
-      bookingId: '#DR452SA54',
-      remindMe: true,
-      status: 'upcoming',
-    ),
-  ];
-
-  static final List<AppointmentInfo> _completedAppointments = [
-    AppointmentInfo(
-      dateTime: 'Aug 18, 2026 - 2:00 PM',
-      doctorName: 'Dr. Sarah Johnson',
-      location: 'G8502 Preston Rd. Inglewood',
-      bookingId: '#DR451SA53',
-      remindMe: false,
-      status: 'completed',
-    ),
-  ];
-
-  static final List<AppointmentInfo> _cancelledAppointments = [
-    AppointmentInfo(
-      dateTime: 'Aug 10, 2026 - 3:30 PM',
-      doctorName: 'Dr. Michael Brown',
-      location: 'G8502 Preston Rd. Inglewood',
-      bookingId: '#DR450SA52',
-      remindMe: false,
-      status: 'cancelled',
-    ),
-  ];
-}
-
-class AppointmentInfo {
-  final String dateTime;
-  final String doctorName;
-  final String location;
-  final String bookingId;
-  final bool remindMe;
-  final String status; // upcoming, completed, cancelled
-
-  AppointmentInfo({
-    required this.dateTime,
-    required this.doctorName,
-    required this.location,
-    required this.bookingId,
-    required this.remindMe,
-    required this.status,
-  });
 }

@@ -11,6 +11,9 @@ class AppointmentReviewData {
     required this.unitPrice,
     required this.paymentMethod,
     required this.location,
+    this.patientAge = 0,
+    this.patientGender = '',
+    this.problem = '',
   });
 
   final DoctorModel? doctor;
@@ -22,6 +25,9 @@ class AppointmentReviewData {
   final double unitPrice;
   final String paymentMethod;
   final String location;
+  final int patientAge;
+  final String patientGender;
+  final String problem;
 
   AppointmentReviewData copyWith({
     DoctorModel? doctor,
@@ -33,6 +39,9 @@ class AppointmentReviewData {
     double? unitPrice,
     String? paymentMethod,
     String? location,
+    int? patientAge,
+    String? patientGender,
+    String? problem,
   }) {
     return AppointmentReviewData(
       doctor: doctor ?? this.doctor,
@@ -44,6 +53,9 @@ class AppointmentReviewData {
       unitPrice: unitPrice ?? this.unitPrice,
       paymentMethod: paymentMethod ?? this.paymentMethod,
       location: location ?? this.location,
+      patientAge: patientAge ?? this.patientAge,
+      patientGender: patientGender ?? this.patientGender,
+      problem: problem ?? this.problem,
     );
   }
 }

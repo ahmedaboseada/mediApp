@@ -13,15 +13,6 @@ class DoctorProfileScreen extends StatefulWidget {
 
   final DoctorModel doctor;
 
-  static const List<String> _timeSlots = [
-    '01:30 PM',
-    '3:00 PM',
-    '5:00 PM',
-    '7:00 PM',
-    '9:00 PM',
-    '10:00 PM',
-  ];
-
   @override
   State<DoctorProfileScreen> createState() => _DoctorProfileScreenState();
 }
@@ -83,27 +74,33 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                       children: [
                         DoctorProfileCalendar(selectedDate: _selectedDate),
                         SizedBox(height: AppSizes.h24),
-                        DoctorAvailabilitySection(
-                          timeSlots: DoctorProfileScreen._timeSlots,
-                          selectedTimeSlot: _selectedTimeSlot,
-                          onTimeSlotSelected: (timeSlot) {
-                            _selectedTimeSlot.value = timeSlot;
-                            context.read<BookingCubit>().updateSelectedTimeSlot(
-                              timeSlot,
-                            );
-                          },
-                        ),
+                        state.isLoadingSlots
+                            ? const Center(child: CircularProgressIndicator())
+                            : DoctorAvailabilitySection(
+                                timeSlots: state.availableSlots,
+                                selectedTimeSlot: _selectedTimeSlot,
+                                onTimeSlotSelected: (timeSlot) {
+                                  _selectedTimeSlot.value = timeSlot;
+                                  context
+                                      .read<BookingCubit>()
+                                      .updateSelectedTimeSlot(timeSlot);
+                                },
+                              ),
                         SizedBox(height: AppSizes.h24),
-                        SizedBox(
-                          width: double.infinity,
-                          child: PrimaryButton(
-                            text: 'Book Appointment',
-                            onPressed: () => context.push(
-                              '/doctors/profile/book',
-                              extra: profileDoctor,
+                        if (state.availableSlots.isNotEmpty) ...[
+                          SizedBox(
+                            width: double.infinity,
+                            child: PrimaryButton(
+                              text: 'Book Appointment',
+                              onPressed: () => context.push(
+                                '/doctors/profile/book',
+                                extra: profileDoctor,
+                              ),
                             ),
                           ),
-                        ),
+                        ] else ...[
+                          const Center(child: Text('No available slots')),
+                        ],
                       ],
                     ),
                   ),

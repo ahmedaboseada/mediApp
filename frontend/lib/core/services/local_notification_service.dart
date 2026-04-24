@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
@@ -74,6 +75,7 @@ class LocalNotificationService {
   static const String _criticalStoragePrefix =
       'medicine_critical_notification_ids_';
   static const String _alarmStoragePrefix = 'medicine_alarm_notification_ids_';
+  static const String _appointmentRemindersPrefix = 'appointment_remind_me_';
   static const String _dndPromptShownKey = 'dnd_prompt_shown_v1';
   static const String _batteryPromptShownKey = 'battery_prompt_shown_v1';
   static const MethodChannel _androidSystemChannel = MethodChannel(
@@ -180,6 +182,75 @@ class LocalNotificationService {
     );
 
     _isInitialized = true;
+  }
+
+  static void saveAppointmentRemindMe(
+    String appointmentId,
+    bool value,
+  ) {
+    if (!Hive.isBoxOpen('settingsBox')) return;
+    final settings = Hive.box('settingsBox');
+    settings.put('$_appointmentRemindersPrefix$appointmentId', value);
+  }
+
+  static bool getAppointmentRemindMe(String appointmentId) {
+    if (!Hive.isBoxOpen('settingsBox')) return false;
+    final settings = Hive.box('settingsBox');
+    return settings.get('$_appointmentRemindersPrefix$appointmentId', defaultValue: false) as bool;
+  }
+
+  static Future<void> scheduleAppointmentReminder(
+    String appointmentId,
+    String doctorName,
+    DateTime date,
+    String time,
+  ) async {
+    await init();
+    final parsedTime = _parseReminderTime(time);
+    if (parsedTime == null) return;
+
+    final scheduledDateTime = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      parsedTime.$1,
+      parsedTime.$2,
+    );
+
+    // Don't schedule if it's in the past
+    if (!scheduledDateTime.isAfter(DateTime.now())) return;
+
+    final id = appointmentId.hashCode.abs();
+
+    final settings = AlarmSettings(
+      id: id,
+      dateTime: scheduledDateTime,
+      assetAudioPath: 'assets/sounds/pill_shaking.mp3',
+      loopAudio: true,
+      vibrate: true,
+      warningNotificationOnKill: false,
+      androidFullScreenIntent: true,
+      androidStopAlarmOnTermination: false,
+      volumeSettings: VolumeSettings.fade(
+        volume: 0.9,
+        fadeDuration: const Duration(seconds: 5),
+        volumeEnforced: true,
+      ),
+      notificationSettings: NotificationSettings(
+        title: 'APPOINTMENT: Dr. $doctorName',
+        body: 'Your appointment is starting now at $time',
+        stopButton: 'Stop alarm',
+        icon: 'notification_icon',
+      ),
+    );
+
+    await Alarm.set(alarmSettings: settings);
+  }
+
+  static Future<void> cancelAppointmentReminder(String appointmentId) async {
+    final id = appointmentId.hashCode.abs();
+    await Alarm.stop(id);
+    await flutterLocalNotificationsPlugin.cancel(id: id);
   }
 
   static Future<void> _requestAndroidReliabilityPermissions() async {
@@ -933,7 +1004,7 @@ class LocalNotificationService {
     return DateTime(year, month, day);
   }
 
-  int? _parseMinutesSinceMidnight(String raw) {
+  static int? _parseMinutesSinceMidnight(String raw) {
     final value = raw.trim();
     if (value.isEmpty) {
       return null;
@@ -966,7 +1037,7 @@ class LocalNotificationService {
     return (hour * 60) + minute;
   }
 
-  String _storageKeyForMedication(Medication medication) {
+  static String _storageKeyForMedication(Medication medication) {
     final remoteId = medication.id.trim();
     if (remoteId.isNotEmpty) {
       return '$_storagePrefix$remoteId';
@@ -983,7 +1054,7 @@ class LocalNotificationService {
     return '$_storagePrefix${fallbackIdentity.hashCode.abs()}';
   }
 
-  String _criticalStorageKeyForMedication(Medication medication) {
+  static String _criticalStorageKeyForMedication(Medication medication) {
     final remoteId = medication.id.trim();
     if (remoteId.isNotEmpty) {
       return '$_criticalStoragePrefix$remoteId';
@@ -1000,17 +1071,17 @@ class LocalNotificationService {
     return '$_criticalStoragePrefix${fallbackIdentity.hashCode.abs()}';
   }
 
-  int _notificationIdFor(String storageKey, DateTime dateTime) {
+  static int _notificationIdFor(String storageKey, DateTime dateTime) {
     final seed = '$storageKey|${dateTime.toIso8601String()}';
     return seed.hashCode & 0x7fffffff;
   }
 
-  int _notificationIdFromSeed(String storageKey, DateTime dateTime) {
+  static int _notificationIdFromSeed(String storageKey, DateTime dateTime) {
     final seed = '$storageKey|${dateTime.toIso8601String()}';
     return seed.hashCode & 0x7fffffff;
   }
 
-  (int, int)? _parseReminderTime(String raw) {
+  static (int, int)? _parseReminderTime(String raw) {
     final value = raw.trim();
     if (value.isEmpty || value == '--:--') {
       return null;

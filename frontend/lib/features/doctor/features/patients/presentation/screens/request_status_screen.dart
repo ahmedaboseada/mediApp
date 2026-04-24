@@ -3,6 +3,7 @@ import 'package:medi/core/core.dart';
 
 class RequestStatusScreen extends StatelessWidget {
   const RequestStatusScreen({
+    super.key,
     required this.isConnected,
     required this.patientId,
     required this.onBack,

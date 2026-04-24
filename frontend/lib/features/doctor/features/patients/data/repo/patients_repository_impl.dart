@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/patients/data/models/patient_model.dart';
 import 'dart:developer';

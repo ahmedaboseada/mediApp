@@ -2,22 +2,25 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:medi/features/patient/features/doctors/data/models/appointment_review_data.dart';
 import 'package:medi/features/patient/features/doctors/data/models/doctor_summary.dart';
+import 'package:medi/features/patient/features/doctors/data/repo/doctors_repo.dart';
 
 part 'booking_state.dart';
 
 class BookingCubit extends Cubit<BookingState> {
-  BookingCubit()
+  final DoctorsRepository doctorsRepository;
+
+  BookingCubit({required this.doctorsRepository})
     : super(
         BookingState(
           appointmentReviewData: AppointmentReviewData(
             doctor: null,
             dateAndHour: '',
-            packageName: '',
-            duration: '',
-            bookingFor: '',
-            amount: 0,
-            unitPrice: 0,
-            paymentMethod: '',
+            packageName: 'Online',
+            duration: '30 minutes',
+            bookingFor: 'Self',
+            amount: 60,
+            unitPrice: 20,
+            paymentMethod: 'card',
             location: '',
           ),
           selectedPackageIndex: 0,
@@ -30,8 +33,24 @@ class BookingCubit extends Cubit<BookingState> {
           cardNumber: '',
           expiryDate: '',
           cvvCode: '',
+          availableSlots: [],
+          isLoadingSlots: false,
         ),
       );
+
+  Future<void> fetchAvailableSlots(String doctorId, DateTime date) async {
+    emit(state.copyWith(isLoadingSlots: true));
+
+    final dateStr = DateFormat('yyyy-MM-dd').format(date);
+    final result = await doctorsRepository.getDoctorSlots(doctorId, dateStr);
+
+    result.fold(
+      (failure) =>
+          emit(state.copyWith(isLoadingSlots: false, availableSlots: [])),
+      (slots) =>
+          emit(state.copyWith(isLoadingSlots: false, availableSlots: slots)),
+    );
+  }
 
   void initializeWithData(AppointmentReviewData data) {
     emit(state.copyWith(appointmentReviewData: data));
@@ -80,6 +99,11 @@ class BookingCubit extends Cubit<BookingState> {
         appointmentReviewData: updatedData,
       ),
     );
+
+    final doctorId = state.appointmentReviewData.doctor?.id;
+    if (doctorId != null) {
+      fetchAvailableSlots(doctorId, selectedDate);
+    }
   }
 
   void updateSelectedTimeSlot(String selectedTimeSlot) {
@@ -139,5 +163,49 @@ class BookingCubit extends Cubit<BookingState> {
   void setDoctor(DoctorModel doctor) {
     final updatedData = state.appointmentReviewData.copyWith(doctor: doctor);
     emit(state.copyWith(appointmentReviewData: updatedData));
+    fetchAvailableSlots(doctor.id, state.selectedDate);
+  }
+
+  void updatePatientDetails({int? age, String? gender, String? problem}) {
+    final updatedData = state.appointmentReviewData.copyWith(
+      patientAge: age,
+      patientGender: gender,
+      problem: problem,
+    );
+    emit(state.copyWith(appointmentReviewData: updatedData));
+  }
+
+  Future<void> createBooking() async {
+    if (state.appointmentReviewData.doctor == null ||
+        state.selectedTimeSlot == null) {
+      return;
+    }
+
+    emit(state.copyWith(isBooking: true, bookingSuccess: false));
+
+    final data = state.appointmentReviewData;
+    final body = {
+      "doctorId": data.doctor!.id,
+      "date": state.selectedDate.toIso8601String(),
+      "time": state.selectedTimeSlot,
+      "packageType": data.packageName.toLowerCase() == 'online'
+          ? 'online'
+          : 'in-person',
+      "bookingFor": data.bookingFor,
+      "patientAge": data.patientAge,
+      "patientGender": data.patientGender.toLowerCase(),
+      "problem": data.problem,
+      "paymentMethod": data.paymentMethod.toLowerCase() == 'card'
+          ? 'card'
+          : 'cash_on_site',
+    };
+
+    final result = await doctorsRepository.createBooking(body);
+
+    result.fold(
+      (failure) =>
+          emit(state.copyWith(isBooking: false, bookingSuccess: false)),
+      (success) => emit(state.copyWith(isBooking: false, bookingSuccess: true)),
+    );
   }
 }

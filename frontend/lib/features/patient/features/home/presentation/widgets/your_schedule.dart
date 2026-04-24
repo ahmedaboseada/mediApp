@@ -8,7 +8,7 @@ import 'package:medi/features/patient/features/home/presentation/controller/sche
 import 'package:medi/features/patient/features/home/presentation/controller/schedule/schedule_cubit.dart';
 
 class YourSchedule extends StatefulWidget {
-  YourSchedule({super.key});
+  const YourSchedule({super.key});
 
   @override
   State<YourSchedule> createState() => _YourScheduleState();

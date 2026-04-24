@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:medi/core/core.dart';
 
 class DoctorHoverCard extends StatefulWidget {
@@ -85,7 +86,15 @@ class _DoctorHoverCardState extends State<DoctorHoverCard> {
                   CircleAvatar(
                     radius: AppSizes.r20,
                     backgroundColor: AppColors.secondary,
-                    backgroundImage: AssetImage(widget.imageAsset),
+                    backgroundImage: (widget.imageAsset.isNotEmpty &&
+                            widget.imageAsset.startsWith('http'))
+                        ? CachedNetworkImageProvider(widget.imageAsset)
+                        : AssetImage(
+                              widget.imageAsset.isNotEmpty
+                                  ? widget.imageAsset
+                                  : AppAssets.avatar1,
+                            )
+                            as ImageProvider,
                   ),
                   SizedBox(width: AppSizes.w16),
                   Expanded(

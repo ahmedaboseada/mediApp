@@ -10,6 +10,9 @@ import 'package:medi/features/patient/features/add_medication/presentation/cubit
 import 'package:medi/features/patient/features/add_medication/presentation/screens/daily_symptoms_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/edit_medication_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/medicine_info_screen.dart';
+import 'package:medi/features/patient/features/doctors/data/models/booking_model.dart';
+import 'package:medi/features/patient/features/doctors/data/repo/doctors_repo.dart';
+import 'package:medi/features/patient/features/doctors/presentation/cubits/my_bookings_cubit.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/screens/add_daily_log_screen.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/screens/health_measurements_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/controller/profile/profile_cubit.dart';
@@ -422,7 +425,16 @@ class AppRouter {
                   ),
                   GoRoute(
                     path: 'cancel-booking',
-                    builder: (context, state) => const CancelBookingScreen(),
+                    builder: (context, state) {
+                      final extra = state.extra as Map<String, dynamic>;
+                      return BlocProvider.value(
+                        value: extra['cubit'] as MyBookingsCubit,
+                        child: CancelBookingScreen(
+                          booking: extra['booking'] as BookingModel,
+                          cubit: extra['cubit'] as MyBookingsCubit,
+                        ),
+                      );
+                    },
                   ),
                   GoRoute(
                     path: 'browse',
@@ -434,7 +446,9 @@ class AppRouter {
                   ),
                   ShellRoute(
                     builder: (context, state, child) => BlocProvider(
-                      create: (context) => BookingCubit(),
+                      create: (context) => BookingCubit(
+                        doctorsRepository: getIt<DoctorsRepository>(),
+                      ),
                       child: child,
                     ),
                     routes: [

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:intl/intl.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/patient/features/doctors/presentation/screens/my_bookings_screen.dart';
+import 'package:medi/features/patient/features/doctors/data/models/booking_model.dart';
 
 class AppointmentCard extends StatefulWidget {
-  final AppointmentInfo appointment;
+  final BookingModel appointment;
   final VoidCallback onSecondaryActionPressed;
   final VoidCallback onPrimaryActionPressed;
 
@@ -24,7 +26,33 @@ class _AppointmentCardState extends State<AppointmentCard> {
   @override
   void initState() {
     super.initState();
-    _remindMe = widget.appointment.remindMe;
+    _remindMe = LocalNotificationService.getAppointmentRemindMe(
+      widget.appointment.id,
+    );
+  }
+
+  Future<void> _toggleRemindMe(bool value) async {
+    setState(() {
+      _remindMe = value;
+    });
+
+    LocalNotificationService.saveAppointmentRemindMe(
+      widget.appointment.id,
+      value,
+    );
+
+    if (value) {
+      await LocalNotificationService.scheduleAppointmentReminder(
+        widget.appointment.id,
+        '${widget.appointment.doctor.user.firstName} ${widget.appointment.doctor.user.lastName}',
+        widget.appointment.date.date,
+        widget.appointment.date.time,
+      );
+    } else {
+      await LocalNotificationService.cancelAppointmentReminder(
+        widget.appointment.id,
+      );
+    }
   }
 
   @override
@@ -44,8 +72,11 @@ class _AppointmentCardState extends State<AppointmentCard> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(widget.appointment.dateTime, style: AppStyles.black14500),
-                if (widget.appointment.status == 'upcoming') ...[
+                Text(
+                  '${DateFormat('MMM d, yyyy').format(widget.appointment.date.date)} - ${widget.appointment.date.time}',
+                  style: AppStyles.black14500,
+                ),
+                if (widget.appointment.status.toLowerCase() == 'upcoming') ...[
                   Row(
                     children: [
                       Text(
@@ -57,11 +88,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
                       SizedBox(width: AppSizes.w8),
                       Switch(
                         value: _remindMe,
-                        onChanged: (value) {
-                          setState(() {
-                            _remindMe = value;
-                          });
-                        },
+                        onChanged: (value) => _toggleRemindMe(value),
                         activeThumbColor: AppColors.whiteText,
                         activeTrackColor: AppColors.primary,
                         inactiveThumbColor: AppColors.whiteText,
@@ -92,12 +119,40 @@ class _AppointmentCardState extends State<AppointmentCard> {
                     color: AppColors.background,
                     borderRadius: BorderRadius.circular(AppSizes.r8),
                   ),
-                  child: Center(
-                    child: Icon(
-                      Icons.person_outline,
-                      size: AppSizes.w32,
-                      color: AppColors.secondaryText,
-                    ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(AppSizes.r8),
+                    child:
+                        (widget
+                                .appointment
+                                .doctor
+                                .user
+                                .profilePicture
+                                .isNotEmpty &&
+                            widget.appointment.doctor.user.profilePicture
+                                .startsWith('http'))
+                        ? CachedNetworkImage(
+                            imageUrl:
+                                widget.appointment.doctor.user.profilePicture,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                            errorWidget: (context, url, error) => Image.asset(
+                              AppAssets.avatar1,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        : Image.asset(
+                            widget
+                                    .appointment
+                                    .doctor
+                                    .user
+                                    .profilePicture
+                                    .isNotEmpty
+                                ? widget.appointment.doctor.user.profilePicture
+                                : AppAssets.avatar1,
+                            fit: BoxFit.cover,
+                          ),
                   ),
                 ),
                 SizedBox(width: AppSizes.w12),
@@ -106,7 +161,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.appointment.doctorName,
+                        'Dr. ${widget.appointment.doctor.user.firstName} ${widget.appointment.doctor.user.lastName}',
                         style: AppStyles.black14500,
                       ),
                       SizedBox(height: AppSizes.h4),
@@ -120,7 +175,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
                           SizedBox(width: AppSizes.w4),
                           Expanded(
                             child: Text(
-                              widget.appointment.location,
+                              widget.appointment.clinicAddress,
                               style: AppStyles.secondary12400,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -143,7 +198,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
                               children: [
                                 const TextSpan(text: 'Booking ID: '),
                                 TextSpan(
-                                  text: widget.appointment.bookingId,
+                                  text: widget.appointment.appointmentId,
                                   style: AppStyles.secondary12400.copyWith(
                                     color: AppColors.primary,
                                   ),
@@ -177,7 +232,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
                       onPressed: widget.onSecondaryActionPressed,
 
                       child: Text(
-                        widget.appointment.status == 'upcoming'
+                        widget.appointment.status.toLowerCase() == 'upcoming'
                             ? 'Cancel'
                             : 'Re-Book',
                         style: AppStyles.primary20700.copyWith(
@@ -194,7 +249,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
                     onPressed: widget.onPrimaryActionPressed,
 
                     child: Text(
-                      (widget.appointment.status == 'upcoming')
+                      (widget.appointment.status.toLowerCase() == 'upcoming')
                           ? 'Reschedule'
                           : 'Add Review',
 

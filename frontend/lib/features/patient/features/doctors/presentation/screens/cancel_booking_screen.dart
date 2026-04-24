@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/features/patient/features/doctors/data/models/booking_model.dart';
+import 'package:medi/features/patient/features/doctors/presentation/cubits/my_bookings_cubit.dart';
 
 class CancelBookingScreen extends StatefulWidget {
-  const CancelBookingScreen({super.key});
+  final BookingModel booking;
+  final MyBookingsCubit cubit;
+  const CancelBookingScreen({
+    super.key,
+    required this.booking,
+    required this.cubit,
+  });
 
   @override
   State<CancelBookingScreen> createState() => _CancelBookingScreenState();
@@ -29,6 +37,12 @@ class _CancelBookingScreenState extends State<CancelBookingScreen> {
   }
 
   void _cancelAppointment() {
+    final reason = _selectedReason == 'Other'
+        ? _otherReasonController.text.trim()
+        : _selectedReason;
+
+    widget.cubit.cancelBooking(widget.booking.id, reason);
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Appointment cancelled successfully')),
     );

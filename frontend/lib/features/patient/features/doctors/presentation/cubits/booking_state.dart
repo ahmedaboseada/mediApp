@@ -12,6 +12,10 @@ class BookingState {
   final String cardNumber;
   final String expiryDate;
   final String cvvCode;
+  final List<String> availableSlots;
+  final bool isLoadingSlots;
+  final bool isBooking;
+  final bool bookingSuccess;
 
   const BookingState({
     required this.appointmentReviewData,
@@ -25,6 +29,10 @@ class BookingState {
     required this.cardNumber,
     required this.expiryDate,
     required this.cvvCode,
+    this.availableSlots = const [],
+    this.isLoadingSlots = false,
+    this.isBooking = false,
+    this.bookingSuccess = false,
   });
 
   BookingState copyWith({
@@ -39,6 +47,10 @@ class BookingState {
     String? cardNumber,
     String? expiryDate,
     String? cvvCode,
+    List<String>? availableSlots,
+    bool? isLoadingSlots,
+    bool? isBooking,
+    bool? bookingSuccess,
   }) {
     return BookingState(
       appointmentReviewData:
@@ -54,6 +66,10 @@ class BookingState {
       cardNumber: cardNumber ?? this.cardNumber,
       expiryDate: expiryDate ?? this.expiryDate,
       cvvCode: cvvCode ?? this.cvvCode,
+      availableSlots: availableSlots ?? this.availableSlots,
+      isLoadingSlots: isLoadingSlots ?? this.isLoadingSlots,
+      isBooking: isBooking ?? this.isBooking,
+      bookingSuccess: bookingSuccess ?? this.bookingSuccess,
     );
   }
 }

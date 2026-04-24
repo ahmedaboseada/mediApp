@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/patients/data/models/patient_model.dart';
-import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/medicine_stock_row.dart';
 
 class MedCard extends StatelessWidget {

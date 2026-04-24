@@ -19,12 +19,30 @@ class ReviewSummaryDoctorHeader extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(AppSizes.r80),
-          child: CachedNetworkImage(
-            imageUrl: doctor.user.profilePicture,
-            width: AppSizes.w64,
-            height: AppSizes.h64,
-            fit: BoxFit.cover,
-          ),
+          child: doctor.user.profilePicture.startsWith('http')
+              ? CachedNetworkImage(
+                  imageUrl: doctor.user.profilePicture,
+                  width: AppSizes.w64,
+                  height: AppSizes.h64,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  errorWidget: (context, url, error) => Image.asset(
+                    AppAssets.avatar1,
+                    width: AppSizes.w64,
+                    height: AppSizes.h64,
+                    fit: BoxFit.cover,
+                  ),
+                )
+              : Image.asset(
+                  doctor.user.profilePicture.isNotEmpty
+                      ? doctor.user.profilePicture
+                      : AppAssets.avatar1,
+                  width: AppSizes.w64,
+                  height: AppSizes.h64,
+                  fit: BoxFit.cover,
+                ),
         ),
         SizedBox(width: AppSizes.w12),
         Expanded(
