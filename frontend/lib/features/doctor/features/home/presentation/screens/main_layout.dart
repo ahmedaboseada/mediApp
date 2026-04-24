@@ -7,13 +7,23 @@ import 'package:medi/features/doctor/features/home/presentation/screens/profile_
 import 'package:medi/features/doctor/features/home/presentation/screens/home_screen.dart';
 import 'package:medi/features/doctor/features/patients/presentation/screens/patients_screen.dart';
 
+import 'package:medi/features/shared/auth/presentation/cubit/user_profile/user_profile_cubit.dart';
+import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
+
 class MainDoctorView extends StatelessWidget {
   const MainDoctorView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => HomeNavCubit(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => UserProfileCubit(getIt<AuthRepoImpl>())..getMe(),
+        ),
+        BlocProvider(
+          create: (_) => HomeNavCubit(),
+        ),
+      ],
       child: const _MainLayoutView(),
     );
   }

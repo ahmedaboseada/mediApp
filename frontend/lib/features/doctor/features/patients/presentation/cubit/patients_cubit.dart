@@ -3,8 +3,7 @@ import 'package:medi/features/doctor/features/patients/data/repo/patients_reposi
 import 'package:medi/features/doctor/features/patients/presentation/cubit/patients_state.dart';
 
 class PatientsCubit extends Cubit<PatientsState> {
-  PatientsCubit(this._repository)
-      : super(const PatientsState());
+  PatientsCubit(this._repository) : super(const PatientsState());
 
   final PatientsRepository _repository;
 

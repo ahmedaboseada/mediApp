@@ -5,7 +5,7 @@ import 'package:medi/features/doctor/features/home/presentation/cubit/appointmen
 
 class AppointmentsCubit extends Cubit<AppointmentsState> {
   AppointmentsCubit(this._repository)
-      : super(AppointmentsState(selectedDate: DateTime.now()));
+    : super(AppointmentsState(selectedDate: DateTime.now()));
 
   final AppointmentsRepository _repository;
 

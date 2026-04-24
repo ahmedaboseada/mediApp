@@ -221,9 +221,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
 
                     // Back and Add Buttons
                     NavigationButtons(
-                      onBackPressed: _isSubmitting
-                          ? null
-                          : () => context.pop(),
+                      onBackPressed: _isSubmitting ? null : () => context.pop(),
                       nextEnabled: !_isSubmitting,
                       onNextPressed: _handleAddMedication,
                       nextText: _isSubmitting ? 'Adding...' : 'Add Medication',

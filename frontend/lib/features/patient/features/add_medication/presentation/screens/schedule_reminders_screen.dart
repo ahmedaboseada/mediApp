@@ -224,7 +224,10 @@ class _ScheduleRemindersScreenState extends State<ScheduleRemindersScreen> {
     });
   }
 
-  void _removeSpecificReminder({required int dateIndex, required int timeIndex}) {
+  void _removeSpecificReminder({
+    required int dateIndex,
+    required int timeIndex,
+  }) {
     setState(() {
       final times = _specificReminders[dateIndex].times;
       times.removeAt(timeIndex);

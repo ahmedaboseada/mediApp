@@ -80,22 +80,19 @@ class _AddPatientViewState extends State<AddPatientView> {
   }
 
   void _openQrScanner() async {
-  final result = await Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => QrScannerScreen(),
-    ),
-  );
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => QrScannerScreen()),
+    );
 
-  if (result != null && result is String) {
+    if (result != null && result is String) {
+      setState(() {
+        _submittedPatientId = result;
+      });
 
-    setState(() {
-      _submittedPatientId = result;
-    });
-
-    context.read<AddPatientCubit>().sendAddRequest(result);
+      context.read<AddPatientCubit>().sendAddRequest(result);
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -117,20 +114,13 @@ class _AddPatientViewState extends State<AddPatientView> {
       );
     }
 
-    return BlocListener<AddPatientCubit, AddPatientState>(
+    return BlocConsumer<AddPatientCubit, AddPatientState>(
       listener: (context, state) {
-        if (state.status == AddPatientStatus.loading) {
+        if (state.status == AddPatientStatus.success) {
           setState(() {
             _flowState = _AddPatientFlowState.pending;
           });
-        } else if (state.status == AddPatientStatus.success) {
-          setState(() {
-            _flowState = _AddPatientFlowState.connected;
-          });
         } else if (state.status == AddPatientStatus.failure) {
-          setState(() {
-            _flowState = _AddPatientFlowState.form;
-          });
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.errorMessage ?? 'Failed to send request'),
@@ -138,76 +128,86 @@ class _AddPatientViewState extends State<AddPatientView> {
           );
         }
       },
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        appBar: CustomAppBar(title: 'Add New Patient'),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.all(AppSizes.w16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  'Connect with a patient to access their medical records',
-                  style: AppStyles.secondary12400,
-                ),
-                SizedBox(height: AppSizes.h32),
-                OptionCard(
-                  icon: Icons.search,
-                  iconBackgroundColor: const Color(0xFFE3F2FD),
-                  title: 'By Patient ID',
-                  description:
-                      'Enter the patient\'s unique ID to send an access request',
-                  isExpanded: _expandedOptions.contains(_AddPatientOption.byId),
-                  onTap: () => _toggleOption(_AddPatientOption.byId),
-                  expandedChild: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: AppSizes.h16),
+      builder: (context, state) {
+        final isLoading = state.status == AddPatientStatus.loading;
 
-                      CustomTextField(
-                        controller: _patientIdController,
-
-                        hintText: 'Enter Patient ID (e.g., PT-12345)',
-                        label: 'Patient ID',
-                      ),
-                      SizedBox(height: AppSizes.h16),
-                      PrimaryButton(
-                        onPressed: _sendRequest,
-                        text: 'Send Request',
-                      ),
-                    ],
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: CustomAppBar(title: 'Add New Patient'),
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.all(AppSizes.w16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Connect with a patient to access their medical records',
+                    style: AppStyles.secondary12400,
                   ),
-                ),
-                SizedBox(height: AppSizes.h16),
-                OptionCard(
-                  icon: Icons.qr_code,
-                  iconBackgroundColor: const Color(0xFFE8F5E9),
-                  title: 'Scan QR Code',
-                  description: 'Scan the Patient\'s QR code for instant access',
-                  isExpanded: _expandedOptions.contains(_AddPatientOption.qr),
-                  onTap: () => _toggleOption(_AddPatientOption.qr),
-                  expandedChild: Column(
-                    children: [
-                      SizedBox(height: AppSizes.h16),
-                      PrimaryButton(
-                        onPressed: _openQrScanner,
-                        text: 'Open QR Scanner',
-                      ),
-                    ],
+                  SizedBox(height: AppSizes.h32),
+                  OptionCard(
+                    icon: Icons.search,
+                    iconBackgroundColor: const Color(0xFFE3F2FD),
+                    title: 'By Patient ID',
+                    description:
+                        'Enter the patient\'s unique ID to send an access request',
+                    isExpanded: _expandedOptions.contains(
+                      _AddPatientOption.byId,
+                    ),
+                    onTap: () => _toggleOption(_AddPatientOption.byId),
+                    expandedChild: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(height: AppSizes.h16),
+                        CustomTextField(
+                          controller: _patientIdController,
+                          hintText: 'Enter Patient ID (e.g., PT-12345)',
+                          label: 'Patient ID',
+                        ),
+                        SizedBox(height: AppSizes.h16),
+                        isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : PrimaryButton(
+                                onPressed: _sendRequest,
+                                text: 'Send Request',
+                              ),
+                      ],
+                    ),
                   ),
-                ),
-                SizedBox(height: AppSizes.h40),
-                InfoBox(
-                  title: 'Patient Approval Required',
-                  description:
-                      'All patient connections require approval to ensure privacy and security. You\'ll receive access only after the patient approves your request.',
-                ),
-              ],
+                  SizedBox(height: AppSizes.h16),
+                  OptionCard(
+                    icon: Icons.qr_code,
+                    iconBackgroundColor: const Color(0xFFE8F5E9),
+                    title: 'Scan QR Code',
+                    description:
+                        'Scan the Patient\'s QR code for instant access',
+                    isExpanded: _expandedOptions.contains(_AddPatientOption.qr),
+                    onTap: () => _toggleOption(_AddPatientOption.qr),
+                    expandedChild: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(height: AppSizes.h16),
+                        isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : PrimaryButton(
+                                onPressed: _openQrScanner,
+                                text: 'Open QR Scanner',
+                              ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: AppSizes.h40),
+                  InfoBox(
+                    title: 'Patient Approval Required',
+                    description:
+                        'All patient connections require approval to ensure privacy and security. You\'ll receive access only after the patient approves your request.',
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

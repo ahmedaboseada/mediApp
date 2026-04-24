@@ -107,11 +107,13 @@ class _SplashScreenState extends State<SplashScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ScaleTransition(
-              scale: _scaleAnimation,
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: Image.asset(AppAssets.welcomPng),
+            Flexible(
+              child: ScaleTransition(
+                scale: _scaleAnimation,
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Image.asset(AppAssets.welcomPng),
+                ),
               ),
             ),
             // SizedBox(height: AppSizes.h20),

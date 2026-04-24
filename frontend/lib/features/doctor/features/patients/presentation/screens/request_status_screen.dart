@@ -84,30 +84,28 @@ class RequestStatusScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: AppSizes.h24),
-              if (!isConnected)...[
-                 Center(
-                child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: AppSizes.w16,
-                    vertical: AppSizes.h10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: 
-                         const Color(0xFFFF6B00),
-                    borderRadius: BorderRadius.circular(AppSizes.r12),
-                  ),
-                  child: Text(
-                    'Pending Doctor Approval',
-                    style: AppStyles.white16600.copyWith(
-                    
-                      fontSize: AppSizes.sp18,
+              if (!isConnected) ...[
+                Center(
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppSizes.w16,
+                      vertical: AppSizes.h10,
                     ),
-                    textAlign: TextAlign.center,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF6B00),
+                      borderRadius: BorderRadius.circular(AppSizes.r12),
+                    ),
+                    child: Text(
+                      'Pending Doctor Approval',
+                      style: AppStyles.white16600.copyWith(
+                        fontSize: AppSizes.sp18,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
-              ),
               ],
-             
+
               SizedBox(height: AppSizes.h16),
               Container(
                 padding: EdgeInsets.symmetric(
@@ -122,13 +120,13 @@ class RequestStatusScreen extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    if (isConnected)...[
+                    if (isConnected) ...[
                       Text(
                         'Access Granted',
                         style: AppStyles.black10600.copyWith(
                           fontSize: AppSizes.sp12,
                         ),
-                      )
+                      ),
                     ],
                     Text(
                       isConnected

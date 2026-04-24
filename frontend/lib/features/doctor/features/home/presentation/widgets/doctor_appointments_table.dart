@@ -3,10 +3,7 @@ import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/home/data/models/doctor_appointment_model.dart';
 
 class DoctorAppointmentsTable extends StatelessWidget {
-  const DoctorAppointmentsTable({
-    super.key,
-    required this.appointments,
-  });
+  const DoctorAppointmentsTable({super.key, required this.appointments});
 
   final List<DoctorAppointmentModel> appointments;
 
@@ -22,7 +19,8 @@ class DoctorAppointmentsTable extends StatelessWidget {
         children: [
           const DoctorAppointmentsHeaderRow(),
           ...appointments.map(
-            (appointment) => DoctorAppointmentsDataRow(appointment: appointment),
+            (appointment) =>
+                DoctorAppointmentsDataRow(appointment: appointment),
           ),
         ],
       ),
@@ -54,7 +52,10 @@ class DoctorAppointmentsHeaderRow extends StatelessWidget {
             flex: 4,
             child: Text('Visit Time', style: AppStyles.black14500),
           ),
-          Expanded(flex: 4, child: Text('Actions', style: AppStyles.black14500)),
+          Expanded(
+            flex: 4,
+            child: Text('Actions', style: AppStyles.black14500),
+          ),
         ],
       ),
     );
@@ -139,10 +140,7 @@ class DoctorAppointmentsDataRow extends StatelessWidget {
     return Container(
       width: AppSizes.w24,
       height: AppSizes.h24,
-      decoration: BoxDecoration(
-        color: bgColor,
-        shape: BoxShape.circle,
-      ),
+      decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
       child: Icon(icon, size: AppSizes.h18, color: iconColor),
     );
   }

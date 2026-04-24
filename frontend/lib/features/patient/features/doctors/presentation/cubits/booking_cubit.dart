@@ -9,7 +9,17 @@ class BookingCubit extends Cubit<BookingState> {
   BookingCubit()
     : super(
         BookingState(
-          appointmentReviewData: AppointmentReviewData.fallback(),
+          appointmentReviewData: AppointmentReviewData(
+            doctor: null,
+            dateAndHour: '',
+            packageName: '',
+            duration: '',
+            bookingFor: '',
+            amount: 0,
+            unitPrice: 0,
+            paymentMethod: '',
+            location: '',
+          ),
           selectedPackageIndex: 0,
           selectedDate: DateTime.now(),
           selectedTimeSlot: null,
@@ -126,7 +136,7 @@ class BookingCubit extends Cubit<BookingState> {
     );
   }
 
-  void setDoctor(DoctorSummary doctor) {
+  void setDoctor(DoctorModel doctor) {
     final updatedData = state.appointmentReviewData.copyWith(doctor: doctor);
     emit(state.copyWith(appointmentReviewData: updatedData));
   }

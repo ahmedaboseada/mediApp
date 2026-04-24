@@ -9,7 +9,7 @@ import 'package:medi/features/patient/features/doctors/presentation/widgets/pack
 class SelectPackageScreen extends StatefulWidget {
   const SelectPackageScreen({super.key, required this.doctor});
 
-  final DoctorSummary? doctor;
+  final DoctorModel doctor;
 
   @override
   State<SelectPackageScreen> createState() => _SelectPackageScreenState();
@@ -19,16 +19,7 @@ class _SelectPackageScreenState extends State<SelectPackageScreen> {
   @override
   void initState() {
     super.initState();
-    final DoctorSummary doctor =
-        widget.doctor ??
-        const DoctorSummary(
-          id: 'dr_marvin_kinney',
-          name: 'Dr. Marvin Kinney',
-          specialty: 'Cardiologist',
-          rating: 4.8,
-          reviewsCount: 82,
-          imageAsset: AppAssets.avatar1,
-        );
+    final DoctorModel doctor = widget.doctor;
 
     context.read<BookingCubit>().setDoctor(doctor);
   }

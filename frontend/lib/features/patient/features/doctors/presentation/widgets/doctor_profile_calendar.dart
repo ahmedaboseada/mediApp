@@ -17,9 +17,7 @@ class DoctorProfileCalendar extends StatelessWidget {
           final DateTime value = selected ?? DateTime.now();
           return Text(
             '${_monthName(value.month)} ${value.year}',
-            style: AppStyles.black18500.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+            style: AppStyles.black18500.copyWith(fontWeight: FontWeight.w700),
           );
         },
       ),

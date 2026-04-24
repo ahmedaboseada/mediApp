@@ -31,9 +31,7 @@ class UpcomingBooking extends StatelessWidget {
               children: [
                 Text(
                   'Upcoming Booking',
-                  style: AppStyles.black18500.copyWith(
-                    fontSize: AppSizes.sp20,
-                  ),
+                  style: AppStyles.black18500.copyWith(fontSize: AppSizes.sp20),
                 ),
                 TextButton(
                   onPressed: () => context.push('/doctors/my-bookings'),
@@ -109,16 +107,10 @@ class _UpcomingBookingTile extends StatelessWidget {
                 color: AppColors.primary,
                 borderRadius: BorderRadius.circular(AppSizes.r24),
               ),
-              child: Text(
-                item.ctaText!,
-                style: AppStyles.white14500,
-              ),
+              child: Text(item.ctaText!, style: AppStyles.white14500),
             )
           else
-            Text(
-              item.scheduleText ?? '',
-              style: AppStyles.secondary12400,
-            ),
+            Text(item.scheduleText ?? '', style: AppStyles.secondary12400),
         ],
       ),
     );

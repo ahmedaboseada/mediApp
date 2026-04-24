@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
 
 class AddReviewDialog extends StatefulWidget {
-  const AddReviewDialog({
-    super.key,
-    required this.onRate,
-  });
+  const AddReviewDialog({super.key, required this.onRate});
 
   final ValueChanged<int> onRate;
 
@@ -44,14 +41,8 @@ class _AddReviewDialogState extends State<AddReviewDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'Leave a',
-              style: AppStyles.black24700,
-            ),
-            Text(
-              'Star Rating',
-              style: AppStyles.primary70024,
-            ),
+            Text('Leave a', style: AppStyles.black24700),
+            Text('Star Rating', style: AppStyles.primary70024),
             SizedBox(height: AppSizes.h18),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

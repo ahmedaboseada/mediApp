@@ -8,15 +8,13 @@ class PatientMedicationCard extends StatelessWidget {
     required this.name,
     required this.dosage,
     required this.frequency,
-    required this.startDate,
-    required this.instructions,
+    this.instructions,
   });
 
   final String name;
   final String dosage;
   final String frequency;
-  final String startDate;
-  final String instructions;
+  final String? instructions;
 
   @override
   Widget build(BuildContext context) {
@@ -35,10 +33,8 @@ class PatientMedicationCard extends StatelessWidget {
                 AppAssets.tablets,
                 width: 24,
                 height: 24,
-                errorBuilder: (_, __, ___) => const Icon(
-                  Icons.medication,
-                  color: AppColors.primary,
-                ),
+                errorBuilder: (_, _, _) =>
+                    const Icon(Icons.medication, color: AppColors.primary),
               ),
               SizedBox(width: AppSizes.w12),
               Text(name, style: AppStyles.black16400),
@@ -67,11 +63,6 @@ class PatientMedicationCard extends StatelessWidget {
                   label: 'Frequency',
                   value: frequency,
                 ),
-                MedicationDetailCol(
-                  icon: Icons.calendar_today,
-                  label: 'Start Date',
-                  value: startDate,
-                ),
               ],
             ),
           ),
@@ -93,15 +84,12 @@ class PatientMedicationCard extends StatelessWidget {
                       size: 20,
                     ),
                     SizedBox(width: AppSizes.w8),
-                    Text(
-                      'Instructions',
-                      style: AppStyles.black14500,
-                    ),
+                    Text('Instructions', style: AppStyles.black14500),
                   ],
                 ),
                 SizedBox(height: AppSizes.h8),
                 Text(
-                  instructions,
+                  instructions ?? 'No special instructions.',
                   style: AppStyles.secondary12400.copyWith(
                     fontSize: 14,
                     color: AppColors.secondaryText,

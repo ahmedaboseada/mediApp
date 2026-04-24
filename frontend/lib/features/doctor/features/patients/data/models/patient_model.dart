@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
+import 'package:medi/features/patient/features/health_measurements/data/models/measurement_model.dart';
 
 enum PatientStatus { normal, abnormal, critical, missedMeds }
 
@@ -12,21 +14,27 @@ class PatientModel {
     required this.bloodType,
     required this.status,
     required this.avatarAsset,
+    required this.email,
     required this.phone,
     this.allergies = const [],
     this.chronicConditions = const [],
+    this.medications = const [],
+    this.measurements = const [],
   });
 
   final String id;
   final String name;
   final int age;
   final String gender;
+  final String email;
   final String bloodType;
   final PatientStatus status;
   final String avatarAsset;
   final String phone;
   final List<String> allergies;
   final List<String> chronicConditions;
+  final List<MedicationModel> medications;
+  final List<MeasurementModel> measurements;
 
   factory PatientModel.fromJson(Map<String, dynamic> json) {
     if (json.containsKey('userId') && json['userId'] is Map<String, dynamic>) {
@@ -34,7 +42,7 @@ class PatientModel {
       final firstName = user['firstName'] ?? '';
       final lastName = user['lastName'] ?? '';
       final name = '$firstName $lastName'.trim();
-      
+
       return PatientModel(
         id: (json['_id'] ?? 'Unknown').toString(),
         name: name.isNotEmpty ? name : 'Unknown',
@@ -44,8 +52,19 @@ class PatientModel {
         status: _statusFromString(json['healthBadge'] ?? 'normal'),
         avatarAsset: (user['profilePicture'] ?? AppAssets.avatar1).toString(),
         phone: (user['phone'] ?? 'Unknown').toString(),
+        email: (user['email'] ?? 'Unknown').toString(),
         allergies: List<String>.from(json['allergies'] ?? []),
         chronicConditions: List<String>.from(json['chronicConditions'] ?? []),
+        medications:
+            (json['medications'] as List<dynamic>?)
+                ?.map(
+                  (m) => MedicationModel.fromJson(m as Map<String, dynamic>),
+                )
+                .toList() ??
+            [],
+        measurements: _parseAndFilterMeasurements(
+          json['healthMeasurements'] as List<dynamic>?,
+        ),
       );
     }
 
@@ -55,13 +74,56 @@ class PatientModel {
       age: json['age'] ?? 0,
       gender: (json['gender'] ?? 'M').toString(),
       bloodType: (json['bloodType'] ?? 'O+').toString(),
-      status: _statusFromString(json['status'] ?? json['healthBadge'] ?? 'normal'),
-      avatarAsset: (json['avatarAsset'] ?? json['avatar'] ?? json['profilePicture'] ?? AppAssets.avatar1)
-          .toString(),
+      status: _statusFromString(
+        json['status'] ?? json['healthBadge'] ?? 'normal',
+      ),
+      avatarAsset:
+          (json['avatarAsset'] ??
+                  json['avatar'] ??
+                  json['profilePicture'] ??
+                  AppAssets.avatar1)
+              .toString(),
       phone: (json['phone'] ?? 'Unknown').toString(),
+      email: (json['email'] ?? 'Unknown').toString(),
       allergies: List<String>.from(json['allergies'] ?? []),
       chronicConditions: List<String>.from(json['chronicConditions'] ?? []),
+      medications:
+          (json['medications'] as List<dynamic>?)
+              ?.map((m) => MedicationModel.fromJson(m as Map<String, dynamic>))
+              .toList() ??
+          [],
+      measurements: _parseAndFilterMeasurements(
+        (json['healthMeasurements'] ?? json['measurements']) as List<dynamic>?,
+      ),
     );
+  }
+
+  static List<MeasurementModel> _parseAndFilterMeasurements(
+    List<dynamic>? measurementsJson,
+  ) {
+    if (measurementsJson == null || measurementsJson.isEmpty) return [];
+
+    final list = List<Map<String, dynamic>>.from(measurementsJson);
+    list.sort((a, b) {
+      final dateA =
+          DateTime.tryParse(a['date']?.toString() ?? '') ?? DateTime(2000);
+      final dateB =
+          DateTime.tryParse(b['date']?.toString() ?? '') ?? DateTime(2000);
+      return dateB.compareTo(dateA); // descending
+    });
+
+    final seenTypes = <String>{};
+    final latestMeasurements = <MeasurementModel>[];
+
+    for (final m in list) {
+      final type = m['type']?.toString();
+      if (type != null && !seenTypes.contains(type)) {
+        seenTypes.add(type);
+        latestMeasurements.add(MeasurementModel.fromJson(m));
+      }
+    }
+
+    return latestMeasurements;
   }
 
   static PatientStatus _statusFromString(String status) {
@@ -103,5 +165,53 @@ class PatientModel {
       case PatientStatus.normal:
         return const Color(0xFF4CAF50);
     }
+  }
+}
+
+class MedicationModel {
+  final String id;
+  final String name;
+  final String frequency;
+  final String dosage;
+  final String type;
+  final int stock;
+  final bool isChronic;
+  final String status;
+
+  const MedicationModel({
+    required this.id,
+    required this.name,
+    required this.frequency,
+    required this.dosage,
+    required this.type,
+    required this.stock,
+    required this.isChronic,
+    required this.status,
+  });
+
+  factory MedicationModel.fromJson(Map<String, dynamic> json) {
+    return MedicationModel(
+      id: json['_id'] ?? '',
+      name: json['name'] ?? '',
+      frequency: json['frequency'] ?? '',
+      dosage: json['dosage']?.toString() ?? '',
+      isChronic: json['isChronic'] ?? false,
+      status: json['status'] ?? 'normal',
+      type: json['type'] ?? 'tablet',
+      stock: json['stock'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'name': name,
+      'frequency': frequency,
+      'dosage': dosage,
+      'isChronic': isChronic,
+      'status': status,
+      'type': type,
+      'stock': stock,
+    };
   }
 }

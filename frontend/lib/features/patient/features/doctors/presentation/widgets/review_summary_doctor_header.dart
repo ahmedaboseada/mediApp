@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/doctors/data/models/doctor_summary.dart';
@@ -9,7 +10,7 @@ class ReviewSummaryDoctorHeader extends StatelessWidget {
     required this.location,
   });
 
-  final DoctorSummary doctor;
+  final DoctorModel doctor;
   final String location;
 
   @override
@@ -18,8 +19,8 @@ class ReviewSummaryDoctorHeader extends StatelessWidget {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(AppSizes.r80),
-          child: Image.asset(
-            doctor.imageAsset,
+          child: CachedNetworkImage(
+            imageUrl: doctor.user.profilePicture,
             width: AppSizes.w64,
             height: AppSizes.h64,
             fit: BoxFit.cover,
@@ -30,9 +31,15 @@ class ReviewSummaryDoctorHeader extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(doctor.name, style: AppStyles.black18500),
+              Text(
+                "${doctor.user.firstName} ${doctor.user.lastName}".replaceAll(
+                  '\n',
+                  ' ',
+                ),
+                style: AppStyles.black18500,
+              ),
               SizedBox(height: AppSizes.h4),
-              Text(doctor.specialty, style: AppStyles.secondary12400),
+              Text(doctor.specialization, style: AppStyles.secondary12400),
               SizedBox(height: AppSizes.h6),
               Row(
                 children: [

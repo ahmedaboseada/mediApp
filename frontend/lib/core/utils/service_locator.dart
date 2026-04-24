@@ -14,6 +14,9 @@ import 'package:medi/features/doctor/features/patients/data/repo/patients_reposi
 import 'package:medi/features/doctor/features/patients/data/repo/patients_repository_impl.dart';
 import 'package:medi/features/doctor/features/patients/presentation/cubit/patients_cubit.dart';
 import 'package:medi/features/doctor/features/patients/presentation/cubit/add_patient_cubit.dart';
+import 'package:medi/features/patient/features/doctors/data/repo/doctors_repo.dart';
+import 'package:medi/features/patient/features/doctors/data/repo/doctors_repo_impl.dart';
+import 'package:medi/features/patient/features/doctors/presentation/cubits/doctors_cubit.dart';
 import 'package:medi/features/patient/features/notification_sound/data/datasources/local_sound_datasource.dart';
 import 'package:medi/features/patient/features/notification_sound/data/datasources/local_sound_datasource_impl.dart';
 import 'package:medi/features/patient/features/health_measurements/data/repo/logs_repo.dart';
@@ -145,6 +148,17 @@ Future<void> setupServiceLocator() async {
         getSounds: getIt(),
         saveSound: getIt(),
       ),
+    );
+  }
+
+  if (!getIt.isRegistered<DoctorsRepository>()) {
+    getIt.registerLazySingleton<DoctorsRepository>(
+      () => DoctorsRepositoryImpl(getIt<ApiService>()),
+    );
+  }
+  if (!getIt.isRegistered<DoctorsCubit>()) {
+    getIt.registerFactory<DoctorsCubit>(
+      () => DoctorsCubit(repository: getIt<DoctorsRepository>()),
     );
   }
 }

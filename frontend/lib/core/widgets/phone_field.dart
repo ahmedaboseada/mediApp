@@ -18,10 +18,7 @@ class PhoneField extends StatelessWidget {
   PhoneNumber _initialValue() {
     final String phoneNumber = phonecontroller?.text.trim() ?? '';
     if (phoneNumber.isNotEmpty) {
-      return PhoneNumber(
-        isoCode: 'EG',
-        phoneNumber: phoneNumber,
-      );
+      return PhoneNumber(isoCode: 'EG', phoneNumber: phoneNumber);
     }
 
     return PhoneNumber(isoCode: 'EG');

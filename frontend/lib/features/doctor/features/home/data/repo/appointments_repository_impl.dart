@@ -35,9 +35,11 @@ class AppointmentsRepositoryImpl implements AppointmentsRepository {
       final List<dynamic> rawList = _extractItems(response);
       final appointments = rawList
           .whereType<Map>()
-          .map((item) => DoctorAppointmentModel.fromJson(
-                Map<String, dynamic>.from(item),
-              ))
+          .map(
+            (item) => DoctorAppointmentModel.fromJson(
+              Map<String, dynamic>.from(item),
+            ),
+          )
           .toList();
 
       if (useMockData && appointments.isEmpty) {

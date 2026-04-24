@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const CustomAppBar({super.key, this.title = '', this.actionIcon, this.onpressed});
+  const CustomAppBar({
+    super.key,
+    this.title = '',
+    this.actionIcon,
+    this.onpressed,
+  });
   final String title;
   final IconData? actionIcon;
   final VoidCallback? onpressed;
@@ -18,12 +23,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       title: Text(title),
       centerTitle: true,
-      actions: [IconButton(
-        icon: Icon(actionIcon),
-        onPressed: onpressed,
-      )],
+      actions: [IconButton(icon: Icon(actionIcon), onPressed: onpressed)],
     );
-    
   }
 
   @override

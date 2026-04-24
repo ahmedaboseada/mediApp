@@ -50,7 +50,6 @@ class Medication extends Equatable {
   final List<String> reminders;
   final List<Map<String, dynamic>> weeklySchedule;
   final List<Map<String, dynamic>> specificSchedule;
-  // final String currentStock;
   final String schedule;
   final int stock;
   final String expiryDate;
@@ -199,12 +198,12 @@ class Medication extends Equatable {
             .toList();
 
     final parsedSpecificSchedule =
-      ((json['specific'] as List?) ??
-          (json['specificSchedule'] as List?) ??
-          const [])
-        .whereType<Map>()
-        .map((item) => Map<String, dynamic>.from(item))
-        .toList();
+        ((json['specific'] as List?) ??
+                (json['specificSchedule'] as List?) ??
+                const [])
+            .whereType<Map>()
+            .map((item) => Map<String, dynamic>.from(item))
+            .toList();
 
     final parsedStockStatus = stockValue <= leftThreshold
         ? MedicationStockStatus.low

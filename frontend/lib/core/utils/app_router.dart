@@ -232,7 +232,6 @@ class AppRouter {
         },
       ),
 
-
       GoRoute(
         path: notificationSoundScreen,
         builder: (context, state) {
@@ -442,13 +441,13 @@ class AppRouter {
                       GoRoute(
                         path: 'profile',
                         builder: (context, state) => DoctorProfileScreen(
-                          doctor: state.extra as DoctorSummary?,
+                          doctor: state.extra as DoctorModel,
                         ),
                         routes: [
                           GoRoute(
                             path: 'book',
                             builder: (context, state) => SelectPackageScreen(
-                              doctor: state.extra as DoctorSummary?,
+                              doctor: state.extra as DoctorModel,
                             ),
                             routes: [
                               GoRoute(

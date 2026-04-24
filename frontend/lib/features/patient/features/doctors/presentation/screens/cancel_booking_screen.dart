@@ -40,9 +40,9 @@ class _CancelBookingScreenState extends State<CancelBookingScreen> {
     final otherReason = _otherReasonController.text.trim();
 
     if (requiresOtherReason && otherReason.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your reason')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please enter your reason')));
       return;
     }
 
@@ -67,16 +67,19 @@ class _CancelBookingScreenState extends State<CancelBookingScreen> {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: AppSizes.h10),
-              
+
                 SizedBox(height: AppSizes.h18),
-                 PrimaryButton(
-                              onPressed: () {
-                                Navigator.of(dialogContext).pop();
-                                _cancelAppointment();
-                              },
-                              text: 'Book Another',
-                            ),
-                   TextButton(onPressed: (){}, child: Text('Go Home', style: AppStyles.secondary18500))
+                PrimaryButton(
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                    _cancelAppointment();
+                  },
+                  text: 'Book Another',
+                ),
+                TextButton(
+                  onPressed: () {},
+                  child: Text('Go Home', style: AppStyles.secondary18500),
+                ),
               ],
             ),
           ),

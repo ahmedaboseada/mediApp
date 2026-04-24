@@ -58,10 +58,7 @@ class DoctorAppointmentsEmptyState extends StatelessWidget {
             size: AppSizes.sp32,
           ),
           SizedBox(height: AppSizes.h12),
-          Text(
-            'No appointments for this day',
-            style: AppStyles.black14500,
-          ),
+          Text('No appointments for this day', style: AppStyles.black14500),
           SizedBox(height: AppSizes.h6),
           Text(
             'Try another date to see scheduled patients.',
@@ -105,12 +102,13 @@ class DoctorAppointmentsErrorState extends StatelessWidget {
             size: AppSizes.sp32,
           ),
           SizedBox(height: AppSizes.h12),
-          Text(message, style: AppStyles.black14500, textAlign: TextAlign.center),
-          SizedBox(height: AppSizes.h16),
-          PrimaryButton(
-            onPressed: onRetry,
-            text: 'Retry',
+          Text(
+            message,
+            style: AppStyles.black14500,
+            textAlign: TextAlign.center,
           ),
+          SizedBox(height: AppSizes.h16),
+          PrimaryButton(onPressed: onRetry, text: 'Retry'),
         ],
       ),
     );

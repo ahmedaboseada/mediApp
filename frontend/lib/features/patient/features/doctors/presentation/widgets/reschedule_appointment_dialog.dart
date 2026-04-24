@@ -18,7 +18,8 @@ class RescheduleAppointmentDialog extends StatefulWidget {
       _RescheduleAppointmentDialogState();
 }
 
-class _RescheduleAppointmentDialogState extends State<RescheduleAppointmentDialog> {
+class _RescheduleAppointmentDialogState
+    extends State<RescheduleAppointmentDialog> {
   static const List<String> _timeSlots = [
     '01:30 PM',
     '3:00 PM',
@@ -79,7 +80,9 @@ class _RescheduleAppointmentDialogState extends State<RescheduleAppointmentDialo
                   Expanded(
                     child: Text(
                       widget.doctorName,
-                      style: AppStyles.black24700.copyWith(fontSize: AppSizes.sp32),
+                      style: AppStyles.black24700.copyWith(
+                        fontSize: AppSizes.sp32,
+                      ),
                     ),
                   ),
                 ],
@@ -102,10 +105,7 @@ class _RescheduleAppointmentDialogState extends State<RescheduleAppointmentDialo
                     Navigator.of(context).pop();
                     widget.onReschedule();
                   },
-                  child: Text(
-                    'Reschedule',
-                    style: AppStyles.white16600,
-                  ),
+                  child: Text('Reschedule', style: AppStyles.white16600),
                 ),
               ),
             ],

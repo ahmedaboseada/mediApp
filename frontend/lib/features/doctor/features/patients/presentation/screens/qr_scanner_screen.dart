@@ -17,8 +17,9 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
         onDetect: (capture) {
           if (isScanned) return;
 
-          final String? code =
-              capture.barcodes.isNotEmpty ? capture.barcodes.first.rawValue : null;
+          final String? code = capture.barcodes.isNotEmpty
+              ? capture.barcodes.first.rawValue
+              : null;
 
           if (code != null && code.isNotEmpty) {
             isScanned = true;

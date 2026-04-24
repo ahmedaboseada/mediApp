@@ -87,12 +87,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen>
     required String emptyMessage,
   }) {
     if (appointments.isEmpty) {
-      return Center(
-        child: Text(
-          emptyMessage,
-          style: AppStyles.secondary12400,
-        ),
-      );
+      return Center(child: Text(emptyMessage, style: AppStyles.secondary12400));
     }
 
     return SingleChildScrollView(
@@ -127,7 +122,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen>
     if (appointment.status == 'completed') {
       context.push(
         AppRouter.doctorProfileScreen,
-        extra: _mapAppointmentDoctor(appointment),
+        extra: appointment.doctorName,
       );
       return;
     }
@@ -138,16 +133,16 @@ class _MyBookingsScreenState extends State<MyBookingsScreen>
     );
   }
 
-  DoctorSummary _mapAppointmentDoctor(AppointmentInfo appointment) {
-    return DoctorSummary(
-      id: appointment.doctorName.toLowerCase().replaceAll(' ', '_'),
-      name: appointment.doctorName,
-      specialty: 'General Physician',
-      rating: 4.8,
-      reviewsCount: 82,
-      imageAsset: AppAssets.avatar1,
-    );
-  }
+  // DoctorModel _mapAppointmentDoctor(AppointmentInfo appointment) {
+  //   return DoctorModel(
+  //     id: appointment.doctorName.toLowerCase().replaceAll(' ', '_'),
+  //     name: appointment.doctorName,
+  //     specialty: 'General Physician',
+  //     rating: 4.8,
+  //     reviewsCount: 82,
+  //     imageAsset: AppAssets.avatar1,
+  //   );
+  // }
 
   void _handlePrimaryAction(AppointmentInfo appointment) {
     if (appointment.status == 'upcoming') {
@@ -168,9 +163,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen>
     showDialog<void>(
       context: context,
       builder: (context) {
-        return AddReviewDialog(
-          onRate: (_) {},
-        );
+        return AddReviewDialog(onRate: (_) {});
       },
     );
   }
@@ -190,9 +183,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen>
           left: 0,
           right: 0,
           child: IgnorePointer(
-            child: Center(
-              child: SuccessTopBanner(message: message),
-            ),
+            child: Center(child: SuccessTopBanner(message: message)),
           ),
         );
       },

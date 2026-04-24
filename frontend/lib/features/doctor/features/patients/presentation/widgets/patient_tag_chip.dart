@@ -23,13 +23,15 @@ class PatientTagChip extends StatelessWidget {
         children: [
           const Icon(Icons.error_outline, color: Color(0xFFFF3D3D), size: 14),
           SizedBox(width: AppSizes.w4),
-          Text(
-            text,
-            // overflow: TextOverflow.ellipsis,
-            maxLines: 2,
-            style: AppStyles.black14400.copyWith(
-              color: const Color(0xFFFF3D3D),
-              fontSize: AppSizes.sp12,
+          Flexible(
+            child: Text(
+              text,
+              // overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+              style: AppStyles.black14400.copyWith(
+                color: const Color(0xFFFF3D3D),
+                fontSize: AppSizes.sp12,
+              ),
             ),
           ),
         ],

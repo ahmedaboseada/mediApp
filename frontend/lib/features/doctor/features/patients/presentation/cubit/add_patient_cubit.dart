@@ -23,10 +23,7 @@ class AddPatientCubit extends Cubit<AddPatientState> {
       },
       (_) {
         emit(
-          state.copyWith(
-            status: AddPatientStatus.success,
-            clearError: true,
-          ),
+          state.copyWith(status: AddPatientStatus.success, clearError: true),
         );
       },
     );

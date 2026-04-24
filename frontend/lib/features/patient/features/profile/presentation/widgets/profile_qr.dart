@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class ProfileQR extends StatelessWidget {
-  final String qrData ;
+  final String qrData;
 
-  const ProfileQR({super.key, required this.qrData  });
+  const ProfileQR({super.key, required this.qrData});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class ProfileQR extends StatelessWidget {
     );
   }
 
-   void _showQrDialog(BuildContext context) {
+  void _showQrDialog(BuildContext context) {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -25,6 +25,7 @@ class ProfileQR extends StatelessWidget {
     );
   }
 }
+
 class QrDialog extends StatelessWidget {
   final String qrData;
 
@@ -45,10 +46,7 @@ class QrDialog extends StatelessWidget {
           children: [
             Text(
               "Scan your QR Code",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
 
             SizedBox(height: 20),
@@ -62,15 +60,16 @@ class QrDialog extends StatelessWidget {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  QrImageView(
-                    data: qrData,
-                    size: 220,
-                  ),
+                  QrImageView(data: qrData, size: 220),
 
                   /// Corners
                   Positioned(top: 0, left: 0, child: _corner()),
                   Positioned(top: 0, right: 0, child: _corner(isRight: true)),
-                  Positioned(bottom: 0, left: 0, child: _corner(isBottom: true)),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    child: _corner(isBottom: true),
+                  ),
                   Positioned(
                     bottom: 0,
                     right: 0,

@@ -11,7 +11,7 @@ class ReviewSummaryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final data = reviewData ?? AppointmentReviewData.fallback();
+    final data = reviewData!;
 
     return Scaffold(
       appBar: const CustomAppBar(title: 'Review Summary'),
@@ -26,7 +26,7 @@ class ReviewSummaryScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               ReviewSummaryDoctorHeader(
-                doctor: data.doctor,
+                doctor: data.doctor!,
                 location: data.location,
               ),
               SizedBox(height: AppSizes.h14),

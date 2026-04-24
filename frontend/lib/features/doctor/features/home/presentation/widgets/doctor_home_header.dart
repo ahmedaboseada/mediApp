@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/patient/features/doctors/data/models/doctor_summary.dart';
 import 'package:medi/features/patient/features/doctors/presentation/widgets/zigzag_bottom_clipper.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class DoctorHomeHeader extends StatelessWidget {
   const DoctorHomeHeader({
     super.key,
-    required this.doctor,
+    required this.name,
+    required this.specialization,
+    required this.id,
+    required this.imageUrl,
     this.onBack,
     this.onInsightsTap,
   });
-
-  final DoctorSummary doctor;
+  final String name;
+  final String specialization;
+  final String id;
+  final String imageUrl;
   final VoidCallback? onBack;
   final VoidCallback? onInsightsTap;
 
@@ -33,7 +38,6 @@ class DoctorHomeHeader extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-              
                 _CircleIconButton(
                   icon: Icons.chat_bubble_outline_outlined,
                   iconColor: AppColors.primary,
@@ -52,14 +56,14 @@ class DoctorHomeHeader extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          doctor.specialty,
+                          specialization,
                           style: AppStyles.tertiary14500.copyWith(
                             color: AppColors.quaternaryText,
                           ),
                         ),
                         SizedBox(height: AppSizes.h4),
                         Text(
-                          doctor.name.replaceAll('\n', ' '),
+                          name,
                           style: AppStyles.black18500.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -73,40 +77,58 @@ class DoctorHomeHeader extends StatelessWidget {
                               color: AppColors.primaryText,
                             ),
                             SizedBox(width: AppSizes.w8),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: AppSizes.w10,
-                                vertical: AppSizes.h6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.surfaceColor,
-                                borderRadius: BorderRadius.circular(
-                                  AppSizes.r20,
+                            Flexible(
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: AppSizes.w10,
+                                  vertical: AppSizes.h6,
                                 ),
-                              ),
-                              child: Text(
-                                'ID:32157832',
-                                style: AppStyles.tertiary40012.copyWith(
-                                  color: AppColors.secondaryText,
+                                decoration: BoxDecoration(
+                                  color: AppColors.surfaceColor,
+                                  borderRadius: BorderRadius.circular(
+                                    AppSizes.r20,
+                                  ),
+                                ),
+                                child: Text(
+                                  "ID:$id",
+                                  style: AppStyles.tertiary40012.copyWith(
+                                    color: AppColors.secondaryText,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
                                 ),
                               ),
                             ),
                           ],
                         ),
                         SizedBox(height: AppSizes.h10),
-                       
                       ],
                     ),
                   ),
                 ),
                 SizedBox(width: AppSizes.w8),
                 Hero(
-                  tag: doctor.id,
-                  child: Image.asset(
-                    doctor.imageAsset,
-                    height: AppSizes.h170,
-                    fit: BoxFit.contain,
-                  ),
+                  tag: id,
+                  child: imageUrl.isEmpty
+                      ? Image.asset(
+                          AppAssets.avatar1,
+                          height: AppSizes.h170,
+                          fit: BoxFit.contain,
+                        )
+                      : CachedNetworkImage(
+                          imageUrl: imageUrl,
+                          height: AppSizes.h170,
+                          fit: BoxFit.contain,
+                          placeholder: (context, url) => SizedBox(
+                            height: AppSizes.h170,
+                            child: const Center(child: CircularProgressIndicator()),
+                          ),
+                          errorWidget: (context, url, error) => Image.asset(
+                            AppAssets.avatar1,
+                            height: AppSizes.h170,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
                 ),
               ],
             ),

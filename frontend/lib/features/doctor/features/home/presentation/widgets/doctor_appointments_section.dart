@@ -24,9 +24,7 @@ class DoctorAppointmentsSection extends StatelessWidget {
               children: [
                 Text(
                   'Appointments',
-                  style: AppStyles.black24700.copyWith(
-                    fontSize: AppSizes.sp20,
-                  ),
+                  style: AppStyles.black24700.copyWith(fontSize: AppSizes.sp20),
                 ),
                 const Spacer(),
                 Text(

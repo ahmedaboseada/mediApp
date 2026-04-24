@@ -52,7 +52,6 @@ Future<void> onAlarmFired(AlarmSettings alarmSettings) async {
     body: alarmSettings.notificationSettings.body,
     notificationDetails: details,
     payload: alarmSettings.notificationSettings.title,
-    
   );
 }
 
@@ -381,10 +380,7 @@ class LocalNotificationService {
               fadeDuration: const Duration(seconds: 5),
               volumeEnforced: true,
             )
-          : const VolumeSettings.fixed(
-              volume: 0.9,
-              volumeEnforced: true,
-            ),
+          : const VolumeSettings.fixed(volume: 0.9, volumeEnforced: true),
       notificationSettings: NotificationSettings(
         title: isCritical
             ? 'CRITICAL: ${medication.name}'
@@ -528,8 +524,7 @@ class LocalNotificationService {
 
     for (final id in ids) {
       await flutterLocalNotificationsPlugin.cancel(id: id);
-      if (
-          shouldTreatAllAsCritical ||
+      if (shouldTreatAllAsCritical ||
           criticalIds.contains(id) ||
           alarmIds.contains(id)) {
         await _alarmService.cancelAlarm(id);
@@ -588,10 +583,9 @@ class LocalNotificationService {
       await prefs.setStringList(criticalStorageKey, criticalIds);
     }
 
-    final alarmIds =
-        (prefs.getStringList(alarmStorageKey) ?? const <String>[])
-            .where((value) => value != id.toString())
-            .toList();
+    final alarmIds = (prefs.getStringList(alarmStorageKey) ?? const <String>[])
+        .where((value) => value != id.toString())
+        .toList();
     if (alarmIds.isEmpty) {
       await prefs.remove(alarmStorageKey);
     } else {
@@ -599,16 +593,16 @@ class LocalNotificationService {
     }
 
     await flutterLocalNotificationsPlugin.cancel(id: id);
-   
-   //   await _alarmService.cancelAlarm(id);
-    
-final alarms = await Alarm.getAlarms();
 
-for (final alarm in alarms) {
-  if (alarm.dateTime.isAtSameMomentAs(scheduledDateTime)) {
-    await Alarm.stop(alarm.id);
-  }
-}
+    //   await _alarmService.cancelAlarm(id);
+
+    final alarms = await Alarm.getAlarms();
+
+    for (final alarm in alarms) {
+      if (alarm.dateTime.isAtSameMomentAs(scheduledDateTime)) {
+        await Alarm.stop(alarm.id);
+      }
+    }
     return true;
   }
 
@@ -665,10 +659,7 @@ for (final alarm in alarms) {
                 fadeDuration: const Duration(seconds: 5),
                 volumeEnforced: true,
               )
-            : const VolumeSettings.fixed(
-                volume: 0.3,
-                volumeEnforced: false,
-              ),
+            : const VolumeSettings.fixed(volume: 0.3, volumeEnforced: false),
         notificationSettings: NotificationSettings(
           title: isCritical ? 'CRITICAL: $medicationName' : 'Medicine Reminder',
           body: 'Time to take your medicine',
@@ -695,22 +686,21 @@ for (final alarm in alarms) {
     }
 
     final prefs = await SharedPreferences.getInstance();
-    final ids = Set<String>.from(prefs.getStringList(storageKey) ?? const <String>[])
-      ..add(id.toString());
+    final ids = Set<String>.from(
+      prefs.getStringList(storageKey) ?? const <String>[],
+    )..add(id.toString());
     await prefs.setStringList(storageKey, ids.toList());
 
     if (isCritical) {
-      final criticalIds =
-          Set<String>.from(
-              prefs.getStringList(criticalStorageKey) ?? const <String>[])
-            ..add(id.toString());
+      final criticalIds = Set<String>.from(
+        prefs.getStringList(criticalStorageKey) ?? const <String>[],
+      )..add(id.toString());
       await prefs.setStringList(criticalStorageKey, criticalIds.toList());
     }
 
-    final alarmIds =
-        Set<String>.from(
-          prefs.getStringList(alarmStorageKey) ?? const <String>[],
-        )..add(id.toString());
+    final alarmIds = Set<String>.from(
+      prefs.getStringList(alarmStorageKey) ?? const <String>[],
+    )..add(id.toString());
     await prefs.setStringList(alarmStorageKey, alarmIds.toList());
 
     return true;
@@ -800,18 +790,24 @@ for (final alarm in alarms) {
     Medication medication, {
     required DateTime now,
   }) {
-    final reminderMinutes = medication.specificSchedule
-        .expand((entry) {
-          final rawTimes = entry['times'];
-          final times = rawTimes is List ? rawTimes.whereType<String>() : const <String>[];
-          return times.map(_parseMinutesSinceMidnight).whereType<int>();
-        })
-        .toSet()
-        .toList()
-      ..sort();
+    final reminderMinutes =
+        medication.specificSchedule
+            .expand((entry) {
+              final rawTimes = entry['times'];
+              final times = rawTimes is List
+                  ? rawTimes.whereType<String>()
+                  : const <String>[];
+              return times.map(_parseMinutesSinceMidnight).whereType<int>();
+            })
+            .toSet()
+            .toList()
+          ..sort();
 
     final specificDates = medication.specificSchedule
-        .map((entry) => _parseDate((entry['day'] ?? entry['date'] ?? '').toString()))
+        .map(
+          (entry) =>
+              _parseDate((entry['day'] ?? entry['date'] ?? '').toString()),
+        )
         .whereType<DateTime>()
         .toList();
 
@@ -828,7 +824,13 @@ for (final alarm in alarms) {
       for (final minute in reminderMinutes) {
         final hour = minute ~/ 60;
         final minutes = minute % 60;
-        final dateTime = DateTime(date.year, date.month, date.day, hour, minutes);
+        final dateTime = DateTime(
+          date.year,
+          date.month,
+          date.day,
+          hour,
+          minutes,
+        );
         if (dateTime.isAfter(now)) {
           scheduled.add(dateTime);
         }

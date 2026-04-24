@@ -281,7 +281,8 @@ class ProfileRepoImpl implements ProfileRepo {
   }
 
   @override
-  Future<Either<ApiError, List<DoctorRequestModel>>> listDoctorRequests() async {
+  Future<Either<ApiError, List<DoctorRequestModel>>>
+  listDoctorRequests() async {
     try {
       final token = HiveService.getAccessToken();
       final headers = {
@@ -329,7 +330,7 @@ class ProfileRepoImpl implements ProfileRepo {
         {},
         headers: headers,
       );
-        log('Accept Doctor Request Response: ${response.toString()}');
+      log('Accept Doctor Request Response: ${response.toString()}');
       if (response is ServerFailure) {
         return Left(response);
       }
@@ -374,4 +375,3 @@ class ProfileRepoImpl implements ProfileRepo {
     }
   }
 }
-

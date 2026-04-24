@@ -57,15 +57,15 @@ class PatientProfileHeader extends StatelessWidget {
                       Text(
                         '${patient.age} Years',
                         style: AppStyles.secondary12400.copyWith(
-                          fontSize: AppSizes.sp18,
+                          fontSize: AppSizes.sp14,
                         ),
                       ),
                       SizedBox(width: AppSizes.w10),
                       Text(
-                        patient.gender == 'F' ? '♀' : '♂',
+                        patient.gender == 'female' ? '♀' : '♂',
                         style: TextStyle(
                           fontSize: AppSizes.sp22,
-                          color: patient.gender == 'F'
+                          color: patient.gender == 'female'
                               ? const Color(0xFFFF4D8D)
                               : const Color(0xFF2178F3),
                         ),
@@ -80,10 +80,6 @@ class PatientProfileHeader extends StatelessWidget {
                       PatientStatusPill(
                         text: patient.statusLabel,
                         color: patient.statusColor,
-                      ),
-                      const PatientStatusPill(
-                        text: 'Abnormal',
-                        color: Color(0xFFEDB64B),
                       ),
                     ],
                   ),

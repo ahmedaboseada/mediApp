@@ -11,8 +11,8 @@ class PaymentSuccessScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final data = reviewData ?? AppointmentReviewData.fallback();
-    final dateTimeParts = data.dateAndHour.split('|');
+    final data = reviewData;
+    final dateTimeParts = data!.dateAndHour.split('|');
     final date = dateTimeParts.first.trim();
     final time = dateTimeParts.length > 1
         ? dateTimeParts[1].trim()
@@ -58,7 +58,7 @@ class PaymentSuccessScreen extends StatelessWidget {
               ),
               SizedBox(height: AppSizes.h4),
               Text(
-                data.doctor.name.replaceAll('\n', ' '),
+                "${data.doctor!.user.firstName} ${data.doctor!.user.lastName}",
                 style: AppStyles.black14500,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -80,19 +80,18 @@ class PaymentSuccessScreen extends StatelessWidget {
                           text: data.bookingFor,
                         ),
                         SizedBox(height: AppSizes.h24),
-                                                _InfoItem(assetPath: AppAssets.calendar, text: date),
-
-                       
+                        _InfoItem(assetPath: AppAssets.calendar, text: date),
                       ],
                     ),
                     SizedBox(width: AppSizes.w24),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
- _InfoItem(
+                        _InfoItem(
                           assetPath: AppAssets.dollarCircle,
                           text: '\$${data.amount.toStringAsFixed(0)}',
-                        ),                        SizedBox(height: AppSizes.h24),
+                        ),
+                        SizedBox(height: AppSizes.h24),
                         _InfoItem(assetPath: AppAssets.timer, text: time),
                       ],
                     ),

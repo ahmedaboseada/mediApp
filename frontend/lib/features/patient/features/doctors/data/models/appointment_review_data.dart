@@ -1,4 +1,3 @@
-import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/doctors/data/models/doctor_summary.dart';
 
 class AppointmentReviewData {
@@ -14,7 +13,7 @@ class AppointmentReviewData {
     required this.location,
   });
 
-  final DoctorSummary doctor;
+  final DoctorModel? doctor;
   final String dateAndHour;
   final String packageName;
   final String duration;
@@ -24,29 +23,8 @@ class AppointmentReviewData {
   final String paymentMethod;
   final String location;
 
-  factory AppointmentReviewData.fallback() {
-    return const AppointmentReviewData(
-      doctor: DoctorSummary(
-        id: 'dr_marvin_kinney',
-        name: 'Dr. Marvin Kinney',
-        specialty: 'Cardiologist',
-        rating: 4.8,
-        reviewsCount: 82,
-        imageAsset: AppAssets.avatar1,
-      ),
-      dateAndHour: 'August 24, 2023 | 10:00 AM',
-      packageName: 'Online',
-      duration: '30 minutes',
-      bookingFor: 'Self',
-      amount: 60,
-      unitPrice: 20,
-      paymentMethod: 'Cash',
-      location: 'New York, United Stats',
-    );
-  }
-
   AppointmentReviewData copyWith({
-    DoctorSummary? doctor,
+    DoctorModel? doctor,
     String? dateAndHour,
     String? packageName,
     String? duration,

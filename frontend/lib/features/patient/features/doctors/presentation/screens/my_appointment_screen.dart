@@ -13,7 +13,7 @@ class MyAppointmentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final data = reviewData ?? AppointmentReviewData.fallback();
+    final data = reviewData!;
     final dateTimeParts = data.dateAndHour.split('|');
     final date = dateTimeParts.first.trim();
     final time = dateTimeParts.length > 1
@@ -32,7 +32,7 @@ class MyAppointmentScreen extends StatelessWidget {
             children: [
               SizedBox(height: AppSizes.h12),
               ReviewSummaryDoctorHeader(
-                doctor: data.doctor,
+                doctor: data.doctor!,
                 location: data.location,
               ),
               SizedBox(height: AppSizes.h12),

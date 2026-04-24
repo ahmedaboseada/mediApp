@@ -51,7 +51,8 @@ class MedicationDataCubit extends Cubit<MedicationDataState> {
     required String endDate,
     required List<String> reminders,
     List<Map<String, dynamic>> weeklySchedule = const <Map<String, dynamic>>[],
-    List<Map<String, dynamic>> specificSchedule = const <Map<String, dynamic>>[],
+    List<Map<String, dynamic>> specificSchedule =
+        const <Map<String, dynamic>>[],
   }) {
     emit(
       MedicationDataUpdated(
@@ -118,9 +119,13 @@ class MedicationDataCubit extends Cubit<MedicationDataState> {
       case 'reminders':
         return data.copyWith(reminders: value as List<String>);
       case 'weeklySchedule':
-        return data.copyWith(weeklySchedule: value as List<Map<String, dynamic>>);
+        return data.copyWith(
+          weeklySchedule: value as List<Map<String, dynamic>>,
+        );
       case 'specificSchedule':
-        return data.copyWith(specificSchedule: value as List<Map<String, dynamic>>);
+        return data.copyWith(
+          specificSchedule: value as List<Map<String, dynamic>>,
+        );
       default:
         return data;
     }

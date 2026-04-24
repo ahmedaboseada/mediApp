@@ -115,12 +115,12 @@ class _Q1HealthScreenState extends State<Q1HealthScreen> {
                       ),
                     ),
                     Image.asset(AppAssets.addInfo, height: AppSizes.h270),
-              
+
                     QTextField(
                       onSelectionChange: (selectedList) =>
                           _onHealthSelectionChanged(cubit, selectedList),
                       items: QuestionnaireConstants().healthConditions,
-              
+
                       label: AppStrings.anyHealthConditionsYouLikeToShare,
                     ),
                     if (_containsOther(_selectedHealthConditions)) ...[
@@ -135,19 +135,19 @@ class _Q1HealthScreenState extends State<Q1HealthScreen> {
                             ),
                           );
                         },
-                       label: ' Please specify other health condition',
+                        label: ' Please specify other health condition',
                         hintText: 'Please specify other health condition',
                       ),
                     ],
-              
+
                     SizedBox(height: AppSizes.h16),
-              
+
                     QTextField(
                       onSelectionChange: (selectedList) =>
                           _onMedicationSelectionChanged(cubit, selectedList),
                       items: QuestionnaireConstants().longTermMedications,
-                      label:
-                          AppStrings.areYouCurrentlyTakingAnyLongTermMedications,
+                      label: AppStrings
+                          .areYouCurrentlyTakingAnyLongTermMedications,
                     ),
                     if (_containsOther(_selectedMedications)) ...[
                       SizedBox(height: AppSizes.h8),
@@ -161,10 +161,10 @@ class _Q1HealthScreenState extends State<Q1HealthScreen> {
                             ),
                           );
                         },
-                         label: ' Please specify other medication',
+                        label: ' Please specify other medication',
                       ),
                     ],
-              
+
                     SizedBox(height: AppSizes.h86),
                     const OnboardingProgress(step: 0),
                     SizedBox(height: AppSizes.h12),

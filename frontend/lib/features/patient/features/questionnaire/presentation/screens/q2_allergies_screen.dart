@@ -95,7 +95,7 @@ class _Q2AllergiesScreenState extends State<Q2AllergiesScreen> {
                       },
                       label: AppStrings.reactionToMedication,
                     ),
-              
+
                     if (hasReactionToMedication) ...[
                       SizedBox(height: AppSizes.h16),
                       QTextField(
@@ -115,7 +115,7 @@ class _Q2AllergiesScreenState extends State<Q2AllergiesScreen> {
                           print(selectedList);
                         },
                         items: QuestionnaireConstants().allergies,
-              
+
                         label: AppStrings.allergiesOrSensitivities,
                       ),
                       if (_containsOther(_selectedAllergies)) ...[
@@ -135,7 +135,7 @@ class _Q2AllergiesScreenState extends State<Q2AllergiesScreen> {
                         ),
                       ],
                     ],
-              
+
                     SizedBox(height: AppSizes.h16),
                     QTextFieldBoolean(
                       singleSelect: true,
@@ -146,7 +146,7 @@ class _Q2AllergiesScreenState extends State<Q2AllergiesScreen> {
                         cubit.updateAllergyAlerts(value);
                         print(value);
                       },
-              
+
                       label: AppStrings.allergyAlerts,
                     ),
                     SizedBox(height: AppSizes.h24),

@@ -2,7 +2,6 @@
 // import 'package:flutter_screenutil/flutter_screenutil.dart';
 // import 'package:flutter_svg/flutter_svg.dart';
 
-
 // class PatientsSearchBar extends StatefulWidget {
 //   const PatientsSearchBar({
 //     super.key,

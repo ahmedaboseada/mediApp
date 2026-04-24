@@ -114,13 +114,14 @@ class ScheduleCubit extends Cubit<ScheduleState> {
     );
 
     if (state.mutedReminderKeys.contains(key)) {
-      final restored = await LocalNotificationService().restoreSingleReminderByTime(
-        medicationId: medication.id,
-        medicationName: medication.name,
-        date: state.selectedDate,
-        time: time,
-        isCritical: medication.isCritical,
-      );
+      final restored = await LocalNotificationService()
+          .restoreSingleReminderByTime(
+            medicationId: medication.id,
+            medicationName: medication.name,
+            date: state.selectedDate,
+            time: time,
+            isCritical: medication.isCritical,
+          );
 
       if (!restored) {
         return 'Unable to restore this reminder time.';

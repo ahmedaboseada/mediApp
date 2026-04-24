@@ -44,35 +44,36 @@ class _AppointmentCardState extends State<AppointmentCard> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  widget.appointment.dateTime,
-                  style: AppStyles.black14500,
-                ),
-                if(widget.appointment.status == 'upcoming')...[
+                Text(widget.appointment.dateTime, style: AppStyles.black14500),
+                if (widget.appointment.status == 'upcoming') ...[
                   Row(
                     children: [
-                      Text('Remind me', style: AppStyles.secondary12400.copyWith(fontSize: AppSizes.sp10)),
+                      Text(
+                        'Remind me',
+                        style: AppStyles.secondary12400.copyWith(
+                          fontSize: AppSizes.sp10,
+                        ),
+                      ),
                       SizedBox(width: AppSizes.w8),
                       Switch(
-                      value: _remindMe,
-                      onChanged: (value) {
-                        setState(() {
-                          _remindMe = value;
-                        });
-                      },
-                      activeThumbColor: AppColors.whiteText,
-                      activeTrackColor: AppColors.primary,
-                      inactiveThumbColor: AppColors.whiteText,
-                      trackOutlineWidth: WidgetStateProperty.all(0),
-                    ),
-                  ],
-                ),
+                        value: _remindMe,
+                        onChanged: (value) {
+                          setState(() {
+                            _remindMe = value;
+                          });
+                        },
+                        activeThumbColor: AppColors.whiteText,
+                        activeTrackColor: AppColors.primary,
+                        inactiveThumbColor: AppColors.whiteText,
+                        trackOutlineWidth: WidgetStateProperty.all(0),
+                      ),
+                    ],
+                  ),
                 ],
               ],
             ),
-        
           ),
-        
+
           Divider(
             color: AppColors.disabledColor,
             height: 1,
@@ -169,27 +170,34 @@ class _AppointmentCardState extends State<AppointmentCard> {
             padding: EdgeInsets.all(AppSizes.w12),
             child: Row(
               children: [
-                if(widget.appointment.status == 'upcoming'|| widget.appointment.status == 'completed')...[
-                Expanded(
-                  child: SecondryButton(
-                    onPressed: widget.onSecondaryActionPressed,
-                   
-                    child: Text(widget.appointment.status == 'upcoming' ? 'Cancel' : 'Re-Book',
-                      style: AppStyles.primary20700.copyWith(
-                        fontSize: AppSizes.sp14,
+                if (widget.appointment.status == 'upcoming' ||
+                    widget.appointment.status == 'completed') ...[
+                  Expanded(
+                    child: SecondryButton(
+                      onPressed: widget.onSecondaryActionPressed,
+
+                      child: Text(
+                        widget.appointment.status == 'upcoming'
+                            ? 'Cancel'
+                            : 'Re-Book',
+                        style: AppStyles.primary20700.copyWith(
+                          fontSize: AppSizes.sp14,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                SizedBox(width: AppSizes.w10),
+                  SizedBox(width: AppSizes.w10),
                 ],
-                
+
                 Expanded(
                   child: PrimaryButton(
                     onPressed: widget.onPrimaryActionPressed,
-                  
-                    child: Text( (widget.appointment.status == 'upcoming') ? 'Reschedule' : 'Add Review',
-                     
+
+                    child: Text(
+                      (widget.appointment.status == 'upcoming')
+                          ? 'Reschedule'
+                          : 'Add Review',
+
                       style: AppStyles.white14500,
                     ),
                   ),

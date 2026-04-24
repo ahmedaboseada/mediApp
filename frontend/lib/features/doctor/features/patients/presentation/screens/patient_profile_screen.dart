@@ -63,8 +63,10 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                             ),
                             PatientInfoRow(
                               label: 'Gender:',
-                              value: widget.patient.gender == 'F' ? '♀' : '♂',
-                              valueColor: widget.patient.gender == 'F'
+                              value: widget.patient.gender == 'female'
+                                  ? '♀'
+                                  : '♂',
+                              valueColor: widget.patient.gender == 'female'
                                   ? const Color(0xFFFF4D8D)
                                   : const Color(0xFF2178F3),
                               valueFontSize: AppSizes.sp24,
@@ -104,13 +106,13 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                           runSpacing: AppSizes.h8,
                           children: widget.patient.allergies.isNotEmpty
                               ? widget.patient.allergies
-                                  .map((a) => PatientTagChip(text: a))
-                                  .toList()
+                                    .map((a) => PatientTagChip(text: a))
+                                    .toList()
                               : [
                                   Text(
                                     'No known allergies',
                                     style: AppStyles.secondary12400,
-                                  )
+                                  ),
                                 ],
                         ),
                       ),
@@ -123,13 +125,13 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                           runSpacing: AppSizes.h8,
                           children: widget.patient.chronicConditions.isNotEmpty
                               ? widget.patient.chronicConditions
-                                  .map((c) => PatientTagChip(text: c))
-                                  .toList()
+                                    .map((c) => PatientTagChip(text: c))
+                                    .toList()
                               : [
                                   Text(
                                     'No medical history',
                                     style: AppStyles.secondary12400,
-                                  )
+                                  ),
                                 ],
                         ),
                       ),
@@ -144,7 +146,6 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                         name: 'Lisinopril',
                         dosage: '10mg',
                         frequency: 'Once daily',
-                        startDate: '2026-01-15',
                         instructions: 'Take in the morning with water',
                       ),
                     ],

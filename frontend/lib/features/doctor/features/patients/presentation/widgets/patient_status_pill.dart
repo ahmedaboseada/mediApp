@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
 
 class PatientStatusPill extends StatelessWidget {
-  const PatientStatusPill({
-    super.key,
-    required this.text,
-    required this.color,
-  });
+  const PatientStatusPill({super.key, required this.text, required this.color});
 
   final String text;
   final Color color;
@@ -23,10 +19,7 @@ class PatientStatusPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSizes.r12),
         border: Border.all(color: color, width: 1),
       ),
-      child: Text(
-        text,
-        style: AppStyles.black14400.copyWith(color: color),
-      ),
+      child: Text(text, style: AppStyles.black14400.copyWith(color: color)),
     );
   }
 }

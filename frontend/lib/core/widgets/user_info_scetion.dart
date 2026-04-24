@@ -20,7 +20,7 @@ class UserInfoScetion extends StatelessWidget {
   final String? networkImageUrl;
   final String? localImagePath;
   final bool isLoading;
-  final String userId ; 
+  final String userId;
   @override
   Widget build(BuildContext context) {
     return Skeletonizer(
@@ -50,8 +50,8 @@ class UserInfoScetion extends StatelessWidget {
               ),
             ],
           ),
-            Spacer(),
-            //put the user id in the qr data
+          Spacer(),
+          //put the user id in the qr data
           ProfileQR(qrData: userId),
         ],
       ),

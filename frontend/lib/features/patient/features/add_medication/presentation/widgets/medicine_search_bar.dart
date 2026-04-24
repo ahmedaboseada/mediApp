@@ -61,7 +61,7 @@ class _MedicineSearchBarState extends State<MedicineSearchBar> {
             color: Colors.transparent,
             child: InkWell(
               onTap: widget.enableInput ? null : widget.onSearchTap,
-             // borderRadius: BorderRadius.circular(AppSizes.r28),
+              // borderRadius: BorderRadius.circular(AppSizes.r28),
               child: Ink(
                 height: AppSizes.h48,
                 padding: EdgeInsets.symmetric(horizontal: AppSizes.w14),
@@ -139,7 +139,8 @@ class _MedicineSearchBarState extends State<MedicineSearchBar> {
                   borderRadius: BorderRadius.circular(AppSizes.r24),
                 ),
                 child: Center(
-                  child: widget.action ??
+                  child:
+                      widget.action ??
                       SvgPicture.asset(
                         AppAssets.medication,
                         width: AppSizes.w24,

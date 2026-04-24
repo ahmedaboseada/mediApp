@@ -97,14 +97,12 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
     final baseTimes = state.scheduleTimes.isNotEmpty
         ? state.scheduleTimes
         : _fallbackScheduleTimes();
-    final updatedScheduleTimes = baseTimes
-        .map((entry) {
-          if (entry.time.trim() == selectedTime) {
-            return entry.copyWith(taken: value);
-          }
-          return entry;
-        })
-        .toList();
+    final updatedScheduleTimes = baseTimes.map((entry) {
+      if (entry.time.trim() == selectedTime) {
+        return entry.copyWith(taken: value);
+      }
+      return entry;
+    }).toList();
     final nextUntaken = _nextUntakenEntry(updatedScheduleTimes);
 
     _emitIfOpen(

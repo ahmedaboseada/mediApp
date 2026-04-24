@@ -41,11 +41,7 @@ class PatientInfoRow extends StatelessWidget {
 }
 
 class PatientIconInfoRow extends StatelessWidget {
-  const PatientIconInfoRow({
-    super.key,
-    required this.icon,
-    required this.text,
-  });
+  const PatientIconInfoRow({super.key, required this.icon, required this.text});
 
   final IconData icon;
   final String text;

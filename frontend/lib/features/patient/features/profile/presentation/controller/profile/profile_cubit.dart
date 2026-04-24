@@ -87,6 +87,8 @@ class ProfileCubit extends Cubit<ProfileState> {
 
     final result = await profileRepo.listCaregiverRequests();
 
+    if (isClosed) return;
+
     result.fold(
       (failure) =>
           emit(CaregiverRequestsFailure(failure.message, failure.errors)),
@@ -136,8 +138,7 @@ class ProfileCubit extends Cubit<ProfileState> {
     final result = await profileRepo.listDoctorRequests();
 
     result.fold(
-      (failure) =>
-          emit(DoctorRequestsFailure(failure.message, failure.errors)),
+      (failure) => emit(DoctorRequestsFailure(failure.message, failure.errors)),
       (requests) => emit(DoctorRequestsSuccess(requests)),
     );
   }
@@ -145,9 +146,7 @@ class ProfileCubit extends Cubit<ProfileState> {
   Future<void> acceptDoctorRequest({required String doctorId}) async {
     emit(DoctorRequestActionLoading());
 
-    final result = await profileRepo.acceptDoctorRequest(
-      doctorId: doctorId,
-    );
+    final result = await profileRepo.acceptDoctorRequest(doctorId: doctorId);
 
     await result.fold(
       (failure) async {
@@ -163,9 +162,7 @@ class ProfileCubit extends Cubit<ProfileState> {
   Future<void> rejectDoctorRequest({required String doctorId}) async {
     emit(DoctorRequestActionLoading());
 
-    final result = await profileRepo.rejectDoctorRequest(
-      doctorId: doctorId,
-    );
+    final result = await profileRepo.rejectDoctorRequest(doctorId: doctorId);
 
     await result.fold(
       (failure) async {

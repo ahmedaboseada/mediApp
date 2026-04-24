@@ -9,9 +9,9 @@ import 'package:medi/features/patient/features/doctors/presentation/widgets/doct
 import 'package:medi/features/patient/features/doctors/presentation/widgets/doctor_profile_header.dart';
 
 class DoctorProfileScreen extends StatefulWidget {
-  const DoctorProfileScreen({super.key, this.doctor});
+  const DoctorProfileScreen({super.key, required this.doctor});
 
-  final DoctorSummary? doctor;
+  final DoctorModel doctor;
 
   static const List<String> _timeSlots = [
     '01:30 PM',
@@ -34,17 +34,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
   void initState() {
     super.initState();
     final bookingCubit = context.read<BookingCubit>();
-    final profileDoctor =
-        widget.doctor ??
-        const DoctorSummary(
-          id: 'dr_marvin_kinney',
-          name: 'Dr. Marvin\nKinney',
-          specialty: 'Cardiologist',
-          rating: 4.8,
-          reviewsCount: 82,
-          imageAsset: AppAssets.avatar1,
-        );
-
+    final profileDoctor = widget.doctor;
     bookingCubit.setDoctor(profileDoctor);
 
     _selectedDate = ValueNotifier<DateTime?>(bookingCubit.state.selectedDate);
@@ -70,7 +60,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
   Widget build(BuildContext context) {
     return BlocBuilder<BookingCubit, BookingState>(
       builder: (context, state) {
-        final DoctorSummary profileDoctor = state.appointmentReviewData.doctor;
+        final DoctorModel profileDoctor = state.appointmentReviewData.doctor!;
 
         return Scaffold(
           body: SafeArea(

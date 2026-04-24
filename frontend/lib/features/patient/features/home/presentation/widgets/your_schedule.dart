@@ -26,7 +26,8 @@ class _YourScheduleState extends State<YourSchedule> {
   void initState() {
     super.initState();
     _selectedDate = ValueNotifier<DateTime?>(DateTime.now());
-    _scheduleCubit = ScheduleCubit(getIt<MedicineRepo>())..loadForSelectedDate();
+    _scheduleCubit = ScheduleCubit(getIt<MedicineRepo>())
+      ..loadForSelectedDate();
     HomeScheduleRefreshBus.signal.addListener(_handleRefreshSignal);
   }
 
@@ -284,10 +285,7 @@ class _MedicationScheduleCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppColors.lightBackground,
                     borderRadius: BorderRadius.circular(AppSizes.r24),
-                    border: Border.all(
-                      color: AppColors.surfaceColor,
-                      width: 1,
-                    ),
+                    border: Border.all(color: AppColors.surfaceColor, width: 1),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,

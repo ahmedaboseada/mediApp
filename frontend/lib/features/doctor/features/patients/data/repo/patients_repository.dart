@@ -7,7 +7,7 @@ abstract class PatientsRepository {
     String? searchQuery,
   });
 
-  Future<Either<ApiError, PatientModel>> getPatientById(String id);
+  // Future<Either<ApiError, PatientModel>> getPatientById(String id);
 
   Future<Either<ApiError, void>> sendAddRequest(String patientId);
 }
