@@ -42,9 +42,8 @@ const bookingSchema = new Schema(
     { timestamps: true, versionKey: false },
 );
 
-bookingSchema.pre('validate', function (next) {
+bookingSchema.pre('validate', function () {
     if (!this.appointmentId) this.appointmentId = crypto.randomBytes(8).toString('hex');
-    next();
 });
 
 bookingSchema.index({ doctorId: 1, 'date.date': 1, 'date.time': 1 });
