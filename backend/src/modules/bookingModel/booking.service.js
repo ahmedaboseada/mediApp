@@ -91,7 +91,7 @@ export const createBooking = async (req, res) => {
     // 3. Double Booking / Validation Checks
     const reqDate = new Date(date);
     const dayName = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][reqDate.getUTCDay()];
-    
+
     if (!doc.workingDays?.includes(dayName)) {
         return res.status(400).json({ message: 'Doctor does not work on this day' });
     }
@@ -153,7 +153,12 @@ export const getMyBookingsAsPatient = async (req, res) => {
     if (!patient) return res.status(404).json({ message: 'Patient not found' });
 
     const bookings = await bookingModel.find({ patientId: patient._id })
-        .populate('doctorId') // Optional: map out doctor public profile fields
+        .populate({
+            path: 'doctorId',
+            populate: {
+                path: 'userId'
+            }
+        })
         .sort({ 'date.date': -1, 'date.time': -1 })
         .lean();
 
@@ -168,7 +173,7 @@ export const getMyBookingsAsDoctor = async (req, res) => {
     if (!doc) return res.status(404).json({ message: 'Doctor not found' });
 
     let filter = { doctorId: doc._id };
-    
+
     if (date) {
         const reqDate = new Date(date);
         if (!isNaN(reqDate)) {
@@ -199,7 +204,7 @@ export const getBookingDetails = async (req, res) => {
 
     // Ensure the requester is either the bound patient or the bound doctor
     let authorized = false;
-    
+
     // Check if user is the patient
     const patient = await patientModel.findOne({ userId });
     if (patient && String(booking.patientId._id || booking.patientId) === String(patient._id)) authorized = true;
@@ -253,13 +258,13 @@ export const rescheduleBooking = async (req, res) => {
 
     const patient = await patientModel.findOne({ userId: patientUserId });
     const booking = await bookingModel.findById(id);
-    
+
     if (!booking) return res.status(404).json({ message: 'Booking not found' });
     if (String(booking.patientId) !== String(patient?._id)) return res.status(403).json({ message: 'Access denied' });
     if (booking.status !== 'upcoming') return res.status(400).json({ message: 'Only upcoming bookings can be rescheduled.' });
 
     const doc = await doctorModel.findById(booking.doctorId).lean();
-    
+
     // Validate the new requested slot
     const reqDate = new Date(date);
     const dayName = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][reqDate.getUTCDay()];
