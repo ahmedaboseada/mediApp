@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dartz/dartz.dart';
@@ -206,22 +207,19 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
     );
   }
 
+  // 1) Cancel notifications
   Future<Either<ApiError, String>> deleteMedication() async {
-    if (_sourceMedication.id.trim().isNotEmpty) {
-      final result = await _medicineRepo.deleteMedication(
-        medicationId: _sourceMedication.id,
-      );
-      if (result.isLeft()) {
-        return result;
-      }
-    }
-
     await LocalNotificationService().cancelMedicationReminders(
       _sourceMedication,
     );
+
+    // 2) Delete locally + queue sync (Optimistic)
     await HiveService.deleteMedication(_sourceMedication);
+
+    // 3) Update UI
     _emitIfOpen(state.copyWith(isDeleted: true));
     _emitIfOpen(state.copyWith(isDeleted: false));
+
     return const Right('Medication deleted successfully');
   }
 

@@ -55,49 +55,47 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
   }
 
   Future<void> _handleAddMedication() async {
-    if (_isSubmitting) {
-      return;
-    }
+    if (_isSubmitting) return;
 
-    setState(() {
-      _isSubmitting = true;
-    });
+    setState(() => _isSubmitting = true);
 
     final medication = context.read<MedicationDataCubit>().state.medicationData;
-    final result = await context.read<MedicineCubit>().addMedication(
-      medication,
-    );
 
-    if (!mounted) {
-      return;
+    try {
+      // 🔥 Offline-first save (always succeeds locally)
+      await context.read<MedicineCubit>().addMedication(medication);
+
+      if (!mounted) return;
+
+      // Success UI
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Medication saved locally'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Notifications
+      LocalNotificationService().scheduleMedicationReminders(medication);
+      LocalNotificationService().showNotification(
+        title: 'Medication Added',
+        body: '${medication.medicationName} has been added to your list.',
+      );
+
+      // Navigate
+      context.pushReplacement('/medicine');
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() => _isSubmitting = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Something went wrong: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
-
-    result.fold(
-      (error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error.message), backgroundColor: Colors.red),
-        );
-        setState(() {
-          _isSubmitting = false;
-        });
-      },
-      (message) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message), backgroundColor: Colors.green),
-        );
-        LocalNotificationService().scheduleMedicationReminders(medication);
-        LocalNotificationService().showNotification(
-          title: 'Medication Added',
-          body: '${medication.medicationName} has been added to your list.',
-        );
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) {
-            return;
-          }
-          context.pushReplacement('/medicine');
-        });
-      },
-    );
   }
 
   @override

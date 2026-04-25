@@ -37,7 +37,9 @@ class Medication extends Equatable {
     this.isChronic = false,
     this.medicationType = MedicationType.pill,
     this.sideEffects = const <String>[],
+    this.isSynced = true,
   });
+
 
   final String id;
   final int selectedMethod;
@@ -60,6 +62,8 @@ class Medication extends Equatable {
   final bool isChronic;
   final MedicationType medicationType;
   final List<String> sideEffects;
+  final bool isSynced;
+
 
   static MedicationType medicationTypeFromLabel(String? label) {
     switch (label?.trim().toLowerCase()) {
@@ -119,7 +123,9 @@ class Medication extends Equatable {
     bool? isChronic,
     MedicationType? medicationType,
     List<String>? sideEffects,
+    bool? isSynced,
   }) {
+
     return Medication(
       id: id ?? this.id,
       selectedMethod: selectedMethod ?? this.selectedMethod,
@@ -143,8 +149,10 @@ class Medication extends Equatable {
       isChronic: isChronic ?? this.isChronic,
       medicationType: medicationType ?? this.medicationType,
       sideEffects: sideEffects ?? this.sideEffects,
+      isSynced: isSynced ?? this.isSynced,
     );
   }
+
 
   Map<String, dynamic> toJson() {
     return {
@@ -169,8 +177,10 @@ class Medication extends Equatable {
       'isChronic': isChronic,
       'medicationType': medicationType.index,
       'sideEffects': sideEffects,
+      'isSynced': isSynced,
     };
   }
+
 
   factory Medication.fromJson(Map<dynamic, dynamic> json) {
     final medicationTypeIndex = json['medicationType'] as int?;
@@ -245,8 +255,10 @@ class Medication extends Equatable {
       sideEffects:
           (json['sideEffects'] as List?)?.whereType<String>().toList() ??
           const <String>[],
+      isSynced: (json['isSynced'] as bool?) ?? true,
     );
   }
+
 
   @override
   List<Object?> get props => [
@@ -272,8 +284,10 @@ class Medication extends Equatable {
     isChronic,
     medicationType,
     sideEffects,
+    isSynced,
   ];
 }
+
 
 class MedicationScheduleTime extends Equatable {
   const MedicationScheduleTime({required this.time, required this.taken});
@@ -331,8 +345,10 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       isChronic: fields[14] as bool? ?? false,
       medicationType: parsedType,
       sideEffects: (fields[17] as List?)?.cast<String>() ?? const <String>[],
+      isSynced: fields[18] as bool? ?? true,
     );
   }
+
 
   @override
   void write(BinaryWriter writer, Medication obj) {
@@ -373,8 +389,11 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       ..writeByte(16)
       ..write(obj.id)
       ..writeByte(17)
-      ..write(obj.sideEffects);
+      ..write(obj.sideEffects)
+      ..writeByte(18)
+      ..write(obj.isSynced);
   }
+
 
   @override
   int get hashCode => typeId.hashCode;

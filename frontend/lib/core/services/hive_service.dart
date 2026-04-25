@@ -8,6 +8,9 @@ import 'package:medi/features/shared/auth/data/models/doctor_model.dart';
 import 'package:medi/features/shared/auth/data/models/user_model.dart';
 import 'package:medi/features/shared/auth/data/models/patient_model.dart';
 import 'package:medi/features/shared/auth/data/models/working_hours_model.dart';
+import 'package:medi/core/data/sync/sync_service.dart';
+import 'package:medi/core/data/sync/sync_action.dart';
+import 'package:uuid/uuid.dart';
 
 class HiveService {
   static const String _authBox = 'authBox';
@@ -92,11 +95,22 @@ class HiveService {
       Hive.registerAdapter(MedicationAdapter());
     }
 
+    if (!Hive.isAdapterRegistered(9)) {
+      // Hive.registerAdapter(MedicationScheduleTimeAdapter());
+    }
+    if (!Hive.isAdapterRegistered(10)) {
+      Hive.registerAdapter(SyncActionAdapter());
+    }
+
     // Open boxes
     await Hive.openBox(_authBox);
     await Hive.openBox(_userBox);
     await Hive.openBox(_settingsBox);
     await Hive.openBox(_medicationsBox);
+
+
+    // Trigger sync on app start
+    SyncService.processQueue();
   }
 
   static Future<Box> _openMedicationsBox() async {
@@ -419,9 +433,24 @@ class HiveService {
 
   /// Add a single medication to the saved list
   static Future<void> addMedication(Medication medication) async {
+    var medicationWithId = medication;
+    if (medication.id.isEmpty) {
+      medicationWithId = medication.copyWith(id: const Uuid().v4());
+    }
+    
+    // Set as not synced initially for offline-first tracking
+    medicationWithId = medicationWithId.copyWith(isSynced: false);
+
     final current = getMedications();
-    current.add(medication);
+    current.add(medicationWithId);
     await saveMedications(current);
+
+    // Push to sync queue
+    await SyncService.addToQueue(
+      type: 'add',
+      entity: 'medication',
+      data: medicationWithId.toJson(),
+    );
   }
 
   /// Update a medication in the locally saved list.
@@ -443,13 +472,22 @@ class HiveService {
       );
     }
 
+    final medicationToSync = updated.copyWith(isSynced: false);
+
     if (index == -1) {
-      current.add(updated);
+      current.add(medicationToSync);
     } else {
-      current[index] = updated;
+      current[index] = medicationToSync;
     }
 
     await saveMedications(current);
+
+    // Push to sync queue
+    await SyncService.addToQueue(
+      type: 'update',
+      entity: 'medication',
+      data: medicationToSync.toJson(),
+    );
   }
 
   /// Delete a medication from the locally saved list.
@@ -470,6 +508,38 @@ class HiveService {
 
     if (index != -1) {
       current.removeAt(index);
+      await saveMedications(current);
+
+      // Push to sync queue
+      await SyncService.addToQueue(
+        type: 'delete',
+        entity: 'medication',
+        data: medication.toJson(),
+      );
+    }
+  }
+
+  // ========== SYNC HELPERS ==========
+
+  /// Mark a medication as synced in local storage
+  static Future<void> markMedicationSynced(String id) async {
+    final current = getMedications();
+    final index = current.indexWhere((m) => m.id == id);
+    if (index != -1) {
+      current[index] = current[index].copyWith(isSynced: true);
+      await saveMedications(current);
+    }
+  }
+
+  /// Update a temporary ID with a server-generated ID
+  static Future<void> updateMedicationServerId(String tempId, String serverId) async {
+    final current = getMedications();
+    final index = current.indexWhere((m) => m.id == tempId);
+    if (index != -1) {
+      current[index] = current[index].copyWith(
+        id: serverId,
+        isSynced: true,
+      );
       await saveMedications(current);
     }
   }

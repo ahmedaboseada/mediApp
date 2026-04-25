@@ -6,7 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:medi/core/services/alarm_service.dart';
 import 'package:medi/core/services/hive_service.dart';
 import 'package:medi/core/services/local_notification_service.dart';
+import 'package:medi/core/services/connectivity_service.dart';
 import 'package:medi/core/utils/service_locator.dart';
+import 'package:medi/core/data/sync/sync_service.dart';
+import 'package:medi/features/patient/features/add_medication/data/repo/medicine_repo.dart';
+import 'package:medi/features/patient/features/health_measurements/data/repo/logs_repo.dart';
 
 class StartupInitResult {
   const StartupInitResult({required this.errors});
@@ -30,13 +34,27 @@ class AppStartupInitializer {
 
     await _runSafe(
       stepName: 'Service locator setup',
-      action: setupServiceLocator,
+      action: () async {
+        await setupServiceLocator();
+        await SyncService.init(
+          medicineRepo: getIt<MedicineRepo>(),
+          logsRepo: getIt<LogsRepo>(),
+        );
+        // Trigger sync on app start
+        SyncService.processQueue();
+      },
       errors: errors,
     );
 
     await _runSafe(
       stepName: 'Local notifications init',
       action: LocalNotificationService.init,
+      errors: errors,
+    );
+
+    await _runSafe(
+      stepName: 'Connectivity listener',
+      action: () async => ConnectivityService.init(),
       errors: errors,
     );
 
