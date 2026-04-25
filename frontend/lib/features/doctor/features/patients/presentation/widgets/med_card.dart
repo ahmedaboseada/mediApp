@@ -33,7 +33,7 @@ class MedCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            MedicationHeader(type: medication.type ?? 'pill'),
+            MedicationHeader(type: medication.type),
             SizedBox(width: AppSizes.w12),
             Expanded(
               child: Column(

@@ -29,3 +29,12 @@ class MyBookingsFailure extends MyBookingsState {
   @override
   List<Object?> get props => [message];
 }
+
+class MyBookingsActionSuccess extends MyBookingsState {
+  final String message;
+
+  const MyBookingsActionSuccess(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}

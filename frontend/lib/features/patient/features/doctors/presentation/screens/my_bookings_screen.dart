@@ -87,25 +87,34 @@ class _MyBookingsScreenState extends State<MyBookingsScreen>
                             .where((b) => b.status.toLowerCase() == 'cancelled')
                             .toList();
 
-                        return TabBarView(
-                          controller: _tabController,
-                          children: [
-                            _buildAppointmentsList(
-                              context,
-                              appointments: upcoming,
-                              emptyMessage: 'No upcoming appointments',
-                            ),
-                            _buildAppointmentsList(
-                              context,
-                              appointments: completed,
-                              emptyMessage: 'No completed appointments',
-                            ),
-                            _buildAppointmentsList(
-                              context,
-                              appointments: cancelled,
-                              emptyMessage: 'No cancelled appointments',
-                            ),
-                          ],
+                        return BlocConsumer<MyBookingsCubit, MyBookingsState>(
+                          listener: (context, state) {
+                            if (state is MyBookingsActionSuccess) {
+                              _showTopSuccessBanner(context, state.message);
+                            }
+                          },
+                          builder: (context, state) {
+                            return TabBarView(
+                              controller: _tabController,
+                              children: [
+                                _buildAppointmentsList(
+                                  context,
+                                  appointments: upcoming,
+                                  emptyMessage: 'No upcoming appointments',
+                                ),
+                                _buildAppointmentsList(
+                                  context,
+                                  appointments: completed,
+                                  emptyMessage: 'No completed appointments',
+                                ),
+                                _buildAppointmentsList(
+                                  context,
+                                  appointments: cancelled,
+                                  emptyMessage: 'No cancelled appointments',
+                                ),
+                              ],
+                            );
+                          },
                         );
                       }
 
@@ -179,12 +188,20 @@ class _MyBookingsScreenState extends State<MyBookingsScreen>
     if (appointment.status.toLowerCase() == 'upcoming') {
       showDialog<void>(
         context: context,
-        builder: (context) {
+        builder: (dialogContext) {
           return RescheduleAppointmentDialog(
             doctorName:
                 'Dr. ${appointment.doctor.user.firstName} ${appointment.doctor.user.lastName}',
-            onReschedule: () {
-              _showTopSuccessBanner(context, 'New appointment added');
+            doctorId: appointment.doctor.id,
+            cubit: context.read<MyBookingsCubit>(),
+            onReschedule: (newDate, newTime) {
+              context.read<MyBookingsCubit>().rescheduleBooking(
+                bookingId: appointment.id,
+                date: newDate.toIso8601String(),
+                time: newTime,
+                doctorName:
+                    '${appointment.doctor.user.firstName} ${appointment.doctor.user.lastName}',
+              );
             },
           );
         },

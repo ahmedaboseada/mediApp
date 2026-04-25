@@ -23,16 +23,52 @@ class MyBookingsCubit extends Cubit<MyBookingsState> {
   Future<void> cancelBooking(String bookingId, String reason) async {
     final result = await doctorsRepository.cancelBooking(bookingId, reason);
 
-    result.fold(
-      (failure) => emit(MyBookingsFailure(failure.message)),
-      (_) async {
-        // Cancel the reminder if it exists
-        await LocalNotificationService.cancelAppointmentReminder(bookingId);
-        LocalNotificationService.saveAppointmentRemindMe(bookingId, false);
-        
-        // Refresh bookings
-        await fetchBookings();
-      },
+    result.fold((failure) => emit(MyBookingsFailure(failure.message)), (
+      _,
+    ) async {
+      // Cancel the reminder if it exists
+      await LocalNotificationService.cancelAppointmentReminder(bookingId);
+      LocalNotificationService.saveAppointmentRemindMe(bookingId, false);
+
+      emit(const MyBookingsActionSuccess('Appointment cancelled'));
+
+      // Refresh bookings
+      await fetchBookings();
+    });
+  }
+
+  Future<void> rescheduleBooking({
+    required String bookingId,
+    required String date,
+    required String time,
+    required String doctorName,
+  }) async {
+    final result = await doctorsRepository.rescheduleBooking(
+      bookingId,
+      date,
+      time,
     );
+
+    result.fold((failure) => emit(MyBookingsFailure(failure.message)), (
+      _,
+    ) async {
+      // If reminder was ON, reschedule it
+      final isRemindMeOn = LocalNotificationService.getAppointmentRemindMe(
+        bookingId,
+      );
+      if (isRemindMeOn) {
+        await LocalNotificationService.scheduleAppointmentReminder(
+          bookingId,
+          doctorName,
+          DateTime.parse(date),
+          time,
+        );
+      }
+
+      emit(const MyBookingsActionSuccess('Appointment rescheduled'));
+
+      // Refresh bookings
+      await fetchBookings();
+    });
   }
 }

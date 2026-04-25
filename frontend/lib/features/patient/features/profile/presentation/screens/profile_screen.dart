@@ -11,6 +11,8 @@ import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/user_profile/user_profile_cubit.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/user_profile/user_profile_state.dart';
 
+import 'package:medi/features/patient/features/doctors/presentation/cubits/connected_doctors_cubit.dart';
+
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
@@ -59,7 +61,11 @@ class ProfileScreen extends StatelessWidget {
                   MedicalRecordsSection(),
                   SizedBox(height: AppSizes.h16),
 
-                  ConnectedDoctorsSection(),
+                  BlocProvider(
+                    create: (context) =>
+                        getIt<ConnectedDoctorsCubit>()..loadConnectedDoctors(),
+                    child: const ConnectedDoctorsSection(),
+                  ),
                   SizedBox(height: AppSizes.h16),
                   PrivacySecuritySection(),
                   SizedBox(height: AppSizes.h16),

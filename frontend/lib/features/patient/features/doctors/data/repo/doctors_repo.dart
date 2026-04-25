@@ -16,4 +16,11 @@ abstract class DoctorsRepository {
   );
   Future<Either<ApiError, List<BookingModel>>> getPatientBookings();
   Future<Either<ApiError, void>> cancelBooking(String bookingId, String reason);
+  Future<Either<ApiError, void>> rescheduleBooking(
+    String bookingId,
+    String date,
+    String time,
+  );
+  Future<Either<ApiError, void>> sendConnectionRequest(String doctorId);
+  Future<Either<ApiError, List<DoctorModel>>> getConnectedDoctors();
 }

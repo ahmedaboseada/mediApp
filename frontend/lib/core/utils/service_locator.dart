@@ -16,6 +16,8 @@ import 'package:medi/features/doctor/features/patients/presentation/cubit/patien
 import 'package:medi/features/doctor/features/patients/presentation/cubit/add_patient_cubit.dart';
 import 'package:medi/features/patient/features/doctors/data/repo/doctors_repo.dart';
 import 'package:medi/features/patient/features/doctors/data/repo/doctors_repo_impl.dart';
+import 'package:medi/features/patient/features/doctors/presentation/cubits/add_doctor_cubit.dart';
+import 'package:medi/features/patient/features/doctors/presentation/cubits/connected_doctors_cubit.dart';
 import 'package:medi/features/patient/features/doctors/presentation/cubits/doctors_cubit.dart';
 import 'package:medi/features/patient/features/notification_sound/data/datasources/local_sound_datasource.dart';
 import 'package:medi/features/patient/features/notification_sound/data/datasources/local_sound_datasource_impl.dart';
@@ -159,6 +161,16 @@ Future<void> setupServiceLocator() async {
   if (!getIt.isRegistered<DoctorsCubit>()) {
     getIt.registerFactory<DoctorsCubit>(
       () => DoctorsCubit(repository: getIt<DoctorsRepository>()),
+    );
+  }
+  if (!getIt.isRegistered<AddDoctorCubit>()) {
+    getIt.registerFactory<AddDoctorCubit>(
+      () => AddDoctorCubit(getIt<DoctorsRepository>()),
+    );
+  }
+  if (!getIt.isRegistered<ConnectedDoctorsCubit>()) {
+    getIt.registerFactory<ConnectedDoctorsCubit>(
+      () => ConnectedDoctorsCubit(repository: getIt<DoctorsRepository>()),
     );
   }
 }

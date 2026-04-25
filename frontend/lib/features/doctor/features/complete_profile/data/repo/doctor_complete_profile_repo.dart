@@ -32,5 +32,14 @@ abstract class DoctorCompleteProfileRepo {
     required int maxDailyPatients,
   });
 
+  Future<Either<ApiError, String>> updateSchedule({
+    required List<String> workingDays,
+    required String startHour,
+    required String endHour,
+    required int consultationDuration,
+    required List<String> appointmentTypes,
+    required int maxDailyPatients,
+  });
+
   Future<Either<ApiError, String>> completeLicense({required String filePath});
 }

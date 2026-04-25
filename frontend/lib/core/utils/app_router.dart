@@ -13,6 +13,7 @@ import 'package:medi/features/patient/features/add_medication/presentation/scree
 import 'package:medi/features/patient/features/doctors/data/models/booking_model.dart';
 import 'package:medi/features/patient/features/doctors/data/repo/doctors_repo.dart';
 import 'package:medi/features/patient/features/doctors/presentation/cubits/my_bookings_cubit.dart';
+import 'package:medi/features/patient/features/doctors/presentation/screens/add_doctor_screen.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/screens/add_daily_log_screen.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/screens/health_measurements_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/controller/profile/profile_cubit.dart';
@@ -155,6 +156,7 @@ class AppRouter {
   static const String patientMyAppointmentScreen =
       '/doctors/profile/book/patient-details/payment-method/review-summary/success/my-appointment';
   static const String patientCancelBookingScreen = '/doctors/cancel-booking';
+  static const String patientAddDoctorScreen = '/patient/add-doctor';
   // ========== DOCTOR ROUTES ==========
   static const String doctorLogin = '/login/doctor';
   static const String doctorSignUpScreen = '/signUp/doctor';
@@ -315,6 +317,10 @@ class AppRouter {
           create: (context) => getIt<ProfileCubit>(),
           child: ChangePasswordScreen(),
         ),
+      ),
+      GoRoute(
+        path: patientAddDoctorScreen,
+        builder: (context, state) => const AddDoctorScreen(),
       ),
       GoRoute(
         path: healthMeasurements,

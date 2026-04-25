@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/home/presentation/cubit/appointments_cubit.dart';
 import 'package:medi/features/doctor/features/home/presentation/widgets/doctor_appointments_section.dart';
@@ -48,40 +49,46 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _appointmentsCubit,
-      child: Scaffold(
-        body: SafeArea(
-          bottom: false,
-          child: BlocBuilder<UserProfileCubit, UserProfileState>(
-            builder: (context, state) {
-              if (state is UserProfileLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
+    return Scaffold(
+      body: SafeArea(
+        bottom: false,
+        child: BlocBuilder<UserProfileCubit, UserProfileState>(
+          builder: (context, state) {
+            final isLoading = state is UserProfileLoading;
 
-              if (state is UserProfileError) {
-                return Center(child: Text(state.message));
-              }
+            if (state is UserProfileError) {
+              return Center(child: Text(state.message));
+            }
 
-              if (state is UserProfileLoaded || state is UserProfileUpdated) {
-                final profile = state.profile!;
-                final user = profile.user;
-                final doctorData = profile.doctor;
-                final imageUrl = user.profilePicture;
+            if (state is UserProfileLoaded ||
+                state is UserProfileUpdated ||
+                isLoading) {
+              final profile = state.profile;
+              final user = profile?.user;
+              final doctorData = profile?.doctor;
 
-                if (doctorData == null) {
-                  return const Center(child: Text('Doctor profile not found'));
-                }
+              final name = user != null
+                  ? "${user.firstName} ${user.lastName}"
+                  : "Doctor Name Placeholder";
+              final specialization =
+                  doctorData?.specialization ?? "Specialization Placeholder";
+              final id = doctorData?.doctorId ?? "ID-12345";
+              final imageUrl = user?.profilePicture ?? "";
 
-                return SingleChildScrollView(
+              return SingleChildScrollView(
+                child: BlocProvider.value(
+                  value: _appointmentsCubit,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      DoctorHomeHeader(
-                        name: "${user.firstName} ${user.lastName}",
-                        specialization: doctorData.specialization,
-                        id: doctorData.doctorId,
-                        imageUrl: imageUrl,
+                      Skeletonizer(
+                        enabled: isLoading,
+                        child: DoctorHomeHeader(
+                          name: name,
+                          specialization: specialization,
+                          id: id,
+                          imageUrl: imageUrl,
+                        ),
                       ),
                       SizedBox(height: AppSizes.h16),
                       Padding(
@@ -96,12 +103,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
-                );
-              }
+                ),
+              );
+            }
 
-              return const SizedBox.shrink();
-            },
-          ),
+            return const SizedBox.shrink();
+          },
         ),
       ),
     );

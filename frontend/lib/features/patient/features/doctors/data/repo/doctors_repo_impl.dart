@@ -139,4 +139,75 @@ class DoctorsRepositoryImpl implements DoctorsRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<ApiError, void>> rescheduleBooking(
+    String bookingId,
+    String date,
+    String time,
+  ) async {
+    try {
+      final dynamic response = await apiService.patch(
+        "/bookings/$bookingId/reschedule",
+        {"date": date, "time": time},
+      );
+
+      log('Reschedule Booking Response: ${response.toString()}');
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(ServerFailure.fromDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<ApiError, void>> sendConnectionRequest(String doctorId) async {
+    try {
+      final response = await apiService.post('/patients/connect-doctor', {
+        'doctorId': doctorId,
+      });
+
+      log('sendConnectionRequest response: $response');
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<ApiError, List<DoctorModel>>> getConnectedDoctors() async {
+    try {
+      final dynamic response = await apiService.get("/patients/connected-doctors");
+
+      log('Get Connected Doctors Response: ${response.toString()}');
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final List<dynamic> rawList = response['doctors'] ?? [];
+
+      final doctors = rawList
+          .whereType<Map>()
+          .map((item) => DoctorModel.fromJson(Map<String, dynamic>.from(item)))
+          .toList();
+
+      return Right(doctors);
+    } on DioException catch (e) {
+      return Left(ServerFailure.fromDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

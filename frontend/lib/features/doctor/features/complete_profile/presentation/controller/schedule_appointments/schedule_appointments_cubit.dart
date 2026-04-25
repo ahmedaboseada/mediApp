@@ -120,36 +120,17 @@ class ScheduleAppointmentsCubit extends Cubit<ScheduleAppointmentsState> {
     final endHour =
         '${state.endTime!.hour.toString().padLeft(2, '0')}:${state.endTime!.minute.toString().padLeft(2, '0')}';
 
-    // Call complete schedule endpoint
-    final scheduleResult = await _repo.completeSchedule(
+    // Call update schedule endpoint (unified)
+    final result = await _repo.updateSchedule(
       workingDays: state.workingDays,
       startHour: startHour,
       endHour: endHour,
       consultationDuration: state.consultationDuration!,
-    );
-
-    // If schedule failed, return early
-    if (scheduleResult.isLeft()) {
-      emit(
-        state.copyWith(
-          isSubmitting: false,
-          isSuccess: false,
-          errorMessage: scheduleResult.fold(
-            (error) => error.message,
-            (message) => null,
-          ),
-        ),
-      );
-      return;
-    }
-
-    // Call complete appointments endpoint
-    final appointmentsResult = await _repo.completeAppointments(
       appointmentTypes: state.appointmentTypes,
       maxDailyPatients: state.maxDailyPatients!,
     );
 
-    appointmentsResult.fold(
+    result.fold(
       (error) {
         emit(
           state.copyWith(
