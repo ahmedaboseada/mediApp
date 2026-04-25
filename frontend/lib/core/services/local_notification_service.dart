@@ -184,10 +184,7 @@ class LocalNotificationService {
     _isInitialized = true;
   }
 
-  static void saveAppointmentRemindMe(
-    String appointmentId,
-    bool value,
-  ) {
+  static void saveAppointmentRemindMe(String appointmentId, bool value) {
     if (!Hive.isBoxOpen('settingsBox')) return;
     final settings = Hive.box('settingsBox');
     settings.put('$_appointmentRemindersPrefix$appointmentId', value);
@@ -196,7 +193,11 @@ class LocalNotificationService {
   static bool getAppointmentRemindMe(String appointmentId) {
     if (!Hive.isBoxOpen('settingsBox')) return false;
     final settings = Hive.box('settingsBox');
-    return settings.get('$_appointmentRemindersPrefix$appointmentId', defaultValue: false) as bool;
+    return settings.get(
+          '$_appointmentRemindersPrefix$appointmentId',
+          defaultValue: false,
+        )
+        as bool;
   }
 
   static Future<void> scheduleAppointmentReminder(
@@ -439,7 +440,7 @@ class LocalNotificationService {
     final settings = AlarmSettings(
       id: id,
       dateTime: time,
-      assetAudioPath: 'assets/sounds/pill_shaking.mp3',
+      //assetAudioPath: 'assets/sounds/pill_shaking.mp3',
       loopAudio: isCritical,
       vibrate: true,
       warningNotificationOnKill: false,
