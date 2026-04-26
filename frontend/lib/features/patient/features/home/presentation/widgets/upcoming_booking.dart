@@ -1,60 +1,89 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/features/patient/features/doctors/data/repo/doctors_repo.dart';
+import 'package:medi/features/patient/features/doctors/presentation/cubits/my_bookings_cubit.dart';
+import 'package:medi/features/patient/features/doctors/presentation/cubits/my_bookings_state.dart';
 
 class UpcomingBooking extends StatelessWidget {
   const UpcomingBooking({super.key});
 
-  static const List<_UpcomingBookingItem> _items = [
-    _UpcomingBookingItem(
-      doctorName: 'Dr. Marvin Kinney',
-      avatarAsset: AppAssets.avatar1,
-      ctaText: 'Start',
-    ),
-    _UpcomingBookingItem(
-      doctorName: 'Dr. John Janson',
-      avatarAsset: AppAssets.avatar2,
-      scheduleText: 'Aug 25, 2026 - 10:00 AM',
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: EdgeInsets.all(AppSizes.w24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Upcoming Booking',
-                  style: AppStyles.black18500.copyWith(fontSize: AppSizes.sp20),
-                ),
-                TextButton(
-                  onPressed: () => context.push('/doctors/my-bookings'),
-                  child: Text(
-                    'View booking',
-                    style: AppStyles.primaryDark12400.copyWith(
-                      fontWeight: FontWeight.w600,
+    return BlocProvider(
+      create: (context) =>
+          MyBookingsCubit(doctorsRepository: getIt<DoctorsRepository>())
+            ..fetchBookings(),
+      child: Card(
+        child: Padding(
+          padding: EdgeInsets.all(AppSizes.w24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Upcoming Booking',
+                    style: AppStyles.black18500.copyWith(
+                      fontSize: AppSizes.sp20,
                     ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: AppSizes.h10),
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _items.length,
-              separatorBuilder: (_, _) => SizedBox(height: AppSizes.h10),
-              itemBuilder: (context, index) {
-                return _UpcomingBookingTile(item: _items[index]);
-              },
-            ),
-          ],
+                  TextButton(
+                    onPressed: () => context.push('/doctors/my-bookings'),
+                    child: Text(
+                      'View booking',
+                      style: AppStyles.primaryDark12400.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: AppSizes.h10),
+              BlocBuilder<MyBookingsCubit, MyBookingsState>(
+                builder: (context, state) {
+                  if (state is MyBookingsLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (state is MyBookingsSuccess) {
+                    final upcoming = state.bookings
+                        .where((b) => b.status.toLowerCase() == 'upcoming')
+                        .toList();
+                    return ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: upcoming.length,
+                      separatorBuilder: (_, _) =>
+                          SizedBox(height: AppSizes.h10),
+                      itemBuilder: (context, index) {
+                        return _UpcomingBookingTile(
+                          item: _UpcomingBookingItem(
+                            doctorName:
+                                "${upcoming[index].doctor.user.firstName} ${upcoming[index].doctor.user.lastName}",
+                            avatarAsset:
+                                upcoming[index].doctor.user.profilePicture,
+                            ctaText:
+                                upcoming[index].date.date.toIso8601String() ==
+                                    DateTime.now().toIso8601String().split(
+                                      'T',
+                                    )[0]
+                                ? 'start'
+                                : null,
+                            scheduleText:
+                                '${DateFormat('MMM d, yyyy').format(DateTime.parse(upcoming[index].date.date.toIso8601String()))} - ${upcoming[index].date.time}',
+                          ),
+                        );
+                      },
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -81,12 +110,19 @@ class _UpcomingBookingTile extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(AppSizes.r10),
-            child: Image.asset(
-              item.avatarAsset,
-              width: AppSizes.w40,
-              height: AppSizes.h40,
-              fit: BoxFit.cover,
-            ),
+            child: item.avatarAsset.isNotEmpty
+                ? Image.network(
+                    item.avatarAsset,
+                    width: AppSizes.w40,
+                    height: AppSizes.h40,
+                    fit: BoxFit.cover,
+                  )
+                : Image.asset(
+                    AppAssets.avatar1,
+                    width: AppSizes.w40,
+                    height: AppSizes.h40,
+                    fit: BoxFit.cover,
+                  ),
           ),
           SizedBox(width: AppSizes.w10),
           Expanded(

@@ -6,7 +6,7 @@ import 'package:medi/features/patient/features/doctors/data/models/booking_model
 import 'package:medi/features/patient/features/doctors/data/models/doctor_summary.dart';
 
 abstract class DoctorsRepository {
-  Future<Either<ApiError, List<DoctorModel>>> getGlobalDoctors();
+  Future<Either<ApiError, List<Doctordata>>> getGlobalDoctors();
   Future<Either<ApiError, List<String>>> getDoctorSlots(
     String doctorId,
     String date,
@@ -22,5 +22,5 @@ abstract class DoctorsRepository {
     String time,
   );
   Future<Either<ApiError, void>> sendConnectionRequest(String doctorId);
-  Future<Either<ApiError, List<DoctorModel>>> getConnectedDoctors();
+  Future<Either<ApiError, List<Doctordata>>> getConnectedDoctors();
 }

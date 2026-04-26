@@ -18,6 +18,8 @@ class HiveService {
   static const String _settingsBox = 'settingsBox';
   static const String _medicationsBox = 'medicationsBox';
   static const String _medicationsKey = 'medications';
+  static const String _earlyVoiceAlertsKey = 'earlyVoiceAlerts';
+  static const String _notificationsEnabledKey = 'notificationsEnabled';
 
   // Keys
   static const String _accessTokenKey = 'accessToken';
@@ -61,6 +63,17 @@ class HiveService {
     return Hive.box(_settingsBox);
   }
 
+  /// Safely open a Hive box, recovering from corrupted/stale data.
+  static Future<Box> _safeOpenBox(String boxName) async {
+    try {
+      return await Hive.openBox(boxName);
+    } catch (e) {
+      // Box contains data from a removed adapter — delete and re-create
+      await Hive.deleteBoxFromDisk(boxName);
+      return await Hive.openBox(boxName);
+    }
+  }
+
   /// Initialize Hive
   static Future<void> init() async {
     if (!Hive.isBoxOpen(_authBox) ||
@@ -95,19 +108,18 @@ class HiveService {
       Hive.registerAdapter(MedicationAdapter());
     }
 
-    if (!Hive.isAdapterRegistered(9)) {
-      // Hive.registerAdapter(MedicationScheduleTimeAdapter());
-    }
+    // if (!Hive.isAdapterRegistered(9)) {
+    //    Hive.registerAdapter(MedicationScheduleTimeAdapter());
+    // }
     if (!Hive.isAdapterRegistered(10)) {
       Hive.registerAdapter(SyncActionAdapter());
     }
 
-    // Open boxes
-    await Hive.openBox(_authBox);
-    await Hive.openBox(_userBox);
-    await Hive.openBox(_settingsBox);
-    await Hive.openBox(_medicationsBox);
-
+    // Open boxes (with recovery for corrupted/stale data)
+    await _safeOpenBox(_authBox);
+    await _safeOpenBox(_userBox);
+    await _safeOpenBox(_settingsBox);
+    await _safeOpenBox(_medicationsBox);
 
     // Trigger sync on app start
     SyncService.processQueue();
@@ -412,6 +424,36 @@ class HiveService {
     }
   }
 
+  // ========== EARLY VOICE ALERTS ==========
+
+  /// Save the early voice alerts preference
+  static Future<void> setEarlyVoiceAlerts(bool enabled) async {
+    if (!Hive.isBoxOpen(_settingsBox)) return;
+    await Hive.box(_settingsBox).put(_earlyVoiceAlertsKey, enabled);
+  }
+
+  /// Get whether early voice alerts are enabled
+  static bool getEarlyVoiceAlerts() {
+    if (!Hive.isBoxOpen(_settingsBox)) return false;
+    return Hive.box(_settingsBox).get(_earlyVoiceAlertsKey, defaultValue: false)
+        as bool;
+  }
+
+  /// Save the notifications enabled preference
+  static Future<void> setNotificationsEnabled(bool enabled) async {
+    if (!Hive.isBoxOpen(_settingsBox)) return;
+    await Hive.box(_settingsBox).put(_notificationsEnabledKey, enabled);
+  }
+
+  /// Get whether notifications are enabled (defaults to true)
+  static bool getNotificationsEnabled() {
+    if (!Hive.isBoxOpen(_settingsBox)) return true;
+    return Hive.box(
+          _settingsBox,
+        ).get(_notificationsEnabledKey, defaultValue: true)
+        as bool;
+  }
+
   // ========== MEDICATION MANAGEMENT ==========
 
   /// Get locally saved medications
@@ -437,7 +479,7 @@ class HiveService {
     if (medication.id.isEmpty) {
       medicationWithId = medication.copyWith(id: const Uuid().v4());
     }
-    
+
     // Set as not synced initially for offline-first tracking
     medicationWithId = medicationWithId.copyWith(isSynced: false);
 
@@ -532,14 +574,14 @@ class HiveService {
   }
 
   /// Update a temporary ID with a server-generated ID
-  static Future<void> updateMedicationServerId(String tempId, String serverId) async {
+  static Future<void> updateMedicationServerId(
+    String tempId,
+    String serverId,
+  ) async {
     final current = getMedications();
     final index = current.indexWhere((m) => m.id == tempId);
     if (index != -1) {
-      current[index] = current[index].copyWith(
-        id: serverId,
-        isSynced: true,
-      );
+      current[index] = current[index].copyWith(id: serverId, isSynced: true);
       await saveMedications(current);
     }
   }

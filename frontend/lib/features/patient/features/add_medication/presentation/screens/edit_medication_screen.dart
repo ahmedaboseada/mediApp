@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/core/data/sync/sync_service.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
-import 'package:medi/features/patient/features/add_medication/data/repo/medicine_repo.dart';
 
 class _SpecificDateReminders {
   _SpecificDateReminders({required this.date, required List<String> times})
@@ -698,23 +698,12 @@ class _EditMedicationScreenState extends State<EditMedicationScreen> {
       specificSchedule: _isSpecificSelected ? _buildSpecificPayload() : null,
     );
 
-    final medicationId = _originalMedication.id.trim();
-    if (medicationId.isNotEmpty) {
-      final result = await getIt<MedicineRepo>().updateMedicineFromMedication(
-        medicationId: medicationId,
-        medication: updated,
-      );
-      if (result.isLeft()) {
-        final error = result.swap().getOrElse(
-          () => ServerFailure('Update failed'),
-        );
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error.message), backgroundColor: Colors.red),
-        );
-        return;
-      }
-    }
+    // 🔥 Offline-sync (Optimistic)
+    await SyncService.addToQueue(
+      type: 'update',
+      entity: 'medication',
+      data: updated.toJson(),
+    );
 
     await HiveService.updateMedication(
       original: _originalMedication,

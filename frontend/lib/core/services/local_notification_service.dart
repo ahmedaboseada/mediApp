@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:medi/core/widgets/alarm_notification.dart';
 import 'package:medi/core/services/alarm_service.dart';
+import 'package:medi/core/services/hive_service.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 import 'package:medi/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -76,6 +77,7 @@ class LocalNotificationService {
       'medicine_critical_notification_ids_';
   static const String _alarmStoragePrefix = 'medicine_alarm_notification_ids_';
   static const String _appointmentRemindersPrefix = 'appointment_remind_me_';
+  // static const String _earlyAlertStoragePrefix = 'medicine_early_alert_ids_';
   static const String _dndPromptShownKey = 'dnd_prompt_shown_v1';
   static const String _batteryPromptShownKey = 'battery_prompt_shown_v1';
   static const MethodChannel _androidSystemChannel = MethodChannel(
@@ -476,6 +478,9 @@ class LocalNotificationService {
     await init();
     await cancelMedicationReminders(medication);
 
+    // Skip scheduling if notifications are globally disabled
+    if (!HiveService.getNotificationsEnabled()) return;
+
     final reminderTimes = _buildReminderDateTimes(
       medication,
       now: DateTime.now(),
@@ -855,7 +860,22 @@ class LocalNotificationService {
     }
 
     scheduled.sort();
-    return scheduled.take(_maxScheduledNotifications).toList();
+    final limitedSchedule = scheduled.take(_maxScheduledNotifications).toList();
+
+    // If early voice alerts are enabled, add 15-minute-early entries
+    if (HiveService.getEarlyVoiceAlerts()) {
+      final earlyAlerts = <DateTime>[];
+      for (final time in List<DateTime>.from(limitedSchedule)) {
+        final earlyTime = time.subtract(const Duration(minutes: 15));
+        if (earlyTime.isAfter(now)) {
+          earlyAlerts.add(earlyTime);
+        }
+      }
+      limitedSchedule.addAll(earlyAlerts);
+      limitedSchedule.sort();
+    }
+
+    return limitedSchedule;
   }
 
   List<DateTime> _buildSpecificReminderDateTimes(
@@ -910,7 +930,22 @@ class LocalNotificationService {
     }
 
     scheduled.sort();
-    return scheduled.take(_maxScheduledNotifications).toList();
+    final limitedSchedule = scheduled.take(_maxScheduledNotifications).toList();
+
+    // If early voice alerts are enabled, add 15-minute-early entries
+    if (HiveService.getEarlyVoiceAlerts()) {
+      final earlyAlerts = <DateTime>[];
+      for (final time in List<DateTime>.from(limitedSchedule)) {
+        final earlyTime = time.subtract(const Duration(minutes: 15));
+        if (earlyTime.isAfter(now)) {
+          earlyAlerts.add(earlyTime);
+        }
+      }
+      limitedSchedule.addAll(earlyAlerts);
+      limitedSchedule.sort();
+    }
+
+    return limitedSchedule;
   }
 
   List<DateTime> _datesByFrequency({

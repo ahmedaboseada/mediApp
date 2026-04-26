@@ -4,8 +4,8 @@ import 'package:medi/features/patient/features/health_measurements/data/models/m
 
 enum PatientStatus { normal, abnormal, critical, missedMeds }
 
-class PatientModel {
-  const PatientModel({
+class PatientData {
+  const PatientData({
     required this.id,
     required this.name,
     required this.age,
@@ -35,14 +35,14 @@ class PatientModel {
   final List<MedicationModel> medications;
   final List<MeasurementModel> measurements;
 
-  factory PatientModel.fromJson(Map<String, dynamic> json) {
+  factory PatientData.fromJson(Map<String, dynamic> json) {
     if (json.containsKey('userId') && json['userId'] is Map<String, dynamic>) {
       final user = json['userId'] as Map<String, dynamic>;
       final firstName = user['firstName'] ?? '';
       final lastName = user['lastName'] ?? '';
       final name = '$firstName $lastName'.trim();
 
-      return PatientModel(
+      return PatientData(
         id: (json['_id'] ?? 'Unknown').toString(),
         name: name.isNotEmpty ? name : 'Unknown',
         age: user['age'] ?? 0,
@@ -67,7 +67,7 @@ class PatientModel {
       );
     }
 
-    return PatientModel(
+    return PatientData(
       id: (json['id'] ?? json['_id'] ?? 'Unknown').toString(),
       name: (json['name'] ?? 'Unknown').toString(),
       age: json['age'] ?? 0,

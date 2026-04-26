@@ -12,7 +12,7 @@ class DoctorProfileHeader extends StatelessWidget {
     this.onInsightsTap,
   });
 
-  final DoctorModel doctor;
+  final Doctordata doctor;
   final VoidCallback? onBack;
   final VoidCallback? onInsightsTap;
 
@@ -138,15 +138,15 @@ class DoctorProfileHeader extends StatelessWidget {
                 SizedBox(width: AppSizes.w8),
                 Hero(
                   tag: doctor.id,
-                  child: (doctor.user.profilePicture.isNotEmpty &&
+                  child:
+                      (doctor.user.profilePicture.isNotEmpty &&
                           doctor.user.profilePicture.startsWith('http'))
                       ? CachedNetworkImage(
                           imageUrl: doctor.user.profilePicture,
                           height: AppSizes.h170,
                           fit: BoxFit.contain,
-                          placeholder: (context, url) => const Center(
-                            child: CircularProgressIndicator(),
-                          ),
+                          placeholder: (context, url) =>
+                              const Center(child: CircularProgressIndicator()),
                           errorWidget: (context, url, error) => Image.asset(
                             AppAssets.avatar1,
                             height: AppSizes.h170,

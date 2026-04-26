@@ -8,7 +8,6 @@ import 'package:medi/features/patient/features/home/presentation/widgets/health_
 import 'package:medi/features/patient/features/home/presentation/widgets/upcoming_booking.dart';
 import 'package:medi/features/patient/features/home/presentation/widgets/user_widget.dart';
 import 'package:medi/features/patient/features/home/presentation/widgets/your_schedule.dart';
-import 'package:medi/features/patient/features/questionnaire/questionnaire_flow.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
@@ -63,20 +62,8 @@ class HomeScreen extends StatelessWidget {
                     ),
 
                     YourSchedule(),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const OnboardingFlow(),
-                          ),
-                        );
-                      },
-                      child: Text('Questionnaire'),
-                    ),
                     HealthSummary(),
                     UpcomingBooking(),
-
                     SizedBox(height: AppSizes.h120),
                   ],
                 ),

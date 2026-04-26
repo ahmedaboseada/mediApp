@@ -1,4 +1,4 @@
-import 'package:medi/features/doctor/features/patients/data/models/patient_model.dart';
+import 'package:medi/features/doctor/features/patients/data/models/patient_data.dart';
 
 enum PatientsStatus { initial, loading, success, empty, failure }
 
@@ -11,18 +11,18 @@ class PatientsState {
     this.searchQuery = '',
   });
 
-  final List<PatientModel> patients;
-  final List<PatientModel> filteredPatients;
+  final List<PatientData> patients;
+  final List<PatientData> filteredPatients;
   final PatientsStatus status;
   final String? errorMessage;
   final String searchQuery;
 
-  List<PatientModel> get displayedPatients =>
+  List<PatientData> get displayedPatients =>
       searchQuery.isEmpty ? patients : filteredPatients;
 
   PatientsState copyWith({
-    List<PatientModel>? patients,
-    List<PatientModel>? filteredPatients,
+    List<PatientData>? patients,
+    List<PatientData>? filteredPatients,
     PatientsStatus? status,
     String? errorMessage,
     String? searchQuery,

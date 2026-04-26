@@ -13,7 +13,7 @@ class ConnectedDoctorsInitial extends ConnectedDoctorsState {}
 class ConnectedDoctorsLoading extends ConnectedDoctorsState {}
 
 class ConnectedDoctorsLoaded extends ConnectedDoctorsState {
-  final List<DoctorModel> doctors;
+  final List<Doctordata> doctors;
 
   const ConnectedDoctorsLoaded(this.doctors);
 

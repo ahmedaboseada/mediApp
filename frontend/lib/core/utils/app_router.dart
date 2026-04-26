@@ -461,13 +461,13 @@ class AppRouter {
                       GoRoute(
                         path: 'profile',
                         builder: (context, state) => DoctorProfileScreen(
-                          doctor: state.extra as DoctorModel,
+                          doctor: state.extra as Doctordata,
                         ),
                         routes: [
                           GoRoute(
                             path: 'book',
                             builder: (context, state) => SelectPackageScreen(
-                              doctor: state.extra as DoctorModel,
+                              doctor: state.extra as Doctordata,
                             ),
                             routes: [
                               GoRoute(

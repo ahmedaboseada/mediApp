@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/doctor/features/patients/data/models/patient_model.dart';
+import 'package:medi/features/doctor/features/patients/data/models/patient_data.dart';
 import 'patient_status_pill.dart';
 
 class PatientProfileHeader extends StatelessWidget {
@@ -11,7 +11,7 @@ class PatientProfileHeader extends StatelessWidget {
     required this.onTabChanged,
   });
 
-  final PatientModel patient;
+  final PatientData patient;
   final int selectedTabIndex;
   final ValueChanged<int> onTabChanged;
 

@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:dartz/dartz.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 import 'package:medi/features/patient/features/add_medication/data/repo/medicine_repo.dart';
@@ -153,24 +152,11 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
       return Left(ServerFailure('Please enter a valid stock amount'));
     }
 
-    final previous = state.medication;
     final updatedStock = state.stock + amount;
     final updated = state.medication.copyWith(
       stock: updatedStock,
-      currentStock: updatedStock.toString(),
       stockStatus: _statusForStock(updatedStock),
     );
-
-    final medicationId = previous.id.trim();
-    if (medicationId.isNotEmpty) {
-      final result = await _medicineRepo.updateMedicineFromMedication(
-        medicationId: medicationId,
-        medication: updated,
-      );
-      if (result.isLeft()) {
-        return result;
-      }
-    }
 
     _emitIfOpen(state.copyWith(medication: updated));
     await _persistMedication(updated);

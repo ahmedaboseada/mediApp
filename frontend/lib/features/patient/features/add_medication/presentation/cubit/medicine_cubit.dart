@@ -11,7 +11,7 @@ class MedicineCubit extends Cubit<MedicineState> {
   final MedicineRepo _medicineRepo;
 
   List<Medication> _allMedications = [];
-  List<Medication> _activeMedications = [];
+  //final List<Medication> _activeMedications = [];
 
   // =========================
   // LOAD MEDICATIONS (LOCAL FIRST)

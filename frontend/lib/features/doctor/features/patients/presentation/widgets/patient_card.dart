@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/doctor/features/patients/data/models/patient_model.dart';
+import 'package:medi/features/doctor/features/patients/data/models/patient_data.dart';
 
 class PatientCard extends StatelessWidget {
   const PatientCard({super.key, required this.patient, this.onViewProfile});
 
-  final PatientModel patient;
+  final PatientData patient;
   final VoidCallback? onViewProfile;
 
   @override
@@ -109,7 +109,7 @@ class _InfoRow extends StatelessWidget {
 class _StatusBadge extends StatelessWidget {
   const _StatusBadge({required this.patient});
 
-  final PatientModel patient;
+  final PatientData patient;
 
   @override
   Widget build(BuildContext context) {

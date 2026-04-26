@@ -8,7 +8,6 @@ import 'package:medi/features/patient/features/add_medication/data/models/medica
 import 'package:medi/features/patient/features/add_medication/data/repo/medicine_repo.dart';
 import 'package:medi/features/patient/features/health_measurements/data/repo/logs_repo.dart';
 
-
 class SyncService {
   static const String _syncBoxName = 'syncBox';
   static Completer<void>? _syncCompleter;
@@ -25,7 +24,14 @@ class SyncService {
     if (!Hive.isAdapterRegistered(10)) {
       Hive.registerAdapter(SyncActionAdapter());
     }
-    await Hive.openBox<SyncAction>(_syncBoxName);
+    await _openBox();
+  }
+
+  static Future<Box<SyncAction>> _openBox() async {
+    if (!Hive.isBoxOpen(_syncBoxName)) {
+      return await Hive.openBox<SyncAction>(_syncBoxName);
+    }
+    return Hive.box<SyncAction>(_syncBoxName);
   }
 
   /// Add a new action to the sync queue
@@ -34,7 +40,7 @@ class SyncService {
     required String entity,
     required Map<String, dynamic> data,
   }) async {
-    final box = Hive.box<SyncAction>(_syncBoxName);
+    final box = await _openBox();
     final action = SyncAction(type: type, entity: entity, data: data);
 
     // Optimize queue before adding
@@ -45,6 +51,13 @@ class SyncService {
 
     // Trigger sync if online
     processQueue();
+  }
+
+  /// Get all pending actions from the queue
+  static List<SyncAction> getPendingActions() {
+    if (!Hive.isBoxOpen(_syncBoxName)) return [];
+    final box = Hive.box<SyncAction>(_syncBoxName);
+    return box.values.toList();
   }
 
   /// Optimize the queue to remove redundant operations
@@ -109,14 +122,16 @@ class SyncService {
     if (!await _hasRealInternet()) return;
 
     _syncCompleter = Completer<void>();
-    final box = Hive.box<SyncAction>(_syncBoxName);
+    final box = await _openBox();
 
     print('Starting sync queue processing... (${box.length} actions)');
 
     while (box.isNotEmpty) {
-      final action = box.getAt(0);
+      final key = box.keyAt(0);
+      final action = box.get(key);
+
       if (action == null) {
-        await box.deleteAt(0);
+        await box.delete(key);
         continue;
       }
 
@@ -139,14 +154,14 @@ class SyncService {
           );
         }
 
-        // Remove from queue
-        await box.deleteAt(0);
+        // Remove from queue safely using key
+        await box.delete(key);
       } else {
         // Failure: Increment retry count
         action.retryCount++;
         if (action.retryCount >= 3) {
           print('Action ${action.id} failed after 3 retries. Dropping.');
-          await box.deleteAt(0);
+          await box.delete(key);
         } else {
           await action.save();
           print(
@@ -220,6 +235,20 @@ class SyncService {
     SyncAction action,
   ) async {
     final repo = _medicineRepo!;
+
+    if (action.type == 'mark_as_taken') {
+      final result = await repo.markAsTaken(
+        medicationId: action.data['id'] ?? action.data['_id'],
+        date: action.data['date'],
+        time: action.data['time'],
+        taken: action.data['taken'] ?? true,
+      );
+      return result.fold(
+        (error) => throw Exception(error.message),
+        (message) => {'success': true, 'message': message},
+      );
+    }
+
     final medication = Medication.fromJson(action.data);
 
     switch (action.type) {
@@ -261,7 +290,8 @@ class SyncService {
     SyncAction action,
   ) async {
     final repo = _logsRepo!;
-    final type = action.data['type']; // e.g. "blood_pressure", "heart_rate", etc.
+    final type =
+        action.data['type']; // e.g. "blood_pressure", "heart_rate", etc.
 
     switch (type) {
       case 'blood_pressure':

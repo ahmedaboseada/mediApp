@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/doctor/features/patients/data/models/patient_model.dart';
+import 'package:medi/features/doctor/features/patients/data/models/patient_data.dart';
 import 'package:medi/features/doctor/features/patients/presentation/widgets/patient_medication_card.dart';
 import 'package:medi/features/doctor/features/patients/presentation/widgets/patient_profile_header.dart';
 import 'package:medi/features/doctor/features/patients/presentation/widgets/patient_section_card.dart';
@@ -10,7 +10,7 @@ import 'package:medi/features/doctor/features/patients/presentation/widgets/pati
 class PatientProfileScreen extends StatefulWidget {
   const PatientProfileScreen({super.key, required this.patient});
 
-  final PatientModel patient;
+  final PatientData patient;
 
   @override
   State<PatientProfileScreen> createState() => _PatientProfileScreenState();

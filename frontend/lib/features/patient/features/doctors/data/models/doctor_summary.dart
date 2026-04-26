@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:medi/features/shared/auth/data/models/user_model.dart';
 
-class DoctorModel extends Equatable {
+class Doctordata extends Equatable {
   final String id;
   final UserModel user;
   final String status;
@@ -20,7 +20,7 @@ class DoctorModel extends Equatable {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  const DoctorModel({
+  const Doctordata({
     required this.id,
     required this.user,
     required this.status,
@@ -40,8 +40,8 @@ class DoctorModel extends Equatable {
     required this.updatedAt,
   });
 
-  factory DoctorModel.fromJson(Map<String, dynamic> json) {
-    return DoctorModel(
+  factory Doctordata.fromJson(Map<String, dynamic> json) {
+    return Doctordata(
       id: (json['_id'] ?? json['id'] ?? '').toString(),
       user: UserModel.fromJson(json['userId'] is Map ? json['userId'] : {}),
       status: (json['status'] ?? '').toString(),
@@ -52,21 +52,37 @@ class DoctorModel extends Equatable {
           .map((e) => e.toString())
           .toList(),
       workingHours: (json['workingHours'] as List? ?? [])
-          .map((e) => WorkingHour.fromJson(e is Map ? Map<String, dynamic>.from(e) : {}))
+          .map(
+            (e) => WorkingHour.fromJson(
+              e is Map ? Map<String, dynamic>.from(e) : {},
+            ),
+          )
           .toList(),
       connectedPatients: (json['connectedPatients'] as List? ?? [])
-          .map((e) => ConnectedPatient.fromJson(e is Map ? Map<String, dynamic>.from(e) : {}))
+          .map(
+            (e) => ConnectedPatient.fromJson(
+              e is Map ? Map<String, dynamic>.from(e) : {},
+            ),
+          )
           .toList(),
       clinicName: (json['clinicName'] ?? '').toString(),
       medicalLicenseId: (json['medicalLicenseId'] ?? '').toString(),
       specialization: (json['specialization'] ?? '').toString(),
       clinicAddress: (json['clinicAddress'] ?? '').toString(),
-      clinicLocation: ClinicLocation.fromJson(json['clinicLocation'] is Map ? json['clinicLocation'] : {}),
-      consultationDuration: int.tryParse(json['consultationDuration']?.toString() ?? '0') ?? 0,
-      maxDailyPatients: int.tryParse(json['maxDailyPatients']?.toString() ?? '0') ?? 0,
+      clinicLocation: ClinicLocation.fromJson(
+        json['clinicLocation'] is Map ? json['clinicLocation'] : {},
+      ),
+      consultationDuration:
+          int.tryParse(json['consultationDuration']?.toString() ?? '0') ?? 0,
+      maxDailyPatients:
+          int.tryParse(json['maxDailyPatients']?.toString() ?? '0') ?? 0,
       reviewsCount: int.tryParse(json['reviewsCount']?.toString() ?? '0') ?? 0,
-      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ?? DateTime.now(),
-      updatedAt: DateTime.tryParse(json['updatedAt']?.toString() ?? '') ?? DateTime.now(),
+      createdAt:
+          DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
+          DateTime.now(),
+      updatedAt:
+          DateTime.tryParse(json['updatedAt']?.toString() ?? '') ??
+          DateTime.now(),
     );
   }
 

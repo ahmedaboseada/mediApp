@@ -10,7 +10,7 @@ class ReviewSummaryDoctorHeader extends StatelessWidget {
     required this.location,
   });
 
-  final DoctorModel doctor;
+  final Doctordata doctor;
   final String location;
 
   @override
@@ -25,9 +25,8 @@ class ReviewSummaryDoctorHeader extends StatelessWidget {
                   width: AppSizes.w64,
                   height: AppSizes.h64,
                   fit: BoxFit.cover,
-                  placeholder: (context, url) => const Center(
-                    child: CircularProgressIndicator(),
-                  ),
+                  placeholder: (context, url) =>
+                      const Center(child: CircularProgressIndicator()),
                   errorWidget: (context, url, error) => Image.asset(
                     AppAssets.avatar1,
                     width: AppSizes.w64,

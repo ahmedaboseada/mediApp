@@ -16,7 +16,7 @@ class AppointmentReviewData {
     this.problem = '',
   });
 
-  final DoctorModel? doctor;
+  final Doctordata? doctor;
   final String dateAndHour;
   final String packageName;
   final String duration;
@@ -30,7 +30,7 @@ class AppointmentReviewData {
   final String problem;
 
   AppointmentReviewData copyWith({
-    DoctorModel? doctor,
+    Doctordata? doctor,
     String? dateAndHour,
     String? packageName,
     String? duration,

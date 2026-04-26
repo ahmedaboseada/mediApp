@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/doctor/features/patients/data/models/patient_model.dart';
+import 'package:medi/features/doctor/features/patients/data/models/patient_data.dart';
 import 'dart:developer';
 import 'package:medi/features/doctor/features/patients/data/repo/patients_repository.dart';
 
@@ -11,7 +11,7 @@ class PatientsRepositoryImpl implements PatientsRepository {
   // Mock data - replace with API calls when backend is ready
 
   @override
-  Future<Either<ApiError, List<PatientModel>>> getPatients({
+  Future<Either<ApiError, List<PatientData>>> getPatients({
     String? searchQuery,
   }) async {
     try {
@@ -24,8 +24,8 @@ class PatientsRepositoryImpl implements PatientsRepository {
       if (response is Map<String, dynamic> &&
           response.containsKey('patients')) {
         final List<dynamic> patientsData = response['patients'];
-        List<PatientModel> patients = patientsData
-            .map((data) => PatientModel.fromJson(data as Map<String, dynamic>))
+        List<PatientData> patients = patientsData
+            .map((data) => PatientData.fromJson(data as Map<String, dynamic>))
             .toList();
 
         // Filter by search query if provided

@@ -4,13 +4,13 @@ import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:medi/core/services/alarm_service.dart';
-import 'package:medi/core/services/hive_service.dart';
 import 'package:medi/core/services/local_notification_service.dart';
 import 'package:medi/core/services/connectivity_service.dart';
 import 'package:medi/core/utils/service_locator.dart';
 import 'package:medi/core/data/sync/sync_service.dart';
 import 'package:medi/features/patient/features/add_medication/data/repo/medicine_repo.dart';
 import 'package:medi/features/patient/features/health_measurements/data/repo/logs_repo.dart';
+import 'package:medi/core/services/hive_service.dart';
 
 class StartupInitResult {
   const StartupInitResult({required this.errors});

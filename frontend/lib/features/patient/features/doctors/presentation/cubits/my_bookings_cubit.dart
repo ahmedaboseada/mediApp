@@ -15,26 +15,36 @@ class MyBookingsCubit extends Cubit<MyBookingsState> {
     final result = await doctorsRepository.getPatientBookings();
 
     result.fold(
-      (failure) => emit(MyBookingsFailure(failure.message)),
-      (bookings) => emit(MyBookingsSuccess(bookings)),
+      (failure) {
+        if (isClosed) return;
+        emit(MyBookingsFailure(failure.message));
+      },
+      (bookings) {
+        if (isClosed) return;
+        emit(MyBookingsSuccess(bookings));
+      },
     );
   }
 
   Future<void> cancelBooking(String bookingId, String reason) async {
     final result = await doctorsRepository.cancelBooking(bookingId, reason);
 
-    result.fold((failure) => emit(MyBookingsFailure(failure.message)), (
-      _,
-    ) async {
-      // Cancel the reminder if it exists
-      await LocalNotificationService.cancelAppointmentReminder(bookingId);
-      LocalNotificationService.saveAppointmentRemindMe(bookingId, false);
+    result.fold(
+      (failure) {
+        if (isClosed) return;
+        emit(MyBookingsFailure(failure.message));
+      },
+      (_) async {
+        // Cancel the reminder if it exists
+        await LocalNotificationService.cancelAppointmentReminder(bookingId);
+        LocalNotificationService.saveAppointmentRemindMe(bookingId, false);
 
-      emit(const MyBookingsActionSuccess('Appointment cancelled'));
+        emit(const MyBookingsActionSuccess('Appointment cancelled'));
 
-      // Refresh bookings
-      await fetchBookings();
-    });
+        // Refresh bookings
+        await fetchBookings();
+      },
+    );
   }
 
   Future<void> rescheduleBooking({

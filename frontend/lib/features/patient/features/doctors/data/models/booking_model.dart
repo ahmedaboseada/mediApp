@@ -4,7 +4,7 @@ import 'package:medi/features/patient/features/doctors/data/models/doctor_summar
 class BookingModel extends Equatable {
   final String id;
   final String patientId;
-  final DoctorModel doctor;
+  final Doctordata doctor;
   final BookingDate date;
   final int duration;
   final String packageType;
@@ -44,7 +44,9 @@ class BookingModel extends Equatable {
     return BookingModel(
       id: (json['_id'] ?? '').toString(),
       patientId: (json['patientId'] ?? '').toString(),
-      doctor: DoctorModel.fromJson(json['doctorId'] is Map ? json['doctorId'] : {}),
+      doctor: Doctordata.fromJson(
+        json['doctorId'] is Map ? json['doctorId'] : {},
+      ),
       date: BookingDate.fromJson(json['date'] is Map ? json['date'] : {}),
       duration: int.tryParse(json['duration']?.toString() ?? '0') ?? 0,
       packageType: (json['packageType'] ?? '').toString(),
@@ -57,31 +59,35 @@ class BookingModel extends Equatable {
       status: (json['status'] ?? '').toString(),
       clinicAddress: (json['clinicAddress'] ?? '').toString(),
       appointmentId: (json['appointmentId'] ?? '').toString(),
-      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ?? DateTime.now(),
-      updatedAt: DateTime.tryParse(json['updatedAt']?.toString() ?? '') ?? DateTime.now(),
+      createdAt:
+          DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
+          DateTime.now(),
+      updatedAt:
+          DateTime.tryParse(json['updatedAt']?.toString() ?? '') ??
+          DateTime.now(),
     );
   }
 
   @override
   List<Object?> get props => [
-        id,
-        patientId,
-        doctor,
-        date,
-        duration,
-        packageType,
-        bookingFor,
-        patientAge,
-        patientGender,
-        problem,
-        paymentMethod,
-        price,
-        status,
-        clinicAddress,
-        appointmentId,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    patientId,
+    doctor,
+    date,
+    duration,
+    packageType,
+    bookingFor,
+    patientAge,
+    patientGender,
+    problem,
+    paymentMethod,
+    price,
+    status,
+    clinicAddress,
+    appointmentId,
+    createdAt,
+    updatedAt,
+  ];
 }
 
 class BookingDate extends Equatable {

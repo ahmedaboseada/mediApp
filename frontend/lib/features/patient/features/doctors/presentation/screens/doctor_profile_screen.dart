@@ -11,7 +11,7 @@ import 'package:medi/features/patient/features/doctors/presentation/widgets/doct
 class DoctorProfileScreen extends StatefulWidget {
   const DoctorProfileScreen({super.key, required this.doctor});
 
-  final DoctorModel doctor;
+  final Doctordata doctor;
 
   @override
   State<DoctorProfileScreen> createState() => _DoctorProfileScreenState();
@@ -51,7 +51,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
   Widget build(BuildContext context) {
     return BlocBuilder<BookingCubit, BookingState>(
       builder: (context, state) {
-        final DoctorModel profileDoctor = state.appointmentReviewData.doctor!;
+        final Doctordata profileDoctor = state.appointmentReviewData.doctor!;
 
         return Scaffold(
           body: SafeArea(

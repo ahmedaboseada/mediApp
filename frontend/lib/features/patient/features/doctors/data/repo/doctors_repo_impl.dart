@@ -15,7 +15,7 @@ class DoctorsRepositoryImpl implements DoctorsRepository {
   DoctorsRepositoryImpl(this.apiService);
 
   @override
-  Future<Either<ApiError, List<DoctorModel>>> getGlobalDoctors() async {
+  Future<Either<ApiError, List<Doctordata>>> getGlobalDoctors() async {
     try {
       final dynamic response = await apiService.get("/doctors/directory");
 
@@ -30,7 +30,7 @@ class DoctorsRepositoryImpl implements DoctorsRepository {
 
       final doctors = rawList
           .whereType<Map>()
-          .map((item) => DoctorModel.fromJson(Map<String, dynamic>.from(item)))
+          .map((item) => Doctordata.fromJson(Map<String, dynamic>.from(item)))
           .toList();
 
       return Right(doctors);
@@ -186,9 +186,11 @@ class DoctorsRepositoryImpl implements DoctorsRepository {
   }
 
   @override
-  Future<Either<ApiError, List<DoctorModel>>> getConnectedDoctors() async {
+  Future<Either<ApiError, List<Doctordata>>> getConnectedDoctors() async {
     try {
-      final dynamic response = await apiService.get("/patients/connected-doctors");
+      final dynamic response = await apiService.get(
+        "/patients/connected-doctors",
+      );
 
       log('Get Connected Doctors Response: ${response.toString()}');
 
@@ -200,7 +202,7 @@ class DoctorsRepositoryImpl implements DoctorsRepository {
 
       final doctors = rawList
           .whereType<Map>()
-          .map((item) => DoctorModel.fromJson(Map<String, dynamic>.from(item)))
+          .map((item) => Doctordata.fromJson(Map<String, dynamic>.from(item)))
           .toList();
 
       return Right(doctors);

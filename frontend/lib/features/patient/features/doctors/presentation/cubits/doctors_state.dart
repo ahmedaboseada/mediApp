@@ -13,7 +13,7 @@ class DoctorsInitial extends DoctorsState {}
 class DoctorsLoading extends DoctorsState {}
 
 class DoctorsLoaded extends DoctorsState {
-  final List<DoctorModel> doctors;
+  final List<Doctordata> doctors;
 
   const DoctorsLoaded(this.doctors);
 

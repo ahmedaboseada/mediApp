@@ -160,7 +160,7 @@ class BookingCubit extends Cubit<BookingState> {
     );
   }
 
-  void setDoctor(DoctorModel doctor) {
+  void setDoctor(Doctordata doctor) {
     final updatedData = state.appointmentReviewData.copyWith(doctor: doctor);
     emit(state.copyWith(appointmentReviewData: updatedData));
     fetchAvailableSlots(doctor.id, state.selectedDate);

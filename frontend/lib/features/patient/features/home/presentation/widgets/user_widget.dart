@@ -63,29 +63,15 @@ class UserWidget extends StatelessWidget {
   }
 
   ImageProvider? _resolveImageProvider(String imageSource) {
-    if (imageSource.trim().isEmpty) {
+    if (imageSource.isEmpty) {
       return null;
     }
 
-    final resolvedUrl = _resolveBackendImageUrl(imageSource.trim());
-    final lower = resolvedUrl.toLowerCase();
+    final lower = imageSource.toLowerCase();
     if (lower.startsWith('http://') || lower.startsWith('https://')) {
-      return NetworkImage(resolvedUrl);
+      return NetworkImage(imageSource);
     }
 
-    return AssetImage(resolvedUrl);
-  }
-
-  String _resolveBackendImageUrl(String imageSource) {
-    if (imageSource.startsWith('http://') ||
-        imageSource.startsWith('https://')) {
-      return imageSource;
-    }
-
-    final normalizedPath = imageSource.startsWith('/')
-        ? imageSource
-        : '/$imageSource';
-
-    return '${ApiEndpoints.baseUrl}$normalizedPath';
+    return AssetImage(imageSource);
   }
 }

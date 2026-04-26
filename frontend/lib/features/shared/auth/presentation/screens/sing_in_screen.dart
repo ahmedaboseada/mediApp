@@ -21,6 +21,7 @@ class _SignInScreenState extends State<SignInScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
+  bool _hasAuthError = false;
 
   @override
   void initState() {
@@ -34,6 +35,16 @@ class _SignInScreenState extends State<SignInScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void _clearAuthError() {
+    if (_hasAuthError) {
+      setState(() {
+        _hasAuthError = false;
+      });
+      // Re-validate to remove the error borders
+      _formKey.currentState?.validate();
+    }
   }
 
   void _handleSignIn() {
@@ -73,7 +84,15 @@ class _SignInScreenState extends State<SignInScreen> {
                 },
               );
             } else if (state is SiginFailure) {
-              context.showSafeSnackBar(state.error);
+              if (state.error == 'Invalid credentials') {
+                setState(() {
+                  _hasAuthError = true;
+                });
+                // Trigger validation to show error borders
+                _formKey.currentState?.validate();
+              } else {
+                context.showSafeSnackBar(state.error);
+              }
             }
           },
           builder: (context, state) {
@@ -110,7 +129,14 @@ class _SignInScreenState extends State<SignInScreen> {
                         hintText: AppStrings.emailHint,
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
-                        validator: (value) => value?.validateEmail(),
+                        onChanged: (_) => _clearAuthError(),
+                        validator: (value) {
+                          final emailError = value?.validateEmail();
+                          if (emailError != null) return emailError;
+                          if (_hasAuthError)
+                            return 'Email or password may be wrong';
+                          return null;
+                        },
                         label: AppStrings.emailHint,
                       ),
                       SizedBox(height: AppSizes.h16),
@@ -121,7 +147,12 @@ class _SignInScreenState extends State<SignInScreen> {
                         hintText: AppStrings.passwordHint,
                         controller: _passwordController,
                         isPassword: true,
-                        validator: (value) => value?.validatePassword(),
+                        onChanged: (_) => _clearAuthError(),
+                        validator: (value) {
+                          if (_hasAuthError)
+                            return 'Email or password may be wrong';
+                          return null;
+                        },
                         label: AppStrings.passwordHint,
                       ),
                       SizedBox(height: AppSizes.h16),
