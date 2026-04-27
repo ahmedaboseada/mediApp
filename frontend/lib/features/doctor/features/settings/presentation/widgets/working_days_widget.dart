@@ -3,10 +3,14 @@ import 'package:medi/core/constants/app_colors.dart';
 import 'package:medi/core/constants/app_sizes.dart';
 
 class WorkingDaysWidget extends StatefulWidget {
-  const WorkingDaysWidget({super.key, required this.onDaysSelected});
+  const WorkingDaysWidget({
+    this.initialDays = const [],
+    super.key,
+    required this.onDaysSelected,
+  });
 
   final Function(List<String>) onDaysSelected;
-
+  final List<String> initialDays;
   @override
   State<WorkingDaysWidget> createState() => _WorkingDaysWidgetState();
 }
@@ -23,6 +27,11 @@ class _WorkingDaysWidgetState extends State<WorkingDaysWidget> {
   ];
 
   late List<String> selectedDays = [];
+  @override
+  void initState() {
+    super.initState();
+    selectedDays = List.from(widget.initialDays);
+  }
 
   @override
   Widget build(BuildContext context) {

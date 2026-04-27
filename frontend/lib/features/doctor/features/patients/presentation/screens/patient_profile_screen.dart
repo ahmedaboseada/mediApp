@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/patients/data/models/patient_data.dart';
-import 'package:medi/features/doctor/features/patients/presentation/widgets/patient_medication_card.dart';
+import 'package:medi/features/doctor/features/patients/presentation/widgets/add_patient_medication_dialog.dart';
+import 'package:medi/features/doctor/features/patients/presentation/widgets/patient_health_reports_tab.dart';
+import 'package:medi/features/doctor/features/patients/presentation/widgets/patient_medications_tab.dart';
+import 'package:medi/features/doctor/features/patients/presentation/widgets/patient_overview_tab.dart';
 import 'package:medi/features/doctor/features/patients/presentation/widgets/patient_profile_header.dart';
-import 'package:medi/features/doctor/features/patients/presentation/widgets/patient_section_card.dart';
-import 'package:medi/features/doctor/features/patients/presentation/widgets/patient_info_row.dart';
-import 'package:medi/features/doctor/features/patients/presentation/widgets/patient_tag_chip.dart';
 
 class PatientProfileScreen extends StatefulWidget {
-  const PatientProfileScreen({super.key, required this.patient});
+  const PatientProfileScreen({
+    super.key,
+    required this.patient,
+    this.showAddMedicationAction = false,
+  });
 
   final PatientData patient;
+  final bool showAddMedicationAction;
 
   @override
   State<PatientProfileScreen> createState() => _PatientProfileScreenState();
@@ -19,11 +24,35 @@ class PatientProfileScreen extends StatefulWidget {
 class _PatientProfileScreenState extends State<PatientProfileScreen> {
   int _selectedTabIndex = 0;
 
+  Future<void> _openAddMedicationDialog() async {
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) =>
+          AddPatientMedicationDialog(patientName: widget.patient.name),
+    );
+
+    if (!context.mounted || result == null) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            'Prepared ${result['medicationName']} for ${widget.patient.name}',
+          ),
+        ),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
+        bottom: false,
         child: Column(
           children: [
             Expanded(
@@ -48,106 +77,17 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                     ),
                     SizedBox(height: AppSizes.h20),
                     if (_selectedTabIndex == 0) ...[
-                      PatientSectionCard(
-                        title: 'Basic Information',
-                        icon: Icons.person_outline,
-                        child: Column(
-                          children: [
-                            PatientInfoRow(
-                              label: 'Patient ID:',
-                              value: widget.patient.id,
-                            ),
-                            PatientInfoRow(
-                              label: 'Age',
-                              value: '${widget.patient.age}',
-                            ),
-                            PatientInfoRow(
-                              label: 'Gender:',
-                              value: widget.patient.gender == 'female'
-                                  ? '♀'
-                                  : '♂',
-                              valueColor: widget.patient.gender == 'female'
-                                  ? const Color(0xFFFF4D8D)
-                                  : const Color(0xFF2178F3),
-                              valueFontSize: AppSizes.sp24,
-                            ),
-                            PatientInfoRow(
-                              label: 'Blood Type:',
-                              value: widget.patient.bloodType,
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: AppSizes.h16),
-                      PatientSectionCard(
-                        title: 'Contact Information',
-                        icon: Icons.contact_page_outlined,
-                        child: Column(
-                          children: [
-                            PatientIconInfoRow(
-                              icon: Icons.call_outlined,
-                              text: widget.patient.phone,
-                            ),
-                            SizedBox(height: AppSizes.h14),
-                            PatientIconInfoRow(
-                              icon: Icons.mail_outline,
-                              text:
-                                  '${widget.patient.name.toLowerCase().replaceAll(' ', '.')}@email.com',
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: AppSizes.h16),
-                      PatientSectionCard(
-                        title: 'Allergies',
-                        icon: Icons.back_hand_outlined,
-                        child: Wrap(
-                          spacing: AppSizes.w8,
-                          runSpacing: AppSizes.h8,
-                          children: widget.patient.allergies.isNotEmpty
-                              ? widget.patient.allergies
-                                    .map((a) => PatientTagChip(text: a))
-                                    .toList()
-                              : [
-                                  Text(
-                                    'No known allergies',
-                                    style: AppStyles.secondary12400,
-                                  ),
-                                ],
-                        ),
-                      ),
-                      SizedBox(height: AppSizes.h16),
-                      PatientSectionCard(
-                        title: 'Medical History',
-                        icon: Icons.assignment_outlined,
-                        child: Wrap(
-                          spacing: AppSizes.w8,
-                          runSpacing: AppSizes.h8,
-                          children: widget.patient.chronicConditions.isNotEmpty
-                              ? widget.patient.chronicConditions
-                                    .map((c) => PatientTagChip(text: c))
-                                    .toList()
-                              : [
-                                  Text(
-                                    'No medical history',
-                                    style: AppStyles.secondary12400,
-                                  ),
-                                ],
-                        ),
-                      ),
+                      PatientOverviewTab(patient: widget.patient),
                     ],
                     if (_selectedTabIndex == 1) ...[
-                      Text(
-                        'Current Medications',
-                        style: AppStyles.black16400.copyWith(fontSize: 18),
+                      PatientMedicationsTab(
+                        patient: widget.patient,
+                        showAddMedicationAction: widget.showAddMedicationAction,
+                        onAddMedication: _openAddMedicationDialog,
                       ),
-                      SizedBox(height: AppSizes.h16),
-                      PatientMedicationCard(
-                        name: 'Lisinopril',
-                        dosage: '10mg',
-                        frequency: 'Once daily',
-                        instructions: 'Take in the morning with water',
-                      ),
+                    ],
+                    if (_selectedTabIndex == 2) ...[
+                      PatientHealthReportsTab(patient: widget.patient),
                     ],
                   ],
                 ),

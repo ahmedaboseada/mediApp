@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:medi/core/enums/user_role.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
@@ -70,17 +72,14 @@ class HiveService {
     } catch (e) {
       // Box contains data from a removed adapter — delete and re-create
       await Hive.deleteBoxFromDisk(boxName);
+      log('the deleted box is $boxName');
       return await Hive.openBox(boxName);
     }
   }
 
   /// Initialize Hive
   static Future<void> init() async {
-    if (!Hive.isBoxOpen(_authBox) ||
-        !Hive.isBoxOpen(_userBox) ||
-        !Hive.isBoxOpen(_settingsBox)) {
-      await Hive.initFlutter();
-    }
+    await Hive.initFlutter();
 
     // Register adapters
     if (!Hive.isAdapterRegistered(0)) {
@@ -598,6 +597,10 @@ class HiveService {
     await userBox.clear();
     await settings.clear();
     await meds.clear();
+    await Hive.deleteBoxFromDisk(_authBox);
+    await Hive.deleteBoxFromDisk(_userBox);
+    await Hive.deleteBoxFromDisk(_settingsBox);
+    await Hive.deleteBoxFromDisk(_medicationsBox);
   }
 
   /// Close all boxes

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/home/presentation/widgets/notification_section.dart';
 import 'package:medi/features/doctor/features/home/presentation/widgets/settings_section.dart';
 import 'package:medi/features/doctor/features/home/presentation/widgets/support_section.dart';
 import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
 import 'package:medi/features/patient/features/profile/presentation/controller/profile/profile_cubit.dart';
+import 'package:medi/features/patient/features/profile/presentation/widgets/log_out_tile.dart';
 import 'package:medi/features/patient/features/profile/presentation/widgets/privacy_security_section.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
+import 'package:medi/features/shared/auth/presentation/cubit/log_out/log_out_cubit.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/user_profile/user_profile_cubit.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/user_profile/user_profile_state.dart';
 
@@ -52,7 +55,13 @@ class ProfileScreen extends StatelessWidget {
                     },
                   ),
                   SizedBox(height: AppSizes.h24),
-                  SettingsSection(),
+                  SettingsSection(
+                    doctor: context
+                        .read<UserProfileCubit>()
+                        .state
+                        .profile!
+                        .doctor!,
+                  ),
                   SizedBox(height: AppSizes.h24),
                   NotificationSection(),
                   SizedBox(height: AppSizes.h24),
@@ -62,6 +71,25 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   SizedBox(height: AppSizes.h24),
                   SupportSection(),
+                  SizedBox(height: AppSizes.h24),
+                  BlocProvider(
+                    create: (_) => LogOutCubit(getIt<AuthRepoImpl>()),
+
+                    child: BlocConsumer<LogOutCubit, LogOutState>(
+                      listener: (context, state) {
+                        if (state is LogOutSuccess) {
+                          context.go(AppRouter.selectScreen);
+                        } else if (state is LogOutFailure) {
+                          ScaffoldMessenger.of(
+                            context,
+                          ).showSnackBar(SnackBar(content: Text(state.error)));
+                        }
+                      },
+                      builder: (context, state) {
+                        return LogOutTile();
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),

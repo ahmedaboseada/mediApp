@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/patients/presentation/widgets/medication_detail_col.dart';
 
@@ -8,12 +9,14 @@ class PatientMedicationCard extends StatelessWidget {
     required this.name,
     required this.dosage,
     required this.frequency,
+    required this.startDate,
     this.instructions,
   });
 
   final String name;
   final String dosage;
   final String frequency;
+  final int startDate;
   final String? instructions;
 
   @override
@@ -29,13 +32,7 @@ class PatientMedicationCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Image.asset(
-                AppAssets.tablets,
-                width: 24,
-                height: 24,
-                errorBuilder: (_, _, _) =>
-                    const Icon(Icons.medication, color: AppColors.primary),
-              ),
+             SvgPicture.asset(AppAssets.meds, width: 24, height: 24, ),
               SizedBox(width: AppSizes.w12),
               Text(name, style: AppStyles.black16400),
             ],
@@ -54,14 +51,19 @@ class PatientMedicationCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 MedicationDetailCol(
-                  icon: Icons.vaccines,
+                  icon: AppAssets.meds,
                   label: 'Dosage',
                   value: dosage,
                 ),
                 MedicationDetailCol(
-                  icon: Icons.access_time,
+                  icon: AppAssets.timer,
                   label: 'Frequency',
                   value: frequency,
+                ),
+                MedicationDetailCol(
+                  icon: AppAssets.medicineBox,
+                  label: 'Stock',
+                  value: '$startDate',
                 ),
               ],
             ),

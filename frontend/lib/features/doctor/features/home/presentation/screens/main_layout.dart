@@ -20,9 +20,7 @@ class MainDoctorView extends StatelessWidget {
         BlocProvider(
           create: (_) => UserProfileCubit(getIt<AuthRepoImpl>())..getMe(),
         ),
-        BlocProvider(
-          create: (_) => HomeNavCubit(),
-        ),
+        BlocProvider(create: (_) => HomeNavCubit()),
       ],
       child: const _MainLayoutView(),
     );

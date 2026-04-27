@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 
 class MedicalRecordsSection extends StatelessWidget {
@@ -21,6 +22,7 @@ class MedicalRecordsSection extends StatelessWidget {
             ),
             SizedBox(height: 20),
             ListTile(
+              onTap: () => context.push(AppRouter.symptomLogScreen),
               contentPadding: EdgeInsets.zero,
               title: Text("Daily symptoms", style: AppStyles.black16400),
               trailing: Icon(Icons.arrow_forward_ios, color: AppColors.primary),

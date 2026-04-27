@@ -4,6 +4,7 @@ import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/home/presentation/widgets/support_section.dart';
 import 'package:medi/features/patient/features/profile/presentation/widgets/account_section.dart';
 import 'package:medi/features/patient/features/profile/presentation/widgets/connected_doctors_section.dart';
+import 'package:medi/features/patient/features/profile/presentation/widgets/log_out_tile.dart';
 import 'package:medi/features/patient/features/profile/presentation/widgets/medical_records_section.dart';
 import 'package:medi/features/patient/features/profile/presentation/widgets/privacy_security_section.dart';
 import 'package:medi/features/patient/features/profile/presentation/widgets/settings_section.dart';
@@ -71,6 +72,8 @@ class ProfileScreen extends StatelessWidget {
                   SizedBox(height: AppSizes.h16),
 
                   SupportSection(),
+                  SizedBox(height: AppSizes.h16),
+                  LogOutTile(),
                   SizedBox(height: AppSizes.h120),
                 ],
               ),

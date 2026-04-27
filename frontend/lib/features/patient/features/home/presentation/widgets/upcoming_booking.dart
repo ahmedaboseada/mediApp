@@ -59,21 +59,32 @@ class UpcomingBooking extends StatelessWidget {
                       separatorBuilder: (_, _) =>
                           SizedBox(height: AppSizes.h10),
                       itemBuilder: (context, index) {
+                        final bookingData = upcoming[index].date.date;
+                        final bookingTime = upcoming[index].date.time;
+                        final timeParts = bookingTime.split(':');
+                        final bookingDateTime = DateTime(
+                          bookingData.year,
+                          bookingData.month,
+                          bookingData.day,
+                          int.parse(timeParts[0]),
+                          int.parse(timeParts[1]),
+                        );
+                        final now = DateTime.now();
+                        final isNowOrStrated =
+                            now.isAfter(
+                              bookingDateTime.subtract(Duration(minutes: 5)),
+                            ) ||
+                            now.isAtSameMomentAs(bookingDateTime);
                         return _UpcomingBookingTile(
                           item: _UpcomingBookingItem(
                             doctorName:
                                 "${upcoming[index].doctor.user.firstName} ${upcoming[index].doctor.user.lastName}",
                             avatarAsset:
                                 upcoming[index].doctor.user.profilePicture,
-                            ctaText:
-                                upcoming[index].date.date.toIso8601String() ==
-                                    DateTime.now().toIso8601String().split(
-                                      'T',
-                                    )[0]
-                                ? 'start'
-                                : null,
+
+                            ctaText: isNowOrStrated ? 'start' : null,
                             scheduleText:
-                                '${DateFormat('MMM d, yyyy').format(DateTime.parse(upcoming[index].date.date.toIso8601String()))} - ${upcoming[index].date.time}',
+                                '${DateFormat('MMM d, yyyy').format(upcoming[index].date.date)} - ${upcoming[index].date.time}',
                           ),
                         );
                       },

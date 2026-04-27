@@ -5,7 +5,8 @@ import 'package:medi/features/patient/features/doctors/presentation/cubits/conne
 class ConnectedDoctorsCubit extends Cubit<ConnectedDoctorsState> {
   final DoctorsRepository repository;
 
-  ConnectedDoctorsCubit({required this.repository}) : super(ConnectedDoctorsInitial());
+  ConnectedDoctorsCubit({required this.repository})
+    : super(ConnectedDoctorsInitial());
 
   Future<void> loadConnectedDoctors() async {
     emit(ConnectedDoctorsLoading());

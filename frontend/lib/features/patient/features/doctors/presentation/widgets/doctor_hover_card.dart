@@ -86,15 +86,16 @@ class _DoctorHoverCardState extends State<DoctorHoverCard> {
                   CircleAvatar(
                     radius: AppSizes.r20,
                     backgroundColor: AppColors.secondary,
-                    backgroundImage: (widget.imageAsset.isNotEmpty &&
+                    backgroundImage:
+                        (widget.imageAsset.isNotEmpty &&
                             widget.imageAsset.startsWith('http'))
                         ? CachedNetworkImageProvider(widget.imageAsset)
                         : AssetImage(
-                              widget.imageAsset.isNotEmpty
-                                  ? widget.imageAsset
-                                  : AppAssets.avatar1,
-                            )
-                            as ImageProvider,
+                                widget.imageAsset.isNotEmpty
+                                    ? widget.imageAsset
+                                    : AppAssets.avatar1,
+                              )
+                              as ImageProvider,
                   ),
                   SizedBox(width: AppSizes.w16),
                   Expanded(

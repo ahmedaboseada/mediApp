@@ -12,6 +12,7 @@ class QTextField extends StatelessWidget {
     this.hint,
     this.search = true,
     this.validator,
+    this.initialSelectedValues,
   });
   final Function(List<String>) onSelectionChange;
   final List<DropdownItem<String>> items;
@@ -20,9 +21,18 @@ class QTextField extends StatelessWidget {
   final String? hint;
   final bool? search;
   final String? Function(List<DropdownItem<String>>?)? validator;
+  final List<String>? initialSelectedValues;
 
   @override
   Widget build(BuildContext context) {
+    final updatedItems = items.map((item) {
+      return DropdownItem<String>(
+        label: item.label,
+        value: item.value,
+        selected: initialSelectedValues?.contains(item.value) ?? false,
+      );
+    }).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -65,7 +75,7 @@ class QTextField extends StatelessWidget {
           dropdownDecoration: DropdownDecoration(
             borderRadius: BorderRadius.circular(8),
           ),
-          items: items,
+          items: updatedItems,
           // QuestionnaireConstants().allergies,
           dropdownItemDecoration: DropdownItemDecoration(
             selectedIcon: const Icon(

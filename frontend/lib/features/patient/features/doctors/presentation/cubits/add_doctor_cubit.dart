@@ -22,9 +22,7 @@ class AddDoctorCubit extends Cubit<AddDoctorState> {
         );
       },
       (_) {
-        emit(
-          state.copyWith(status: AddDoctorStatus.success, clearError: true),
-        );
+        emit(state.copyWith(status: AddDoctorStatus.success, clearError: true));
       },
     );
   }

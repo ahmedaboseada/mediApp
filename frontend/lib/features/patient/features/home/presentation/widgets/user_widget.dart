@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 
 class UserWidget extends StatelessWidget {
@@ -15,35 +16,40 @@ class UserWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final displayName = firstName.trim().isEmpty ? 'User' : firstName.trim();
 
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSizes.w16,
-        vertical: AppSizes.h6,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceColor,
-        borderRadius: BorderRadius.all(Radius.circular(AppSizes.r40)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircleAvatar(
-            radius: AppSizes.r20,
-            backgroundColor: AppColors.secondary,
-            foregroundImage: _resolveImageProvider(profileImagePath),
-            child: Text(
-              _initials(displayName),
-              style: TextStyle(
-                color: AppColors.primary,
-                fontSize: AppSizes.sp14,
-                fontWeight: FontWeight.w700,
+    return GestureDetector(
+      onTap: () {
+        context.go('/profile');
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSizes.w16,
+          vertical: AppSizes.h6,
+        ),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceColor,
+          borderRadius: BorderRadius.all(Radius.circular(AppSizes.r40)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleAvatar(
+              radius: AppSizes.r20,
+              backgroundColor: AppColors.secondary,
+              foregroundImage: _resolveImageProvider(profileImagePath),
+              child: Text(
+                _initials(displayName),
+                style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: AppSizes.sp14,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
-          ),
 
-          SizedBox(width: AppSizes.w12),
-          Text('Hi, $displayName!', style: AppStyles.black18500),
-        ],
+            SizedBox(width: AppSizes.w12),
+            Text('Hi, $displayName!', style: AppStyles.black18500),
+          ],
+        ),
       ),
     );
   }

@@ -7,6 +7,8 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final initResult = await AppStartupInitializer.initializeCoreServices();
+
   runApp(const medi());
 }
 

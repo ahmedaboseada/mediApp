@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:medi/core/core.dart';
 
 class MedicationDetailCol extends StatelessWidget {
@@ -9,7 +10,7 @@ class MedicationDetailCol extends StatelessWidget {
     required this.value,
   });
 
-  final IconData icon;
+  final String icon;
   final String label;
   final String value;
 
@@ -17,7 +18,12 @@ class MedicationDetailCol extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, color: AppColors.primary, size: 24),
+        SvgPicture.asset(
+          icon,
+          width: 24,
+          height: 24,
+          colorFilter: ColorFilter.mode(AppColors.primary, BlendMode.srcIn),
+        ),
         SizedBox(height: AppSizes.h8),
         Text(
           label,

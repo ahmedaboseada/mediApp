@@ -161,6 +161,15 @@ class MedicineCubit extends Cubit<MedicineState> {
     emit(state.copyWith(isFabExpanded: !state.isFabExpanded));
   }
 
+  Future<String> generateDoctorMedicationAccessToken() async {
+    final result = await _medicineRepo.getDoctorMedicationAccessToken();
+
+    return result.fold(
+      (failure) => throw Exception(failure.message),
+      (token) => token,
+    );
+  }
+
   // =========================
   // STATS
   // =========================

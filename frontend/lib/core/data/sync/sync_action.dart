@@ -19,7 +19,6 @@ class SyncAction extends HiveObject {
   }) : id = id ?? const Uuid().v4(),
        createdAt = createdAt ?? DateTime.now();
 
-
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -79,4 +78,3 @@ class SyncActionAdapter extends TypeAdapter<SyncAction> {
       ..write(obj.retryCount);
   }
 }
-

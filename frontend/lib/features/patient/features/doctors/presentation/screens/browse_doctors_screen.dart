@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/widgets/medicine_search_bar.dart';
 import 'package:medi/features/patient/features/doctors/presentation/cubits/doctors_cubit.dart';
 import 'package:medi/features/patient/features/doctors/presentation/cubits/doctors_state.dart';
 import 'package:medi/features/patient/features/doctors/presentation/widgets/doctor_hover_card.dart';
-import 'package:medi/features/patient/features/doctors/presentation/widgets/doctors_search_bar.dart';
 
 class BrowseDoctorsScreen extends StatelessWidget {
   const BrowseDoctorsScreen({super.key});
@@ -25,7 +25,22 @@ class BrowseDoctorsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const DoctorsSearchBar(),
+                BlocBuilder<DoctorsCubit, DoctorsState>(
+                  builder: (context, state) {
+                    return MedicineSearchBar(
+                      hintText: 'Search doctors by name or specialty',
+                      enableInput: true,
+                      showAction: false,
+                      onChanged: (query) {
+                        context.read<DoctorsCubit>().searchDoctors(query);
+                      },
+                      onClear: () {
+                        context.read<DoctorsCubit>().clearSearch();
+                      },
+                    );
+                  },
+                ),
+                // const DoctorsSearchBar(),
                 SizedBox(height: AppSizes.h32),
                 Expanded(
                   child: BlocBuilder<DoctorsCubit, DoctorsState>(

@@ -9,6 +9,7 @@ import 'package:medi/features/doctor/features/complete_profile/data/repo/doctor_
 import 'package:medi/features/doctor/features/home/data/repo/appointments_repository.dart';
 import 'package:medi/features/doctor/features/home/data/repo/appointments_repository_impl.dart';
 import 'package:medi/features/doctor/features/home/presentation/cubit/appointments_cubit.dart';
+import 'package:medi/features/shared/auth/data/repo/auth_repo.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
 import 'package:medi/features/doctor/features/patients/data/repo/patients_repository.dart';
 import 'package:medi/features/doctor/features/patients/data/repo/patients_repository_impl.dart';
@@ -59,6 +60,11 @@ Future<void> setupServiceLocator() async {
   if (!getIt.isRegistered<ProfileRepo>()) {
     getIt.registerLazySingleton<ProfileRepo>(
       () => ProfileRepoImpl(getIt<ApiService>()),
+    );
+  }
+  if (!getIt.isRegistered<AuthRepo>()) {
+    getIt.registerLazySingleton<AuthRepo>(
+      () => AuthRepoImpl(getIt<ApiService>()),
     );
   }
   if (!getIt.isRegistered<ProfileCubit>()) {

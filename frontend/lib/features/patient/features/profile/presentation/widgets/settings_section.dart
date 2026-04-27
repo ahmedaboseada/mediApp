@@ -110,25 +110,7 @@ class _SettingsSectionState extends State<SettingsSection> {
                     context.push(AppRouter.patientAccountInfoScreen);
                   },
                 ),
-                SectionItemTile(
-                  title: 'Logout',
-                  trailingIcon: isLoading
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(
-                          Icons.arrow_forward_ios,
-                          color: AppColors.primary,
-                          size: 16,
-                        ),
-                  onTap: isLoading
-                      ? null
-                      : () {
-                          context.read<LogOutCubit>().logOut();
-                        },
-                ),
+
                 ToggleTile(
                   title: 'Notifications',
                   value: notifications,

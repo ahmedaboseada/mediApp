@@ -40,7 +40,6 @@ class Medication extends Equatable {
     this.isSynced = true,
   });
 
-
   final String id;
   final int selectedMethod;
   final String name;
@@ -63,7 +62,6 @@ class Medication extends Equatable {
   final MedicationType medicationType;
   final List<String> sideEffects;
   final bool isSynced;
-
 
   static MedicationType medicationTypeFromLabel(String? label) {
     switch (label?.trim().toLowerCase()) {
@@ -125,7 +123,6 @@ class Medication extends Equatable {
     List<String>? sideEffects,
     bool? isSynced,
   }) {
-
     return Medication(
       id: id ?? this.id,
       selectedMethod: selectedMethod ?? this.selectedMethod,
@@ -153,7 +150,6 @@ class Medication extends Equatable {
     );
   }
 
-
   Map<String, dynamic> toJson() {
     return {
       '_id': id,
@@ -180,7 +176,6 @@ class Medication extends Equatable {
       'isSynced': isSynced,
     };
   }
-
 
   factory Medication.fromJson(Map<dynamic, dynamic> json) {
     final medicationTypeIndex = json['medicationType'] as int?;
@@ -259,7 +254,6 @@ class Medication extends Equatable {
     );
   }
 
-
   @override
   List<Object?> get props => [
     id,
@@ -287,7 +281,6 @@ class Medication extends Equatable {
     isSynced,
   ];
 }
-
 
 class MedicationScheduleTime extends Equatable {
   const MedicationScheduleTime({required this.time, required this.taken});
@@ -349,7 +342,6 @@ class MedicationAdapter extends TypeAdapter<Medication> {
     );
   }
 
-
   @override
   void write(BinaryWriter writer, Medication obj) {
     writer
@@ -393,7 +385,6 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       ..writeByte(18)
       ..write(obj.isSynced);
   }
-
 
   @override
   int get hashCode => typeId.hashCode;

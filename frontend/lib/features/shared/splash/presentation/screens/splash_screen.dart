@@ -33,32 +33,32 @@ class _SplashScreenState extends State<SplashScreen>
     _animationController.forward();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(_initializeAndNavigate());
+      _navigateToNextScreen();
     });
   }
 
-  Future<void> _initializeAndNavigate() async {
-    final startedAt = DateTime.now();
-    final initResult = await AppStartupInitializer.initializeCoreServices();
+  // Future<void> _initializeAndNavigate() async {
+  //   final startedAt = DateTime.now();
+  //   final initResult = await AppStartupInitializer.initializeCoreServices();
 
-    // Keep splash visible briefly for smoother transition and branding.
-    const minSplashDuration = Duration(milliseconds: 1200);
-    final elapsed = DateTime.now().difference(startedAt);
-    if (elapsed < minSplashDuration) {
-      await Future<void>.delayed(minSplashDuration - elapsed);
-    }
+  //   // Keep splash visible briefly for smoother transition and branding.
+  //   const minSplashDuration = Duration(milliseconds: 1200);
+  //   final elapsed = DateTime.now().difference(startedAt);
+  //   if (elapsed < minSplashDuration) {
+  //     await Future<void>.delayed(minSplashDuration - elapsed);
+  //   }
 
-    if (initResult.hadFailures) {
-      for (final error in initResult.errors) {
-        debugPrint(error);
-      }
-    }
+  //   if (initResult.hadFailures) {
+  //     for (final error in initResult.errors) {
+  //       debugPrint(error);
+  //     }
+  //   }
 
-    if (!mounted) return;
+  //   if (!mounted) return;
 
-    AppStartupInitializer.initializeDeferredServices();
-    _navigateToNextScreen();
-  }
+  //   AppStartupInitializer.initializeDeferredServices();
+  //   _navigateToNextScreen();
+  // }
 
   void _navigateToNextScreen() {
     if (!mounted) return;

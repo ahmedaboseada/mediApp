@@ -121,7 +121,9 @@ class DoctorHomeHeader extends StatelessWidget {
                           fit: BoxFit.contain,
                           placeholder: (context, url) => SizedBox(
                             height: AppSizes.h170,
-                            child: const Center(child: CircularProgressIndicator()),
+                            child: const Center(
+                              child: CircularProgressIndicator(),
+                            ),
                           ),
                           errorWidget: (context, url, error) => Image.asset(
                             AppAssets.avatar1,

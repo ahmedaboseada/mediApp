@@ -44,7 +44,9 @@ import 'package:medi/features/patient/features/doctors/presentation/screens/my_b
 import 'package:medi/features/patient/features/doctors/presentation/screens/cancel_booking_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/search_doctors_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/profile_screen.dart';
+import 'package:medi/features/patient/features/profile/presentation/screens/symptom_log_screen.dart';
 import 'package:medi/features/patient/features/questionnaire/presentation/screens/take_info_screen.dart';
+import 'package:medi/features/shared/auth/data/models/doctor_model.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/complete_profile/complete_profile_cubit.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/forget_password/forget_password_cubit.dart';
@@ -157,6 +159,7 @@ class AppRouter {
       '/doctors/profile/book/patient-details/payment-method/review-summary/success/my-appointment';
   static const String patientCancelBookingScreen = '/doctors/cancel-booking';
   static const String patientAddDoctorScreen = '/patient/add-doctor';
+  static const String symptomLogScreen = '/health/symptom-log';
   // ========== DOCTOR ROUTES ==========
   static const String doctorLogin = '/login/doctor';
   static const String doctorSignUpScreen = '/signUp/doctor';
@@ -571,6 +574,10 @@ class AppRouter {
           ),
         ],
       ),
+      GoRoute(
+        path: symptomLogScreen,
+        builder: (context, state) => const SymptomLogScreen(),
+      ),
       // ========== DOCTOR ROUTES ==========
       GoRoute(
         path: doctorLogin,
@@ -611,7 +618,7 @@ class AppRouter {
         path: availabilityScreen,
         builder: (context, state) => BlocProvider(
           create: (context) => ScheduleCubit(),
-          child: const ScheduleAvailabilityScreen(),
+          child: ScheduleAvailabilityScreen(doctor: state.extra as DoctorModel),
         ),
       ),
       GoRoute(

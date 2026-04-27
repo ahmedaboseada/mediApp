@@ -7,11 +7,13 @@ class TimePickerField extends StatefulWidget {
     required this.label,
     this.onTimeSelected,
     this.validator,
+    this.initialTime,
   });
 
   final String label;
   final ValueChanged<TimeOfDay>? onTimeSelected;
   final String? Function(String?)? validator;
+  final TimeOfDay? initialTime;
 
   @override
   State<TimePickerField> createState() => _TimePickerFieldState();
@@ -20,6 +22,18 @@ class TimePickerField extends StatefulWidget {
 class _TimePickerFieldState extends State<TimePickerField> {
   final TextEditingController _timeController = TextEditingController();
   TimeOfDay? selectedTime;
+  @override
+  void initState() {
+    super.initState();
+
+    selectedTime = widget.initialTime;
+
+    if (widget.initialTime != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _timeController.text = widget.initialTime!.format(context);
+      });
+    }
+  }
 
   @override
   void dispose() {

@@ -348,6 +348,69 @@ class MedicineRepoImpl implements MedicineRepo {
     }
   }
 
+  @override
+  Future<Either<ApiError, String>> getDoctorMedicationAccessToken() async {
+    try {
+      final dynamic response = await apiService.get(
+        '/patients/medications/access-token',
+      );
+
+      log('Doctor Medication Access Token Response: ${response.toString()}');
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final token = _extractAccessToken(response);
+      if (token == null || token.isEmpty) {
+        return Left(ServerFailure('No access token returned from server'));
+      }
+
+      return Right(token);
+    } on DioException catch (e) {
+      return Left(ServerFailure.fromDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  String? _extractAccessToken(dynamic response) {
+    if (response is! Map<String, dynamic>) return null;
+
+    final directToken = _tokenFromMap(response);
+    if (directToken != null && directToken.isNotEmpty) {
+      return directToken;
+    }
+
+    final data = response['data'];
+    if (data is Map<String, dynamic>) {
+      return _tokenFromMap(data);
+    }
+
+    return null;
+  }
+
+  String? _tokenFromMap(Map<String, dynamic> map) {
+    const possibleKeys = <String>[
+      'idToken',
+      'id_token',
+      'token',
+      'accessToken',
+      'access_token',
+      'qrToken',
+      'qr_token',
+    ];
+
+    for (final key in possibleKeys) {
+      final value = map[key];
+      if (value is String && value.trim().isNotEmpty) {
+        return value;
+      }
+    }
+
+    return null;
+  }
+
   String _toApiFrequency(String value) {
     final normalized = value.trim().toLowerCase();
     switch (normalized) {

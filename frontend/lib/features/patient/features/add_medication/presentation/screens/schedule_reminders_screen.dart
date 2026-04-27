@@ -7,16 +7,14 @@ import 'package:medi/features/patient/features/add_medication/presentation/widge
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/navigation_buttons.dart';
 
 class _WeeklyDayReminders {
-  _WeeklyDayReminders({required this.day, required List<String> times})
-    : times = times;
+  _WeeklyDayReminders({required this.day, required this.times});
 
   final String day;
   final List<String> times;
 }
 
 class _SpecificDateReminders {
-  _SpecificDateReminders({required this.date, required List<String> times})
-    : times = times;
+  _SpecificDateReminders({required this.date, required this.times});
 
   final String date;
   final List<String> times;
