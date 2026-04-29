@@ -8,9 +8,9 @@ import * as MS from './medicine.service.js';
 
 const medicineRouter = Router();
 
-// all medicine routes require authentication and must be patient
+// all medicine routes require authentication and must be patient or doctor
 medicineRouter.use(verifyToken);
-medicineRouter.use(restrictTo(['patient']));
+medicineRouter.use(restrictTo(['patient', 'doctor']));
 
 medicineRouter.post('/', validation(MVS.addMedicineSchema), MS.addMedicine);
 medicineRouter.get('/', MS.getMedicines);

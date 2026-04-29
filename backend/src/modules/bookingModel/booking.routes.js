@@ -21,4 +21,8 @@ router.patch('/:id/reschedule', verifyToken, restrictTo(['patient']), validation
 router.post('/webhook/paymob', bookingController.paymobWebhook);
 router.get('/webhook/paymob', bookingController.paymobCallbackRedirect);
 
+router.post('/:bookingId/generate-qr', verifyToken, restrictTo(['patient']), bookingController.generateSessionToken);
+router.post('/start-session', verifyToken, restrictTo(['doctor']), bookingController.startSession);
+router.post('/:bookingId/end-session', verifyToken, restrictTo(['patient', 'doctor']), bookingController.endSession);
+
 export default router;

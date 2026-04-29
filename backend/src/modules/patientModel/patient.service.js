@@ -683,3 +683,57 @@ export const completeProfile = async (req, res) => {
         patient: updatedPatient,
     });
 };
+
+export const setEmergencyContact = async (req, res) => {
+    const userId = req.user.id;
+    const { name, phone, contactMethod } = req.body;
+
+    const patient = await patientModel.findOne({ userId });
+    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+    patient.emergencyContact = { name, phone, contactMethod };
+    await patient.save();
+
+    return res.status(200).json({ message: 'Emergency contact updated successfully', emergencyContact: patient.emergencyContact });
+};
+
+export const triggerSOS = async (req, res) => {
+    const userId = req.user.id;
+    const { lat, lng } = req.body;
+
+    const user = await userModel.findById(userId);
+    const patient = await patientModel.findOne({ userId });
+    if (!patient || !patient.emergencyContact || !patient.emergencyContact.phone) {
+        return res.status(400).json({ message: 'No emergency contact set up.' });
+    }
+
+    const { name, phone, contactMethod } = patient.emergencyContact;
+    
+    // Construct message
+    const locationLink = (lat && lng) ? `https://maps.google.com/?q=${lat},${lng}` : 'location unavailable';
+    const messageText = `EMERGENCY SOS: This is an automated alert from MediApp. ${user.firstName || 'The patient'} needs immediate help. Live location: ${locationLink}`;
+
+    let deepLink = '';
+    
+    // Clean phone number (remove +, spaces, dashes for wa.me link)
+    const cleanPhone = phone.replace(/[^\d]/g, '');
+
+    if (contactMethod === 'whatsapp') {
+        deepLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(messageText)}`;
+    } else {
+        // Fallback to SMS
+        deepLink = `sms:${phone}?body=${encodeURIComponent(messageText)}`;
+    }
+
+    // Here you would also integrate an SMS gateway API (e.g., Twilio) 
+    // if you want the backend to SEND it autonomously instead of just 
+    // returning the deep link.
+    // For now, we return the deep link to the frontend so it can open it.
+
+    return res.status(200).json({ 
+        message: 'SOS Triggered', 
+        deepLink,
+        contactName: name,
+        contactMethod
+    });
+};

@@ -29,9 +29,14 @@ const bookingSchema = new Schema(
         problem: { type: String, trim: true, maxlength: 1200 },
 
         paymentMethod: { type: String, trim: true, maxlength: 40 },
+        paymentStatus: { type: String, enum: ['pending', 'paid', 'failed', 'refunded'], default: 'pending' },
         price: { type: Number, min: 0 },
 
         appointmentId: { type: String, unique: true, index: true },
+        
+        sessionToken: { type: String, index: true },
+        sessionActive: { type: Boolean, default: false },
+        sessionExpiresAt: { type: Date },
 
         status: { type: String, enum: Object.values(bookingStatus), default: bookingStatus.upcoming, index: true },
 

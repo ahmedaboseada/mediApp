@@ -70,4 +70,26 @@ export const paymobCallbackRedirect = async (req, res, next) => {
     } catch (err) {
         next(err);
     }
+export const generateSessionToken = async (req, res, next) => {
+    try {
+        await bookingService.generateSessionToken(req, res);
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const startSession = async (req, res, next) => {
+    try {
+        await bookingService.startSession(req, res);
+    } catch (err) {
+        next(err);
+    }
+};
+
+export const endSession = async (req, res, next) => {
+    try {
+        await bookingService.endSession(req, res);
+    } catch (err) {
+        next(err);
+    }
 };

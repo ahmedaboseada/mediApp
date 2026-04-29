@@ -342,7 +342,8 @@ export const paymobWebhook = async (req, res) => {
             const orderId = data.obj.order?.merchant_order_id || data.obj.order?.special_reference || data.obj.payment_key_claims?.billing_data?.special_reference;
             
             if (orderId) {
-                // Could update booking payment status here if you track it
+                // Update booking payment status
+                await bookingModel.findByIdAndUpdate(orderId, { paymentStatus: 'paid' });
                 console.log(`Payment successful for Order/Booking ID: ${orderId}`);
             }
         }
@@ -384,4 +385,78 @@ export const paymobCallbackRedirect = async (req, res) => {
             </html>
         `);
     }
+};
+
+export const generateSessionToken = async (req, res) => {
+    const patientUserId = req.user.id;
+    const { bookingId } = req.params;
+
+    const patient = await patientModel.findOne({ userId: patientUserId });
+    const booking = await bookingModel.findById(bookingId);
+
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+    if (String(booking.patientId) !== String(patient?._id)) return res.status(403).json({ message: 'Access denied' });
+
+    // Session starts only if booking is paid (or cash on site)
+    if (['online', 'card', 'paymob'].includes(booking.paymentMethod) && booking.paymentStatus !== 'paid') {
+        return res.status(400).json({ message: 'Cannot start session. Booking is not paid yet.' });
+    }
+
+    import('crypto').then(async (crypto) => {
+        const token = crypto.randomBytes(16).toString('hex');
+        booking.sessionToken = token;
+        booking.sessionActive = false; // Not active until doctor scans it
+        await booking.save();
+        return res.status(200).json({ message: 'QR Token generated', sessionToken: token });
+    });
+};
+
+export const startSession = async (req, res) => {
+    const doctorUserId = req.user.id;
+    const { sessionToken } = req.body;
+
+    const doc = await doctorModel.findOne({ userId: doctorUserId });
+    if (!doc) return res.status(404).json({ message: 'Doctor not found' });
+
+    const booking = await bookingModel.findOne({ sessionToken });
+    if (!booking) return res.status(404).json({ message: 'Invalid or expired session token' });
+
+    if (String(booking.doctorId) !== String(doc._id)) {
+        return res.status(403).json({ message: 'This token is not meant for you' });
+    }
+
+    if (['online', 'card', 'paymob'].includes(booking.paymentMethod) && booking.paymentStatus !== 'paid') {
+        return res.status(400).json({ message: 'Cannot start session. Booking is not paid yet.' });
+    }
+
+    booking.sessionActive = true;
+    // Session window valid for 2 hours
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 2);
+    booking.sessionExpiresAt = expiresAt;
+    await booking.save();
+
+    return res.status(200).json({ message: 'Session started successfully. Elevated permissions granted.', bookingId: booking._id, expiresAt });
+};
+
+export const endSession = async (req, res) => {
+    const { bookingId } = req.params;
+    const userId = req.user.id;
+
+    const booking = await bookingModel.findById(bookingId);
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+
+    const doc = await doctorModel.findOne({ userId });
+    const patient = await patientModel.findOne({ userId });
+
+    if (!doc && !patient) return res.status(403).json({ message: 'Access denied' });
+    if (doc && String(booking.doctorId) !== String(doc._id)) return res.status(403).json({ message: 'Access denied' });
+    if (patient && String(booking.patientId) !== String(patient._id)) return res.status(403).json({ message: 'Access denied' });
+
+    booking.sessionActive = false;
+    booking.sessionToken = undefined;
+    booking.sessionExpiresAt = new Date(); // expire immediately
+    await booking.save();
+
+    return res.status(200).json({ message: 'Session ended successfully. Elevated permissions revoked.' });
 };

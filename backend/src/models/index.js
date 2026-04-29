@@ -7,3 +7,4 @@ export { default as chatModel } from './chat.model.js';
 export { default as messageModel } from './message.model.js';
 export { default as reviewModel } from './review.model.js';
 export { default as bookingModel } from './booking.model.js';
+export { default as auditLogModel } from './audit-log.model.js';

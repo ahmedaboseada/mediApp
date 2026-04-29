@@ -1,6 +1,48 @@
-import { medicineModel, patientModel } from '../../models/index.js';
+import { medicineModel, patientModel, doctorModel, bookingModel, auditLogModel } from '../../models/index.js';
 import { medicineFrequency, medicineStatus, weekDays } from '../../config/CONSTANTS.js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+
+const getContext = async (req) => {
+    const { id: userId } = req.user;
+    let patient;
+    let docId = null;
+    let activeBookingId = null;
+
+    const patientLookup = await patientModel.findOne({ userId });
+    if (patientLookup) {
+        patient = patientLookup;
+    } else {
+        const docLookup = await doctorModel.findOne({ userId });
+        if (docLookup) {
+            const patientIdFromReq = req.body.patientId || req.query.patientId;
+            if (!patientIdFromReq) {
+                const err = new Error('Patient ID is required for doctor access');
+                err.status = 400; throw err;
+            }
+            patient = await patientModel.findById(patientIdFromReq);
+            docId = docLookup._id;
+
+            const activeSession = await bookingModel.findOne({
+                doctorId: docLookup._id,
+                patientId: patient?._id,
+                sessionActive: true,
+                sessionExpiresAt: { $gt: new Date() }
+            });
+
+            if (!activeSession) {
+                const err = new Error('You do not have an active editing session with this patient');
+                err.status = 403; throw err;
+            }
+            activeBookingId = activeSession._id;
+        }
+    }
+    
+    if (!patient) {
+        const err = new Error('Patient not found');
+        err.status = 404; throw err;
+    }
+    return { patient, docId, activeBookingId };
+};
 
 const enhanceMedicineWithAI = async (medicineId, medicineName, submittedType) => {
     if (!medicineName || !process.env.GEMINI_API_KEY) return;
@@ -90,10 +132,8 @@ Respond with a single JSON object containing:
 };
 
 export const addMedicine = async (req, res, next) => {
-    const { id: userId } = req.user;
-
-    const patient = await patientModel.findOne({ userId });
-    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+    try {
+        const { patient, docId, activeBookingId } = await getContext(req);
 
     const medicineData = {
         ...req.body,
@@ -117,7 +157,12 @@ export const addMedicine = async (req, res, next) => {
     // Background AI Task (VPS)
     enhanceMedicineWithAI(medicine._id, req.body.name, req.body.type).catch(console.error);
 
+    if (docId) {
+        await auditLogModel.create({ patientId: patient._id, doctorId: docId, bookingId: activeBookingId, action: 'add_medicine', details: `Added ${medicine.name}` });
+    }
+
     res.status(201).json({ message: 'Medicine added successfully', medicine });
+    } catch(err) { res.status(err.status || 500).json({ message: err.message }); }
 };
 
 export const getMedicines = async (req, res, next) => {
@@ -147,11 +192,9 @@ export const getMedicines = async (req, res, next) => {
 };
 
 export const updateMedicine = async (req, res, next) => {
-    const { id } = req.params;
-    const { id: userId } = req.user;
-
-    const patient = await patientModel.findOne({ userId });
-    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+    try {
+        const { id } = req.params;
+        const { patient, docId, activeBookingId } = await getContext(req);
 
     const payload = { ...req.body };
 
@@ -178,15 +221,18 @@ export const updateMedicine = async (req, res, next) => {
         enhanceMedicineWithAI(medicine._id, req.body.name || medicine.name, req.body.type || medicine.type).catch(console.error);
     }
 
+    if (docId) {
+        await auditLogModel.create({ patientId: patient._id, doctorId: docId, bookingId: activeBookingId, action: 'modify_medicine', details: `Modified ${medicine.name}` });
+    }
+
     res.status(200).json({ message: 'Medicine updated successfully', medicine });
+    } catch(err) { res.status(err.status || 500).json({ message: err.message }); }
 };
 
 export const deleteMedicine = async (req, res, next) => {
-    const { id } = req.params;
-    const { id: userId } = req.user;
-
-    const patient = await patientModel.findOne({ userId });
-    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+    try {
+        const { id } = req.params;
+        const { patient, docId, activeBookingId } = await getContext(req);
 
     const medicine = await medicineModel.findOneAndDelete({ _id: id, patientId: patient._id });
     if (!medicine) return res.status(404).json({ message: 'Medicine not found' });
@@ -194,7 +240,12 @@ export const deleteMedicine = async (req, res, next) => {
     patient.medications.pull(medicine._id);
     await patient.save();
 
+    if (docId) {
+        await auditLogModel.create({ patientId: patient._id, doctorId: docId, bookingId: activeBookingId, action: 'delete_medicine', details: `Deleted ${medicine.name || 'medicine'}` });
+    }
+
     res.status(200).json({ message: 'Medicine deleted successfully' });
+    } catch(err) { res.status(err.status || 500).json({ message: err.message }); }
 };
 
 export const getSchedule = async (req, res, next) => {

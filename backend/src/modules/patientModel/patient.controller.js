@@ -68,4 +68,8 @@ patientRouter.get('/doctor-requests', PS.listDoctorRequests);
 patientRouter.patch('/connected-doctors/accept/:doctorId', validation(PVS.doctorIdSchema), PS.acceptDoctor);
 patientRouter.patch('/connected-doctors/reject/:doctorId', validation(PVS.doctorIdSchema), PS.rejectDoctor);
 
+// SOS
+patientRouter.patch('/emergency-contact', PS.setEmergencyContact);
+patientRouter.post('/sos', PS.triggerSOS);
+
 export default patientRouter;
