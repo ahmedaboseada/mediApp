@@ -354,3 +354,32 @@ export const paymobWebhook = async (req, res) => {
         return res.status(500).send('Webhook Error');
     }
 };
+
+export const paymobCallbackRedirect = async (req, res) => {
+    const { success, merchant_order_id } = req.query;
+    
+    // This is purely for the user's browser/webview to see something nicely formatted
+    // instead of a 404. The actual data is handled via the POST webhook securely.
+    
+    if (success === 'true') {
+        return res.status(200).send(`
+            <html>
+            <head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+            <body style="font-family: sans-serif; text-align: center; padding: 40px;">
+                <h2 style="color: #4CAF50;">Payment Successful!</h2>
+                <p>Your appointment has been booked. You can close this window now.</p>
+            </body>
+            </html>
+        `);
+    } else {
+        return res.status(400).send(`
+            <html>
+            <head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+            <body style="font-family: sans-serif; text-align: center; padding: 40px;">
+                <h2 style="color: #f44336;">Payment Failed or Cancelled</h2>
+                <p>Please try again or use another payment method. You can close this window now.</p>
+            </body>
+            </html>
+        `);
+    }
+};

@@ -63,3 +63,11 @@ export const paymobWebhook = async (req, res, next) => {
         next(err);
     }
 };
+
+export const paymobCallbackRedirect = async (req, res, next) => {
+    try {
+        await bookingService.paymobCallbackRedirect(req, res);
+    } catch (err) {
+        next(err);
+    }
+};
