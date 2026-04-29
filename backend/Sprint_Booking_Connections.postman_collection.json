@@ -181,6 +181,15 @@
                             }
                         },
                         {
+                            "name": "Create Booking Reservation (Online Payment)",
+                            "request": {
+                                "method": "POST",
+                                "header": [{ "key": "Authorization", "value": "bearer {{ACCESS_TOKEN}}" }],
+                                "body": { "mode": "raw", "raw": "{\n  \"doctorId\": \"{{doctor_object_id}}\",\n  \"date\": \"2026-06-15T00:00:00.000Z\",\n  \"time\": \"10:00\",\n  \"packageType\": \"online\",\n  \"bookingFor\": \"Self\",\n  \"patientAge\": 24,\n  \"patientGender\": \"male\",\n  \"problem\": \"Online Consultation\",\n  \"paymentMethod\": \"card\"\n}", "options": { "raw": { "language": "json" } } },
+                                "url": { "raw": "{{BASE_URL}}/bookings", "host": ["{{BASE_URL}}"], "path": ["bookings"] }
+                            }
+                        },
+                        {
                             "name": "View My Booking History",
                             "request": {
                                 "method": "GET",
@@ -212,6 +221,15 @@
                                 "header": [{ "key": "Authorization", "value": "bearer {{ACCESS_TOKEN}}" }],
                                 "body": { "mode": "raw", "raw": "{\n  \"cancelledReason\": \"Unexpected work trip\"\n}", "options": { "raw": { "language": "json" } } },
                                 "url": { "raw": "{{BASE_URL}}/bookings/{{booking_object_id}}/cancel", "host": ["{{BASE_URL}}"], "path": ["bookings", "{{booking_object_id}}", "cancel"] }
+                            }
+                        },
+                        {
+                            "name": "Paymob Webhook (Simulation)",
+                            "request": {
+                                "method": "POST",
+                                "header": [],
+                                "body": { "mode": "raw", "raw": "{\n  \"type\": \"TRANSACTION\",\n  \"obj\": {\n    \"success\": true,\n    \"order\": {\n      \"id\": 123456,\n      \"merchant_order_id\": \"{{booking_object_id}}\"\n    }\n  }\n}", "options": { "raw": { "language": "json" } } },
+                                "url": { "raw": "{{BASE_URL}}/bookings/webhook/paymob", "host": ["{{BASE_URL}}"], "path": ["bookings", "webhook", "paymob"] }
                             }
                         }
                     ]
