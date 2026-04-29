@@ -166,11 +166,24 @@ export const addMedicine = async (req, res, next) => {
 };
 
 export const getMedicines = async (req, res, next) => {
-    const { id: userId } = req.user;
-    const { filter } = req.query; // all, active, chronic
+    try {
+        const { id: userId, role } = req.user;
+        const { filter } = req.query; // all, active, chronic
 
-    const patient = await patientModel.findOne({ userId });
-    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+        let patient;
+        if (role === 'doctor' || !req.user.role && req.query.patientId) {
+            const patientIdFromReq = req.query.patientId || req.body.patientId;
+            if (!patientIdFromReq) return res.status(400).json({ message: 'Patient ID required' });
+            patient = await patientModel.findById(patientIdFromReq);
+            // Verify doctor is connected or has active session
+            const doc = await doctorModel.findOne({ userId });
+            const isConnected = doc.connectedPatients?.some(c => String(c.patientId) === String(patient._id) && c.status === 'approved');
+            if (!isConnected) return res.status(403).json({ message: 'Not connected to this patient' });
+        } else {
+            patient = await patientModel.findOne({ userId });
+        }
+
+        if (!patient) return res.status(404).json({ message: 'Patient not found' });
 
     let query = { patientId: patient._id };
 
@@ -189,6 +202,7 @@ export const getMedicines = async (req, res, next) => {
     const medicines = await medicineModel.find(query).sort({ createdAt: -1 });
 
     res.status(200).json({ message: 'Success', medicines });
+    } catch(err) { res.status(err.status || 500).json({ message: err.message }); }
 };
 
 export const updateMedicine = async (req, res, next) => {
@@ -249,11 +263,23 @@ export const deleteMedicine = async (req, res, next) => {
 };
 
 export const getSchedule = async (req, res, next) => {
-    const { id: userId } = req.user;
-    const { date } = req.query; // Format: YYYY-MM-DD
+    try {
+        const { id: userId, role } = req.user;
+        const { date } = req.query; // Format: YYYY-MM-DD
 
-    const patient = await patientModel.findOne({ userId });
-    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+        let patient;
+        if (role === 'doctor' || !req.user.role && req.query.patientId) {
+            const patientIdFromReq = req.query.patientId || req.body.patientId;
+            if (!patientIdFromReq) return res.status(400).json({ message: 'Patient ID required' });
+            patient = await patientModel.findById(patientIdFromReq);
+            const doc = await doctorModel.findOne({ userId });
+            const isConnected = doc.connectedPatients?.some(c => String(c.patientId) === String(patient._id) && c.status === 'approved');
+            if (!isConnected) return res.status(403).json({ message: 'Not connected to this patient' });
+        } else {
+            patient = await patientModel.findOne({ userId });
+        }
+
+        if (!patient) return res.status(404).json({ message: 'Patient not found' });
 
     const targetDate = date ? new Date(date) : new Date();
     targetDate.setHours(0, 0, 0, 0); // start of day
@@ -306,6 +332,7 @@ export const getSchedule = async (req, res, next) => {
     });
 
     res.status(200).json({ message: 'Success', schedule });
+    } catch(err) { res.status(err.status || 500).json({ message: err.message }); }
 };
 
 export const markAsTaken = async (req, res, next) => {
