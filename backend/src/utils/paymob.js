@@ -59,7 +59,7 @@ export const createPaymentIntention = async ({ amount, currency = 'EGP', billing
         const paymentToken = paymentKeyData.token;
 
         // The checkout URL requires an iframe ID. If you have it, replace YOUR_IFRAME_ID
-        const checkoutUrl = `https://accept.paymob.com/api/acceptance/iframes/YOUR_IFRAME_ID?payment_token=${paymentToken}`;
+        const checkoutUrl = `https://accept.paymob.com/api/acceptance/iframes/1006562?payment_token=${paymentToken}`;
 
         return { clientSecret: paymentToken, checkoutUrl, intentionId: paymobOrderId };
     } catch (error) {
