@@ -55,3 +55,11 @@ export const getBookingDetails = async (req, res, next) => {
         next(err);
     }
 };
+
+export const paymobWebhook = async (req, res, next) => {
+    try {
+        await bookingService.paymobWebhook(req, res);
+    } catch (err) {
+        next(err);
+    }
+};

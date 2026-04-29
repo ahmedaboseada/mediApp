@@ -18,4 +18,6 @@ router.get('/:id', verifyToken, restrictTo(['patient', 'doctor']), validation(va
 router.patch('/:id/cancel', verifyToken, restrictTo(['patient', 'doctor']), validation(validationSchemas.cancelBookingSchema), bookingController.cancelBooking);
 router.patch('/:id/reschedule', verifyToken, restrictTo(['patient']), validation(validationSchemas.rescheduleBookingSchema), bookingController.rescheduleBooking);
 
+router.post('/webhook/paymob', bookingController.paymobWebhook);
+
 export default router;

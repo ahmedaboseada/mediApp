@@ -2,6 +2,8 @@ import bookingModel from '../../models/booking.model.js';
 import doctorModel from '../../models/doctor.model.js';
 import patientModel from '../../models/patient.model.js';
 import notificationModel from '../../models/notification.model.js';
+import userModel from '../../models/user.model.js';
+import { createPaymentIntention } from '../../utils/paymob.js';
 
 // --- Time Helpers ---
 const timeToMins = (t) => {
@@ -131,6 +133,33 @@ export const createBooking = async (req, res) => {
         clinicAddress: doc.clinicAddress || ''
     });
 
+    let paymentUrl = null;
+    let clientSecret = null;
+    let intentionId = null;
+
+    if (paymentMethod === 'card' || paymentMethod === 'online' || paymentMethod === 'paymob') {
+        const user = await userModel.findById(patientUserId);
+        const billingData = {
+            first_name: user?.firstName || 'Patient',
+            last_name: user?.lastName || 'Name',
+            email: user?.email || 'patient@example.com',
+            phone_number: user?.phone || '+201000000000',
+        };
+        
+        try {
+            const paymobData = await createPaymentIntention({
+                amount: booking.price > 0 ? booking.price : 100, // Handle 0 price fallback
+                billingData,
+                orderId: booking._id,
+            });
+            paymentUrl = paymobData.checkoutUrl;
+            clientSecret = paymobData.clientSecret;
+            intentionId = paymobData.intentionId;
+        } catch (error) {
+            console.error("Paymob creation failed", error);
+        }
+    }
+
     // 5. Connect mappings (if appropriate to embed locally)
     if (!patient.connectedDoctors.find(d => String(d.doctorId) === String(doc._id))) {
         patient.connectedDoctors.push({ doctorId: doc._id, status: 'approved' });
@@ -144,7 +173,13 @@ export const createBooking = async (req, res) => {
         userId: patientUserId,
     });
 
-    return res.status(201).json({ message: 'Booking confirmed!', booking });
+    return res.status(201).json({ 
+        message: 'Booking confirmed!', 
+        booking,
+        paymentUrl,
+        clientSecret,
+        intentionId 
+    });
 };
 
 export const getMyBookingsAsPatient = async (req, res) => {
@@ -294,4 +329,28 @@ export const rescheduleBooking = async (req, res) => {
     });
 
     return res.status(200).json({ message: 'Booking rescheduled successfully', booking });
+};
+
+export const paymobWebhook = async (req, res) => {
+    try {
+        const data = req.body;
+        console.log('--- Paymob Webhook Received ---');
+        console.log(JSON.stringify(data, null, 2));
+
+        if (data && data.obj && data.obj.success === true) {
+            // Retrieve booking ID from either merchant_order_id or special_reference depending on webhook type
+            const orderId = data.obj.order?.merchant_order_id || data.obj.order?.special_reference || data.obj.payment_key_claims?.billing_data?.special_reference;
+            
+            if (orderId) {
+                // Could update booking payment status here if you track it
+                console.log(`Payment successful for Order/Booking ID: ${orderId}`);
+            }
+        }
+
+        // Always return 200 OK to Paymob to acknowledge receipt
+        return res.status(200).send('Webhook processed');
+    } catch (error) {
+        console.error('Paymob Webhook Error:', error);
+        return res.status(500).send('Webhook Error');
+    }
 };
