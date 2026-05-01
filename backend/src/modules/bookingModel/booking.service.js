@@ -145,7 +145,7 @@ export const createBooking = async (req, res) => {
             email: user?.email || 'patient@example.com',
             phone_number: user?.phone || '+201000000000',
         };
-        
+
         try {
             const paymobData = await createPaymentIntention({
                 amount: booking.price > 0 ? booking.price : 100, // Handle 0 price fallback
@@ -173,12 +173,12 @@ export const createBooking = async (req, res) => {
         userId: patientUserId,
     });
 
-    return res.status(201).json({ 
-        message: 'Booking confirmed!', 
+    return res.status(201).json({
+        message: 'Booking confirmed!',
         booking,
         paymentUrl,
         clientSecret,
-        intentionId 
+        intentionId
     });
 };
 
@@ -340,7 +340,7 @@ export const paymobWebhook = async (req, res) => {
         if (data && data.obj && data.obj.success === true) {
             // Retrieve booking ID from either merchant_order_id or special_reference depending on webhook type
             const orderId = data.obj.order?.merchant_order_id || data.obj.order?.special_reference || data.obj.payment_key_claims?.billing_data?.special_reference;
-            
+
             if (orderId) {
                 // Update booking payment status
                 await bookingModel.findByIdAndUpdate(orderId, { paymentStatus: 'paid' });
@@ -357,33 +357,12 @@ export const paymobWebhook = async (req, res) => {
 };
 
 export const paymobCallbackRedirect = async (req, res) => {
-    const { success, merchant_order_id } = req.query;
-    const errorMessage = req.query['data.message'] || 'Unknown Error';
-    
-    // This is purely for the user's browser/webview to see something nicely formatted
-    // instead of a 404. The actual data is handled via the POST webhook securely.
-    
+    const { success } = req.query;
+
     if (success === 'true') {
-        return res.status(200).send(`
-            <html>
-            <head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
-            <body style="font-family: sans-serif; text-align: center; padding: 40px;">
-                <h2 style="color: #4CAF50;">Payment Successful!</h2>
-                <p>Your appointment has been booked. You can close this window now.</p>
-            </body>
-            </html>
-        `);
+        return res.redirect('medi://payment/return?status=success');
     } else {
-        return res.status(400).send(`
-            <html>
-            <head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
-            <body style="font-family: sans-serif; text-align: center; padding: 40px;">
-                <h2 style="color: #f44336;">Payment Failed or Cancelled</h2>
-                <p>Reason: <strong>${errorMessage}</strong></p>
-                <p>Please try again or use another payment method. You can close this window now.</p>
-            </body>
-            </html>
-        `);
+        return res.redirect('medi://payment/return?status=failure');
     }
 };
 
