@@ -4,6 +4,9 @@ import 'package:medi/core/core.dart';
 class ApiService {
   final DioClient _dioClient = DioClient();
 
+  /// Get DioClient instance
+  DioClient get dioClient => _dioClient;
+
   /// CRUD METHODS
 
   /// get

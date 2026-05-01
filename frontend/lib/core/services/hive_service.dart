@@ -34,6 +34,7 @@ class HiveService {
   static const String _onboardingCompletedKey = 'onboardingCompleted';
   static const String _completeProfileRequiredKey = 'completeProfileRequired';
   static const String _userCountryKey = 'userCountry';
+  static const String _emergencyContactKey = 'emergencyContact';
   static Future<void>? _initFuture;
 
   static Future<void> _ensureInitialized() {
@@ -304,6 +305,28 @@ class HiveService {
       );
       await saveUserData(updatedUser);
     }
+  }
+
+  // ========== EMERGENCY CONTACT HELPERS ==========
+
+  /// Save emergency contact locally
+  static Future<void> saveEmergencyContact(Map<String, dynamic> contact) async {
+    final settings = await _openSettingsBox();
+    await settings.put(_emergencyContactKey, contact);
+  }
+
+  /// Get locally saved emergency contact
+  static Map<String, dynamic>? getEmergencyContact() {
+    if (!Hive.isBoxOpen(_settingsBox)) return null;
+    final raw = Hive.box(_settingsBox).get(_emergencyContactKey);
+    if (raw == null) return null;
+    return Map<String, dynamic>.from(raw as Map);
+  }
+
+  /// Clear locally saved emergency contact
+  static Future<void> clearEmergencyContact() async {
+    final settings = await _openSettingsBox();
+    await settings.delete(_emergencyContactKey);
   }
 
   // ========== USER ROLE MANAGEMENT ==========

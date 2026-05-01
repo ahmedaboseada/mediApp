@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/core/widgets/common/app_button.dart';
 import 'package:medi/features/patient/features/doctors/data/models/appointment_review_data.dart';
 
 class PaymentSuccessScreen extends StatelessWidget {
-  const PaymentSuccessScreen({super.key, this.reviewData});
+  const PaymentSuccessScreen({super.key, required this.reviewData});
 
-  final AppointmentReviewData? reviewData;
+  final AppointmentReviewData reviewData;
 
   @override
   Widget build(BuildContext context) {
-    final data = reviewData;
-    final dateTimeParts = data!.dateAndHour.split('|');
+    final dateTimeParts = reviewData.dateAndHour.split('|');
     final date = dateTimeParts.first.trim();
     final time = dateTimeParts.length > 1
         ? dateTimeParts[1].trim()
@@ -58,7 +58,7 @@ class PaymentSuccessScreen extends StatelessWidget {
               ),
               SizedBox(height: AppSizes.h4),
               Text(
-                "${data.doctor!.user.firstName} ${data.doctor!.user.lastName}",
+                "${reviewData.doctor!.user.firstName} ${reviewData.doctor!.user.lastName}",
                 style: AppStyles.black14500,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -77,7 +77,7 @@ class PaymentSuccessScreen extends StatelessWidget {
                       children: [
                         _InfoItem(
                           assetPath: AppAssets.man,
-                          text: data.bookingFor,
+                          text: reviewData.bookingFor,
                         ),
                         SizedBox(height: AppSizes.h24),
                         _InfoItem(assetPath: AppAssets.calendar, text: date),
@@ -89,7 +89,7 @@ class PaymentSuccessScreen extends StatelessWidget {
                       children: [
                         _InfoItem(
                           assetPath: AppAssets.dollarCircle,
-                          text: '\$${data.amount.toStringAsFixed(0)}',
+                          text: '\$${reviewData.amount.toStringAsFixed(0)}',
                         ),
                         SizedBox(height: AppSizes.h24),
                         _InfoItem(assetPath: AppAssets.timer, text: time),
@@ -103,7 +103,7 @@ class PaymentSuccessScreen extends StatelessWidget {
                 text: 'View Appointment',
                 onPressed: () => context.push(
                   AppRouter.patientMyAppointmentScreen,
-                  extra: data,
+                  extra: reviewData,
                 ),
               ),
               SizedBox(height: AppSizes.h8),

@@ -20,7 +20,7 @@ class PaymentMethodScreen extends StatelessWidget {
       case _PaymentMethod.card:
         context.read<BookingCubit>().updatePaymentMethod('Card');
         context.push(
-          AppRouter.patientAddCardScreen,
+          AppRouter.patientReviewSummaryScreen,
           extra: state.appointmentReviewData.copyWith(paymentMethod: 'Card'),
         );
         break;

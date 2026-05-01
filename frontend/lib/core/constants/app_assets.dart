@@ -54,7 +54,9 @@ class AppAssets {
   static const String paypal = '${path}paypal.svg';
   static const String card = '${path}card.svg';
   static const String check = '${path}check.svg';
+  static const String setSos = '${path}setsos.svg';
   static const String location = '${path}location.svg';
+  static const String sos = '${path}sos.svg';
   // Health measurement icons
   static const String bloodPressureIcon = '${svgPath}blood_pressure.svg';
   static const String bloodSugarIcon = '${svgPath}blood_sugar.svg';

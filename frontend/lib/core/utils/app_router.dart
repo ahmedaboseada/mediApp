@@ -16,6 +16,8 @@ import 'package:medi/features/patient/features/doctors/presentation/cubits/my_bo
 import 'package:medi/features/patient/features/doctors/presentation/screens/add_doctor_screen.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/screens/add_daily_log_screen.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/screens/health_measurements_screen.dart';
+import 'package:medi/features/patient/features/home/presentation/screens/confirm_emergency_alert_screen.dart';
+import 'package:medi/features/patient/features/home/presentation/screens/set_emergency_contact_dialog.dart';
 import 'package:medi/features/patient/features/profile/presentation/controller/profile/profile_cubit.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/account_info_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/caregiver_mode_screen.dart'
@@ -34,7 +36,6 @@ import 'package:medi/features/patient/features/doctors/presentation/screens/revi
 import 'package:medi/features/patient/features/doctors/presentation/screens/payment_success_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/my_appointment_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/patient_details_screen.dart';
-import 'package:medi/features/patient/features/doctors/presentation/screens/add_card_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/payment_method_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/select_package_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/cubits/booking_cubit.dart';
@@ -149,8 +150,6 @@ class AppRouter {
       '/doctors/profile/book/patient-details';
   static const String patientPaymentMethodScreen =
       '/doctors/profile/book/patient-details/payment-method';
-  static const String patientAddCardScreen =
-      '/doctors/profile/book/patient-details/payment-method/add-card';
   static const String patientReviewSummaryScreen =
       '/doctors/profile/book/patient-details/payment-method/review-summary';
   static const String patientPaymentSuccessScreen =
@@ -179,6 +178,8 @@ class AppRouter {
   static const String addPatientScreen = '/doctor/addPatient';
   static const String healthMeasurements = '/healthMeasurements';
   static const String dailyHealthLogScreen = '/health/dailyLog';
+  static const String setEmergencyContactscreen = '/home/sos';
+  static const String confirmEmergencyAlertScreen = '/home/sendsos';
 
   static final router = GoRouter(
     navigatorKey: navigatorKey,
@@ -420,6 +421,7 @@ class AppRouter {
               ),
             ],
           ),
+         
 
           /// ========= DOCTORS TAB =========
           StatefulShellBranch(
@@ -491,15 +493,6 @@ class AppRouter {
                                         ),
                                     routes: [
                                       GoRoute(
-                                        path: 'add-card',
-                                        builder: (context, state) =>
-                                            AddCardScreen(
-                                              initialData:
-                                                  state.extra
-                                                      as AppointmentReviewData?,
-                                            ),
-                                      ),
-                                      GoRoute(
                                         path: 'review-summary',
                                         builder: (context, state) =>
                                             ReviewSummaryScreen(
@@ -514,7 +507,7 @@ class AppRouter {
                                                 PaymentSuccessScreen(
                                                   reviewData:
                                                       state.extra
-                                                          as AppointmentReviewData?,
+                                                          as AppointmentReviewData,
                                                 ),
                                             routes: [
                                               GoRoute(
@@ -574,10 +567,27 @@ class AppRouter {
           ),
         ],
       ),
+
       GoRoute(
         path: symptomLogScreen,
         builder: (context, state) => const SymptomLogScreen(),
       ),
+       GoRoute(
+        path: setEmergencyContactscreen,
+        builder: (context, state) =>  SetEmergencyContactscreen(
+        ),
+       ),
+       GoRoute(
+        path: confirmEmergencyAlertScreen,
+        builder: (context, state) {
+          final contactName = (state.extra as Map<String, dynamic>?)?['contactName'] as String? ?? '';
+          final contactMethod = (state.extra as Map<String, dynamic>?)?['contactMethod'] as String? ?? 'whatsapp';
+          return ConfirmEmergencyAlertScreen(
+            contactName: contactName,
+            contactMethod: contactMethod,
+          );
+        },
+       ),
       // ========== DOCTOR ROUTES ==========
       GoRoute(
         path: doctorLogin,

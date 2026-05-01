@@ -37,6 +37,7 @@ class CustomDropdown extends StatelessWidget {
         SizedBox(height: AppSizes.h6),
         SizedBox(
           child: DropdownButtonFormField<String>(
+            
             dropdownColor: AppColors.whiteText,
             validator: validator,
             initialValue: selectedValue,

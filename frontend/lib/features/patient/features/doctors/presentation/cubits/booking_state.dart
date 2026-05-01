@@ -16,6 +16,8 @@ class BookingState {
   final bool isLoadingSlots;
   final bool isBooking;
   final bool bookingSuccess;
+  final String? paymentUrl;
+  final bool isProcessingPayment;
 
   const BookingState({
     required this.appointmentReviewData,
@@ -33,6 +35,8 @@ class BookingState {
     this.isLoadingSlots = false,
     this.isBooking = false,
     this.bookingSuccess = false,
+    this.paymentUrl,
+    this.isProcessingPayment = false,
   });
 
   BookingState copyWith({
@@ -51,6 +55,8 @@ class BookingState {
     bool? isLoadingSlots,
     bool? isBooking,
     bool? bookingSuccess,
+    String? paymentUrl,
+    bool? isProcessingPayment,
   }) {
     return BookingState(
       appointmentReviewData:
@@ -70,6 +76,8 @@ class BookingState {
       isLoadingSlots: isLoadingSlots ?? this.isLoadingSlots,
       isBooking: isBooking ?? this.isBooking,
       bookingSuccess: bookingSuccess ?? this.bookingSuccess,
+      paymentUrl: paymentUrl ?? this.paymentUrl,
+      isProcessingPayment: isProcessingPayment ?? this.isProcessingPayment,
     );
   }
 }

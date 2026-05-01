@@ -9,6 +9,9 @@ import 'package:medi/features/doctor/features/complete_profile/data/repo/doctor_
 import 'package:medi/features/doctor/features/home/data/repo/appointments_repository.dart';
 import 'package:medi/features/doctor/features/home/data/repo/appointments_repository_impl.dart';
 import 'package:medi/features/doctor/features/home/presentation/cubit/appointments_cubit.dart';
+import 'package:medi/features/patient/features/home/data/repo/sos_repo.dart';
+import 'package:medi/features/patient/features/home/data/repo/sos_repo_impl.dart';
+import 'package:medi/features/patient/features/home/presentation/controller/sos/sos_cubit.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
 import 'package:medi/features/doctor/features/patients/data/repo/patients_repository.dart';
@@ -177,6 +180,16 @@ Future<void> setupServiceLocator() async {
   if (!getIt.isRegistered<ConnectedDoctorsCubit>()) {
     getIt.registerFactory<ConnectedDoctorsCubit>(
       () => ConnectedDoctorsCubit(repository: getIt<DoctorsRepository>()),
+    );
+  }
+  if (!getIt.isRegistered<SosRepo>()) {
+    getIt.registerLazySingleton<SosRepo>(
+      () => SosRepoImpl(getIt<ApiService>()),
+    );
+  }
+  if (!getIt.isRegistered<SosCubit>()) {
+    getIt.registerFactory<SosCubit>(
+      () => SosCubit(getIt<SosRepo>()),
     );
   }
 }

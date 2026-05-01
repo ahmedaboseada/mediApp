@@ -208,4 +208,62 @@ class BookingCubit extends Cubit<BookingState> {
       (success) => emit(state.copyWith(isBooking: false, bookingSuccess: true)),
     );
   }
+
+  Future<void> initiatePayment() async {
+    if (state.appointmentReviewData.doctor == null ||
+        state.selectedTimeSlot == null) {
+      return;
+    }
+
+    emit(state.copyWith(isBooking: true));
+
+    final data = state.appointmentReviewData;
+    final body = {
+      "doctorId": data.doctor!.id,
+      "date": state.selectedDate.toIso8601String(),
+      "time": state.selectedTimeSlot,
+      "packageType": data.packageName.toLowerCase() == 'online'
+          ? 'online'
+          : 'in-person',
+      "bookingFor": data.bookingFor,
+      "patientAge": data.patientAge,
+      "patientGender": data.patientGender?.toLowerCase(),
+      "problem": data.problem,
+      "paymentMethod": data.paymentMethod.toLowerCase() == 'card'
+          ? 'card'
+          : 'cash_on_site',
+    };
+
+    final result = await doctorsRepository.createBooking(body);
+
+    result.fold(
+      (failure) {
+        emit(state.copyWith(isBooking: false, paymentUrl: null));
+      },
+      (successResponse) {
+        // Extract paymentUrl from response
+        String? paymentUrl;
+        try {
+          if (successResponse is Map<String, dynamic>) {
+            paymentUrl = successResponse['paymentUrl'] as String?;
+          }
+        } catch (e) {
+          // Handle parsing error silently
+        }
+        
+        emit(state.copyWith(isBooking: false, paymentUrl: paymentUrl));
+      },
+    );
+  }
+
+  Future<void> confirmPaymentSuccess() async {
+    emit(state.copyWith(isProcessingPayment: true));
+    // Booking was already created in initiatePayment
+    // Just emit success to navigate to success screen
+    emit(state.copyWith(
+      isProcessingPayment: false,
+      bookingSuccess: true,
+      paymentUrl: null,
+    ));
+  }
 }

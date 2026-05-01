@@ -264,7 +264,8 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:medi/core/network/api_service.dart';
 import 'package:medi/core/services/hive_service.dart';
-import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
+
+typedef OnAuthenticationFailure = Future<void> Function();
 
 class DioClient {
   final Dio _dio = Dio(
@@ -278,6 +279,7 @@ class DioClient {
 
   bool _isRefreshing = false;
   final List<Completer<void>> _refreshCompleters = [];
+  OnAuthenticationFailure? _onAuthFailure;
 
   DioClient() {
     _dio.interceptors.add(
@@ -293,23 +295,33 @@ class DioClient {
         },
 
         onError: (DioException error, handler) async {
+          // Handle 401 Unauthorized
           if (error.response?.statusCode == 401 &&
               error.requestOptions.path != "/users/refreshToken") {
+            log('[DioClient] 401 Unauthorized - Attempting token refresh');
             final requestOptions = error.requestOptions;
 
             if (_isRefreshing) {
+              log('[DioClient] Token refresh already in progress, waiting...');
               final completer = Completer<void>();
               _refreshCompleters.add(completer);
 
               await completer.future;
 
               final token = HiveService.getAccessToken();
-
-              requestOptions.headers["Authorization"] = "Bearer $token";
-
-              final response = await _dio.fetch(requestOptions);
-
-              return handler.resolve(response);
+              if (token != null) {
+                requestOptions.headers["Authorization"] = "Bearer $token";
+                try {
+                  final response = await _dio.fetch(requestOptions);
+                  return handler.resolve(response);
+                } catch (e) {
+                  log('[DioClient] Retry after refresh failed: $e');
+                  return handler.next(error);
+                }
+              } else {
+                log('[DioClient] No token available after refresh completion');
+                return handler.next(error);
+              }
             }
 
             _isRefreshing = true;
@@ -326,12 +338,31 @@ class DioClient {
             if (refreshed) {
               final token = HiveService.getAccessToken();
 
-              requestOptions.headers["Authorization"] = "Bearer $token";
-
-              final response = await _dio.fetch(requestOptions);
-
-              return handler.resolve(response);
+              if (token != null) {
+                requestOptions.headers["Authorization"] = "Bearer $token";
+                try {
+                  final response = await _dio.fetch(requestOptions);
+                  log('[DioClient] Retry after token refresh successful');
+                  return handler.resolve(response);
+                } catch (retryError) {
+                  log('[DioClient] Retry after token refresh failed: $retryError');
+                  return handler.next(error);
+                }
+              } else {
+                log('[DioClient] No token available after successful refresh');
+                await _handleAuthenticationFailure();
+                return handler.next(error);
+              }
+            } else {
+              log('[DioClient] Token refresh failed, triggering logout');
+              await _handleAuthenticationFailure();
             }
+          }
+
+          // Handle 403 Forbidden (usually means tokens are invalid)
+          if (error.response?.statusCode == 403) {
+            log('[DioClient] 403 Forbidden - Tokens may be invalid');
+            await _handleAuthenticationFailure();
           }
 
           return handler.next(error);
@@ -342,21 +373,43 @@ class DioClient {
 
   Dio get dio => _dio;
 
-  /// refresh token logic
+  /// Set callback for authentication failure handling
+  void setOnAuthFailureCallback(OnAuthenticationFailure callback) {
+    _onAuthFailure = callback;
+  }
+
+  /// Handle authentication failure
+  Future<void> _handleAuthenticationFailure() async {
+    try {
+      log('[DioClient] Clearing stored credentials');
+      await HiveService.clearTokens();
+
+      if (_onAuthFailure != null) {
+        log('[DioClient] Triggering onAuthFailure callback');
+        await _onAuthFailure!();
+      } else {
+        log('[DioClient] WARNING: No onAuthFailure callback set');
+      }
+    } catch (e) {
+      log('[DioClient] Error during authentication failure handling: $e');
+    }
+  }
+
+  /// Refresh token logic with improved error handling
   Future<bool> _refreshToken() async {
     try {
       final refreshToken = HiveService.getRefreshToken();
-      log('Attempting token refresh, refresh token exists: $refreshToken');
+      log('[DioClient] Attempting token refresh, refresh token available: ${refreshToken != null}');
 
       if (refreshToken == null) {
-        log("No refresh token → logout");
+        log('[DioClient] No refresh token available - logout required');
         return false;
       }
 
       final dio = Dio(
         BaseOptions(
-          baseUrl: "https://medi-app-dusky.vercel.app",
-          headers: {"Authorization": "bearer $refreshToken"},
+          baseUrl: "http://35.246.202.219:8000/",
+          headers: {"Authorization": "Bearer $refreshToken"},
         ),
       );
 
@@ -364,31 +417,35 @@ class DioClient {
         "/users/refreshToken",
         options: Options(validateStatus: (status) => status != null),
       );
-      log("Refresh response status: ${response.statusCode}");
-      log("Refresh response data: ${response.data}");
+      
+      log('[DioClient] Refresh token response status: ${response.statusCode}');
 
-      if (response.statusCode != 200) {
-        log("Refresh failed");
-        AuthRepoImpl(ApiService()).signOut();
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final newAccessToken = response.data["accessToken"] ?? response.data["access_token"];
+        final newRefreshToken = response.data["refreshToken"] ?? response.data["refresh_token"];
+
+        if (newAccessToken == null) {
+          log('[DioClient] No access token in refresh response');
+          return false;
+        }
+
+        await HiveService.saveAccessToken(newAccessToken);
+        if (newRefreshToken != null) {
+          await HiveService.saveRefreshToken(newRefreshToken);
+        }
+
+        log('[DioClient] Token refreshed successfully');
+        return true;
+      } else if (response.statusCode == 401 || response.statusCode == 403) {
+        log('[DioClient] Refresh token invalid (${response.statusCode}) - logout required');
+        log('[DioClient] Response: ${response.data}');
+        return false;
+      } else {
+        log('[DioClient] Unexpected response status: ${response.statusCode}');
         return false;
       }
-
-      final newAccessToken = response.data["accessToken"];
-      final newRefreshToken = response.data["refreshToken"];
-
-      if (newAccessToken == null) return false;
-
-      await HiveService.saveAccessToken(newAccessToken);
-
-      if (newRefreshToken != null) {
-        await HiveService.saveRefreshToken(newRefreshToken);
-      }
-
-      log("Token refreshed successfully");
-
-      return true;
     } catch (e) {
-      log("Refresh error: $e");
+      log('[DioClient] Error during token refresh: $e');
       return false;
     }
   }
