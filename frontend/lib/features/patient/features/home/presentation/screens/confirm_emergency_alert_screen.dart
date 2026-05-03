@@ -28,104 +28,105 @@ class _ConfirmEmergencyAlertScreenState
       body: BlocProvider(
         create: (context) => SosCubit(getIt<SosRepo>()),
         child: SafeArea(
-              child: BlocListener<SosCubit, SosState>(
-                listener: (context, state) {
-                  if (state is SosTriggeredSuccess) {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (context) => AlertSentScreen(
-                          contactName: widget.contactName,
-                          contactMethod: widget.contactMethod,
+          child: BlocListener<SosCubit, SosState>(
+            listener: (context, state) {
+              if (state is SosTriggeredSuccess) {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) => AlertSentScreen(
+                      contactName: widget.contactName,
+                      contactMethod: widget.contactMethod,
+                    ),
+                  ),
+                );
+              } else if (state is SosFailure) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(state.message)));
+              }
+            },
+            child: Padding(
+              padding: EdgeInsets.all(AppSizes.h24),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    children: [
+                      // Title
+                      Text(
+                        'Confirm Emergency Alert',
+                        style: AppStyles.black24700,
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: AppSizes.h16),
+
+                      // Description
+                      RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text:
+                                  "We will send an emergency message with your live location to ",
+                              style: AppStyles.secondary12400,
+                            ),
+                            TextSpan(
+                              text: widget.contactName,
+                              style: AppStyles.black14600,
+                            ),
+                            TextSpan(
+                              text: " via ",
+                              style: AppStyles.secondary12400,
+                            ),
+                            TextSpan(
+                              text: widget.contactMethod.toUpperCase(),
+                              style: AppStyles.black14600,
+                            ),
+                          ],
                         ),
                       ),
-                    );
-                  } else if (state is SosFailure) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(state.message)),
-                    );
-                  }
-                },
-                child: Padding(
-                  padding: EdgeInsets.all(AppSizes.h24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      SizedBox(height: AppSizes.h40),
+
+                      // Illustration
+                      _buildIllustration(),
+                    ],
+                  ),
+                  // Buttons
+                  Column(
                     children: [
-                      Column(
-                        children: [
-                          // Title
-                          Text(
-                            'Confirm Emergency Alert',
-                            style: AppStyles.black24700,
-                            textAlign: TextAlign.center,
-                          ),
-                          SizedBox(height: AppSizes.h16),
-      
-                          // Description
-                          RichText(
-                            textAlign: TextAlign.center,
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: "We will send an emergency message with your live location to ",
-                                  style: AppStyles.secondary12400,
-                                ),
-                                TextSpan(
-                                  text: widget.contactName,
-                                  style: AppStyles.black14600,
-                                ),
-                                TextSpan(
-                                  text: " via ",
-                                  style: AppStyles.secondary12400,
-                                ),
-                                TextSpan(
-                                  text: widget.contactMethod.toUpperCase(),
-                                  style: AppStyles.black14600,
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: AppSizes.h40),
-      
-                          // Illustration
-                          _buildIllustration(),
-                        ],
-                      ),
-                      // Buttons
-                      Column(
-                        children: [
-                          BlocBuilder<SosCubit, SosState>(
-                            builder: (context, state) {
-                              final isLoading = state is SosLoading;
-                              return SizedBox(
-                                width: double.infinity,
-                                child: PrimaryButton(
-                                  text: 'Send SOS',
-                                  onPressed: isLoading
-                                      ? null
-                                      : () {
-                                          context.read<SosCubit>().triggerSos();
-                                        },
-                                //  isLoading: isLoading,
-                                  backgroundColor: AppColors.error,
-                                ),
-                              );
-                            },
-                          ),
-                          SizedBox(height: AppSizes.h12),
-                          SizedBox(
+                      BlocBuilder<SosCubit, SosState>(
+                        builder: (context, state) {
+                          final isLoading = state is SosLoading;
+                          return SizedBox(
                             width: double.infinity,
-                            child: SecondryButton(
-                              text: 'Cancel',
-                              onPressed: () => Navigator.pop(context),
+                            child: PrimaryButton(
+                              text: 'Send SOS',
+                              onPressed: isLoading
+                                  ? null
+                                  : () {
+                                      context.read<SosCubit>().triggerSos();
+                                    },
+                              //  isLoading: isLoading,
+                              backgroundColor: AppColors.error,
                             ),
-                          ),
-                        ],
+                          );
+                        },
+                      ),
+                      SizedBox(height: AppSizes.h12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: SecondryButton(
+                          text: 'Cancel',
+                          onPressed: () => Navigator.pop(context),
+                        ),
                       ),
                     ],
                   ),
-                ),
+                ],
               ),
             ),
+          ),
+        ),
       ),
     );
   }
@@ -138,11 +139,7 @@ class _ConfirmEmergencyAlertScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.location_on,
-              size: AppSizes.w80,
-              color: AppColors.error,
-            ),
+            Icon(Icons.location_on, size: AppSizes.w80, color: AppColors.error),
             SizedBox(height: AppSizes.h16),
             Text(
               'Emergency alert will be sent',

@@ -40,11 +40,15 @@ class PatientOverviewTab extends StatelessWidget {
           icon: Icons.contact_page_outlined,
           child: Column(
             children: [
-              PatientIconInfoRow(icon: Icons.call_outlined, text: patient.phone),
+              PatientIconInfoRow(
+                icon: Icons.call_outlined,
+                text: patient.phone,
+              ),
               SizedBox(height: AppSizes.h14),
               PatientIconInfoRow(
                 icon: Icons.mail_outline,
-                text: '${patient.name.toLowerCase().replaceAll(' ', '.')}@email.com',
+                text:
+                    '${patient.name.toLowerCase().replaceAll(' ', '.')}@email.com',
               ),
             ],
           ),
@@ -58,12 +62,7 @@ class PatientOverviewTab extends StatelessWidget {
             runSpacing: AppSizes.h8,
             children: patient.allergies.isNotEmpty
                 ? patient.allergies.map((a) => PatientTagChip(text: a)).toList()
-                : [
-                    Text(
-                      'No known allergies',
-                      style: AppStyles.secondary12400,
-                    ),
-                  ],
+                : [Text('No known allergies', style: AppStyles.secondary12400)],
           ),
         ),
         SizedBox(height: AppSizes.h16),
@@ -74,13 +73,10 @@ class PatientOverviewTab extends StatelessWidget {
             spacing: AppSizes.w8,
             runSpacing: AppSizes.h8,
             children: patient.chronicConditions.isNotEmpty
-                ? patient.chronicConditions.map((c) => PatientTagChip(text: c)).toList()
-                : [
-                    Text(
-                      'No medical history',
-                      style: AppStyles.secondary12400,
-                    ),
-                  ],
+                ? patient.chronicConditions
+                      .map((c) => PatientTagChip(text: c))
+                      .toList()
+                : [Text('No medical history', style: AppStyles.secondary12400)],
           ),
         ),
       ],

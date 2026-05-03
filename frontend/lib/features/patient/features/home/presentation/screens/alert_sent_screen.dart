@@ -71,9 +71,9 @@ class AlertSentScreen extends StatelessWidget {
                       text: 'Done',
                       onPressed: () {
                         // Navigate back to home
-                        Navigator.of(context).popUntil(
-                          (route) => route.isFirst,
-                        );
+                        Navigator.of(
+                          context,
+                        ).popUntil((route) => route.isFirst);
                       },
                     ),
                   ),
@@ -104,10 +104,7 @@ class AlertSentScreen extends StatelessWidget {
                         ),
                       ),
                       SizedBox(width: AppSizes.w8),
-                      Text(
-                        '|',
-                        style: AppStyles.tertiary14400,
-                      ),
+                      Text('|', style: AppStyles.tertiary14400),
                       SizedBox(width: AppSizes.w8),
                       GestureDetector(
                         onTap: () {

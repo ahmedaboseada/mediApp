@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:medi/core/network/api_service.dart';
 import 'package:medi/core/services/audio_player_service.dart';
+import 'package:medi/core/services/payment_flow_cache.dart';
 import 'package:medi/features/patient/features/add_medication/data/repo/medicine_repo.dart';
 import 'package:medi/features/patient/features/add_medication/data/repo/medicine_repo_impl.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_cubit.dart';
@@ -16,11 +17,20 @@ import 'package:medi/features/shared/auth/data/repo/auth_repo.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
 import 'package:medi/features/doctor/features/patients/data/repo/patients_repository.dart';
 import 'package:medi/features/doctor/features/patients/data/repo/patients_repository_impl.dart';
-import 'package:medi/features/doctor/features/patients/presentation/cubit/patients_cubit.dart';
-import 'package:medi/features/doctor/features/patients/presentation/cubit/add_patient_cubit.dart';
+import 'package:medi/features/doctor/features/patients/presentation/cubit/patients/patients_cubit.dart';
+import 'package:medi/features/doctor/features/patients/presentation/cubit/add_patient/add_patient_cubit.dart';
+import 'package:medi/features/doctor/features/patients/data/repo/booking_session_repository.dart';
+import 'package:medi/features/doctor/features/patients/data/repo/booking_session_repository_impl.dart';
+import 'package:medi/features/doctor/features/patients/presentation/cubit/booking_session/booking_session_cubit.dart';
+import 'package:medi/features/doctor/features/patients/data/repo/manage_meds/manage_meds_repo.dart';
+import 'package:medi/features/doctor/features/patients/data/repo/manage_meds/manage_meds_repo_impl.dart';
+import 'package:medi/features/doctor/features/patients/presentation/cubit/manage_meds/mange_meds_cubit.dart';
+import 'package:medi/features/patient/features/doctors/data/repo/booking_qr_repository.dart';
+import 'package:medi/features/patient/features/doctors/data/repo/booking_qr_repository_impl.dart';
 import 'package:medi/features/patient/features/doctors/data/repo/doctors_repo.dart';
 import 'package:medi/features/patient/features/doctors/data/repo/doctors_repo_impl.dart';
 import 'package:medi/features/patient/features/doctors/presentation/cubits/add_doctor_cubit.dart';
+import 'package:medi/features/patient/features/doctors/presentation/cubits/booking_qr_cubit.dart';
 import 'package:medi/features/patient/features/doctors/presentation/cubits/connected_doctors_cubit.dart';
 import 'package:medi/features/patient/features/doctors/presentation/cubits/doctors_cubit.dart';
 import 'package:medi/features/patient/features/notification_sound/data/datasources/local_sound_datasource.dart';
@@ -115,6 +125,26 @@ Future<void> setupServiceLocator() async {
       () => AddPatientCubit(getIt<PatientsRepository>()),
     );
   }
+  if (!getIt.isRegistered<BookingSessionRepository>()) {
+    getIt.registerLazySingleton<BookingSessionRepository>(
+      () => BookingSessionRepositoryImpl(getIt<ApiService>()),
+    );
+  }
+  if (!getIt.isRegistered<BookingSessionCubit>()) {
+    getIt.registerFactory<BookingSessionCubit>(
+      () => BookingSessionCubit(getIt<BookingSessionRepository>()),
+    );
+  }
+  if (!getIt.isRegistered<ManageMedsRepo>()) {
+    getIt.registerLazySingleton<ManageMedsRepo>(
+      () => ManageMedsRepoImpl(getIt<ApiService>()),
+    );
+  }
+  if (!getIt.isRegistered<ManageMedsCubit>()) {
+    getIt.registerFactory<ManageMedsCubit>(
+      () => ManageMedsCubit(getIt<ManageMedsRepo>()),
+    );
+  }
   final sharedPreferences = await SharedPreferences.getInstance();
   if (!getIt.isRegistered<SharedPreferences>()) {
     getIt.registerLazySingleton<SharedPreferences>(() => sharedPreferences);
@@ -131,6 +161,9 @@ Future<void> setupServiceLocator() async {
   }
   if (!getIt.isRegistered<AudioPlayerService>()) {
     getIt.registerLazySingleton<AudioPlayerService>(() => AudioPlayerService());
+  }
+  if (!getIt.isRegistered<PaymentFlowCache>()) {
+    getIt.registerLazySingleton<PaymentFlowCache>(() => PaymentFlowCache());
   }
   if (!getIt.isRegistered<GetSoundsUseCase>()) {
     getIt.registerLazySingleton<GetSoundsUseCase>(
@@ -167,6 +200,16 @@ Future<void> setupServiceLocator() async {
       () => DoctorsRepositoryImpl(getIt<ApiService>()),
     );
   }
+  if (!getIt.isRegistered<BookingQrRepository>()) {
+    getIt.registerLazySingleton<BookingQrRepository>(
+      () => BookingQrRepositoryImpl(getIt<ApiService>()),
+    );
+  }
+  if (!getIt.isRegistered<BookingQrCubit>()) {
+    getIt.registerFactory<BookingQrCubit>(
+      () => BookingQrCubit(getIt<BookingQrRepository>()),
+    );
+  }
   if (!getIt.isRegistered<DoctorsCubit>()) {
     getIt.registerFactory<DoctorsCubit>(
       () => DoctorsCubit(repository: getIt<DoctorsRepository>()),
@@ -188,8 +231,6 @@ Future<void> setupServiceLocator() async {
     );
   }
   if (!getIt.isRegistered<SosCubit>()) {
-    getIt.registerFactory<SosCubit>(
-      () => SosCubit(getIt<SosRepo>()),
-    );
+    getIt.registerFactory<SosCubit>(() => SosCubit(getIt<SosRepo>()));
   }
 }

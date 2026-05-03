@@ -4,10 +4,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/patients/data/models/patient_data.dart';
-import 'package:medi/features/doctor/features/patients/presentation/cubit/patients_cubit.dart';
-import 'package:medi/features/doctor/features/patients/presentation/cubit/patients_state.dart';
+import 'package:medi/features/doctor/features/patients/presentation/cubit/patients/patients_cubit.dart';
+import 'package:medi/features/doctor/features/patients/presentation/cubit/patients/patients_state.dart';
 import 'package:medi/features/doctor/features/patients/presentation/screens/patient_profile_screen.dart';
 import 'package:medi/features/doctor/features/patients/presentation/screens/qr_scanner_screen.dart';
+import 'package:medi/features/doctor/features/patients/presentation/cubit/booking_session/booking_session_cubit.dart';
 import 'package:medi/features/doctor/features/patients/presentation/widgets/patient_card.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/medicine_search_bar.dart';
 
@@ -187,24 +188,73 @@ class PatientsScreen extends StatelessWidget {
       return;
     }
 
-    final patient = _resolvePatientFromToken(context, scannedToken);
+    // Try to start a booking session using the scanned token (doctor flow).
+    final sessionCubit = getIt<BookingSessionCubit>();
+    final sessionResult = await sessionCubit.startSessionWithToken(
+      scannedToken,
+    );
 
-    if (patient == null) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          const SnackBar(content: Text('Invalid patient token. Try again.')),
+    await sessionResult.fold<Future<void>>(
+      (failure) async {
+        // Start session failed -> try to resolve as patient token
+        await sessionCubit.close();
+        final patient = _resolvePatientFromToken(context, scannedToken);
+
+        if (patient == null) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(SnackBar(content: Text(failure.message)));
+          return;
+        }
+
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => PatientProfileScreen(
+              patient: patient,
+              showAddMedicationAction: true,
+            ),
+          ),
         );
-      return;
-    }
+      },
+      (session) async {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              content: Text(
+                'Session started (${session.bookingId}). Expires at ${session.expiresAt}',
+              ),
+            ),
+          );
 
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => PatientProfileScreen(
-          patient: patient,
-          showAddMedicationAction: true,
-        ),
-      ),
+        final patient = _resolvePatientFromToken(context, scannedToken);
+
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => PatientProfileScreen(
+              patient:
+                  patient ??
+                  PatientData(
+                    id: session.bookingId,
+                    name: 'Patient',
+                    age: 0,
+                    gender: '',
+                    bloodType: '',
+                    status: PatientStatus.normal,
+                    avatarAsset: AppAssets.avatar1,
+                    email: '',
+                    phone: '',
+                    allergies: const [],
+                    chronicConditions: const [],
+                    medications: const [],
+                  ),
+              showAddMedicationAction: true,
+              bookingSessionCubit: sessionCubit,
+              bookingSession: session,
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -223,7 +273,7 @@ class PatientsScreen extends StatelessWidget {
     }
 
     if (normalized == _mockPatientToken) {
-      return  PatientData(
+      return PatientData(
         id: 'mock-patient-001',
         name: 'Mai Ali',
         age: 25,
@@ -240,18 +290,24 @@ class PatientsScreen extends StatelessWidget {
             name: 'Lisinopril',
             dosage: '10 mg once daily',
             frequency: 'Daily',
-             id: '', type: '', stock: 12, isChronic: true, status: '',
+            id: '',
+            type: '',
+            stock: 12,
+            isChronic: true,
+            status: '',
           ),
           MedicationModel(
             name: 'Atorvastatin',
             dosage: '20 mg once daily',
             frequency: 'Daily',
-              id: '', type: '', stock: 5, isChronic: true, status: '',
+            id: '',
+            type: '',
+            stock: 5,
+            isChronic: true,
+            status: '',
           ),
         ],
-     
       );
-      
     }
 
     return null;

@@ -5,15 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/home/data/repo/sos_repo.dart';
 import 'package:medi/features/patient/features/home/presentation/controller/sos/sos_cubit.dart';
-import 'package:medi/features/patient/features/home/presentation/screens/confirm_emergency_alert_screen.dart';
 
 class SetEmergencyContactscreen extends StatefulWidget {
-
-
-  const SetEmergencyContactscreen({
-    super.key,
-    
-  });
+  const SetEmergencyContactscreen({super.key});
 
   @override
   State<SetEmergencyContactscreen> createState() =>
@@ -27,7 +21,6 @@ class _SetEmergencyContactscreenState extends State<SetEmergencyContactscreen> {
   @override
   void initState() {
     super.initState();
-
   }
 
   @override
@@ -58,8 +51,7 @@ class _SetEmergencyContactscreenState extends State<SetEmergencyContactscreen> {
               child: Padding(
                 padding: EdgeInsets.all(AppSizes.h24),
                 child: Column(
-                 // mainAxisSize: MainAxisSize.min,
-                  
+                  // mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // Close button
@@ -80,7 +72,7 @@ class _SetEmergencyContactscreenState extends State<SetEmergencyContactscreen> {
                     SizedBox(height: AppSizes.h24),
 
                     // Name field
-                   SvgPicture.asset(AppAssets.setSos),
+                    SvgPicture.asset(AppAssets.setSos),
                     CustomTextField(
                       controller: nameController,
                       hintText: 'Enter name',
@@ -90,19 +82,17 @@ class _SetEmergencyContactscreenState extends State<SetEmergencyContactscreen> {
                     SizedBox(height: AppSizes.h20),
 
                     // Phone field
-                   
                     PhoneField(phonecontroller: phoneController),
                     SizedBox(height: AppSizes.h20),
 
                     // Contact method dropdown
-                  
                     SizedBox(height: AppSizes.h8),
                     CustomDropdown(
                       items: const ['whatsapp', 'sms'],
                       value: selectedMethod,
                       onChanged: (value) {
                         setState(() {
-                          selectedMethod = value ;
+                          selectedMethod = value;
                         });
                       },
                       hint: 'Select',
@@ -138,7 +128,7 @@ class _SetEmergencyContactscreenState extends State<SetEmergencyContactscreen> {
                         ),
                         SizedBox(width: AppSizes.w12),
                         Expanded(
-                         child: BlocBuilder<SosCubit, SosState>(
+                          child: BlocBuilder<SosCubit, SosState>(
                             builder: (context, state) {
                               final isLoading = state is SosLoading;
                               return SecondryButton(
@@ -154,12 +144,10 @@ class _SetEmergencyContactscreenState extends State<SetEmergencyContactscreen> {
                                                   .trim(),
                                               contactMethod: selectedMethod,
                                             );
-                                            
                                       },
                                 // isLoading: isLoading,
                               );
                             },
-                          
                           ),
                         ),
                       ],
@@ -194,18 +182,18 @@ class _SetEmergencyContactscreenState extends State<SetEmergencyContactscreen> {
               children: [
                 // Success icon
                 Icon(
-                      Icons.check_circle,
-                      size: AppSizes.w48,
-                      color: AppColors.success,
-                    
-                  
+                  Icons.check_circle,
+                  size: AppSizes.w48,
+                  color: AppColors.success,
                 ),
                 SizedBox(height: AppSizes.h24),
 
                 // Message
                 Text(
                   'Saved successfully',
-                  style: AppStyles.black18500.copyWith(fontWeight: FontWeight.w900),
+                  style: AppStyles.black18500.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: AppSizes.h32),
@@ -216,9 +204,8 @@ class _SetEmergencyContactscreenState extends State<SetEmergencyContactscreen> {
                   child: PrimaryButton(
                     text: 'Done',
                     onPressed: () {
-                    context.pop(); // Close success dialog
-                     context.pop(); // Close main dialog
-                     
+                      context.pop(); // Close success dialog
+                      context.pop(); // Close main dialog
                     },
                   ),
                 ),

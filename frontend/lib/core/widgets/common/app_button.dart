@@ -45,10 +45,7 @@ class AppButton extends StatelessWidget {
               )
             : Text(
                 text,
-                style: style ??
-                    AppStyles.white16600.copyWith(
-                      color: textColor,
-                    ),
+                style: style ?? AppStyles.white16600.copyWith(color: textColor),
               ),
       ),
     );

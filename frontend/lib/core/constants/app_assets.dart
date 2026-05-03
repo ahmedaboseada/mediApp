@@ -57,6 +57,7 @@ class AppAssets {
   static const String setSos = '${path}setsos.svg';
   static const String location = '${path}location.svg';
   static const String sos = '${path}sos.svg';
+  static const String trash = '${path}trash.svg';
   // Health measurement icons
   static const String bloodPressureIcon = '${svgPath}blood_pressure.svg';
   static const String bloodSugarIcon = '${svgPath}blood_sugar.svg';

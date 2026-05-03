@@ -102,8 +102,6 @@ class PatientHealthReportsTab extends StatelessWidget {
                   },
                 ),
               SizedBox(height: AppSizes.h12),
-             
-                
             ],
           ),
         ),
@@ -144,10 +142,7 @@ class PatientHealthReportsTab extends StatelessWidget {
 }
 
 class _SectionCard extends StatelessWidget {
-  const _SectionCard({
-    required this.title,
-    required this.child,
-  });
+  const _SectionCard({required this.title, required this.child});
 
   final String title;
   final Widget child;
@@ -169,7 +164,10 @@ class _SectionCard extends StatelessWidget {
               children: [
                 SvgPicture.asset(AppAssets.meds),
                 SizedBox(width: AppSizes.w8),
-                Text(title, style: AppStyles.black18500.copyWith(fontSize: AppSizes.sp20),),
+                Text(
+                  title,
+                  style: AppStyles.black18500.copyWith(fontSize: AppSizes.sp20),
+                ),
               ],
             ),
             SizedBox(height: AppSizes.h16),

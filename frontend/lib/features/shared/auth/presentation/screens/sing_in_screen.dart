@@ -133,8 +133,9 @@ class _SignInScreenState extends State<SignInScreen> {
                         validator: (value) {
                           final emailError = value?.validateEmail();
                           if (emailError != null) return emailError;
-                          if (_hasAuthError)
+                          if (_hasAuthError) {
                             return 'Email or password may be wrong';
+                          }
                           return null;
                         },
                         label: AppStrings.emailHint,
@@ -149,8 +150,9 @@ class _SignInScreenState extends State<SignInScreen> {
                         isPassword: true,
                         onChanged: (_) => _clearAuthError(),
                         validator: (value) {
-                          if (_hasAuthError)
+                          if (_hasAuthError) {
                             return 'Email or password may be wrong';
+                          }
                           return null;
                         },
                         label: AppStrings.passwordHint,

@@ -227,7 +227,7 @@ class BookingCubit extends Cubit<BookingState> {
           : 'in-person',
       "bookingFor": data.bookingFor,
       "patientAge": data.patientAge,
-      "patientGender": data.patientGender?.toLowerCase(),
+      "patientGender": data.patientGender.toLowerCase(),
       "problem": data.problem,
       "paymentMethod": data.paymentMethod.toLowerCase() == 'card'
           ? 'card'
@@ -250,7 +250,7 @@ class BookingCubit extends Cubit<BookingState> {
         } catch (e) {
           // Handle parsing error silently
         }
-        
+
         emit(state.copyWith(isBooking: false, paymentUrl: paymentUrl));
       },
     );
@@ -260,10 +260,16 @@ class BookingCubit extends Cubit<BookingState> {
     emit(state.copyWith(isProcessingPayment: true));
     // Booking was already created in initiatePayment
     // Just emit success to navigate to success screen
-    emit(state.copyWith(
-      isProcessingPayment: false,
-      bookingSuccess: true,
-      paymentUrl: null,
-    ));
+    emit(
+      state.copyWith(
+        isProcessingPayment: false,
+        bookingSuccess: true,
+        paymentUrl: null,
+      ),
+    );
+  }
+
+  void clearPaymentUrl() {
+    emit(state.copyWith(paymentUrl: null));
   }
 }

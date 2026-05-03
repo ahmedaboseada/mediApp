@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/core/widgets/common/app_button.dart';
 import 'package:medi/features/patient/features/doctors/data/models/appointment_review_data.dart';
 
 class PaymentSuccessScreen extends StatelessWidget {

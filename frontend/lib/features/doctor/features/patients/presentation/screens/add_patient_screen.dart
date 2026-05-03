@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:medi/features/doctor/features/patients/presentation/cubit/add_patient_cubit.dart';
-import 'package:medi/features/doctor/features/patients/presentation/cubit/add_patient_state.dart';
+import 'package:medi/features/doctor/features/patients/presentation/cubit/add_patient/add_patient_cubit.dart';
+import 'package:medi/features/doctor/features/patients/presentation/cubit/add_patient/add_patient_state.dart';
 import 'package:medi/features/doctor/features/patients/presentation/screens/qr_scanner_screen.dart';
 import 'package:medi/features/doctor/features/patients/presentation/screens/request_status_screen.dart';
 import 'package:medi/features/doctor/features/patients/presentation/widgets/info_box.dart';

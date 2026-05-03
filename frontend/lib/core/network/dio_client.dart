@@ -262,7 +262,6 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:medi/core/network/api_service.dart';
 import 'package:medi/core/services/hive_service.dart';
 
 typedef OnAuthenticationFailure = Future<void> Function();
@@ -345,7 +344,9 @@ class DioClient {
                   log('[DioClient] Retry after token refresh successful');
                   return handler.resolve(response);
                 } catch (retryError) {
-                  log('[DioClient] Retry after token refresh failed: $retryError');
+                  log(
+                    '[DioClient] Retry after token refresh failed: $retryError',
+                  );
                   return handler.next(error);
                 }
               } else {
@@ -399,7 +400,9 @@ class DioClient {
   Future<bool> _refreshToken() async {
     try {
       final refreshToken = HiveService.getRefreshToken();
-      log('[DioClient] Attempting token refresh, refresh token available: ${refreshToken != null}');
+      log(
+        '[DioClient] Attempting token refresh, refresh token available: ${refreshToken != null}',
+      );
 
       if (refreshToken == null) {
         log('[DioClient] No refresh token available - logout required');
@@ -417,12 +420,14 @@ class DioClient {
         "/users/refreshToken",
         options: Options(validateStatus: (status) => status != null),
       );
-      
+
       log('[DioClient] Refresh token response status: ${response.statusCode}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final newAccessToken = response.data["accessToken"] ?? response.data["access_token"];
-        final newRefreshToken = response.data["refreshToken"] ?? response.data["refresh_token"];
+        final newAccessToken =
+            response.data["accessToken"] ?? response.data["access_token"];
+        final newRefreshToken =
+            response.data["refreshToken"] ?? response.data["refresh_token"];
 
         if (newAccessToken == null) {
           log('[DioClient] No access token in refresh response');
@@ -437,7 +442,9 @@ class DioClient {
         log('[DioClient] Token refreshed successfully');
         return true;
       } else if (response.statusCode == 401 || response.statusCode == 403) {
-        log('[DioClient] Refresh token invalid (${response.statusCode}) - logout required');
+        log(
+          '[DioClient] Refresh token invalid (${response.statusCode}) - logout required',
+        );
         log('[DioClient] Response: ${response.data}');
         return false;
       } else {

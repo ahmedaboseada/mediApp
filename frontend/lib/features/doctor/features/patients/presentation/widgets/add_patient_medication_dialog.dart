@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/features/doctor/features/patients/presentation/cubit/manage_meds/mange_meds_cubit.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/reminder_grouped_list_view.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/reminder_simple_list_view.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/reminder_time_picker_row.dart';
@@ -19,9 +21,14 @@ class _SpecificDateReminders {
 }
 
 class AddPatientMedicationDialog extends StatefulWidget {
-  const AddPatientMedicationDialog({super.key, required this.patientName});
+  const AddPatientMedicationDialog({
+    super.key,
+    required this.patientName,
+    required this.patientId,
+  });
 
   final String patientName;
+  final String patientId;
 
   @override
   State<AddPatientMedicationDialog> createState() =>
@@ -125,7 +132,7 @@ class _AddPatientMedicationDialogState
     );
 
     if (selectedTime != null) {
-      _timeController.text = selectedTime.format(context);
+      _timeController.text = _formatTimeOfDay(selectedTime);
     }
   }
 
@@ -248,36 +255,51 @@ class _AddPatientMedicationDialogState
   }
 
   List<String> _flattenWeeklyTimes() {
-    return _weeklyReminders.expand((entry) => entry.times).toSet().toList();
+    return _weeklyReminders
+        .expand((entry) => entry.times)
+        .map(_normalizeTimeString)
+        .toSet()
+        .toList();
   }
 
   List<String> _flattenSpecificTimes() {
-    return _specificReminders.expand((entry) => entry.times).toSet().toList();
-  }
-
-  List<Map<String, dynamic>> _buildWeeklyPayload() {
-    return _weeklyReminders
-        .map(
-          (entry) => <String, dynamic>{
-            'day': entry.day.toLowerCase(),
-            'times': List<String>.from(entry.times),
-          },
-        )
-        .toList();
-  }
-
-  List<Map<String, dynamic>> _buildSpecificPayload() {
     return _specificReminders
-        .map(
-          (entry) => <String, dynamic>{
-            'day': entry.date,
-            'times': List<String>.from(entry.times),
-          },
-        )
+        .expand((entry) => entry.times)
+        .map(_normalizeTimeString)
+        .toSet()
         .toList();
   }
 
-  void _handleAdd() {
+  String _formatTimeOfDay(TimeOfDay timeOfDay) {
+    final hour = timeOfDay.hour.toString().padLeft(2, '0');
+    final minute = timeOfDay.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
+
+  String _normalizeTimeString(String value) {
+    final trimmed = value.trim();
+    final match = RegExp(r'^(\d{1,2}):(\d{2})\s*([AaPp][Mm])$').firstMatch(
+      trimmed,
+    );
+
+    if (match == null) {
+      return trimmed;
+    }
+
+    var hour = int.parse(match.group(1)!);
+    final minute = int.parse(match.group(2)!);
+    final period = match.group(3)!.toUpperCase();
+
+    if (period == 'PM' && hour != 12) {
+      hour += 12;
+    } else if (period == 'AM' && hour == 12) {
+      hour = 0;
+    }
+
+    return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
+  }
+
+  Future<void> _handleAdd() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -310,28 +332,43 @@ class _AddPatientMedicationDialogState
       }
     }
 
-    final payload = <String, dynamic>{
-      'medicationName': _medicationNameController.text.trim(),
-      'type': _selectedType,
-      'dosage': _dosageController.text.trim(),
-      'frequency': _selectedFrequency,
-      'startDate': _isSpecificSelected ? '' : _startDateController.text.trim(),
-      'endDate': _isSpecificSelected ? '' : _endDateController.text.trim(),
-      'reminders': _isWeeklySelected
+    final result = await context.read<ManageMedsCubit>().addMedication(
+      patientId: widget.patientId,
+      name: _medicationNameController.text.trim(),
+      type: _selectedType!.trim(),
+      dosage: _dosageController.text.trim(),
+      frequency: _selectedFrequency!,
+      daily: _isWeeklySelected
           ? _flattenWeeklyTimes()
           : _isSpecificSelected
           ? _flattenSpecificTimes()
           : _reminders,
-      'weeklySchedule': _isWeeklySelected
-          ? _buildWeeklyPayload()
-          : const <Map<String, dynamic>>[],
-      'specificSchedule': _isSpecificSelected
-          ? _buildSpecificPayload()
-          : const <Map<String, dynamic>>[],
-      'patientName': widget.patientName,
-    };
+    );
 
-    Navigator.of(context).pop(payload);
+    if (!mounted) {
+      return;
+    }
+
+    result.fold(
+      (error) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              content: Text(error.message),
+              backgroundColor: Colors.red,
+            ),
+          );
+      },
+      (message) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(content: Text(message)),
+          );
+        Navigator.of(context).pop();
+      },
+    );
   }
 
   String _formatIsoDate(DateTime dateTime) {
@@ -385,7 +422,6 @@ class _AddPatientMedicationDialogState
                       ],
                     ),
                   ),
-                 
                 ],
               ),
             ),
@@ -592,18 +628,20 @@ class _AddPatientMedicationDialogState
                   Expanded(
                     child: SecondryButton(
                       onPressed: () => Navigator.of(context).pop(),
-                     
-                     text: 'Cancel',
+
+                      text: 'Cancel',
                     ),
                   ),
                   SizedBox(width: AppSizes.w12),
-                  Expanded(
-                    child: PrimaryButton(
-                      onPressed: _handleAdd,
-                     
-                     text:'Add',
-                    ),
-                  ),
+                  Expanded(child: BlocBuilder<ManageMedsCubit, ManageMedsState>(
+                    builder: (context, state) {
+                      final isLoading = state.status == ManageMedsStatus.loading;
+                      return PrimaryButton(
+                        onPressed: isLoading ? null : _handleAdd,
+                        text: isLoading ? 'Adding...' : 'Add',
+                      );
+                    },
+                  )),
                 ],
               ),
             ),

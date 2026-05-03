@@ -19,7 +19,9 @@ class SosRepoImpl implements SosRepo {
   }) async {
     try {
       final token = HiveService.getAccessToken();
-      log('Setting Emergency Contact - Token: ${token != null ? "EXISTS" : "NULL"}');
+      log(
+        'Setting Emergency Contact - Token: ${token != null ? "EXISTS" : "NULL"}',
+      );
 
       if (token == null || token.isEmpty) {
         return Left(

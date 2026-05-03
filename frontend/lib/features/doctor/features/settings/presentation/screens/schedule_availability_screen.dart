@@ -162,30 +162,18 @@ class _ScheduleAvailabilityScreenState
                             SizedBox(height: AppSizes.h16),
                             TimePickerField(
                               label: 'Start Time',
-                              initialTime:
-                                  widget.doctor.workingHours.first.startHour !=
-                                      null
-                                  ? TimeOfDay(
-                                      hour: int.parse(
-                                        widget
-                                            .doctor
-                                            .workingHours
-                                            .first
-                                            .startHour!
-                                            .split(':')
-                                            .first,
-                                      ),
-                                      minute: int.parse(
-                                        widget
-                                            .doctor
-                                            .workingHours
-                                            .first
-                                            .startHour!
-                                            .split(':')
-                                            .last,
-                                      ),
-                                    )
-                                  : null,
+                              initialTime: TimeOfDay(
+                                hour: int.parse(
+                                  widget.doctor.workingHours.first.startHour!
+                                      .split(':')
+                                      .first,
+                                ),
+                                minute: int.parse(
+                                  widget.doctor.workingHours.first.startHour!
+                                      .split(':')
+                                      .last,
+                                ),
+                              ),
                               onTimeSelected: (time) {
                                 context
                                     .read<ScheduleAppointmentsCubit>()
@@ -196,30 +184,18 @@ class _ScheduleAvailabilityScreenState
                             SizedBox(height: AppSizes.h16),
                             TimePickerField(
                               label: 'End Time',
-                              initialTime:
-                                  widget.doctor.workingHours.first.endHour !=
-                                      null
-                                  ? TimeOfDay(
-                                      hour: int.parse(
-                                        widget
-                                            .doctor
-                                            .workingHours
-                                            .first
-                                            .endHour!
-                                            .split(':')
-                                            .first,
-                                      ),
-                                      minute: int.parse(
-                                        widget
-                                            .doctor
-                                            .workingHours
-                                            .first
-                                            .endHour!
-                                            .split(':')
-                                            .last,
-                                      ),
-                                    )
-                                  : null,
+                              initialTime: TimeOfDay(
+                                hour: int.parse(
+                                  widget.doctor.workingHours.first.endHour!
+                                      .split(':')
+                                      .first,
+                                ),
+                                minute: int.parse(
+                                  widget.doctor.workingHours.first.endHour!
+                                      .split(':')
+                                      .last,
+                                ),
+                              ),
                               onTimeSelected: (time) {
                                 context
                                     .read<ScheduleAppointmentsCubit>()

@@ -4,12 +4,15 @@ import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/doctors/data/models/booking_model.dart';
 import 'package:medi/features/patient/features/doctors/data/repo/doctors_repo.dart';
+import 'package:medi/features/patient/features/doctors/presentation/cubits/booking_qr_cubit.dart';
+import 'package:medi/features/patient/features/doctors/presentation/cubits/booking_qr_state.dart';
 import 'package:medi/features/patient/features/doctors/presentation/cubits/my_bookings_cubit.dart';
 import 'package:medi/features/patient/features/doctors/presentation/cubits/my_bookings_state.dart';
 import 'package:medi/features/patient/features/doctors/presentation/widgets/add_review_dialog.dart';
 import 'package:medi/features/patient/features/doctors/presentation/widgets/appointment_card.dart';
 import 'package:medi/features/patient/features/doctors/presentation/widgets/reschedule_appointment_dialog.dart';
 import 'package:medi/features/patient/features/doctors/presentation/widgets/success_top_banner.dart';
+import 'package:medi/features/patient/features/profile/presentation/widgets/profile_qr.dart';
 
 class MyBookingsScreen extends StatefulWidget {
   const MyBookingsScreen({super.key});
@@ -39,93 +42,122 @@ class _MyBookingsScreenState extends State<MyBookingsScreen>
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) =>
-          MyBookingsCubit(doctorsRepository: getIt<DoctorsRepository>())
-            ..fetchBookings(),
-      child: Builder(
-        builder: (context) {
-          return Scaffold(
-            appBar: CustomAppBar(
-              title: 'My Booking',
-              actionIcon: Icons.search,
-              onpressed: () {},
-            ),
-            body: Column(
-              children: [
-                TabBar(
-                  controller: _tabController,
-                  labelColor: AppColors.primary,
-                  unselectedLabelColor: AppColors.secondaryText,
-                  indicatorColor: AppColors.primary,
-                  indicatorWeight: 3,
-                  tabs: const [
-                    Tab(text: 'Upcoming'),
-                    Tab(text: 'Completed'),
-                    Tab(text: 'Cancelled'),
-                  ],
-                ),
-                Expanded(
-                  child: BlocBuilder<MyBookingsCubit, MyBookingsState>(
-                    builder: (context, state) {
-                      if (state is MyBookingsLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) =>
+              MyBookingsCubit(doctorsRepository: getIt<DoctorsRepository>())
+                ..fetchBookings(),
+        ),
+        BlocProvider(create: (context) => getIt<BookingQrCubit>()),
+      ],
+      child: BlocListener<BookingQrCubit, BookingQrState>(
+        listener: (context, state) {
+          if (state is BookingQrFailure) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
+          }
 
-                      if (state is MyBookingsFailure) {
-                        return Center(child: Text(state.message));
-                      }
-
-                      if (state is MyBookingsSuccess) {
-                        final upcoming = state.bookings
-                            .where((b) => b.status.toLowerCase() == 'upcoming')
-                            .toList();
-                        final completed = state.bookings
-                            .where((b) => b.status.toLowerCase() == 'completed')
-                            .toList();
-                        final cancelled = state.bookings
-                            .where((b) => b.status.toLowerCase() == 'cancelled')
-                            .toList();
-
-                        return BlocConsumer<MyBookingsCubit, MyBookingsState>(
-                          listener: (context, state) {
-                            if (state is MyBookingsActionSuccess) {
-                              _showTopSuccessBanner(context, state.message);
-                            }
-                          },
-                          builder: (context, state) {
-                            return TabBarView(
-                              controller: _tabController,
-                              children: [
-                                _buildAppointmentsList(
-                                  context,
-                                  appointments: upcoming,
-                                  emptyMessage: 'No upcoming appointments',
-                                ),
-                                _buildAppointmentsList(
-                                  context,
-                                  appointments: completed,
-                                  emptyMessage: 'No completed appointments',
-                                ),
-                                _buildAppointmentsList(
-                                  context,
-                                  appointments: cancelled,
-                                  emptyMessage: 'No cancelled appointments',
-                                ),
-                              ],
-                            );
-                          },
-                        );
-                      }
-
-                      return const SizedBox.shrink();
-                    },
-                  ),
-                ),
-              ],
-            ),
-          );
+          if (state is BookingQrSuccess) {
+            showDialog(
+              context: context,
+              builder: (_) => QrDialog(qrData: state.sessionToken),
+            );
+          }
         },
+        child: Builder(
+          builder: (context) {
+            return Scaffold(
+              appBar: CustomAppBar(
+                title: 'My Booking',
+                actionIcon: Icons.search,
+                onpressed: () {},
+              ),
+              body: Column(
+                children: [
+                  TabBar(
+                    controller: _tabController,
+                    labelColor: AppColors.primary,
+                    unselectedLabelColor: AppColors.secondaryText,
+                    indicatorColor: AppColors.primary,
+                    indicatorWeight: 3,
+                    tabs: const [
+                      Tab(text: 'Upcoming'),
+                      Tab(text: 'Completed'),
+                      Tab(text: 'Cancelled'),
+                    ],
+                  ),
+                  Expanded(
+                    child: BlocBuilder<MyBookingsCubit, MyBookingsState>(
+                      builder: (context, state) {
+                        if (state is MyBookingsLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        if (state is MyBookingsFailure) {
+                          return Center(child: Text(state.message));
+                        }
+
+                        if (state is MyBookingsSuccess) {
+                          final upcoming = state.bookings
+                              .where(
+                                (b) => b.status.toLowerCase() == 'upcoming',
+                              )
+                              .toList();
+                          final completed = state.bookings
+                              .where(
+                                (b) => b.status.toLowerCase() == 'completed',
+                              )
+                              .toList();
+                          final cancelled = state.bookings
+                              .where(
+                                (b) => b.status.toLowerCase() == 'cancelled',
+                              )
+                              .toList();
+
+                          return BlocConsumer<MyBookingsCubit, MyBookingsState>(
+                            listener: (context, state) {
+                              if (state is MyBookingsActionSuccess) {
+                                _showTopSuccessBanner(context, state.message);
+                              }
+                            },
+                            builder: (context, state) {
+                              return TabBarView(
+                                controller: _tabController,
+                                children: [
+                                  _buildAppointmentsList(
+                                    context,
+                                    appointments: upcoming,
+                                    emptyMessage: 'No upcoming appointments',
+                                  ),
+                                  _buildAppointmentsList(
+                                    context,
+                                    appointments: completed,
+                                    emptyMessage: 'No completed appointments',
+                                  ),
+                                  _buildAppointmentsList(
+                                    context,
+                                    appointments: cancelled,
+                                    emptyMessage: 'No cancelled appointments',
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        }
+
+                        return const SizedBox.shrink();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/features/doctor/features/patients/data/repo/patients_repository.dart';
-import 'package:medi/features/doctor/features/patients/presentation/cubit/patients_state.dart';
+import 'package:medi/features/doctor/features/patients/presentation/cubit/patients/patients_state.dart';
 
 class PatientsCubit extends Cubit<PatientsState> {
   PatientsCubit(this._repository) : super(const PatientsState());

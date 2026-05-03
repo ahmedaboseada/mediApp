@@ -9,11 +9,15 @@ class PatientMedicationsTab extends StatelessWidget {
     required this.patient,
     this.showAddMedicationAction = false,
     this.onAddMedication,
+    this.onEditMedication,
+    this.onDeleteMedication,
   });
 
   final PatientData patient;
   final bool showAddMedicationAction;
   final VoidCallback? onAddMedication;
+  final VoidCallback? onEditMedication;
+  final VoidCallback? onDeleteMedication;
 
   @override
   Widget build(BuildContext context) {
@@ -59,10 +63,14 @@ class PatientMedicationsTab extends StatelessWidget {
             (medication) => Padding(
               padding: EdgeInsets.only(bottom: AppSizes.h12),
               child: PatientMedicationCard(
+                canEdit:showAddMedicationAction,
+                onEdit: () => onEditMedication?.call(),
+                onDelete: () => onDeleteMedication?.call(),
                 name: medication.name,
                 dosage: medication.dosage,
                 frequency: medication.frequency,
-                startDate: medication.stock, // Assuming createdAt is the start date. Adjust if there's a specific start date field.
+                startDate: medication
+                    .stock, // Assuming createdAt is the start date. Adjust if there's a specific start date field.
                 instructions:
                     'Type: ${medication.type} • Status: ${medication.status} • Stock: ${medication.stock}',
               ),

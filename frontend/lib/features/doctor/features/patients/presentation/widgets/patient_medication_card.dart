@@ -11,6 +11,9 @@ class PatientMedicationCard extends StatelessWidget {
     required this.frequency,
     required this.startDate,
     this.instructions,
+    this.canEdit=false,
+    this.onEdit,
+    this.onDelete,
   });
 
   final String name;
@@ -18,6 +21,9 @@ class PatientMedicationCard extends StatelessWidget {
   final String frequency;
   final int startDate;
   final String? instructions;
+  final bool canEdit;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -32,9 +38,22 @@ class PatientMedicationCard extends StatelessWidget {
         children: [
           Row(
             children: [
-             SvgPicture.asset(AppAssets.meds, width: 24, height: 24, ),
+              SvgPicture.asset(AppAssets.meds, width: 24, height: 24),
               SizedBox(width: AppSizes.w12),
               Text(name, style: AppStyles.black16400),
+              if(canEdit)...[
+                Spacer(),
+              GestureDetector(
+                onTap: onEdit,
+                child: SvgPicture.asset(AppAssets.edit),
+                ),
+              SizedBox(width: AppSizes.w8),
+              GestureDetector(
+                onTap: onDelete,
+                child: SvgPicture.asset(AppAssets.trash),
+                ),
+
+              ]
             ],
           ),
           SizedBox(height: AppSizes.h16),

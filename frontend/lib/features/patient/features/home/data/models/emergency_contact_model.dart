@@ -18,10 +18,6 @@ class EmergencyContactModel {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'phone': phone,
-      'contactMethod': contactMethod,
-    };
+    return {'name': name, 'phone': phone, 'contactMethod': contactMethod};
   }
 }

@@ -3,10 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/complete_profile/data/repo/doctor_complete_profile_repo.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/controller/schedule_appointments/schedule_appointments_state.dart';
-import 'package:medi/features/shared/auth/data/models/doctor_model.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo.dart';
-import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
-import 'package:medi/features/shared/auth/presentation/cubit/user_profile/user_profile_cubit.dart';
 
 class ScheduleAppointmentsCubit extends Cubit<ScheduleAppointmentsState> {
   ScheduleAppointmentsCubit(this._repo)

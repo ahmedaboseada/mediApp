@@ -5,10 +5,8 @@ import 'package:medi/core/core.dart';
 import 'package:medi/core/widgets/common/app_button.dart';
 import 'package:medi/features/patient/features/doctors/data/models/appointment_review_data.dart';
 import 'package:medi/features/patient/features/doctors/presentation/cubits/booking_cubit.dart';
-import 'package:medi/features/patient/features/doctors/presentation/screens/payment_success_screen.dart';
-import 'package:medi/features/patient/features/doctors/presentation/screens/paymob_checkout_screen.dart';
-import 'package:medi/features/patient/features/doctors/presentation/screens/payment_failure_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/widgets/review_summary_doctor_header.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ReviewSummaryScreen extends StatelessWidget {
   const ReviewSummaryScreen({super.key, this.reviewData});
@@ -18,18 +16,14 @@ class ReviewSummaryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocListener<BookingCubit, BookingState>(
+      listenWhen: (previous, current) =>
+          previous.paymentUrl != current.paymentUrl &&
+          current.paymentUrl != null,
       listener: (context, state) {
-        // Show payment screen when paymentUrl is available
-        if (state.paymentUrl != null && state.paymentUrl!.isNotEmpty) {
-          _showPaymentScreen(context, state.paymentUrl!, state.appointmentReviewData);
-        }
-        // Navigate to success screen after payment
-        if (state.bookingSuccess && state.paymentUrl == null) {
-          context.push(
-            AppRouter.patientPaymentSuccessScreen,
-            extra: state.appointmentReviewData,
-          );
-        }
+        getIt<PaymentFlowCache>().setPendingReviewData(
+          state.appointmentReviewData,
+        );
+        _launchPaymentUrl(context, state.paymentUrl!);
       },
       child: BlocBuilder<BookingCubit, BookingState>(
         builder: (context, state) {
@@ -67,7 +61,10 @@ class ReviewSummaryScreen extends StatelessWidget {
                               title: 'Package',
                               value: data.packageName,
                             ),
-                            _SummaryRow(title: 'Duration', value: data.duration),
+                            _SummaryRow(
+                              title: 'Duration',
+                              value: data.duration,
+                            ),
                             _SummaryRow(
                               title: 'Booking for',
                               value: data.bookingFor,
@@ -81,9 +78,13 @@ class ReviewSummaryScreen extends StatelessWidget {
                             ),
                             _SummaryRow(
                               title: 'Duration (30 mins)',
-                              value: '1 X \$${data.unitPrice.toStringAsFixed(0)}',
+                              value:
+                                  '1 X \$${data.unitPrice.toStringAsFixed(0)}',
                             ),
-                            _SummaryRow(title: 'Duration', value: data.duration),
+                            _SummaryRow(
+                              title: 'Duration',
+                              value: data.duration,
+                            ),
                             SizedBox(height: AppSizes.h8),
                             Divider(color: AppColors.borderColor),
                             SizedBox(height: AppSizes.h6),
@@ -116,8 +117,7 @@ class ReviewSummaryScreen extends StatelessWidget {
                                   },
                                   child: const Text(
                                     'Change',
-                                    style:
-                                        TextStyle(color: AppColors.primary),
+                                    style: TextStyle(color: AppColors.primary),
                                   ),
                                 ),
                               ],
@@ -132,7 +132,7 @@ class ReviewSummaryScreen extends StatelessWidget {
                       onPressed: state.isBooking
                           ? null
                           : () =>
-                              context.read<BookingCubit>().initiatePayment(),
+                                context.read<BookingCubit>().initiatePayment(),
                       text: 'Pay Now',
                     ),
                   ],
@@ -145,36 +145,33 @@ class ReviewSummaryScreen extends StatelessWidget {
     );
   }
 
-  void _showPaymentScreen(BuildContext context, String paymentUrl , AppointmentReviewData reviewData) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PaymobCheckoutScreen(checkoutUrl: paymentUrl),
-      ),
-    ).then((paymentSuccess) {
-      if (paymentSuccess == true) {
-        // Payment successful, confirm booking
-        context.read<BookingCubit>().confirmPaymentSuccess();
-          Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>  PaymentSuccessScreen(
-              reviewData:reviewData ,
-            ),
-          ),
-        );
-      } else if (paymentSuccess == false) {
-        // Payment failed
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const PaymentFailureScreen(
-              errorMessage: 'Payment was cancelled or failed. Please try again.',
-            ),
-          ),
-        );
-      }
-    });
+  Future<void> _launchPaymentUrl(
+    BuildContext context,
+    String paymentUrl,
+  ) async {
+    final paymentUri = Uri.parse(paymentUrl);
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    final launched = await launchUrl(
+      paymentUri,
+      mode: LaunchMode.externalApplication,
+    );
+
+    if (context.mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+      context.read<BookingCubit>().clearPaymentUrl();
+    }
+
+    if (!launched && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unable to open the payment page.')),
+      );
+    }
   }
 }
 

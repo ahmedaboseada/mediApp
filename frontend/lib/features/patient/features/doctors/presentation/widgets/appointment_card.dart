@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/doctors/data/models/booking_model.dart';
+import 'package:medi/features/patient/features/doctors/presentation/cubits/booking_qr_cubit.dart';
 
 class AppointmentCard extends StatefulWidget {
   final BookingModel appointment;
@@ -160,9 +162,28 @@ class _AppointmentCardState extends State<AppointmentCard> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Dr. ${widget.appointment.doctor.user.firstName} ${widget.appointment.doctor.user.lastName}',
-                        style: AppStyles.black14500,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Dr. ${widget.appointment.doctor.user.firstName} ${widget.appointment.doctor.user.lastName}',
+                            style: AppStyles.black14500,
+                          ),
+                          GestureDetector(
+                            onTap: () => context
+                                .read<BookingQrCubit>()
+                                .generateSessionToken(widget.appointment.id),
+                            child: CircleAvatar(
+                              radius: 20,
+                              backgroundColor: AppColors.background,
+                              child: Icon(
+                                Icons.qr_code_rounded,
+                                color: Colors.black,
+                                size: AppSizes.sp24,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       SizedBox(height: AppSizes.h4),
                       Row(
@@ -201,6 +222,7 @@ class _AppointmentCardState extends State<AppointmentCard> {
                                   text: widget.appointment.appointmentId,
                                   style: AppStyles.secondary12400.copyWith(
                                     color: AppColors.primary,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               ],

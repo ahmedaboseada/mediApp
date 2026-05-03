@@ -33,7 +33,9 @@ import 'package:medi/features/patient/features/add_medication/presentation/scree
 import 'package:medi/features/patient/features/doctors/data/models/doctor_summary.dart';
 import 'package:medi/features/patient/features/doctors/data/models/appointment_review_data.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/review_summary_screen.dart';
+import 'package:medi/features/patient/features/doctors/presentation/screens/payment_result_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/payment_success_screen.dart';
+import 'package:medi/features/patient/features/doctors/presentation/screens/payment_failure_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/my_appointment_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/patient_details_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/payment_method_screen.dart';
@@ -152,6 +154,8 @@ class AppRouter {
       '/doctors/profile/book/patient-details/payment-method';
   static const String patientReviewSummaryScreen =
       '/doctors/profile/book/patient-details/payment-method/review-summary';
+  static const String patientPaymentFailureScreen = '/payment-failure';
+  static const String patientPaymentReturnScreen = '/payment-return';
   static const String patientPaymentSuccessScreen =
       '/doctors/profile/book/patient-details/payment-method/review-summary/success';
   static const String patientMyAppointmentScreen =
@@ -181,9 +185,33 @@ class AppRouter {
   static const String setEmergencyContactscreen = '/home/sos';
   static const String confirmEmergencyAlertScreen = '/home/sendsos';
 
+  static String _resolvePaymentStatus(Uri uri) {
+    final normalized = uri.toString().toLowerCase();
+
+    if (normalized.contains('success')) {
+      return 'success';
+    }
+
+    if (normalized.contains('paid')) {
+      return 'paid';
+    }
+
+    return 'failure';
+  }
+
   static final router = GoRouter(
     navigatorKey: navigatorKey,
     initialLocation: '/',
+    redirect: (context, state) {
+      final uri = state.uri;
+
+      if (uri.scheme == 'medi' && uri.host == 'payment') {
+        final status = _resolvePaymentStatus(uri);
+        return '$patientPaymentReturnScreen?status=$status';
+      }
+
+      return null;
+    },
     routes: [
       // ========== SHARED/SPLASH ROUTES ==========
       GoRoute(
@@ -347,6 +375,33 @@ class AppRouter {
         },
       ),
 
+      GoRoute(
+        path: patientPaymentReturnScreen,
+        builder: (context, state) => PaymentResultScreen(
+          status: state.uri.queryParameters['status'] ?? 'failure',
+        ),
+      ),
+      GoRoute(
+        path: patientPaymentSuccessScreen,
+        builder: (context, state) => PaymentSuccessScreen(
+          reviewData: state.extra as AppointmentReviewData,
+        ),
+        routes: [
+          GoRoute(
+            path: 'my-appointment',
+            builder: (context, state) => MyAppointmentScreen(
+              reviewData: state.extra as AppointmentReviewData?,
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: patientPaymentFailureScreen,
+        builder: (context, state) => const PaymentFailureScreen(
+          errorMessage: 'Payment was cancelled or failed. Please try again.',
+        ),
+      ),
+
       /// ================= PATIENT SHELL =================
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -421,7 +476,6 @@ class AppRouter {
               ),
             ],
           ),
-         
 
           /// ========= DOCTORS TAB =========
           StatefulShellBranch(
@@ -500,28 +554,6 @@ class AppRouter {
                                                   state.extra
                                                       as AppointmentReviewData?,
                                             ),
-                                        routes: [
-                                          GoRoute(
-                                            path: 'success',
-                                            builder: (context, state) =>
-                                                PaymentSuccessScreen(
-                                                  reviewData:
-                                                      state.extra
-                                                          as AppointmentReviewData,
-                                                ),
-                                            routes: [
-                                              GoRoute(
-                                                path: 'my-appointment',
-                                                builder: (context, state) =>
-                                                    MyAppointmentScreen(
-                                                      reviewData:
-                                                          state.extra
-                                                              as AppointmentReviewData?,
-                                                    ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
                                       ),
                                     ],
                                   ),
@@ -572,22 +604,27 @@ class AppRouter {
         path: symptomLogScreen,
         builder: (context, state) => const SymptomLogScreen(),
       ),
-       GoRoute(
+      GoRoute(
         path: setEmergencyContactscreen,
-        builder: (context, state) =>  SetEmergencyContactscreen(
-        ),
-       ),
-       GoRoute(
+        builder: (context, state) => SetEmergencyContactscreen(),
+      ),
+      GoRoute(
         path: confirmEmergencyAlertScreen,
         builder: (context, state) {
-          final contactName = (state.extra as Map<String, dynamic>?)?['contactName'] as String? ?? '';
-          final contactMethod = (state.extra as Map<String, dynamic>?)?['contactMethod'] as String? ?? 'whatsapp';
+          final contactName =
+              (state.extra as Map<String, dynamic>?)?['contactName']
+                  as String? ??
+              '';
+          final contactMethod =
+              (state.extra as Map<String, dynamic>?)?['contactMethod']
+                  as String? ??
+              'whatsapp';
           return ConfirmEmergencyAlertScreen(
             contactName: contactName,
             contactMethod: contactMethod,
           );
         },
-       ),
+      ),
       // ========== DOCTOR ROUTES ==========
       GoRoute(
         path: doctorLogin,

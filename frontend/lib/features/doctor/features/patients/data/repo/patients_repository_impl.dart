@@ -39,7 +39,7 @@ class PatientsRepositoryImpl implements PatientsRepository {
               )
               .toList();
         }
- log('Fetched patients: ${response['patients']}');
+        log('Fetched patients: ${response['patients']}');
         return Right(patients);
       }
 
