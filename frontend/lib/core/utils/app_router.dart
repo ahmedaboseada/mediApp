@@ -46,8 +46,11 @@ import 'package:medi/features/patient/features/doctors/presentation/screens/doct
 import 'package:medi/features/patient/features/doctors/presentation/screens/my_bookings_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/cancel_booking_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/search_doctors_screen.dart';
+import 'package:medi/features/patient/features/profile/presentation/screens/export_health_report_screen.dart';
+import 'package:medi/features/patient/features/profile/presentation/screens/medicine_history_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/profile_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/symptom_log_screen.dart';
+import 'package:medi/features/doctor/features/patients/data/models/patient_data.dart';
 import 'package:medi/features/patient/features/questionnaire/presentation/screens/take_info_screen.dart';
 import 'package:medi/features/shared/auth/data/models/doctor_model.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
@@ -163,6 +166,8 @@ class AppRouter {
   static const String patientCancelBookingScreen = '/doctors/cancel-booking';
   static const String patientAddDoctorScreen = '/patient/add-doctor';
   static const String symptomLogScreen = '/health/symptom-log';
+  static const String exportHealthReportScreen = '/health/export-report';
+  static const String medicineHistoryScreen = '/health/medicine-history';
   // ========== DOCTOR ROUTES ==========
   static const String doctorLogin = '/login/doctor';
   static const String doctorSignUpScreen = '/signUp/doctor';
@@ -286,6 +291,40 @@ class AppRouter {
           return const TakeInfoScreen();
         },
       ),
+      GoRoute(
+        path: medicineHistoryScreen,
+        builder: (context, state) {
+          final extra = state.extra;
+
+          if (extra is Medication) {
+            return MedicineHistoryScreen(medicine: extra);
+          }
+
+          if (extra is MedicationModel) {
+            return MedicineHistoryScreen(
+              medicine: Medication(
+                id: extra.id,
+                name: extra.name,
+                type: extra.type,
+                dosage: extra.dosage,
+                frequency: extra.frequency,
+                stock: extra.stock,
+                isChronic: extra.isChronic,
+                isCriticalMode:
+                    extra.status.trim().toLowerCase().contains('critical'),
+                medicationType: Medication.medicationTypeFromLabel(extra.type),
+                stockStatus: extra.stock <= 10
+                    ? MedicationStockStatus.low
+                    : (extra.stock <= 20
+                        ? MedicationStockStatus.medium
+                        : MedicationStockStatus.good),
+              ),
+            );
+          }
+
+          throw StateError('Unsupported medication payload: ${extra.runtimeType}');
+        },
+      ),
 
       ShellRoute(
         builder: (context, state, child) {
@@ -395,6 +434,7 @@ class AppRouter {
           ),
         ],
       ),
+
       GoRoute(
         path: patientPaymentFailureScreen,
         builder: (context, state) => const PaymentFailureScreen(
@@ -699,6 +739,10 @@ class AppRouter {
       GoRoute(
         path: doctorAllSetScreen,
         builder: (context, state) => const DoctorAllSetScreen(),
+      ),
+      GoRoute(
+        path: exportHealthReportScreen,
+        builder: (context, state) => ExportHealthReportScreen(),
       ),
 
       // ========== SHARED AUTH ROUTES ==========

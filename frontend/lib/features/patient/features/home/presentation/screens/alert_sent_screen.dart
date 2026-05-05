@@ -13,119 +13,45 @@ class AlertSentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(AppSizes.h24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
+    return Dialog(
+      backgroundColor: AppColors.surfaceColor,
+      child: Padding(
+        padding: EdgeInsets.all(AppSizes.h24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+
+          children: [
+            // Title
+            _buildSuccessIllustration(),
+
+            // Description
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
                 children: [
-                  // Title
-                  Text(
-                    'Confirm Emergency Alert',
-                    style: AppStyles.black24700,
-                    textAlign: TextAlign.center,
+                  TextSpan(
+                    text: "Your emergency message has been sent to\n ",
+                    style: AppStyles.secondary12400,
                   ),
-                  SizedBox(height: AppSizes.h16),
-
-                  // Description
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: "Your emergency message has been sent to ",
-                          style: AppStyles.secondary12400,
-                        ),
-                        TextSpan(
-                          text: contactName,
-                          style: AppStyles.black14600,
-                        ),
-                        TextSpan(
-                          text: " via ",
-                          style: AppStyles.secondary12400,
-                        ),
-                        TextSpan(
-                          text: contactMethod.toUpperCase(),
-                          style: AppStyles.black14600,
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: AppSizes.h40),
-
-                  // Success illustration
-                  _buildSuccessIllustration(),
-                ],
-              ),
-
-              // Bottom section with links
-              Column(
-                children: [
-                  // Done button
-                  SizedBox(
-                    width: double.infinity,
-                    child: PrimaryButton(
-                      text: 'Done',
-                      onPressed: () {
-                        // Navigate back to home
-                        Navigator.of(
-                          context,
-                        ).popUntil((route) => route.isFirst);
-                      },
-                    ),
-                  ),
-                  SizedBox(height: AppSizes.h24),
-
-                  // Helper links
-                  Text(
-                    'Need more help?',
-                    style: AppStyles.tertiary14400,
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: AppSizes.h12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          // Call emergency contact
-                        },
-                        child: Text(
-                          'Call emergency contact',
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontSize: AppSizes.sp12,
-                            fontWeight: FontWeight.w600,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: AppSizes.w8),
-                      Text('|', style: AppStyles.tertiary14400),
-                      SizedBox(width: AppSizes.w8),
-                      GestureDetector(
-                        onTap: () {
-                          // Call doctor
-                        },
-                        child: Text(
-                          'Call your doctor',
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontSize: AppSizes.sp12,
-                            fontWeight: FontWeight.w600,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                    ],
+                  TextSpan(
+                    text: "$contactName via ${contactMethod.toUpperCase()}",
+                    style: AppStyles.primaryDark12400,
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+            SizedBox(height: AppSizes.h12),
+
+            // Success illustration
+            PrimaryButton(
+              text: 'Done',
+              onPressed: () {
+                // Navigate back to home
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -153,7 +79,7 @@ class AlertSentScreen extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: AppSizes.h24),
+            SizedBox(height: AppSizes.h12),
             Text(
               'Alert Sent',
               style: AppStyles.black18500,

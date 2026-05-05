@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/patients/data/models/patient_data.dart';
 import 'package:medi/features/doctor/features/patients/presentation/widgets/patient_section_card.dart';
+import 'package:medi/features/doctor/features/patients/presentation/widgets/section_card.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/medicine_card.dart';
 import 'package:medi/features/doctor/features/patients/presentation/widgets/patient_tag_chip.dart';
@@ -118,7 +118,7 @@ class PatientHealthReportsTab extends StatelessWidget {
           ),
         ),
         SizedBox(height: AppSizes.h16),
-        _SectionCard(
+        SectionCard(
           title: 'Medication History',
           child: patient.medications.isEmpty
               ? Text('No medication history', style: AppStyles.secondary12400)
@@ -137,44 +137,6 @@ class PatientHealthReportsTab extends StatelessWidget {
                 ),
         ),
       ],
-    );
-  }
-}
-
-class _SectionCard extends StatelessWidget {
-  const _SectionCard({required this.title, required this.child});
-
-  final String title;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      color: AppColors.surfaceColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSizes.r24),
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(AppSizes.w16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                SvgPicture.asset(AppAssets.meds),
-                SizedBox(width: AppSizes.w8),
-                Text(
-                  title,
-                  style: AppStyles.black18500.copyWith(fontSize: AppSizes.sp20),
-                ),
-              ],
-            ),
-            SizedBox(height: AppSizes.h16),
-            child,
-          ],
-        ),
-      ),
     );
   }
 }

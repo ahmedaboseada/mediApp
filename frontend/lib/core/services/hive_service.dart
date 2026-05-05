@@ -71,8 +71,13 @@ class HiveService {
     try {
       return await Hive.openBox(boxName);
     } catch (e) {
-      // Box contains data from a removed adapter — delete and re-create
-      await Hive.deleteBoxFromDisk(boxName);
+      // Box contains data from a removed adapter or stale on-disk state.
+      // Delete if possible, but keep startup alive even if the lock file is already gone.
+      try {
+        await Hive.deleteBoxFromDisk(boxName);
+      } catch (deleteError) {
+        log('Failed to delete box $boxName: $deleteError');
+      }
       log('the deleted box is $boxName');
       return await Hive.openBox(boxName);
     }

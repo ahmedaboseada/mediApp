@@ -28,6 +28,7 @@ class MedicalRecordsSection extends StatelessWidget {
               trailing: Icon(Icons.arrow_forward_ios, color: AppColors.primary),
             ),
             ListTile(
+              onTap: () => context.push(AppRouter.exportHealthReportScreen),
               contentPadding: EdgeInsets.zero,
               title: Text("Export health report", style: AppStyles.black16400),
               trailing: SvgPicture.asset(
