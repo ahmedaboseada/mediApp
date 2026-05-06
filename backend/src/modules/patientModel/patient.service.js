@@ -775,17 +775,26 @@ export const triggerSOS = async (req, res) => {
     const authToken = process.env.TWILIO_AUTH_TOKEN || '81f095bd735d9b6910998a0a34e896c4';
     const twilioPhone = process.env.TWILIO_PHONE_NUMBER || '+12566459112';
 
+    let twilioStatus = 'sent';
+    let twilioError = null;
+
     try {
         const client = twilio(accountSid, authToken);
 
         if (contactMethod === 'call') {
             await client.calls.create({
-                url: 'http://demo.twilio.com/docs/voice.xml', // Or your own TwiML URL
+                twiml: `<Response><Say voice="alice">Emergency SOS from MediApp. ${user.firstName || 'The patient'} needs immediate help.</Say></Response>`,
                 to: phone,
                 from: twilioPhone
             });
+        } else if (contactMethod === 'whatsapp') {
+            await client.messages.create({
+                body: messageText,
+                from: `whatsapp:${twilioPhone}`,
+                to: `whatsapp:${phone}`
+            });
         } else {
-            // Default to SMS for text/whatsapp if backend sends it directly
+            // Default to SMS
             await client.messages.create({
                 body: messageText,
                 from: twilioPhone,
@@ -795,13 +804,14 @@ export const triggerSOS = async (req, res) => {
         console.log(`SOS sent to ${phone} via Twilio`);
     } catch (error) {
         console.error('Twilio Error:', error);
-        // We don't fail the request if Twilio fails, we still return the deepLink for the frontend to use
+        twilioStatus = 'failed';
+        twilioError = error.message;
     }
 
-    return res.status(200).json({
-        message: 'SOS Triggered',
+    return res.status(200).json({ 
+        message: 'SOS trigger processed', 
         deepLink,
-        contactName: name,
-        contactMethod
+        twilioStatus,
+        twilioError
     });
 };
