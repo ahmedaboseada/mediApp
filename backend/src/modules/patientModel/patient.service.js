@@ -756,7 +756,8 @@ export const triggerSOS = async (req, res) => {
 
     // Construct message
     const locationLink = (lat && lng) ? `https://maps.google.com/?q=${lat},${lng}` : 'location unavailable';
-    const messageText = `EMERGENCY SOS: This is an automated alert from MediApp. ${user.firstName || 'The patient'} needs immediate help. Live location: ${locationLink}`;
+    const timestamp = new Date().toLocaleTimeString();
+    const messageText = `EMERGENCY SOS: This is an automated alert from MediApp. ${user.firstName || 'The patient'} needs immediate help. Live location: ${locationLink} (Sent at: ${timestamp})`;
 
     let deepLink = '';
 
