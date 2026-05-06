@@ -118,21 +118,6 @@
 // userRouter.get('/confirmEmailChange/:token', validation(UVS.confirmEmailChangeSchema), US.confirmEmailChange);
 
 // // protected
-// userRouter.use('/', verifyToken);
-// userRouter.use('/', restrictTo(['user', 'patient', 'doctor']));
-// userRouter.post('/resendConfirmEmail', US.resendConfirmEmail);
-
-// userRouter.get('/', US.getProfile);
-// userRouter.post('/logout', US.logout);
-// userRouter.patch('/updateProfile', validation(UVS.updateProfileSchema), US.updateProfile);
-
-// userRouter.patch('/email/change', validation(UVS.changeEmailSchema), US.requestEmailChange);
-// userRouter.patch('/email/cancel', US.cancelEmailChange);
-
-// userRouter.patch('/2fa', validation(UVS.toggle2FASchema), US.toggle2FA);
-
-
-// export default userRouter;
 
 // import { Router } from 'express';
 // import { validation } from '../../middlewares/validation.js';
@@ -227,5 +212,8 @@ userRouter.post('/resendConfirmEmail', US.resendConfirmEmail);
 
 // SETTINGS
 userRouter.patch('/settings', US.updateSettings);
+
+// DELETE ACCOUNT
+userRouter.delete('/me', US.deleteAccount);
 
 export default userRouter;

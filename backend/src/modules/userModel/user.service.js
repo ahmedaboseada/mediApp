@@ -1180,3 +1180,20 @@ export const updateSettings = async (req, res) => {
 
     return res.status(200).json({ message: 'Settings updated successfully', settings: user.settings });
 };
+
+export const deleteAccount = async (req, res) => {
+    const userId = req.user.id;
+    const user = await userModel.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Scrub data (Hard Delete for MVP simplicity)
+    await userModel.findByIdAndDelete(userId);
+
+    if (user.type === 'patient') {
+        await patientModel.findOneAndDelete({ userId });
+    } else if (user.type === 'doctor') {
+        await doctorModel.findOneAndDelete({ userId });
+    }
+
+    return res.status(200).json({ message: 'Account permanently deleted successfully.' });
+};
