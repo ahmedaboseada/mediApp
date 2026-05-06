@@ -916,11 +916,11 @@ export const requestOTP = async (req, res) => {
     //     otp,
     //     name: `${user.firstName} ${user.lastName}`,
     // });
-    waitUntil(sendOTPEvent({
+    sendOTPEvent({
         email: user.email,
         otp,
         name: `${user.firstName} ${user.lastName}`,
-    }));
+    }).catch(console.error);
 
     return res.status(200).json({ message: 'OTP sent' });
 };
@@ -1028,7 +1028,7 @@ export const resendConfirmEmail = async (req, res) => {
         await user.save();
 
         // eventEmitter.emit('sendEmail', { email: user.email, name: `${user.firstName} ${user.lastName}` });
-        waitUntil(sendEmailEvent({ email: user.email, name: `${user.firstName} ${user.lastName}`, tokenId: confirmTokenId }));
+        sendEmailEvent({ email: user.email, name: `${user.firstName} ${user.lastName}`, tokenId: confirmTokenId }).catch(console.error);
 
         return res.status(200).json({ message: 'Confirmation email sent successfully.' });
     } catch {
