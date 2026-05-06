@@ -8,5 +8,6 @@ import * as MS from './message.service.js';
 const messageRouter = Router({ mergeParams: true });
 
 messageRouter.post('/', verifyToken, isApprovedDoctor, validation(MVS.sendMessageSchema), MS.send);
+messageRouter.get('/verify/:targetUserId', verifyToken, MS.verifyChat);
 
 export default messageRouter;

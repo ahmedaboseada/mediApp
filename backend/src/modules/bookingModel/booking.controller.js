@@ -40,6 +40,14 @@ export const cancelBooking = async (req, res, next) => {
     }
 };
 
+export const getCallToken = async (req, res, next) => {
+    try {
+        await bookingService.getCallToken(req, res);
+    } catch (err) {
+        next(err);
+    }
+};
+
 export const rescheduleBooking = async (req, res, next) => {
     try {
         await bookingService.rescheduleBooking(req, res);

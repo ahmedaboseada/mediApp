@@ -24,5 +24,6 @@ router.get('/webhook/paymob', bookingController.paymobCallbackRedirect);
 router.post('/:bookingId/generate-qr', verifyToken, restrictTo(['patient']), bookingController.generateSessionToken);
 router.post('/start-session', verifyToken, restrictTo(['doctor']), bookingController.startSession);
 router.post('/:bookingId/end-session', verifyToken, restrictTo(['patient', 'doctor']), bookingController.endSession);
+router.get('/:bookingId/call-token', verifyToken, restrictTo(['patient', 'doctor']), bookingController.getCallToken);
 
 export default router;

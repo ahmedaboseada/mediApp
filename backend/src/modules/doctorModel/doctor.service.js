@@ -70,6 +70,7 @@ import patientModel from '../../models/patient.model.js';
 import notificationModel from '../../models/notification.model.js';
 import medicineModel from '../../models/medicine.model.js';
 import healthMeasurementModel from '../../models/health-measurement.model.js';
+import withdrawalRequestModel from '../../models/withdrawal-request.model.js';
 import * as ET from '../../utils/encryption/index.js';
 
 const publicUser = async (u) => {
@@ -382,6 +383,30 @@ export const rejectPatient = async (req, res) => {
     return res.status(200).json({ message: 'Patient request rejected successfully!' });
 };
 
+export const cancelPatientRequest = async (req, res) => {
+    const doctorUserId = req.user.id;
+    const { patientId } = req.params;
+
+    const { err, doc } = await assertDoctor(doctorUserId);
+    if (err) return res.status(err.status).json({ message: err.message });
+
+    const patient = await patientModel.findById(patientId);
+
+    // Remove from doctor's side
+    if (doc.connectedPatients) {
+        doc.connectedPatients = doc.connectedPatients.filter(c => String(c.patientId) !== String(patientId));
+        await doc.save();
+    }
+
+    // Remove from patient's side
+    if (patient && patient.connectedDoctors) {
+        patient.connectedDoctors = patient.connectedDoctors.filter(c => String(c.doctorId) !== String(doc._id));
+        await patient.save();
+    }
+
+    return res.status(200).json({ message: 'Patient connection request cancelled' });
+};
+
 export const listConnectedPatients = async (req, res) => {
     const userId = req.user.id;
     const { err, doc } = await assertDoctor(userId);
@@ -431,4 +456,71 @@ export const listConnectedPatients = async (req, res) => {
     }
 
     return res.status(200).json({ patients: enrichedPatients });
+};
+
+export const getWallet = async (req, res) => {
+    const userId = req.user.id;
+    const { err, doc } = await assertDoctor(userId);
+    if (err) return res.status(err.status).json({ message: err.message });
+
+    const withdrawals = await withdrawalRequestModel.find({ doctorId: doc._id }).sort({ createdAt: -1 }).lean();
+
+    return res.status(200).json({
+        walletBalance: doc.walletBalance || 0,
+        withdrawals
+    });
+};
+
+export const requestWithdrawal = async (req, res) => {
+    const userId = req.user.id;
+    const { amount, bankDetails } = req.body;
+
+    const { err, doc } = await assertDoctor(userId);
+    if (err) return res.status(err.status).json({ message: err.message });
+
+    if (doc.walletBalance < amount) {
+        return res.status(400).json({ message: 'Insufficient wallet balance' });
+    }
+
+    // Deduct immediately
+    doc.walletBalance -= amount;
+    await doc.save();
+
+    const request = await withdrawalRequestModel.create({
+        doctorId: doc._id,
+        amount,
+        bankDetails
+    });
+
+    return res.status(201).json({ message: 'Withdrawal request submitted successfully', request });
+};
+
+export const processWithdrawal = async (req, res) => {
+    const { id } = req.params;
+    const { status, adminNotes } = req.body;
+
+    const request = await withdrawalRequestModel.findById(id);
+    if (!request) return res.status(404).json({ message: 'Withdrawal request not found' });
+
+    if (request.status !== 'pending' && request.status !== 'approved') {
+        return res.status(400).json({ message: `Cannot process a ${request.status} request` });
+    }
+
+    request.status = status;
+    request.adminNotes = adminNotes;
+
+    if (status === 'processed' || status === 'approved') {
+        request.processedAt = new Date();
+    } else if (status === 'rejected') {
+        // Refund doctor's wallet
+        const doc = await doctorModel.findById(request.doctorId);
+        if (doc) {
+            doc.walletBalance += request.amount;
+            await doc.save();
+        }
+    }
+
+    await request.save();
+
+    return res.status(200).json({ message: `Withdrawal request ${status}`, request });
 };

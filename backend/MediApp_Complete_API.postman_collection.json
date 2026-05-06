@@ -3173,6 +3173,867 @@
           }
         }
       ]
+    },
+    {
+      "name": "Sprint 5 - Endpoints & Tests",
+      "item": [
+        {
+          "name": "1. Exports (PDF & QR)",
+          "item": [
+            {
+              "name": "Export Health Passport (Success)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/export/health-passport",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "export",
+                    "health-passport"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Export Health Passport (Unauthorized)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer invalid_token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/export/health-passport",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "export",
+                    "health-passport"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 401', function () { pm.response.to.have.status(401); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Export Patient Record (Success)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/export/patient-record",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "export",
+                    "patient-record"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Generate QR Token (Success)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/export/qr-token",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "export",
+                    "qr-token"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                      "var jsonData = pm.response.json();",
+                      "if(jsonData.qrToken) pm.collectionVariables.set('qrToken', jsonData.qrToken);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Access Shared Record (Success)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{BASE_URL}}/export/shared/{{qrToken}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "export",
+                    "shared",
+                    "{{qrToken}}"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Access Shared Record (Invalid Token)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{BASE_URL}}/export/shared/invalid_token_123",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "export",
+                    "shared",
+                    "invalid_token_123"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 401', function () { pm.response.to.have.status(401); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Export Health Passport (Doctor - Missing Patient ID 400)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/export/health-passport",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "export",
+                    "health-passport"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 400', function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Export Health Passport (Doctor - Unconnected Patient 403)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/export/health-passport?patientId={{invalidPatientId}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "export",
+                    "health-passport"
+                  ],
+                  "query": [
+                    {
+                      "key": "patientId",
+                      "value": "{{invalidPatientId}}"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 403', function () { pm.response.to.have.status(403); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "2. Doctor Wallet & Payouts",
+          "item": [
+            {
+              "name": "Get Doctor Wallet (Success)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/doctors/wallet",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "wallet"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Request Withdrawal (Success)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"amount\": 50,\n  \"bankDetails\": {\n    \"bankName\": \"National Bank\",\n    \"accountNumber\": \"123456789\",\n    \"accountHolderName\": \"Dr. John Doe\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/doctors/wallet/withdraw",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "wallet",
+                    "withdraw"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 201', function () { pm.response.to.have.status(201); });",
+                      "var jsonData = pm.response.json();",
+                      "if(jsonData.request && jsonData.request._id) pm.collectionVariables.set('withdrawalId', jsonData.request._id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Request Withdrawal (Insufficient Funds 400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"amount\": 9999999,\n  \"bankDetails\": {\n    \"bankName\": \"National Bank\",\n    \"accountNumber\": \"123456789\",\n    \"accountHolderName\": \"Dr. John Doe\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/doctors/wallet/withdraw",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "wallet",
+                    "withdraw"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 400', function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Process Withdrawal (Admin Success)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ADMIN_ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"approved\",\n  \"adminNotes\": \"Processed immediately\"\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/doctors/wallet/withdraw/{{withdrawalId}}/process",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "wallet",
+                    "withdraw",
+                    "{{withdrawalId}}",
+                    "process"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Process Withdrawal (Not Admin 403)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"approved\",\n  \"adminNotes\": \"Processed immediately\"\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/doctors/wallet/withdraw/{{withdrawalId}}/process",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "wallet",
+                    "withdraw",
+                    "{{withdrawalId}}",
+                    "process"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 403', function () { pm.response.to.have.status(403); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Request Withdrawal (Validation Error - Missing Bank Name 400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"amount\": 50,\n  \"bankDetails\": {\n    \"accountNumber\": \"123456789\",\n    \"accountHolderName\": \"Dr. John Doe\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/doctors/wallet/withdraw",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "wallet",
+                    "withdraw"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 400', function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "3. Request Cancellations",
+          "item": [
+            {
+              "name": "Cancel Caregiver Request (Success)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/patients/caregiver/requests/{{requestId}}/cancel",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "patients",
+                    "caregiver",
+                    "requests",
+                    "{{requestId}}",
+                    "cancel"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200 or 404/400', function () { pm.expect(pm.response.code).to.be.oneOf([200, 400, 404]); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Cancel Doctor Request - Patient Side (Success)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/patients/connected-doctors/cancel/{{doctorId}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "patients",
+                    "connected-doctors",
+                    "cancel",
+                    "{{doctorId}}"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Cancel Patient Request - Doctor Side (Success)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/doctors/patients/cancel/{{patientId}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "patients",
+                    "cancel",
+                    "{{patientId}}"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "4. Voice & Video Calls",
+          "item": [
+            {
+              "name": "Get Call Token (Success - Active Session)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/bookings/{{bookingId}}/call-token",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "bookings",
+                    "{{bookingId}}",
+                    "call-token"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Call Token (Forbidden - No Active Session 403)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/bookings/{{inactiveBookingId}}/call-token",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "bookings",
+                    "{{inactiveBookingId}}",
+                    "call-token"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 403', function () { pm.response.to.have.status(403); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "5. Chat & Messaging",
+          "item": [
+            {
+              "name": "Verify Chat Allowed (Success)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/messages/verify/:targetUserId",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "messages",
+                    "verify",
+                    ":targetUserId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "targetUserId",
+                      "value": "TARGET_USER_ID_HERE"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Verify Chat Allowed (Forbidden 403)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/messages/verify/:targetUserId",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "messages",
+                    "verify",
+                    ":targetUserId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "targetUserId",
+                      "value": "UNCONNECTED_USER_ID_HERE"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 403', function () { pm.response.to.have.status(403); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "6. Settings & Privacy",
+          "item": [
+            {
+              "name": "Update Settings (Success)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"settings\": {\n    \"notifications\": {\n      \"push\": false,\n      \"email\": true\n    },\n    \"privacy\": {\n      \"allowCaregiverAccess\": true,\n      \"allowDoctorAccess\": false\n    }\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/users/settings",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "users",
+                    "settings"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Update Settings (Bad Request 400)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/users/settings",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "users",
+                    "settings"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 400', function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }

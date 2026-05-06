@@ -1,0 +1,4181 @@
+{
+  "info": {
+    "name": "MediApp Complete API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Unified collection of all MediApp Endpoints"
+  },
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "02 - Signup (patient)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"patient\",\n  \"firstName\": \"Ahmed\",\n  \"lastName\": \"Abu Seada\",\n  \"email\": \"ahmedabuseada22@gmail.com\",\n  \"password\": \"116574Mm@@\",\n  \"confirmPassword\": \"116574Mm@@\",\n  \"phone\": \"01012345678\",\n  \"DOB\": \"2000-01-01\",\n  \"age\": 26,\n  \"gender\": \"male\",\n  \"twoFA\": false\n}"
+            },
+            "url": "{{baseUrl}}/users/signup"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "var token = jsonData.accessToken || (jsonData.data && jsonData.data.accessToken);",
+                  "if (token) {",
+                  "    var type = jsonData.user ? jsonData.user.type : (jsonData.data && jsonData.data.user && jsonData.data.user.type);",
+                  "    if (type === 'doctor') {",
+                  "        pm.collectionVariables.set('DOCTOR_ACCESS_TOKEN', token);",
+                  "        console.log('Saved DOCTOR_ACCESS_TOKEN');",
+                  "    } else if (type === 'admin') {",
+                  "        pm.collectionVariables.set('ADMIN_ACCESS_TOKEN', token);",
+                  "        console.log('Saved ADMIN_ACCESS_TOKEN');",
+                  "    } else {",
+                  "        pm.collectionVariables.set('ACCESS_TOKEN', token);",
+                  "        console.log('Saved ACCESS_TOKEN');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "02.5 - Google Auth (Public)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idToken\": \"PUT_YOUR_GOOGLE_ID_TOKEN_HERE\",\n  \"userType\": \"patient\"\n}"
+            },
+            "url": "{{baseUrl}}/users/google"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "var token = jsonData.accessToken || (jsonData.data && jsonData.data.accessToken);",
+                  "if (token) {",
+                  "    var type = jsonData.user ? jsonData.user.type : (jsonData.data && jsonData.data.user && jsonData.data.user.type);",
+                  "    if (type === 'doctor') {",
+                  "        pm.collectionVariables.set('DOCTOR_ACCESS_TOKEN', token);",
+                  "        console.log('Saved DOCTOR_ACCESS_TOKEN');",
+                  "    } else if (type === 'admin') {",
+                  "        pm.collectionVariables.set('ADMIN_ACCESS_TOKEN', token);",
+                  "        console.log('Saved ADMIN_ACCESS_TOKEN');",
+                  "    } else {",
+                  "        pm.collectionVariables.set('ACCESS_TOKEN', token);",
+                  "        console.log('Saved ACCESS_TOKEN');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "03 - Confirm Email (paste token into confirmEmailToken)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/users/confirmEmail/{{confirmEmailToken}}"
+          }
+        },
+        {
+          "name": "04 - Signin (normal or returns challengeToken if 2FA)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ahmedabuseada22@gmail.com\",\n  \"password\": \"116574Mm@@\"\n}"
+            },
+            "url": "{{baseUrl}}/users/signin"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "var token = jsonData.accessToken || (jsonData.data && jsonData.data.accessToken);",
+                  "if (token) {",
+                  "    var type = jsonData.user ? jsonData.user.type : (jsonData.data && jsonData.data.user && jsonData.data.user.type);",
+                  "    if (type === 'doctor') {",
+                  "        pm.collectionVariables.set('DOCTOR_ACCESS_TOKEN', token);",
+                  "        console.log('Saved DOCTOR_ACCESS_TOKEN');",
+                  "    } else if (type === 'admin') {",
+                  "        pm.collectionVariables.set('ADMIN_ACCESS_TOKEN', token);",
+                  "        console.log('Saved ADMIN_ACCESS_TOKEN');",
+                  "    } else {",
+                  "        pm.collectionVariables.set('ACCESS_TOKEN', token);",
+                  "        console.log('Saved ACCESS_TOKEN');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "05 - Signin with OTP (2FA only) - replace otp",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"challengeToken\": \"{{challengeToken}}\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": "{{baseUrl}}/users/signin/otp"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "var token = jsonData.accessToken || (jsonData.data && jsonData.data.accessToken);",
+                  "if (token) {",
+                  "    var type = jsonData.user ? jsonData.user.type : (jsonData.data && jsonData.data.user && jsonData.data.user.type);",
+                  "    if (type === 'doctor') {",
+                  "        pm.collectionVariables.set('DOCTOR_ACCESS_TOKEN', token);",
+                  "        console.log('Saved DOCTOR_ACCESS_TOKEN');",
+                  "    } else if (type === 'admin') {",
+                  "        pm.collectionVariables.set('ADMIN_ACCESS_TOKEN', token);",
+                  "        console.log('Saved ADMIN_ACCESS_TOKEN');",
+                  "    } else {",
+                  "        pm.collectionVariables.set('ACCESS_TOKEN', token);",
+                  "        console.log('Saved ACCESS_TOKEN');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "06 - Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{prefixUser}} {{refreshToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/users/refreshToken"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "var token = jsonData.accessToken || (jsonData.data && jsonData.data.accessToken);",
+                  "if (token) {",
+                  "    var type = jsonData.user ? jsonData.user.type : (jsonData.data && jsonData.data.user && jsonData.data.user.type);",
+                  "    if (type === 'doctor') {",
+                  "        pm.collectionVariables.set('DOCTOR_ACCESS_TOKEN', token);",
+                  "        console.log('Saved DOCTOR_ACCESS_TOKEN');",
+                  "    } else if (type === 'admin') {",
+                  "        pm.collectionVariables.set('ADMIN_ACCESS_TOKEN', token);",
+                  "        console.log('Saved ADMIN_ACCESS_TOKEN');",
+                  "    } else {",
+                  "        pm.collectionVariables.set('ACCESS_TOKEN', token);",
+                  "        console.log('Saved ACCESS_TOKEN');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "07 - Resend Confirm Email (Protected)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{prefixUser}} {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/users/resendConfirmEmail"
+          }
+        },
+        {
+          "name": "11 - Request OTP (Public - Generic)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ahmedabuseada22@gmail.com\"\n}"
+            },
+            "url": "{{baseUrl}}/users/requestOTP"
+          }
+        },
+        {
+          "name": "12 - Check OTP (Public - Generic)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ahmedabuseada22@gmail.com\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": "{{baseUrl}}/users/checkOTP"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "var token = jsonData.accessToken || (jsonData.data && jsonData.data.accessToken);",
+                  "if (token) {",
+                  "    var type = jsonData.user ? jsonData.user.type : (jsonData.data && jsonData.data.user && jsonData.data.user.type);",
+                  "    if (type === 'doctor') {",
+                  "        pm.collectionVariables.set('DOCTOR_ACCESS_TOKEN', token);",
+                  "        console.log('Saved DOCTOR_ACCESS_TOKEN');",
+                  "    } else if (type === 'admin') {",
+                  "        pm.collectionVariables.set('ADMIN_ACCESS_TOKEN', token);",
+                  "        console.log('Saved ADMIN_ACCESS_TOKEN');",
+                  "    } else {",
+                  "        pm.collectionVariables.set('ACCESS_TOKEN', token);",
+                  "        console.log('Saved ACCESS_TOKEN');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "13 - Forget Password - Request OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ahmedabuseada22@gmail.com\"\n}"
+            },
+            "url": "{{baseUrl}}/users/forgetPassword"
+          }
+        },
+        {
+          "name": "14 - Forget Password - Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ahmedabuseada22@gmail.com\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": "{{baseUrl}}/users/forgetPassword/verify"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "var token = jsonData.accessToken || (jsonData.data && jsonData.data.accessToken);",
+                  "if (token) {",
+                  "    var type = jsonData.user ? jsonData.user.type : (jsonData.data && jsonData.data.user && jsonData.data.user.type);",
+                  "    if (type === 'doctor') {",
+                  "        pm.collectionVariables.set('DOCTOR_ACCESS_TOKEN', token);",
+                  "        console.log('Saved DOCTOR_ACCESS_TOKEN');",
+                  "    } else if (type === 'admin') {",
+                  "        pm.collectionVariables.set('ADMIN_ACCESS_TOKEN', token);",
+                  "        console.log('Saved ADMIN_ACCESS_TOKEN');",
+                  "    } else {",
+                  "        pm.collectionVariables.set('ACCESS_TOKEN', token);",
+                  "        console.log('Saved ACCESS_TOKEN');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "15 - Reset Password (Public with Token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resetToken\": \"{{resetToken}}\",\n  \"newPassword\": \"New@123456\",\n  \"confirmPassword\": \"New@123456\"\n}"
+            },
+            "url": "{{baseUrl}}/users/resetPassword"
+          }
+        },
+        {
+          "name": "16 - Change Password (Protected)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{prefixUser}} {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"116574Mm@@\",\n  \"newPassword\": \"New@123456\",\n  \"confirmPassword\": \"New@123456\"\n}"
+            },
+            "url": "{{baseUrl}}/users/changePassword"
+          }
+        },
+        {
+          "name": "20 - Confirm Email Change (paste token into confirmEmailChangeToken)",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/users/confirmEmailChange/{{confirmEmailChangeToken}}"
+          }
+        },
+        {
+          "name": "21 - Logout (Protected)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{prefixUser}} {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/users/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Users & Profile",
+      "item": [
+        {
+          "name": "Profile Completion",
+          "item": [
+            {
+              "name": "Complete Profile (One Step)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "avatar",
+                      "type": "file",
+                      "src": []
+                    },
+                    {
+                      "key": "specialization",
+                      "value": "Cardiology",
+                      "type": "text"
+                    },
+                    {
+                      "key": "clinicName",
+                      "value": "Heart Care Center",
+                      "type": "text"
+                    },
+                    {
+                      "key": "medicalLicenseId",
+                      "value": "MD123456",
+                      "type": "text"
+                    },
+                    {
+                      "key": "phone",
+                      "value": "+19876543210",
+                      "type": "text"
+                    },
+                    {
+                      "key": "gender",
+                      "value": "male",
+                      "type": "text"
+                    },
+                    {
+                      "key": "clinicAddress",
+                      "value": "Smouha, 8502 Alexandria",
+                      "type": "text"
+                    },
+                    {
+                      "key": "clinicLocation[lat]",
+                      "value": "31.21564",
+                      "type": "text"
+                    },
+                    {
+                      "key": "clinicLocation[lng]",
+                      "value": "29.95527",
+                      "type": "text"
+                    },
+                    {
+                      "key": "clinicLocation[label]",
+                      "value": "Smouha, Alexandria",
+                      "type": "text"
+                    },
+                    {
+                      "key": "workingDays[0]",
+                      "value": "monday",
+                      "type": "text"
+                    },
+                    {
+                      "key": "workingDays[1]",
+                      "value": "tuesday",
+                      "type": "text"
+                    },
+                    {
+                      "key": "workingDays[2]",
+                      "value": "wednesday",
+                      "type": "text"
+                    },
+                    {
+                      "key": "workingHours[0][startHour]",
+                      "value": "09:00",
+                      "type": "text"
+                    },
+                    {
+                      "key": "workingHours[0][endHour]",
+                      "value": "17:00",
+                      "type": "text"
+                    },
+                    {
+                      "key": "consultationDuration",
+                      "value": "30",
+                      "type": "text"
+                    },
+                    {
+                      "key": "appointmentTypes[0]",
+                      "value": "in-person",
+                      "type": "text"
+                    },
+                    {
+                      "key": "appointmentTypes[1]",
+                      "value": "online",
+                      "type": "text"
+                    },
+                    {
+                      "key": "maxDailyPatients",
+                      "value": "20",
+                      "type": "text"
+                    },
+                    {
+                      "key": "licenseImage",
+                      "type": "file",
+                      "src": []
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/doctors/complete",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "complete"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Step 1: Basic Info",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "avatar",
+                      "type": "file",
+                      "src": []
+                    },
+                    {
+                      "key": "specialization",
+                      "value": "Cardiology",
+                      "type": "text"
+                    },
+                    {
+                      "key": "clinicName",
+                      "value": "Heart Care Center",
+                      "type": "text"
+                    },
+                    {
+                      "key": "medicalLicenseId",
+                      "value": "MD123456",
+                      "type": "text"
+                    },
+                    {
+                      "key": "phone",
+                      "value": "+19876543210",
+                      "type": "text"
+                    },
+                    {
+                      "key": "gender",
+                      "value": "male",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/doctors/complete/step1",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "complete",
+                    "step1"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Step 2: Location",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"clinicAddress\": \"Smouha, 8502 Alexandria\",\n    \"clinicLocation\": {\n        \"lat\": 31.21564,\n        \"lng\": 29.95527,\n        \"label\": \"Smouha, Alexandria\"\n    }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/doctors/complete/location",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "complete",
+                    "location"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Step 3: Schedule",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"workingDays\": [\"monday\", \"tuesday\", \"wednesday\"],\n    \"workingHours\": [\n        { \"startHour\": \"09:00\", \"endHour\": \"17:00\" }\n    ],\n    \"consultationDuration\": 30\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/doctors/complete/schedule",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "complete",
+                    "schedule"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Step 4: Appointments",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"appointmentTypes\": [\"in-person\", \"online\"],\n    \"maxDailyPatients\": 20\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/doctors/complete/appointments",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "complete",
+                    "appointments"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Step 5: License",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "licenseImage",
+                      "type": "file",
+                      "src": []
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/doctors/complete/license",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "complete",
+                    "license"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Complete Profile (One Step)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "avatar",
+                      "type": "file",
+                      "src": []
+                    },
+                    {
+                      "key": "phone",
+                      "value": "+1234567890",
+                      "type": "text"
+                    },
+                    {
+                      "key": "yearOfBirth",
+                      "value": "1990",
+                      "type": "text"
+                    },
+                    {
+                      "key": "gender",
+                      "value": "male",
+                      "type": "text"
+                    },
+                    {
+                      "key": "chronicConditions[0]",
+                      "value": "Hypertension",
+                      "type": "text"
+                    },
+                    {
+                      "key": "longTermMedication[0]",
+                      "value": "Aspirin",
+                      "type": "text"
+                    },
+                    {
+                      "key": "longTermMedication[1]",
+                      "value": "Ibuprofen",
+                      "type": "text"
+                    },
+                    {
+                      "key": "allergies[0]",
+                      "value": "Penicillin",
+                      "type": "text"
+                    },
+                    {
+                      "key": "reactionToMedication",
+                      "value": "true",
+                      "type": "text"
+                    },
+                    {
+                      "key": "allergyAlerts",
+                      "value": "true",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/patients/complete",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "patients",
+                    "complete"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Complete Basic Profile",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "avatar",
+                      "type": "file",
+                      "src": []
+                    },
+                    {
+                      "key": "phone",
+                      "value": "+1234567890",
+                      "type": "text"
+                    },
+                    {
+                      "key": "yearOfBirth",
+                      "value": "1990",
+                      "type": "text"
+                    },
+                    {
+                      "key": "gender",
+                      "value": "male",
+                      "type": "text"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/patients/complete/basic",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "patients",
+                    "complete",
+                    "basic"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Complete Health Step 1",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"chronicConditions\": [\"Hypertension\"],\n    \"longTermMedication\": [\"Aspirin\", \"Ibuprofen\"],\n    \"activeIngredients\": []\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/patients/complete/health1",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "patients",
+                    "complete",
+                    "health1"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Complete Health Step 2",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"allergies\": [\"Penicillin\"],\n    \"reactionToMedication\": true,\n    \"allergyAlerts\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/patients/complete/health2",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "patients",
+                    "complete",
+                    "health2"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "08 - Me (Protected)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{prefixUser}} {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/users/me"
+          }
+        },
+        {
+          "name": "09 - Public Profile By ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/users/profile/{{userId}}"
+          }
+        },
+        {
+          "name": "10 - Update Profile (Protected)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{prefixUser}} {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"01098765432\"\n}"
+            },
+            "url": "{{baseUrl}}/users/updateProfile"
+          }
+        },
+        {
+          "name": "17 - Toggle 2FA (Protected)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{prefixUser}} {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": true\n}"
+            },
+            "url": "{{baseUrl}}/users/2fa"
+          }
+        },
+        {
+          "name": "18 - Request Email Change (Protected)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{prefixUser}} {{accessToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newEmail\": \"ahmed_patient_1_new@test.com\"\n}"
+            },
+            "url": "{{baseUrl}}/users/email/change"
+          }
+        },
+        {
+          "name": "19 - Cancel Email Change (Protected)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{prefixUser}} {{accessToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/users/email/cancel"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Patients & Caregivers",
+      "item": [
+        {
+          "name": "Caregiver Logic",
+          "item": [
+            {
+              "name": "Set Caregiving Option",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"caregivingOption\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/patients/caregiver/option",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "patients",
+                    "caregiver",
+                    "option"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Send Caregiver Request",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"caregiverEmail\": \"caregiver@example.com\",\n    \"relationship\": \"parent\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/patients/caregiver/request",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "patients",
+                    "caregiver",
+                    "request"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "List Caregiver Requests (Inbox)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{CAREGIVER_ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/patients/caregiver/requests",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "patients",
+                    "caregiver",
+                    "requests"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Accept Caregiver Request",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{CAREGIVER_ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/patients/caregiver/requests/:requestId/accept",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "patients",
+                    "caregiver",
+                    "requests",
+                    ":requestId",
+                    "accept"
+                  ],
+                  "variable": [
+                    {
+                      "key": "requestId",
+                      "value": "65b4c43...",
+                      "description": "MongoDB Request ID fetched from inbox"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Reject Caregiver Request",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{CAREGIVER_ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/patients/caregiver/requests/:requestId/reject",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "patients",
+                    "caregiver",
+                    "requests",
+                    ":requestId",
+                    "reject"
+                  ],
+                  "variable": [
+                    {
+                      "key": "requestId",
+                      "value": "65b4c43...",
+                      "description": "MongoDB Request ID fetched from inbox"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Patient Endpoints",
+          "item": [
+            {
+              "name": "1. Onboarding & Setup",
+              "item": [
+                {
+                  "name": "Complete Profile (Unified)",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "key": "phone",
+                          "value": "1234567890",
+                          "type": "text"
+                        },
+                        {
+                          "key": "yearOfBirth",
+                          "value": "1995",
+                          "type": "text"
+                        },
+                        {
+                          "key": "gender",
+                          "value": "male",
+                          "type": "text"
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{BASE_URL}}/patients/complete",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "patients",
+                        "complete"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Complete Profile (Basic Step)",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "key": "phone",
+                          "value": "1234567890",
+                          "type": "text"
+                        },
+                        {
+                          "key": "yearOfBirth",
+                          "value": "1995",
+                          "type": "text"
+                        },
+                        {
+                          "key": "gender",
+                          "value": "male",
+                          "type": "text"
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{BASE_URL}}/patients/complete/basic",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "patients",
+                        "complete",
+                        "basic"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Complete Profile (Health 1)",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"chronicConditions\": [\"Asthma\"],\n  \"longTermMedication\": [\"653245f...\"],\n  \"activeIngredients\": [\"Ibuprofen\"]\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{BASE_URL}}/patients/complete/health1",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "patients",
+                        "complete",
+                        "health1"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Complete Profile (Health 2)",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"allergies\": [\"Peanuts\"],\n  \"reactionToMedication\": false,\n  \"allergyAlerts\": true\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{BASE_URL}}/patients/complete/health2",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "patients",
+                        "complete",
+                        "health2"
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "2. Caregiver Settings",
+              "item": [
+                {
+                  "name": "Set Caregiver Option",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"isCaregiver\": true\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{BASE_URL}}/patients/caregiver/option",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "patients",
+                        "caregiver",
+                        "option"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Send Caregiver Request",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"caregiverEmail\": \"caregiver@test.com\",\n  \"relationship\": \"Parent\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{BASE_URL}}/patients/caregiver/request",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "patients",
+                        "caregiver",
+                        "request"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "View Incoming Caregiver Requests",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{BASE_URL}}/patients/caregiver/requests",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "patients",
+                        "caregiver",
+                        "requests"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Accept Caregiver Request",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{BASE_URL}}/patients/caregiver/requests/{{request_id}}/accept",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "patients",
+                        "caregiver",
+                        "requests",
+                        "{{request_id}}",
+                        "accept"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Reject Caregiver Request",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{BASE_URL}}/patients/caregiver/requests/{{request_id}}/reject",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "patients",
+                        "caregiver",
+                        "requests",
+                        "{{request_id}}",
+                        "reject"
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "3. Doctors Directory",
+              "item": [
+                {
+                  "name": "Browse Global Doctors",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{BASE_URL}}/doctors/directory",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "doctors",
+                        "directory"
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "4. Connection Requests (Sending)",
+              "item": [
+                {
+                  "name": "Send Doctor Add Request",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"doctorId\": \"{{doctor_object_id}}\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{BASE_URL}}/patients/connect-doctor",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "patients",
+                        "connect-doctor"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "View My Approved Doctors",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{BASE_URL}}/patients/connected-doctors",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "patients",
+                        "connected-doctors"
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "5. Connection Requests (Receiving)",
+              "item": [
+                {
+                  "name": "View Incoming Doctor Requests",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{BASE_URL}}/patients/doctor-requests",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "patients",
+                        "doctor-requests"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Accept Doctor Access Request",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{BASE_URL}}/patients/connected-doctors/accept/{{doctor_object_id}}",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "patients",
+                        "connected-doctors",
+                        "accept",
+                        "{{doctor_object_id}}"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Reject/Remove Doctor Connection",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{BASE_URL}}/patients/connected-doctors/reject/{{doctor_object_id}}",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "patients",
+                        "connected-doctors",
+                        "reject",
+                        "{{doctor_object_id}}"
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "6. Bookings & Appointments",
+              "item": [
+                {
+                  "name": "Check Doctor Availability Slots",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{BASE_URL}}/bookings/slots/{{doctor_object_id}}?date=2026-06-15",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "bookings",
+                        "slots",
+                        "{{doctor_object_id}}"
+                      ],
+                      "query": [
+                        {
+                          "key": "date",
+                          "value": "2026-06-15"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Create Booking Reservation",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"doctorId\": \"{{doctor_object_id}}\",\n  \"date\": \"2026-06-15T00:00:00.000Z\",\n  \"time\": \"10:00\",\n  \"packageType\": \"in-person\",\n  \"bookingFor\": \"Self\",\n  \"patientAge\": 24,\n  \"patientGender\": \"male\",\n  \"problem\": \"Checkup\",\n  \"paymentMethod\": \"cash_on_site\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{BASE_URL}}/bookings",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "bookings"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Create Booking Reservation (Online Payment)",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"doctorId\": \"{{doctor_object_id}}\",\n  \"date\": \"2026-06-15T00:00:00.000Z\",\n  \"time\": \"10:00\",\n  \"packageType\": \"online\",\n  \"bookingFor\": \"Self\",\n  \"patientAge\": 24,\n  \"patientGender\": \"male\",\n  \"problem\": \"Online Consultation\",\n  \"paymentMethod\": \"card\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{BASE_URL}}/bookings",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "bookings"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "View My Booking History",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{BASE_URL}}/bookings/patient",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "bookings",
+                        "patient"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "View Single Booking Details (Patient)",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{BASE_URL}}/bookings/{{booking_object_id}}",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "bookings",
+                        "{{booking_object_id}}"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Reschedule Appointment",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"date\": \"2026-06-16T00:00:00.000Z\",\n  \"time\": \"14:30\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{BASE_URL}}/bookings/{{booking_object_id}}/reschedule",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "bookings",
+                        "{{booking_object_id}}",
+                        "reschedule"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Cancel Booking",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"cancelledReason\": \"Unexpected work trip\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{BASE_URL}}/bookings/{{booking_object_id}}/cancel",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "bookings",
+                        "{{booking_object_id}}",
+                        "cancel"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Paymob Webhook (Simulation)",
+                  "request": {
+                    "method": "POST",
+                    "header": [],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"type\": \"TRANSACTION\",\n  \"obj\": {\n    \"success\": true,\n    \"order\": {\n      \"id\": 123456,\n      \"merchant_order_id\": \"{{booking_object_id}}\"\n    }\n  }\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{BASE_URL}}/bookings/webhook/paymob",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "bookings",
+                        "webhook",
+                        "paymob"
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Patient - SOS & Emergency",
+          "item": [
+            {
+              "name": "Set Emergency Contact",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"John Doe\",\n  \"phone\": \"+201012345678\",\n  \"contactMethod\": \"whatsapp\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/patients/emergency-contact",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "patients",
+                    "emergency-contact"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Trigger SOS",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"lat\": 31.2156,\n  \"lng\": 29.9553\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/patients/sos",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "patients",
+                    "sos"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Doctors & Bookings",
+      "item": [
+        {
+          "name": "Doctor Endpoints",
+          "item": [
+            {
+              "name": "1. Onboarding & Setup",
+              "item": [
+                {
+                  "name": "Complete Profile (Unified)",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "key": "specialization",
+                          "value": "Cardiology",
+                          "type": "text"
+                        },
+                        {
+                          "key": "clinicName",
+                          "value": "Heart Center",
+                          "type": "text"
+                        },
+                        {
+                          "key": "medicalLicenseId",
+                          "value": "ML12345",
+                          "type": "text"
+                        },
+                        {
+                          "key": "phone",
+                          "value": "1234567890",
+                          "type": "text"
+                        },
+                        {
+                          "key": "gender",
+                          "value": "male",
+                          "type": "text"
+                        },
+                        {
+                          "key": "clinicAddress",
+                          "value": "123 Main St",
+                          "type": "text"
+                        },
+                        {
+                          "key": "workingDays",
+                          "value": "monday",
+                          "type": "text"
+                        },
+                        {
+                          "key": "workingHours[0][startHour]",
+                          "value": "09:00",
+                          "type": "text"
+                        },
+                        {
+                          "key": "workingHours[0][endHour]",
+                          "value": "17:00",
+                          "type": "text"
+                        },
+                        {
+                          "key": "consultationDuration",
+                          "value": "30",
+                          "type": "text"
+                        },
+                        {
+                          "key": "appointmentTypes",
+                          "value": "in-person",
+                          "type": "text"
+                        },
+                        {
+                          "key": "maxDailyPatients",
+                          "value": "20",
+                          "type": "text"
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{BASE_URL}}/doctors/complete",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "doctors",
+                        "complete"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Complete Profile (Step 1 - Basic)",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": [
+                        {
+                          "key": "specialization",
+                          "value": "Cardiology",
+                          "type": "text"
+                        },
+                        {
+                          "key": "clinicName",
+                          "value": "Heart Center",
+                          "type": "text"
+                        },
+                        {
+                          "key": "medicalLicenseId",
+                          "value": "ML12345",
+                          "type": "text"
+                        },
+                        {
+                          "key": "phone",
+                          "value": "1234567890",
+                          "type": "text"
+                        },
+                        {
+                          "key": "gender",
+                          "value": "male",
+                          "type": "text"
+                        }
+                      ]
+                    },
+                    "url": {
+                      "raw": "{{BASE_URL}}/doctors/complete/step1",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "doctors",
+                        "complete",
+                        "step1"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Complete Profile (Step 2 - Location)",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"clinicAddress\": \"123 Main St\",\n  \"clinicLocation\": {\n    \"lat\": 40.7128,\n    \"lng\": -74.0060,\n    \"label\": \"NYC\"\n  }\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{BASE_URL}}/doctors/complete/location",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "doctors",
+                        "complete",
+                        "location"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Complete Profile (Step 3 - Schedule)",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"workingDays\": [\"monday\", \"tuesday\"],\n  \"workingHours\": [\n    {\n      \"startHour\": \"09:00\",\n      \"endHour\": \"17:00\"\n    }\n  ]\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{BASE_URL}}/doctors/complete/schedule",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "doctors",
+                        "complete",
+                        "schedule"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Complete Profile (Step 4 - Appointments)",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"consultationDuration\": 30,\n  \"appointmentTypes\": [\"in-person\", \"online\"],\n  \"maxDailyPatients\": 20\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{BASE_URL}}/doctors/complete/appointments",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "doctors",
+                        "complete",
+                        "appointments"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Complete Profile (Step 5 - License)",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "formdata",
+                      "formdata": []
+                    },
+                    "url": {
+                      "raw": "{{BASE_URL}}/doctors/complete/license",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "doctors",
+                        "complete",
+                        "license"
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "2. Settings",
+              "item": [
+                {
+                  "name": "Configure Working Schedule",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"workingDays\": [\"monday\", \"tuesday\", \"wednesday\", \"thursday\", \"friday\"],\n  \"workingHours\": [\n    {\n      \"startHour\": \"09:00\",\n      \"endHour\": \"17:00\"\n    }\n  ],\n  \"consultationDuration\": 30,\n  \"appointmentTypes\": [\"in-person\", \"online\"],\n  \"maxDailyPatients\": 20\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{BASE_URL}}/doctors/schedule",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "doctors",
+                        "schedule"
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "3. Connection Requests (Receiving)",
+              "item": [
+                {
+                  "name": "Accept Incoming Patient",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{BASE_URL}}/doctors/patients/accept/{{patient_object_id}}",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "doctors",
+                        "patients",
+                        "accept",
+                        "{{patient_object_id}}"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Reject/Remove Patient",
+                  "request": {
+                    "method": "PATCH",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{BASE_URL}}/doctors/patients/reject/{{patient_object_id}}",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "doctors",
+                        "patients",
+                        "reject",
+                        "{{patient_object_id}}"
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "4. Connection Requests (Sending)",
+              "item": [
+                {
+                  "name": "Send Add Request to Patient",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"patientId\": \"{{patient_object_id}}\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{BASE_URL}}/doctors/patients/connect-patient",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "doctors",
+                        "patients",
+                        "connect-patient"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "View Approved Connected Patients",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{BASE_URL}}/doctors/patients",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "doctors",
+                        "patients"
+                      ]
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "name": "5. Appointments Calendar",
+              "item": [
+                {
+                  "name": "View All Appointments",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{BASE_URL}}/bookings/doctor",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "bookings",
+                        "doctor"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "View Single Booking Details (Doctor)",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{BASE_URL}}/bookings/{{booking_object_id}}",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "bookings",
+                        "{{booking_object_id}}"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Filter Daily Appointments by Date",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{BASE_URL}}/bookings/doctor?date=2026-06-15",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "bookings",
+                        "doctor"
+                      ],
+                      "query": [
+                        {
+                          "key": "date",
+                          "value": "2026-06-15"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Booking - Sessions (QR & Permissions)",
+          "item": [
+            {
+              "name": "Generate QR Session Token (Patient)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bookings/{{bookingId}}/generate-qr",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bookings",
+                    "{{bookingId}}",
+                    "generate-qr"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Start Session (Doctor)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sessionToken\": \"1234abcd5678efgh\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/bookings/start-session",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bookings",
+                    "start-session"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "End Session",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bookings/{{bookingId}}/end-session",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bookings",
+                    "{{bookingId}}",
+                    "end-session"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Doctor - Patient Medications (Elevated)",
+          "item": [
+            {
+              "name": "Get Patient Medications",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/medications?patientId={{patientId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "medications"
+                  ],
+                  "query": [
+                    {
+                      "key": "patientId",
+                      "value": "{{patientId}}"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Add Patient Medication (Requires Active Session)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"patientId\": \"{{patientId}}\",\n  \"name\": \"Panadol Extra\",\n  \"type\": \"tablet\",\n  \"dosage\": \"500mg\",\n  \"frequency\": \"daily\",\n  \"daily\": [\"08:00\", \"20:00\"]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/medications",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "medications"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Update Patient Medication (Requires Active Session)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"patientId\": \"{{patientId}}\",\n  \"dosage\": \"1000mg\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/medications/{{medicineId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "medications",
+                    "{{medicineId}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete Patient Medication (Requires Active Session)",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"patientId\": \"{{patientId}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/medications/{{medicineId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "medications",
+                    "{{medicineId}}"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. Medical Records",
+      "item": [
+        {
+          "name": "Medications",
+          "item": [
+            {
+              "name": "Add Medicine",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"name\":\"Aspirin\",\"type\":\"tablet\",\"frequency\":\"daily\",\"daily\":[\"08:00\",\"20:00\"],\"dosage\":\"10mg\",\"stock\":30}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/medications",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "medications"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Add Critical Weekly Medicine",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"name\":\"Insulin\",\"type\":\"injection\",\"frequency\":\"weekly\",\"weekly\":[{\"day\":\"monday\",\"times\":[\"09:00\"]}],\"dosage\":\"20 units\",\"stock\":5,\"criticalMode\":true,\"status\":\"critical\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/medications",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "medications"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Add Specific Date Medicine",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"name\":\"Amoxicillin\",\"type\":\"syrup\",\"frequency\":\"specific\",\"specific\":[{\"day\":\"2026-06-15\",\"times\":[\"10:00\",\"22:00\"]}],\"dosage\":\"5ml\",\"stock\":1}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/medications",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "medications"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Add Chronic Medicine",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"name\":\"Lisinopril\",\"type\":\"capsule\",\"frequency\":\"daily\",\"daily\":[\"08:00\"],\"isChronic\":true,\"notes\":\"Taken for high blood pressure long term\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/medications",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "medications"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Add Critical Medicine",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"name\":\"Atorvastatin\",\"type\":\"tablet\",\"frequency\":\"daily\",\"daily\":[\"20:00\"],\"criticalMode\":true,\"notes\":\"Testing boolean sync\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/medications",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "medications"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Add AI Inferred Chronic Medicine",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"name\":\"Metformin\",\"type\":\"tablet\",\"frequency\":\"daily\",\"daily\":[\"12:00\"],\"notes\":\"Should automatically trigger chronic condition assignments in DB\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/medications",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "medications"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get All Medications",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/medications",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "medications"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Edit Medicine",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"name\":\"Aspirin Extra\",\"type\":\"tablet\",\"frequency\":\"daily\",\"daily\":[\"09:00\",\"21:00\"],\"dosage\":\"20mg\",\"stock\":100}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/medications/{{MED_ID}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "medications",
+                    "{{MED_ID}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Delete Medicine",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/medications/{{MED_ID}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "medications",
+                    "{{MED_ID}}"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get active medications",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/medications?filter=active",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "medications"
+                  ],
+                  "query": [
+                    {
+                      "key": "filter",
+                      "value": "active"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get full schedule",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/medications/schedule",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "medications",
+                    "schedule"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Schedule For Specific Date",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/medications/schedule?date=2026-04-10",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "medications",
+                    "schedule"
+                  ],
+                  "query": [
+                    {
+                      "key": "date",
+                      "value": "2026-04-10"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Mark as Taken",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"date\":\"2026-06-15\",\"time\":\"08:00\",\"taken\":true}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/medications/{{MED_ID}}/taken",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "medications",
+                    "{{MED_ID}}",
+                    "taken"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Add Daily Log",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"text\":\"Feeling good\",\"level\":\"low\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/medications/{{MED_ID}}/log",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "medications",
+                    "{{MED_ID}}",
+                    "log"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Health & Symptoms",
+          "item": [
+            {
+              "name": "Add Blood Pressure",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"type\":\"blood_pressure\",\"systolic\":120,\"diastolic\":80,\"heartRate\":72}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/health/measurements",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "health",
+                    "measurements"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Blood Pressures",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/health/measurements?type=blood_pressure",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "health",
+                    "measurements"
+                  ],
+                  "query": [
+                    {
+                      "key": "type",
+                      "value": "blood_pressure"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Add Heart Rate",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"type\":\"heart_rate\",\"value\":80}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/health/measurements",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "health",
+                    "measurements"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Heart Rates",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/health/measurements?type=heart_rate",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "health",
+                    "measurements"
+                  ],
+                  "query": [
+                    {
+                      "key": "type",
+                      "value": "heart_rate"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Add Blood Sugar",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"type\":\"blood_sugar\",\"value\":105,\"notes\":\"Fasting blood sugar\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/health/measurements",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "health",
+                    "measurements"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Add Weight",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"type\":\"weight\",\"value\":75.5}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/health/measurements",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "health",
+                    "measurements"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Add Symptom Log",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"symptoms\":[\"Headache\",\"Fatigue\"],\"severity\":\"moderate\",\"notes\":\"Mild headache in the morning\"}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/health/symptoms",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "health",
+                    "symptoms"
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Symptoms Logs",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/health/symptoms",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "health",
+                    "symptoms"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6. Sprint 5 Final MVP",
+      "item": [
+        {
+          "name": "1. Exports (PDF & QR)",
+          "item": [
+            {
+              "name": "Export Health Passport (Success)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/export/health-passport",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "export",
+                    "health-passport"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Export Health Passport (Unauthorized)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer invalid_token"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/export/health-passport",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "export",
+                    "health-passport"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 401', function () { pm.response.to.have.status(401); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Export Patient Record (Success)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/export/patient-record",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "export",
+                    "patient-record"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Generate QR Token (Success)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/export/qr-token",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "export",
+                    "qr-token"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                      "var jsonData = pm.response.json();",
+                      "if(jsonData.qrToken) pm.collectionVariables.set('qrToken', jsonData.qrToken);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Access Shared Record (Success)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{BASE_URL}}/export/shared/{{qrToken}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "export",
+                    "shared",
+                    "{{qrToken}}"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Access Shared Record (Invalid Token)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{BASE_URL}}/export/shared/invalid_token_123",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "export",
+                    "shared",
+                    "invalid_token_123"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 401', function () { pm.response.to.have.status(401); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Export Health Passport (Doctor - Missing Patient ID 400)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/export/health-passport",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "export",
+                    "health-passport"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 400', function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Export Health Passport (Doctor - Unconnected Patient 403)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/export/health-passport?patientId={{invalidPatientId}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "export",
+                    "health-passport"
+                  ],
+                  "query": [
+                    {
+                      "key": "patientId",
+                      "value": "{{invalidPatientId}}"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 403', function () { pm.response.to.have.status(403); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "2. Doctor Wallet & Payouts",
+          "item": [
+            {
+              "name": "Get Doctor Wallet (Success)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/doctors/wallet",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "wallet"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Request Withdrawal (Success)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"amount\": 50,\n  \"bankDetails\": {\n    \"bankName\": \"National Bank\",\n    \"accountNumber\": \"123456789\",\n    \"accountHolderName\": \"Dr. John Doe\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/doctors/wallet/withdraw",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "wallet",
+                    "withdraw"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 201', function () { pm.response.to.have.status(201); });",
+                      "var jsonData = pm.response.json();",
+                      "if(jsonData.request && jsonData.request._id) pm.collectionVariables.set('withdrawalId', jsonData.request._id);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Request Withdrawal (Insufficient Funds 400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"amount\": 9999999,\n  \"bankDetails\": {\n    \"bankName\": \"National Bank\",\n    \"accountNumber\": \"123456789\",\n    \"accountHolderName\": \"Dr. John Doe\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/doctors/wallet/withdraw",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "wallet",
+                    "withdraw"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 400', function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Process Withdrawal (Admin Success)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ADMIN_ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"approved\",\n  \"adminNotes\": \"Processed immediately\"\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/doctors/wallet/withdraw/{{withdrawalId}}/process",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "wallet",
+                    "withdraw",
+                    "{{withdrawalId}}",
+                    "process"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Process Withdrawal (Not Admin 403)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"approved\",\n  \"adminNotes\": \"Processed immediately\"\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/doctors/wallet/withdraw/{{withdrawalId}}/process",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "wallet",
+                    "withdraw",
+                    "{{withdrawalId}}",
+                    "process"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 403', function () { pm.response.to.have.status(403); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Request Withdrawal (Validation Error - Missing Bank Name 400)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"amount\": 50,\n  \"bankDetails\": {\n    \"accountNumber\": \"123456789\",\n    \"accountHolderName\": \"Dr. John Doe\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/doctors/wallet/withdraw",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "wallet",
+                    "withdraw"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 400', function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "3. Request Cancellations",
+          "item": [
+            {
+              "name": "Cancel Caregiver Request (Success)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/patients/caregiver/requests/{{requestId}}/cancel",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "patients",
+                    "caregiver",
+                    "requests",
+                    "{{requestId}}",
+                    "cancel"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200 or 404/400', function () { pm.expect(pm.response.code).to.be.oneOf([200, 400, 404]); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Cancel Doctor Request - Patient Side (Success)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/patients/connected-doctors/cancel/{{doctorId}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "patients",
+                    "connected-doctors",
+                    "cancel",
+                    "{{doctorId}}"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Cancel Patient Request - Doctor Side (Success)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{DOCTOR_ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/doctors/patients/cancel/{{patientId}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "doctors",
+                    "patients",
+                    "cancel",
+                    "{{patientId}}"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "4. Voice & Video Calls",
+          "item": [
+            {
+              "name": "Get Call Token (Success - Active Session)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/bookings/{{bookingId}}/call-token",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "bookings",
+                    "{{bookingId}}",
+                    "call-token"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Call Token (Forbidden - No Active Session 403)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/bookings/{{inactiveBookingId}}/call-token",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "bookings",
+                    "{{inactiveBookingId}}",
+                    "call-token"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 403', function () { pm.response.to.have.status(403); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "5. Chat & Messaging",
+          "item": [
+            {
+              "name": "Verify Chat Allowed (Success)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/messages/verify/:targetUserId",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "messages",
+                    "verify",
+                    ":targetUserId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "targetUserId",
+                      "value": "TARGET_USER_ID_HERE"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Verify Chat Allowed (Forbidden 403)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/messages/verify/:targetUserId",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "messages",
+                    "verify",
+                    ":targetUserId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "targetUserId",
+                      "value": "UNCONNECTED_USER_ID_HERE"
+                    }
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 403', function () { pm.response.to.have.status(403); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "6. Settings & Privacy",
+          "item": [
+            {
+              "name": "Update Settings (Success)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"settings\": {\n    \"notifications\": {\n      \"push\": false,\n      \"email\": true\n    },\n    \"privacy\": {\n      \"allowCaregiverAccess\": true,\n      \"allowDoctorAccess\": false\n    }\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/users/settings",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "users",
+                    "settings"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Update Settings (Bad Request 400)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/users/settings",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "users",
+                    "settings"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 400', function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "http://localhost:3000/api/v1"
+    },
+    {
+      "key": "ACCESS_TOKEN",
+      "value": ""
+    },
+    {
+      "key": "DOCTOR_ACCESS_TOKEN",
+      "value": ""
+    },
+    {
+      "key": "ADMIN_ACCESS_TOKEN",
+      "value": ""
+    },
+    {
+      "key": "bookingId",
+      "value": ""
+    },
+    {
+      "key": "patientId",
+      "value": ""
+    },
+    {
+      "key": "doctorId",
+      "value": ""
+    },
+    {
+      "key": "qrToken",
+      "value": ""
+    },
+    {
+      "key": "withdrawalId",
+      "value": ""
+    }
+  ]
+}

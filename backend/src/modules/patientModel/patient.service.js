@@ -186,7 +186,7 @@ import * as ET from '../../utils/encryption/index.js';
 const publicUser = async (u) => {
     let decryptedPhone = u.phone;
     if (u.phone) {
-        try { decryptedPhone = await ET.decrypt(u.phone); } catch (err) {}
+        try { decryptedPhone = await ET.decrypt(u.phone); } catch (err) { }
     }
     return {
         id: String(u._id),
@@ -211,6 +211,7 @@ const publicUser = async (u) => {
         allergies: u.allergies,
         reactionToMedication: u.reactionToMedication,
         allergyAlerts: u.allergyAlerts,
+        measurements: u.measurements,
     };
 };
 
@@ -443,8 +444,26 @@ export const rejectCaregiverRequest = async (req, res) => {
         });
     }
 
-
     return res.status(200).json({ message: 'Request rejected' });
+};
+
+export const cancelCaregiverRequest = async (req, res) => {
+    const patientUserId = req.user.id;
+    const { requestId } = req.params;
+
+    const patient = await patientModel.findOne({ userId: patientUserId });
+    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+    const r = await caregiverRequestModel.findById(requestId);
+    if (!r) return res.status(404).json({ message: 'Request not found' });
+    if (String(r.patientId) !== String(patient._id)) return res.status(403).json({ message: 'Forbidden' });
+    if (r.status !== 'pending') return res.status(400).json({ message: 'Can only cancel pending requests' });
+
+    r.status = 'cancelled';
+    r.respondedAt = new Date();
+    await r.save();
+
+    return res.status(200).json({ message: 'Caregiver request cancelled successfully' });
 };
 
 export const connectDoctor = async (req, res) => {
@@ -494,7 +513,7 @@ export const listConnectedDoctors = async (req, res) => {
 
     for (const doc of approved) {
         if (doc && doc.userId && doc.userId.phone) {
-            try { doc.userId.phone = await ET.decrypt(doc.userId.phone); } catch (err) {}
+            try { doc.userId.phone = await ET.decrypt(doc.userId.phone); } catch (err) { }
         }
     }
 
@@ -518,7 +537,7 @@ export const listDoctorRequests = async (req, res) => {
 
     for (const doc of pendingRequests) {
         if (doc && doc.userId && doc.userId.phone) {
-            try { doc.userId.phone = await ET.decrypt(doc.userId.phone); } catch (err) {}
+            try { doc.userId.phone = await ET.decrypt(doc.userId.phone); } catch (err) { }
         }
     }
 
@@ -581,7 +600,31 @@ export const rejectDoctor = async (req, res) => {
     patient.connectedDoctors = patient.connectedDoctors?.filter(c => String(c.doctorId) !== String(doctorId));
     await patient.save();
 
-    return res.status(200).json({ message: 'Doctor request rejected successfully!' });
+    return res.status(200).json({ message: 'Doctor connection rejected successfully!' });
+};
+
+export const cancelDoctorRequest = async (req, res) => {
+    const patientUserId = req.user.id;
+    const { doctorId } = req.params;
+
+    const patient = await patientModel.findOne({ userId: patientUserId });
+    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+    const doc = await doctorModel.findById(doctorId);
+    
+    // Remove from patient's side
+    if (patient.connectedDoctors) {
+        patient.connectedDoctors = patient.connectedDoctors.filter(c => String(c.doctorId) !== String(doctorId));
+        await patient.save();
+    }
+    
+    // Remove from doctor's side
+    if (doc && doc.connectedPatients) {
+        doc.connectedPatients = doc.connectedPatients.filter(c => String(c.patientId) !== String(patient._id));
+        await doc.save();
+    }
+
+    return res.status(200).json({ message: 'Doctor connection request cancelled' });
 };
 
 export const completeProfile = async (req, res) => {
@@ -697,6 +740,8 @@ export const setEmergencyContact = async (req, res) => {
     return res.status(200).json({ message: 'Emergency contact updated successfully', emergencyContact: patient.emergencyContact });
 };
 
+import twilio from 'twilio';
+
 export const triggerSOS = async (req, res) => {
     const userId = req.user.id;
     const { lat, lng } = req.body;
@@ -708,13 +753,13 @@ export const triggerSOS = async (req, res) => {
     }
 
     const { name, phone, contactMethod } = patient.emergencyContact;
-    
+
     // Construct message
     const locationLink = (lat && lng) ? `https://maps.google.com/?q=${lat},${lng}` : 'location unavailable';
     const messageText = `EMERGENCY SOS: This is an automated alert from MediApp. ${user.firstName || 'The patient'} needs immediate help. Live location: ${locationLink}`;
 
     let deepLink = '';
-    
+
     // Clean phone number (remove +, spaces, dashes for wa.me link)
     const cleanPhone = phone.replace(/[^\d]/g, '');
 
@@ -725,13 +770,36 @@ export const triggerSOS = async (req, res) => {
         deepLink = `sms:${phone}?body=${encodeURIComponent(messageText)}`;
     }
 
-    // Here you would also integrate an SMS gateway API (e.g., Twilio) 
-    // if you want the backend to SEND it autonomously instead of just 
-    // returning the deep link.
-    // For now, we return the deep link to the frontend so it can open it.
+    // Twilio Integration
+    const accountSid = process.env.TWILIO_ACCOUNT_SID || 'AC51aa059827f457d17106c28df37a27b7';
+    const authToken = process.env.TWILIO_AUTH_TOKEN || '81f095bd735d9b6910998a0a34e896c4';
+    const twilioPhone = process.env.TWILIO_PHONE_NUMBER || '+12566459112';
 
-    return res.status(200).json({ 
-        message: 'SOS Triggered', 
+    try {
+        const client = twilio(accountSid, authToken);
+
+        if (contactMethod === 'call') {
+            await client.calls.create({
+                url: 'http://demo.twilio.com/docs/voice.xml', // Or your own TwiML URL
+                to: phone,
+                from: twilioPhone
+            });
+        } else {
+            // Default to SMS for text/whatsapp if backend sends it directly
+            await client.messages.create({
+                body: messageText,
+                from: twilioPhone,
+                to: phone
+            });
+        }
+        console.log(`SOS sent to ${phone} via Twilio`);
+    } catch (error) {
+        console.error('Twilio Error:', error);
+        // We don't fail the request if Twilio fails, we still return the deepLink for the frontend to use
+    }
+
+    return res.status(200).json({
+        message: 'SOS Triggered',
         deepLink,
         contactName: name,
         contactMethod

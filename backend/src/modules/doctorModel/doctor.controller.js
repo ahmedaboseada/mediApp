@@ -48,6 +48,14 @@ doctorRouter.patch('/schedule', validation(DVS.updateScheduleSchema), DS.updateS
 doctorRouter.post('/patients/connect-patient', validation(DVS.patientIdBodySchema), DS.connectPatient);
 doctorRouter.patch('/patients/accept/:patientId', validation(DVS.patientIdSchema), DS.acceptPatient);
 doctorRouter.patch('/patients/reject/:patientId', validation(DVS.patientIdSchema), DS.rejectPatient);
+doctorRouter.patch('/patients/cancel/:patientId', validation(DVS.patientIdSchema), DS.cancelPatientRequest);
 doctorRouter.get('/patients', DS.listConnectedPatients);
+
+// Doctor Wallet
+doctorRouter.get('/wallet', DS.getWallet);
+doctorRouter.post('/wallet/withdraw', validation(DVS.withdrawSchema), DS.requestWithdrawal);
+
+// Admin
+doctorRouter.patch('/wallet/withdraw/:id/process', restrictTo(['admin']), validation(DVS.processWithdrawSchema), DS.processWithdrawal);
 
 export default doctorRouter;

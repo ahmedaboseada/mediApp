@@ -2,6 +2,7 @@ import joi from 'joi';
 import { medicineTypes, medicineFrequency, medicineStatus, weekDays, feedbackLevels } from '../../config/CONSTANTS.js';
 
 const addMedicineBody = joi.object({
+    patientId: joi.string().hex().length(24).optional(),
     type: joi.string().valid(...Object.values(medicineTypes)).required(),
     frequency: joi.string().valid(...Object.values(medicineFrequency)).required(),
 

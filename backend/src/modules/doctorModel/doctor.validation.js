@@ -98,3 +98,24 @@ export const patientIdBodySchema = {
         patientId: joi.string().hex().length(24).required(),
     }),
 };
+
+export const withdrawSchema = {
+    body: joi.object({
+        amount: joi.number().min(10).required(),
+        bankDetails: joi.object({
+            bankName: joi.string().required(),
+            accountNumber: joi.string().required(),
+            accountHolderName: joi.string().required(),
+        }).required(),
+    }),
+};
+
+export const processWithdrawSchema = {
+    params: joi.object({
+        id: joi.string().hex().length(24).required(),
+    }),
+    body: joi.object({
+        status: joi.string().valid('approved', 'rejected', 'processed').required(),
+        adminNotes: joi.string().allow('', null).optional(),
+    }),
+};

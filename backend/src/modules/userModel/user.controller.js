@@ -225,4 +225,7 @@ userRouter.patch('/updateProfile', US.updateProfile);
 userRouter.patch('/changePassword', validation(UVS.changePasswordSchema), US.changePassword);
 userRouter.post('/resendConfirmEmail', US.resendConfirmEmail);
 
+// SETTINGS
+userRouter.patch('/settings', US.updateSettings);
+
 export default userRouter;

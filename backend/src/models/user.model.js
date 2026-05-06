@@ -36,6 +36,17 @@ const userSchema = new Schema(
         confirmTokenId: { type: String, select: false },
         resetTokenId: { type: String, select: false },
         emailChangeTokenId: { type: String, select: false },
+
+        settings: {
+            notifications: {
+                push: { type: Boolean, default: true },
+                email: { type: Boolean, default: true }
+            },
+            privacy: {
+                allowCaregiverAccess: { type: Boolean, default: true },
+                allowDoctorAccess: { type: Boolean, default: true }
+            }
+        }
     },
     { timestamps: true }
 );

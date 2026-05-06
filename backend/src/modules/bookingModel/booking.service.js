@@ -3,6 +3,8 @@ import doctorModel from '../../models/doctor.model.js';
 import patientModel from '../../models/patient.model.js';
 import notificationModel from '../../models/notification.model.js';
 import userModel from '../../models/user.model.js';
+import healthMeasurementModel from '../../models/health-measurement.model.js';
+import * as ET from '../../utils/encryption/index.js';
 import { createPaymentIntention } from '../../utils/paymob.js';
 
 // --- Time Helpers ---
@@ -318,8 +320,11 @@ export const rescheduleBooking = async (req, res) => {
     const isTaken = existingBookings.some(b => b.date.time === time);
     if (isTaken) return res.status(409).json({ message: 'This slot is already reserved.' });
 
-    booking.date = { date: startOfDay, time };
-    await booking.save();
+    const updatedBooking = await bookingModel.findByIdAndUpdate(
+        booking._id,
+        { 'date.date': startOfDay, 'date.time': time },
+        { new: true }
+    );
 
     await notificationModel.create({
         type: 'bookingReschedule',
@@ -328,7 +333,7 @@ export const rescheduleBooking = async (req, res) => {
         userId: patientUserId,
     });
 
-    return res.status(200).json({ message: 'Booking rescheduled successfully', booking });
+    return res.status(200).json({ message: 'Booking rescheduled successfully', booking: updatedBooking });
 };
 
 export const paymobWebhook = async (req, res) => {
@@ -342,9 +347,19 @@ export const paymobWebhook = async (req, res) => {
             const orderId = data.obj.order?.merchant_order_id || data.obj.order?.special_reference || data.obj.payment_key_claims?.billing_data?.special_reference;
 
             if (orderId) {
-                // Update booking payment status
-                await bookingModel.findByIdAndUpdate(orderId, { paymentStatus: 'paid' });
-                console.log(`Payment successful for Order/Booking ID: ${orderId}`);
+                const booking = await bookingModel.findById(orderId);
+                if (booking && booking.paymentStatus !== 'paid') {
+                    booking.paymentStatus = 'paid';
+                    await booking.save();
+                    console.log(`Payment successful for Order/Booking ID: ${orderId}`);
+                    
+                    // Credit doctor's wallet (MVP)
+                    const doctor = await doctorModel.findById(booking.doctorId);
+                    if (doctor && booking.price) {
+                        doctor.walletBalance += booking.price;
+                        await doctor.save();
+                    }
+                }
             }
         }
 
@@ -404,6 +419,24 @@ export const startSession = async (req, res) => {
         return res.status(403).json({ message: 'This token is not meant for you' });
     }
 
+    if (!booking.patientId) return res.status(400).json({ message: 'Invalid or expired session token' });
+    
+    const patient = await patientModel.findById(booking.patientId)
+        .populate('userId', 'firstName lastName email type DOB age gender phone profilePicture confirmed')
+        .populate('medications', 'name type dosage frequency activeIngredient status isChronic endDate')
+        .populate('longTermMedication', 'name type dosage frequency activeIngredient status isChronic endDate')
+        .lean();
+        
+    if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+    // Fetch measurements manually
+    patient.measurements = await healthMeasurementModel.find({ patientId: patient._id }).sort({ date: -1 }).lean();
+
+    // Decrypt phone if possible
+    if (patient.userId && patient.userId.phone) {
+        try { patient.userId.phone = await ET.decrypt(patient.userId.phone); } catch (e) {}
+    }
+
     if (['online', 'card', 'paymob'].includes(booking.paymentMethod) && booking.paymentStatus !== 'paid') {
         return res.status(400).json({ message: 'Cannot start session. Booking is not paid yet.' });
     }
@@ -415,7 +448,12 @@ export const startSession = async (req, res) => {
     booking.sessionExpiresAt = expiresAt;
     await booking.save();
 
-    return res.status(200).json({ message: 'Session started successfully. Elevated permissions granted.', bookingId: booking._id, expiresAt });
+    return res.status(200).json({ 
+        message: 'Session started successfully. Elevated permissions granted.', 
+        bookingId: booking._id, 
+        expiresAt,
+        patient
+    });
 };
 
 export const endSession = async (req, res) => {
@@ -438,4 +476,32 @@ export const endSession = async (req, res) => {
     await booking.save();
 
     return res.status(200).json({ message: 'Session ended successfully. Elevated permissions revoked.' });
+};
+
+export const getCallToken = async (req, res) => {
+    const userId = req.user.id;
+    const { bookingId } = req.params;
+
+    const booking = await bookingModel.findById(bookingId);
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+
+    let authorized = false;
+    const patient = await patientModel.findOne({ userId });
+    if (patient && String(booking.patientId) === String(patient._id)) authorized = true;
+
+    const doc = await doctorModel.findOne({ userId });
+    if (doc && String(booking.doctorId) === String(doc._id)) authorized = true;
+
+    if (!authorized) return res.status(403).json({ message: 'Access denied' });
+
+    if (!booking.sessionActive || !booking.sessionExpiresAt || new Date() > booking.sessionExpiresAt) {
+        return res.status(403).json({ message: 'Live session is not active or has expired. Cannot start a call.' });
+    }
+
+    const roomName = `MediApp-Session-${booking._id}-${booking.doctorId}`;
+
+    return res.status(200).json({ 
+        message: 'Token generated',
+        roomName
+    });
 };

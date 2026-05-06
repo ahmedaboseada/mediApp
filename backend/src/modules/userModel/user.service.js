@@ -503,6 +503,7 @@
 import userModel from '../../models/user.model.js';
 import patientModel from '../../models/patient.model.js';
 import doctorModel from '../../models/doctor.model.js';
+import healthMeasurementModel from '../../models/health-measurement.model.js';
 import { OAuth2Client } from 'google-auth-library';
 import { revokeTokenModel } from '../../models/revoke-token.model.js';
 
@@ -520,7 +521,7 @@ const isAdminPrefix = (user) => user?.type === 'admin';
 const publicUser = async (u) => {
     let decryptedPhone = u.phone;
     if (u.phone) {
-        try { decryptedPhone = await ET.decrypt(u.phone); } catch (err) {}
+        try { decryptedPhone = await ET.decrypt(u.phone); } catch (err) { }
     }
     return {
         id: String(u._id),
@@ -545,6 +546,8 @@ const publicUser = async (u) => {
         allergies: u.allergies,
         reactionToMedication: u.reactionToMedication,
         allergyAlerts: u.allergyAlerts,
+        measurements: u.measurements,
+        settings: u.settings,
     };
 };
 
@@ -554,6 +557,11 @@ const attachTypeDoc = async (user) => {
             .populate({ path: 'medications', select: 'name type dosage frequency activeIngredient status isChronic endDate' })
             .populate({ path: 'longTermMedication', select: 'name type dosage frequency activeIngredient status isChronic endDate' })
             .lean();
+        
+        if (patient) {
+            patient.measurements = await healthMeasurementModel.find({ patientId: patient._id }).sort({ date: -1 }).lean();
+        }
+            
         return { patient };
     }
     if (user.type === 'doctor') return { doctor: await doctorModel.findOne({ userId: user._id }).lean() };
@@ -1143,4 +1151,32 @@ export const googleAuth = async (req, res) => {
     } catch (err) {
         return res.status(401).json({ message: 'Google Authentication Failed', error: err.message });
     }
+};
+
+export const updateSettings = async (req, res) => {
+    const userId = req.user.id;
+    const { settings } = req.body;
+
+    if (!settings) {
+        return res.status(400).json({ message: 'Settings object is required' });
+    }
+
+    const user = await userModel.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.settings = {
+        ...user.settings,
+        notifications: {
+            ...user.settings?.notifications,
+            ...settings.notifications
+        },
+        privacy: {
+            ...user.settings?.privacy,
+            ...settings.privacy
+        }
+    };
+
+    await user.save();
+
+    return res.status(200).json({ message: 'Settings updated successfully', settings: user.settings });
 };
