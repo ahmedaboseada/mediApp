@@ -39,6 +39,7 @@ class MedicalRecordsSection extends StatelessWidget {
             ),
             ListTile(
               contentPadding: EdgeInsets.zero,
+              onTap: () => context.push(AppRouter.exportHealthPassportScreen),
               title: Text(
                 "Export health passport",
                 style: AppStyles.black16400,

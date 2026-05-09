@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
@@ -6,6 +7,7 @@ import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/profile/data/models/caregiver_request_model.dart';
 import 'package:medi/features/patient/features/profile/data/models/doctor_request_model.dart';
 import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
+import 'package:path_provider/path_provider.dart';
 
 class ProfileRepoImpl implements ProfileRepo {
   final ApiService apiService;
@@ -368,6 +370,45 @@ class ProfileRepoImpl implements ProfileRepo {
 
       final message = response['message'] ?? 'Doctor request rejected';
       return Right(message.toString());
+    } on DioException catch (e) {
+      return Left(ServerFailure.fromDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<ApiError, String>> exportHealthPassportPDF({
+    required String apiEndpoint,
+  }) async {
+    try {
+      final dio = Dio();
+      final token = HiveService.getAccessToken();
+      final headers = {
+        'Authorization': 'Bearer $token',
+      };
+
+      final response = await dio.get(
+        apiEndpoint,
+        options: Options(
+          responseType: ResponseType.bytes,
+          headers: headers,
+        ),
+      );
+
+      // Get documents directory
+      final dir = await getApplicationDocumentsDirectory();
+      final fileName =
+          'health_passport_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      final filePath = '${dir.path}/$fileName';
+
+      // Save file
+      final file = File(filePath);
+      await file.writeAsBytes(response.data);
+
+      log('Health passport saved at: $filePath');
+
+      return Right(filePath);
     } on DioException catch (e) {
       return Left(ServerFailure.fromDioError(e));
     } catch (e) {

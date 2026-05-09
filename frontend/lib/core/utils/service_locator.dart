@@ -46,6 +46,7 @@ import 'package:medi/features/patient/features/notification_sound/presentation/c
 import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
 import 'package:medi/features/patient/features/profile/data/repo/profile_repo_impl.dart';
 import 'package:medi/features/patient/features/profile/presentation/controller/profile/profile_cubit.dart';
+import 'package:medi/features/patient/features/profile/presentation/controller/health_passport_export/health_passport_export_cubit.dart';
 import 'package:medi/features/patient/features/questionnaire/data/repo/questionnaire_repo.dart';
 import 'package:medi/features/patient/features/questionnaire/data/repo/questionnaire_repo_impl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -83,6 +84,11 @@ Future<void> setupServiceLocator() async {
   if (!getIt.isRegistered<ProfileCubit>()) {
     getIt.registerFactory<ProfileCubit>(
       () => ProfileCubit(getIt<ProfileRepo>()),
+    );
+  }
+  if (!getIt.isRegistered<HealthPassportExportCubit>()) {
+    getIt.registerFactory<HealthPassportExportCubit>(
+      () => HealthPassportExportCubit(getIt<ProfileRepo>()),
     );
   }
   if (!getIt.isRegistered<QuestionnaireRepo>()) {

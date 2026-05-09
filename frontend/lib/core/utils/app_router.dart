@@ -47,6 +47,7 @@ import 'package:medi/features/patient/features/doctors/presentation/screens/my_b
 import 'package:medi/features/patient/features/doctors/presentation/screens/cancel_booking_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/search_doctors_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/export_health_report_screen.dart';
+import 'package:medi/features/patient/features/profile/presentation/screens/health_passport_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/medicine_history_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/profile_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/symptom_log_screen.dart';
@@ -167,6 +168,7 @@ class AppRouter {
   static const String patientAddDoctorScreen = '/patient/add-doctor';
   static const String symptomLogScreen = '/health/symptom-log';
   static const String exportHealthReportScreen = '/health/export-report';
+  static const String exportHealthPassportScreen = '/health/export-passport';
   static const String medicineHistoryScreen = '/health/medicine-history';
   // ========== DOCTOR ROUTES ==========
   static const String doctorLogin = '/login/doctor';
@@ -743,6 +745,10 @@ class AppRouter {
       GoRoute(
         path: exportHealthReportScreen,
         builder: (context, state) => ExportHealthReportScreen(),
+      ),
+      GoRoute(
+        path: exportHealthPassportScreen,
+        builder: (context, state) => const HealthPassportScreen(),
       ),
 
       // ========== SHARED AUTH ROUTES ==========

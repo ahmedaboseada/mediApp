@@ -10,7 +10,7 @@ class DatePickerField extends StatefulWidget {
     this.onDateSelected,
     required this.dateController,
     this.enabled = true,
-    this.validator,
+    this.validator, 
   });
   final DateTime? initialDate;
   final Function(DateTime)? onDateSelected;

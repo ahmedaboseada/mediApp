@@ -41,4 +41,8 @@ abstract class ProfileRepo {
   Future<Either<ApiError, String>> rejectDoctorRequest({
     required String doctorId,
   });
+
+  Future<Either<ApiError, String>> exportHealthPassportPDF({
+    required String apiEndpoint,
+  });
 }

@@ -12,7 +12,7 @@ class QTextField extends StatelessWidget {
     this.hint,
     this.search = true,
     this.validator,
-    this.initialSelectedValues,
+    this.initialSelectedValues, 
   });
   final Function(List<String>) onSelectionChange;
   final List<DropdownItem<String>> items;

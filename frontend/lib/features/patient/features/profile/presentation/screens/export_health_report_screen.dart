@@ -80,7 +80,10 @@ class ExportHealthReportScreen extends StatelessWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding:  EdgeInsets.symmetric(horizontal: AppSizes.w16, vertical: AppSizes.h24),
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSizes.w16,
+              vertical: AppSizes.h24,
+            ),
             child: Column(
               children: [
                 HealthReportHeader(
