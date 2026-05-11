@@ -1,317 +1,261 @@
-# MediApp Enterprise Technical Documentation
+# MediApp Technical Documentation
 
 **Document status:** Source-derived technical analysis  
 **Repository scope:** `backend/` Node.js API and `frontend/` Flutter application  
-**Primary domain:** Medication management, patient/doctor onboarding, bookings, health records, caregiving, messaging, and medical data export
+**Primary domain:** Medication management, patient/doctor onboarding, bookings, health records, caregiving, messaging, payments, and medical data export
 
 ---
 
-## 1. Executive Technical Overview
+## 1. Introduction
 
-MediApp is a full-stack healthcare application composed of a Flutter client and an Express/MongoDB backend. The product supports patient medication tracking, health measurements, doctor discovery, appointment booking, doctor-patient session access, caregiver workflows, authentication, OTP flows, payment initiation, and exportable health records.
+### a. Motivation
 
-### 1.1 Project Purpose
+MediApp is built to centralize medication adherence, patient health tracking, doctor collaboration, appointment booking, caregiver support, and shareable medical records in one healthcare platform. The inspected repository contains a Flutter client and an Express/MongoDB backend that together implement patient and doctor onboarding, authentication, health measurement logging, medication scheduling, doctor discovery, booking, session-based medical record access, messaging, exports, and administrative doctor approval.
 
-The system is designed to solve the operational gap between medication adherence, patient health telemetry, and doctor/caregiver collaboration. It gives patients a single mobile interface to manage medications, reminders, chronic medication indicators, symptoms, doctor connections, appointment booking, and health records. Doctors can complete professional profiles, expose schedules, accept patient connections, inspect records during approved sessions, and request wallet withdrawals.
+The main motivation is to reduce fragmentation in patient care. A patient often uses separate reminder apps, messaging tools, clinic booking channels, paper records, and caregiver communication methods. MediApp combines these concerns into a single architecture where medications, health records, doctors, caregivers, and appointments are linked through one authenticated patient identity.
 
-### 1.2 Core Capabilities
+### b. Problem Statement
 
-| Capability | Backend Implementation | Frontend Implementation |
+Patients who take multiple medications or manage chronic conditions need reliable reminders, medication context, health measurements, access to doctors, and caregiver involvement. Doctors need structured access to patient information during approved care sessions without permanent unrestricted access. Caregivers need permission-based visibility into patients they support. Existing fragmented tools make it difficult to coordinate medication adherence, health data, appointments, and medical history securely.
+
+The implementation addresses this problem through:
+
+| Problem Area | Implemented Response |
+|---|---|
+| Medication adherence | Medicine CRUD, schedules, taken-dose tracking, local reminders, notification sounds |
+| Health tracking | Health measurements and symptom logs |
+| Doctor access | Doctor directory, connection workflows, bookings, QR session token, two-hour elevated access window |
+| Caregiver coordination | Caregiver option, caregiver requests, accepted/cancelled request flow |
+| Identity/security | Email/password auth, Google auth, OTP, optional 2FA, JWT access/refresh tokens, role guards |
+| Medical record portability | Health passport, patient record, QR shared-record endpoints |
+| Doctor governance | Admin pending-doctor queue and approve/reject endpoints |
+
+### c. Goals of the Project
+
+The project goals derived from the current implementation are:
+
+1. Provide patients with a mobile-first medication and health tracking experience.
+2. Allow doctors to onboard, define clinic information, define schedules, and receive bookings.
+3. Support secure role-based access for patients, doctors, admins, and general users.
+4. Support doctor-patient and caregiver-patient relationship workflows.
+5. Provide appointment booking, payment initiation, cancellation, rescheduling, and live-session access.
+6. Enable medical data export through PDF/record endpoints and public QR-token shared records.
+7. Use a maintainable modular monolith backend and feature-first Flutter frontend.
+8. Identify hardening work required for enterprise readiness, including webhook verification, booking concurrency controls, queue-backed background jobs, observability, and secure token storage.
+
+### d. Currently Available Solutions (Applications)
+
+The repository does not include market research artifacts, but the feature domain overlaps with several common healthcare application categories:
+
+| Existing Solution Category | Typical Capability | Gap Addressed by MediApp |
 |---|---|---|
-| Identity and authentication | Email/password, Google auth, OTP, 2FA challenge token, access/refresh JWTs, token revocation | Auth screens, Cubits, Hive token persistence, Dio refresh retry interceptor |
-| Patient profile | Patient model, profile completion, caregiver mode, emergency contact, SOS | Patient onboarding, questionnaire, profile management |
-| Doctor profile | Doctor model, multi-step profile completion, schedule, license upload, approval status | Doctor onboarding flow, location, schedule, license upload, settings |
-| Medication management | Medicine model, CRUD, schedule generation, taken logs, AI enrichment, audit logging | Add/edit medication flow, reminders, local Hive cache |
-| Health tracking | HealthMeasurement and SymptomLog models with patient-only APIs | Health measurement screens and daily log flow |
-| Booking | Slot generation, booking creation, cancellation, rescheduling, payment webhook, QR session tokens | Doctor browsing, package selection, patient details flow |
-| Messaging | Message API with approved doctor guard | Chat UI scaffolding for doctor/patient communication |
-| Export | Health passport, patient record, QR token, public shared record | Export-oriented profile/records UX hooks |
-| Admin review | Pending doctor list and approve/reject actions | No complete admin frontend detected |
+| Medication reminder apps | Dose reminders, refill alerts, adherence logs | MediApp links medication data with doctors, caregivers, symptoms, and health exports |
+| Telehealth/doctor booking apps | Doctor directory, appointments, online consultation | MediApp adds medication schedules, health measurements, QR session medical record access, and caregiver workflows |
+| Personal health record apps | Health records and basic exports | MediApp adds active medication management, booking, doctor approval, and role-based collaboration |
+| Clinic management systems | Doctor schedules and patient appointments | MediApp is patient-centered and mobile-first, with medication reminders and caregiver support |
+| Messaging apps | Patient-doctor communication | MediApp gates messaging through authenticated healthcare roles and approved doctor context |
 
-### 1.3 High-Level Architecture
+### e. Features Matrix
+
+| Feature | Medication Reminder Apps | Telehealth Apps | Personal Health Record Apps | MediApp Proposed Solution |
+|---|---:|---:|---:|---:|
+| Email/password login | Partial | Yes | Yes | Yes |
+| Google authentication | Partial | Yes | Partial | Yes |
+| OTP / 2FA flow | Rare | Partial | Partial | Yes |
+| Patient profile | Partial | Yes | Yes | Yes |
+| Doctor profile and approval | No | Yes | No | Yes |
+| Medication CRUD | Yes | Rare | Partial | Yes |
+| Medication schedule generation | Yes | Rare | Partial | Yes |
+| Taken-dose tracking | Yes | Rare | Rare | Yes |
+| AI medication enrichment | Rare | Rare | Rare | Implemented asynchronously |
+| Health measurements | Partial | Partial | Yes | Yes |
+| Symptom logs | Partial | Partial | Yes | Yes |
+| Doctor directory | No | Yes | No | Yes |
+| Appointment booking | No | Yes | Rare | Yes |
+| Payment initiation | No | Yes | No | Paymob integration |
+| QR session token | No | Rare | Rare | Yes |
+| Caregiver workflow | Partial | Rare | Partial | Yes |
+| Medical record export | Partial | Partial | Yes | Yes |
+| Admin doctor approval | No | Yes | No | Yes |
+
+### f. Software Development Methodology Used and Rationale
+
+The repository structure and implementation maturity indicate an **Iterative and Incremental / Agile-style methodology** rather than a strict Waterfall delivery model. The backend is divided by domain modules (`userModel`, `patientModel`, `doctorModel`, `medicineModel`, `bookingModel`, `healthModel`, `exportModel`, `adminModel`), and the Flutter frontend is organized by feature slices (`shared/auth`, `patient/features/*`, `doctor/features/*`). This supports incremental delivery of one feature at a time.
+
+This methodology is suitable because healthcare applications require repeated validation of workflows such as onboarding, reminders, bookings, caregiver access, and medical record sharing. The codebase also shows iterative evolution through commented legacy code, `.bak` service files, newly uncommented endpoints, and MVP-oriented notes. An iterative approach allows the team to stabilize critical flows first and then harden security, scalability, testing, and DevOps.
+
+---
+
+## 2. Requirements Analysis
+
+### a. Surveys, Questionnaires, Interviews, etc.
+
+No survey, questionnaire, or interview result files were present in the inspected repository. Therefore, this requirements analysis is derived from implemented source code, backend route inventory, database schemas, frontend routes, feature modules, and project behavior.
+
+For future enterprise documentation, the following stakeholder discovery methods are recommended:
+
+| Method | Target Stakeholders | Purpose |
+|---|---|---|
+| Patient survey | Chronic patients, caregivers, general medication users | Validate reminder, medication schedule, and caregiver needs |
+| Doctor interviews | General practitioners and specialists | Validate profile, scheduling, record access, and wallet workflows |
+| Admin interview | Clinic/platform operations team | Validate doctor approval, compliance, and escalation needs |
+| Usability testing | Patient and doctor users | Validate onboarding, booking, and health tracking UX |
+| Security workshop | Engineering and compliance stakeholders | Validate privacy, token storage, audit, and medical record sharing controls |
+
+### b. Results of Part 2.a Represented as Charts
+
+Because no source survey dataset exists, the following charts represent **implementation-derived feature coverage**, not real survey results.
+
+#### Implementation Coverage by Domain
 
 ```mermaid
-flowchart TB
-    subgraph Client[Flutter Mobile/Web Client]
-        UI[Screens and Widgets]
-        Cubits[flutter_bloc Cubits]
-        Repos[Feature Repositories]
-        Dio[DioClient + ApiService]
-        Hive[Hive Local Persistence]
-    end
-
-    subgraph API[Express Backend]
-        App[app.controller.js]
-        Routes[Module Controllers / Routes]
-        MW[Middleware: JWT, RBAC, Joi, Helmet, Rate Limit]
-        Services[Service Layer]
-        Utils[Email, Token, Encryption, Paymob, Gemini]
-    end
-
-    subgraph Data[MongoDB Atlas / MongoDB]
-        Users[(User)]
-        Patients[(Patient)]
-        Doctors[(Doctor)]
-        Meds[(Medicine)]
-        Bookings[(Booking)]
-        Logs[(Health / Audit / Notifications)]
-    end
-
-    subgraph External[External Integrations]
-        Cloudinary[Cloudinary]
-        Email[Nodemailer SMTP]
-        Google[Google OAuth]
-        Gemini[Google Gemini]
-        Paymob[Paymob]
-    end
-
-    UI --> Cubits --> Repos --> Dio
-    Dio -->|HTTPS JSON / Multipart| App
-    Hive <--> Cubits
-    App --> MW --> Routes --> Services
-    Services --> Data
-    Services --> Utils
-    Utils --> External
+xychart-beta
+    title "Implemented Feature Coverage by Domain"
+    x-axis [Auth, Patient, Doctor, Medication, Health, Booking, Export, Admin, DevOps, Testing]
+    y-axis "Coverage Score" 0 --> 10
+    bar [8, 8, 8, 8, 7, 8, 7, 5, 4, 4]
 ```
 
-### 1.4 Technologies Used
+#### Production Hardening Priority Distribution
 
-| Layer | Technology | Purpose |
-|---|---|---|
-| Backend runtime | Node.js ES modules | API execution |
-| HTTP framework | Express 5 | Routing, middleware, JSON API |
-| Database | MongoDB | Document persistence |
-| ODM | Mongoose 9 | Models, schema constraints, indexes |
-| Validation | Joi | Request schema validation |
-| Auth | JWT, bcrypt, nanoid | Access/refresh tokens, password hashing, token IDs |
-| Security | Helmet, CORS, express-rate-limit | Baseline API security |
-| Uploads | Multer, Cloudinary | Avatar, cover, license assets |
-| Payments | Paymob REST | Card/online booking payment initiation and webhook |
-| AI | Google Gemini SDK / REST | Medication active ingredient and warning enrichment |
-| Notifications/email | Nodemailer | Confirmation, OTP, email-change workflows |
-| Frontend | Flutter / Dart | Cross-platform UI |
-| State management | flutter_bloc Cubit | Feature state orchestration |
-| HTTP client | Dio | API transport and token refresh |
-| Local storage | Hive, shared_preferences | Tokens, user data, medications, settings |
-| Navigation | GoRouter | Declarative routes |
-| Device services | local notifications, alarm, audio, geolocation | Reminders, sounds, location flows |
-
-### 1.5 Engineering Philosophy and Scale Assumptions
-
-The codebase follows a modular monolith backend with one Express application split by domain modules. The frontend uses feature-first Clean Architecture conventions: `data`, `domain`, and `presentation` folders are common inside feature modules. The current system is appropriate for MVP-to-growth-stage workloads, assuming moderate traffic, low write contention per doctor schedule, and MongoDB as the operational data store. The architecture is not yet fully enterprise hardened because transactions, centralized observability, environment validation consistency, admin UI, and comprehensive tests are incomplete.
-
----
-
-## 2. Complete Project Structure Analysis
-
-### 2.1 Repository Tree
-
-```text
-mediApp/
-├── ENTERPRISE_TECHNICAL_DOCUMENTATION.md
-├── backend/
-│   ├── index.js
-│   ├── package.json
-│   ├── package-lock.json
-│   ├── vercel.json
-│   ├── README.md
-│   ├── MediApp_Complete_API.postman_collection.json
-│   ├── MediApp_Final_Collection.json
-│   └── src/
-│       ├── app.controller.js
-│       ├── config/
-│       │   ├── DB.js
-│       │   ├── CONSTANTS.js
-│       │   ├── cloudinary.js
-│       │   └── env.js
-│       ├── middlewares/
-│       │   ├── authentication.js
-│       │   ├── restrictTo.js
-│       │   ├── validation.js
-│       │   ├── errorHandler.js
-│       │   ├── notFound.js
-│       │   ├── cloudinary.js
-│       │   ├── upload.js
-│       │   ├── multer.js
-│       │   └── isApprovedDoctor.js
-│       ├── models/
-│       │   ├── user.model.js
-│       │   ├── patient.model.js
-│       │   ├── doctor.model.js
-│       │   ├── medicine.model.js
-│       │   ├── booking.model.js
-│       │   ├── message.model.js
-│       │   ├── chat.model.js
-│       │   ├── notification.model.js
-│       │   ├── health-measurement.model.js
-│       │   ├── symptom-log.model.js
-│       │   ├── caregiver-request.model.js
-│       │   ├── audit-log.model.js
-│       │   ├── review.model.js
-│       │   ├── withdrawal-request.model.js
-│       │   ├── revoke-token.model.js
-│       │   └── index.js
-│       ├── modules/
-│       │   ├── userModel/
-│       │   ├── patientModel/
-│       │   ├── doctorModel/
-│       │   ├── medicineModel/
-│       │   ├── healthModel/
-│       │   ├── bookingModel/
-│       │   ├── messageModel/
-│       │   ├── adminModel/
-│       │   └── exportModel/
-│       └── utils/
-│           ├── ai.util.js
-│           ├── paymob.js
-│           ├── sendEmail.js
-│           ├── sendEmail-events/
-│           ├── templates/
-│           ├── token/
-│           ├── hash/
-│           ├── encryption/
-│           └── index.js
-└── frontend/
-    ├── pubspec.yaml
-    ├── analysis_options.yaml
-    ├── README.md
-    ├── assets/
-    ├── android/ ios/ macos/ linux/ windows/ web/
-    └── lib/
-        ├── main.dart
-        ├── core/
-        │   ├── constants/
-        │   ├── enums/
-        │   ├── network/
-        │   ├── services/
-        │   ├── utils/
-        │   └── widgets/
-        └── features/
-            ├── shared/
-            │   ├── auth/
-            │   └── splash/
-            ├── patient/
-            │   └── features/
-            │       ├── add_medication/
-            │       ├── doctors/
-            │       ├── health_measurements/
-            │       ├── home/
-            │       ├── notification_sound/
-            │       ├── profile/
-            │       └── questionnaire/
-            └── doctor/
-                └── features/
-                    ├── complete_profile/
-                    ├── home/
-                    └── settings/
+```mermaid
+pie title Production Hardening Priorities
+    "Security" : 30
+    "Reliability / Queues" : 20
+    "Database / Performance" : 15
+    "Testing" : 15
+    "Observability" : 10
+    "DevOps / CI-CD" : 10
 ```
 
-### 2.2 Folder Responsibilities
+### c. Discussion of Results in Part 2.b
 
-| Folder | Responsibility | Cohesion Evaluation |
+The implementation coverage chart shows strong feature progress in authentication, patient workflows, doctor onboarding, medication management, and booking. Export functionality exists, but operational hardening remains required. Admin support is currently backend-focused and lacks a complete frontend. DevOps and testing receive lower scores because the repository contains only placeholder lint/format scripts, limited backend tests, no CI pipeline, and no observed Flutter test suite beyond dependencies.
+
+The production hardening chart emphasizes security because the app handles medical data, identity tokens, payment webhooks, doctor approvals, and shared records. Reliability is also important because email, AI analysis, exports, and notifications currently run as best-effort asynchronous work rather than durable queued jobs.
+
+### d. Functional Requirements
+
+#### Authentication and User Management
+
+| ID | Requirement | Implemented By |
 |---|---|---|
-| `backend/src/config` | Database connection, constants, environment schema, Cloudinary config | High cohesion, but `env.js` validates `MONGODB_URI` while `DB.js` reads `MONGO_URI_ONLINE`/`MONGO_URI`, creating configuration drift |
-| `backend/src/models` | Mongoose persistence schemas | High domain cohesion; schema constraints are meaningful but some fields used by services are absent from schemas |
-| `backend/src/modules/*Model` | Route/controller, Joi validation, service per bounded context | Good modularity; naming mixes “Model” with controller/service concerns |
-| `backend/src/middlewares` | Cross-cutting HTTP concerns | Clear separation for auth, RBAC, validation, upload, and error handling |
-| `backend/src/utils` | External service clients and reusable primitives | Mixed cohesion: token/hash/encryption are clean, while `index.js` combines OTP and cron scheduling |
-| `frontend/lib/core` | Cross-feature constants, networking, DI, router, shared widgets/services | Strong foundation but contains some hard-coded URLs and comments from older Dio implementations |
-| `frontend/lib/features/shared` | Auth and splash feature modules | Cleanly separated reusable application flows |
-| `frontend/lib/features/patient/features` | Patient-specific domain features | Feature-first structure supports maintainability |
-| `frontend/lib/features/doctor/features` | Doctor onboarding, home, settings | Good separation; admin feature is absent |
+| FR-AUTH-01 | Users shall sign up with email/password and a role/type | `/users/signup`, `user.model.js` |
+| FR-AUTH-02 | Users shall sign in with email/password | `/users/signin` |
+| FR-AUTH-03 | Users shall authenticate through Google ID token | `/users/google` |
+| FR-AUTH-04 | The system shall support email confirmation | `/users/confirmEmail/:token` |
+| FR-AUTH-05 | The system shall support OTP and optional 2FA | `/users/signin/otp`, `/users/2fa` |
+| FR-AUTH-06 | The system shall issue and refresh JWT tokens | `/users/refreshToken`, token utilities |
+| FR-AUTH-07 | Users shall update profile, password, email, settings, and delete account | protected `/users/*` routes |
 
-### 2.3 Layer Separation Analysis
+#### Patient Requirements
+
+| ID | Requirement | Implemented By |
+|---|---|---|
+| FR-PAT-01 | Patient shall complete profile in full or step-based flow | `/patients/complete`, `/patients/complete/basic`, `/patients/complete/health1`, `/patients/complete/health2` |
+| FR-PAT-02 | Patient shall set caregiver option and request caregiver | `/patients/caregiver/option`, `/patients/caregiver/request` |
+| FR-PAT-03 | Patient shall accept/cancel caregiver requests | `/patients/caregiver/requests/:requestId/*` |
+| FR-PAT-04 | Patient shall connect with doctors | `/patients/connect-doctor`, `/patients/connected-doctors/*` |
+| FR-PAT-05 | Patient shall set emergency contact and trigger SOS | `/patients/emergency-contact`, `/patients/sos` |
+
+#### Doctor Requirements
+
+| ID | Requirement | Implemented By |
+|---|---|---|
+| FR-DOC-01 | Doctor shall appear in a searchable directory for verified users | `/doctors/directory` |
+| FR-DOC-02 | Doctor shall complete profile, location, schedule, appointments, and license | `/doctors/complete/*` |
+| FR-DOC-03 | Doctor shall update schedule after onboarding | `/doctors/schedule` |
+| FR-DOC-04 | Doctor shall request/accept/reject/cancel patient connections | `/doctors/patients/*` |
+| FR-DOC-05 | Doctor shall view wallet and request withdrawal | `/doctors/wallet`, `/doctors/wallet/withdraw` |
+
+#### Medication and Health Requirements
+
+| ID | Requirement | Implemented By |
+|---|---|---|
+| FR-MED-01 | Patient/doctor shall add medication | `POST /medications` |
+| FR-MED-02 | Patient/doctor shall list, update, delete medication | `GET/PUT/DELETE /medications` |
+| FR-MED-03 | System shall generate medication schedule | `GET /medications/schedule` |
+| FR-MED-04 | System shall mark medicine dose as taken | `PATCH /medications/:id/taken` |
+| FR-MED-05 | System shall record medication logs/feedback | `POST /medications/:id/log` |
+| FR-HEALTH-01 | Patient shall add and retrieve measurements | `/health/measurements` |
+| FR-HEALTH-02 | Patient shall add and retrieve symptoms | `/health/symptoms` |
+
+#### Booking, Payment, Session, Export, and Admin Requirements
+
+| ID | Requirement | Implemented By |
+|---|---|---|
+| FR-BOOK-01 | User shall view doctor slots | `GET /bookings/slots/:doctorId` |
+| FR-BOOK-02 | Patient shall create, list, cancel, and reschedule bookings | `/bookings` routes |
+| FR-BOOK-03 | Doctor shall list assigned bookings | `GET /bookings/doctor` |
+| FR-BOOK-04 | Online/card booking shall initiate Paymob payment | `createPaymentIntention` |
+| FR-BOOK-05 | Paymob webhook shall update payment status and doctor wallet | `POST /bookings/webhook/paymob` |
+| FR-SESSION-01 | Patient shall generate QR/session token | `POST /bookings/:bookingId/generate-qr` |
+| FR-SESSION-02 | Doctor shall start session by token and receive patient context | `POST /bookings/start-session` |
+| FR-SESSION-03 | Patient/doctor shall end session | `POST /bookings/:bookingId/end-session` |
+| FR-EXPORT-01 | Patient/doctor shall export health passport and patient record | `/export/health-passport`, `/export/patient-record` |
+| FR-EXPORT-02 | Patient shall generate shared QR token | `/export/qr-token` |
+| FR-ADMIN-01 | Admin shall approve or reject pending doctors | `/admin/doctors/*` |
+
+### e. Non-functional Requirements
+
+| Category | Requirement | Current Implementation / Gap |
+|---|---|---|
+| Security | Passwords must be hashed | Implemented using bcrypt |
+| Security | Sensitive token flows must use JWT secrets and token IDs | Implemented, but refresh-token storage should move to platform secure storage |
+| Security | API must enforce role-based access | Implemented with `verifyToken` and `restrictTo` |
+| Security | Payment webhooks must be verified | Gap: Paymob HMAC/signature verification should be added |
+| Privacy | Doctor access to patient records must be limited | Implemented through session token and active session window |
+| Performance | Lists should support pagination | Gap: booking, measurement, symptoms, notification, and medication list endpoints need pagination |
+| Reliability | Background tasks should be durable | Gap: email, AI, export, and notification jobs should use queues |
+| Scalability | API should be horizontally scalable | Mostly stateless; cron should move outside app runtime |
+| Maintainability | Code should be modular | Implemented with backend modules and frontend feature folders |
+| Observability | Logs, metrics, and traces should be structured | Gap: currently mostly Morgan and console logs |
+| Testability | Critical flows should have automated tests | Partial backend tests exist; broader tests required |
+
+### f. Use Case Diagrams
+
+#### Patient Use Cases
 
 ```mermaid
 flowchart LR
-    subgraph Backend
-        Controller[Controller / Route Files]
-        Validation[Joi Validation]
-        Service[Service Files]
-        Model[Mongoose Models]
-        Utility[Utilities]
-    end
-
-    Controller --> Validation
-    Controller --> Service
-    Service --> Model
-    Service --> Utility
-    Utility --> Model
+    Patient((Patient))
+    Patient --> Signup[Sign up / sign in]
+    Patient --> CompleteProfile[Complete patient profile]
+    Patient --> ManageMed[Manage medications]
+    Patient --> TrackHealth[Track health measurements]
+    Patient --> LogSymptoms[Log symptoms]
+    Patient --> BrowseDoctors[Browse doctors]
+    Patient --> BookAppointment[Book appointment]
+    Patient --> GenerateQR[Generate session QR]
+    Patient --> ManageCaregiver[Manage caregiver requests]
+    Patient --> ExportRecord[Export health record]
+    Patient --> SOS[Trigger SOS]
 ```
 
-Backend route files correctly delegate most business logic to service files. The main coupling risks are:
+#### Doctor and Admin Use Cases
 
-- Service functions directly write Express responses, which couples business logic to HTTP and makes unit testing harder.
-- Some controllers call service methods as pass-through wrappers, but others export routers directly, resulting in inconsistent controller style.
-- Several service methods perform authorization checks inline rather than using reusable policy functions.
-
-Frontend modules use Cubits and repositories, which improves testability and state isolation. The main coupling risks are hard-coded backend base URLs and mixed local/remote medication persistence.
+```mermaid
+flowchart LR
+    Doctor((Doctor))
+    Admin((Admin))
+    Doctor --> SignupD[Sign up / sign in]
+    Doctor --> CompleteDoctor[Complete doctor profile]
+    Doctor --> Schedule[Manage schedule]
+    Doctor --> PatientConnections[Manage patient connections]
+    Doctor --> ViewBookings[View bookings]
+    Doctor --> StartSession[Start patient session]
+    Doctor --> Wallet[Manage wallet / withdrawals]
+    Admin --> PendingDoctors[View pending doctors]
+    Admin --> ApproveReject[Approve or reject doctors]
+```
 
 ---
 
-## 3. System Architecture Documentation
+## 3. Design
 
-### 3.1 Backend Architecture
+### a. Sequence Diagrams
 
-The backend initializes through `index.js`, which imports environment variables and exports a Vercel-compatible handler after awaiting `bootstrap()`. `app.controller.js` creates the Express app, connects MongoDB, starts a weekly cron reset, applies JSON parsing, CORS, Morgan, Helmet, rate limiting, health endpoints, and mounts domain routers.
-
-```mermaid
-sequenceDiagram
-    participant Vercel as Vercel/Node Runtime
-    participant Index as index.js
-    participant App as app.controller.js
-    participant DB as MongoDB
-    participant Routes as Module Routers
-
-    Vercel->>Index: HTTP request
-    Index->>App: await bootstrap()
-    App->>DB: connectDB()
-    App->>App: register middleware and routers
-    Index->>Routes: app(req,res)
-    Routes->>DB: service queries/mutations
-    Routes-->>Vercel: JSON response
-```
-
-### 3.2 Frontend Architecture
-
-The Flutter app starts in `main.dart`, builds a `MaterialApp.router`, applies ScreenUtil sizing, and uses `AppRouter.router`. Core networking is centralized in `DioClient`, which injects bearer tokens from Hive and attempts refresh-token recovery on HTTP 401.
-
-```mermaid
-flowchart TB
-    Main[main.dart]
-    Router[AppRouter / GoRouter]
-    Screen[Feature Screen]
-    Cubit[Feature Cubit]
-    Repo[Repository]
-    Api[ApiService]
-    Dio[DioClient Interceptors]
-    Hive[HiveService]
-    Backend[Express API]
-
-    Main --> Router --> Screen --> Cubit --> Repo --> Api --> Dio --> Backend
-    Dio <--> Hive
-    Cubit <--> Hive
-```
-
-### 3.3 Request Lifecycle
-
-```mermaid
-flowchart TD
-    A[Client sends request] --> B[Express JSON/urlencoded parser]
-    B --> C[Helmet/CORS/Morgan/Rate Limit]
-    C --> D{Route requires JWT?}
-    D -- yes --> E[verifyToken]
-    D -- no --> G[Joi validation if configured]
-    E --> F[restrictTo role guard if configured]
-    F --> G
-    G --> H[Controller]
-    H --> I[Service]
-    I --> J[Mongoose / External API]
-    J --> K[JSON response]
-    I -- throws/errors --> L[errorHandler]
-```
-
-### 3.4 Authentication Flow
+#### Authentication Sequence
 
 ```mermaid
 sequenceDiagram
@@ -341,21 +285,55 @@ sequenceDiagram
     end
 ```
 
----
+#### Booking and Payment Sequence
 
-## 4. Database Engineering Documentation
+```mermaid
+sequenceDiagram
+    participant P as Patient App
+    participant API as Booking API
+    participant DB as MongoDB
+    participant Paymob as Paymob
+    participant D as Doctor Wallet
 
-### 4.1 Database Overview
+    P->>API: POST /bookings
+    API->>DB: resolve patient and doctor
+    API->>DB: check doctor day, capacity, existing bookings
+    API->>DB: create booking
+    alt online/card/paymob payment
+        API->>Paymob: create payment intention
+        Paymob-->>API: checkout URL / payment token
+    end
+    API->>DB: connect patient to doctor if absent
+    API-->>P: booking + payment URL
+    Paymob->>API: POST /bookings/webhook/paymob
+    API->>DB: mark booking paid
+    API->>D: credit doctor wallet
+    API-->>Paymob: 200 OK
+```
 
-| Attribute | Implementation |
-|---|---|
-| Database type | MongoDB document database |
-| ODM | Mongoose |
-| Migration system | No explicit migration framework detected |
-| Connection strategy | Single Mongoose connection using `MONGO_URI_ONLINE` or `MONGO_URI`, `autoIndex` disabled in production |
-| Scaling approach | Vertical scaling / managed MongoDB scaling; application is mostly stateless except cron and local uploads path |
+#### QR Session Access Sequence
 
-### 4.2 Entity Relationship Diagram
+```mermaid
+sequenceDiagram
+    participant P as Patient
+    participant API as Booking API
+    participant D as Doctor
+    participant DB as MongoDB
+
+    P->>API: POST /bookings/:bookingId/generate-qr
+    API->>DB: validate patient owns booking and payment is valid
+    API->>DB: store sessionToken
+    API-->>P: sessionToken
+    D->>API: POST /bookings/start-session with sessionToken
+    API->>DB: validate doctor owns booking
+    API->>DB: load patient, medications, measurements
+    API->>DB: set sessionActive=true and expiresAt=now+2h
+    API-->>D: patient context and session expiry
+    D->>API: POST /bookings/:bookingId/end-session
+    API->>DB: clear session token and expire session
+```
+
+### b. ERD
 
 ```mermaid
 erDiagram
@@ -379,7 +357,7 @@ erDiagram
     BOOKING ||--o{ AUDIT_LOG : contextualizes
 ```
 
-### 4.3 Schema Analysis
+#### Schema Summary
 
 | Model | Purpose | Key Fields | Constraints / Indexes |
 |---|---|---|---|
@@ -389,7 +367,6 @@ erDiagram
 | `Medicine` | Medication regimen and adherence data | `patientId`, `type`, `frequency`, `daily`, `weekly`, `specific`, `dosage`, `stock`, `isChronic`, `status`, `dates`, `dailyFeedback` | Frequency/type/status enums; pre-validate enforces daily/weekly/specific shape; `patientId` and `status` indexed |
 | `Booking` | Appointment and live-session record | `patientId`, `doctorId`, `date`, `duration`, `packageType`, `paymentStatus`, `appointmentId`, `sessionToken`, `status` | `appointmentId` unique/indexed; compound index on doctor/date/time; patient/doctor/status indexes |
 | `Message` | Point-to-point chat message | `senderId`, `receiverId`, `message`, `time`, `status`, `files`, `voiceNote` | sender/receiver/time/status indexed; file type enum |
-| `Chat` | Chat conversation metadata | `name`, `profileImage`, `status`, `messages`, `patientId`, `doctorId` | patient/doctor indexed |
 | `Notification` | In-app notification | `type`, `header`, `message`, `time`, `read`, `userId` | type/time/read/user indexed |
 | `HealthMeasurement` | Patient health telemetry | `patientId`, `type`, `value`, `systolic`, `diastolic`, `heartRate`, `date`, `notes` | patient indexed; type enum |
 | `SymptomLog` | Patient symptom journal | `patientId`, `symptoms`, `severity`, `date`, `notes` | patient indexed; severity enum |
@@ -399,39 +376,459 @@ erDiagram
 | `WithdrawalRequest` | Doctor payout request | `doctorId`, `amount`, `status`, `bankDetails`, `adminNotes`, `processedAt` | doctor indexed; amount min 10; status enum |
 | `RevokeToken` | JWT revocation and TTL cleanup | `tokenId`, `expiredAt` | tokenId unique/indexed; TTL index on `expiredAt` |
 
-### 4.4 Relationship and Cascade Analysis
+### c. Data Flow Diagrams
 
-Mongoose references are used extensively, but there are no database-level cascades because MongoDB does not enforce foreign keys. Deletion workflows must manually clean dependent documents. The `deleteAccount` service should be treated as the canonical lifecycle cleanup point. High-value cascading requirements include User → Patient/Doctor, Patient → Medicine/Booking/HealthMeasurement/SymptomLog, Doctor → Booking/WithdrawalRequest, and Booking → AuditLog.
+#### DFD Level 0
 
-### 4.5 Query Analysis and Optimization Risks
+```mermaid
+flowchart LR
+    Patient[Patient App]
+    Doctor[Doctor App]
+    Admin[Admin]
+    System((MediApp System))
+    DB[(MongoDB)]
+    External[External Services: Cloudinary, SMTP, Google, Gemini, Paymob]
 
-| Query Area | Current Pattern | Risk | Recommendation |
-|---|---|---|---|
-| Doctor slots | Fetch all bookings for doctor/day, then in-memory reserved slot filtering | O(B + S) per request; acceptable for daily load but race-prone | Add transaction/unique reservation guard for concurrent booking attempts |
-| Booking listings | Populate patient/doctor and sort by date/time | Large historical lists may grow without pagination | Add `limit`, `cursor`, and compound indexes for date windows |
-| Patient attachment | `attachTypeDoc` populates medications and loads all health measurements | Payload can become large | Paginate measurements and medication history |
-| Medicine schedule | Iterates medicines and generated date windows | Can become CPU-heavy with long date ranges | Cap schedule range, precompute occurrences, or use recurrence library/cache |
-| Directory search | Doctor directory service likely filters approved/specialization | Needs compound indexes | Add `{status:1, specialization:1}` and location index if geo-search is enabled |
+    Patient -->|Auth, profile, meds, health, booking| System
+    Doctor -->|Profile, schedule, patient sessions| System
+    Admin -->|Doctor approval| System
+    System -->|Persist/read domain data| DB
+    System -->|Uploads, email, OAuth, AI, payment| External
+    System -->|Responses, tokens, records| Patient
+    System -->|Responses, bookings, patient context| Doctor
+    System -->|Doctor status updates| Admin
+```
+
+#### DFD Level 1
+
+```mermaid
+flowchart TB
+    subgraph Clients
+        P[Patient Flutter Screens]
+        D[Doctor Flutter Screens]
+        A[Admin/API Consumer]
+    end
+
+    subgraph Backend[Express API Processes]
+        Auth[Authentication Process]
+        Profile[Profile and Relationship Process]
+        Med[Medication and Health Process]
+        Booking[Booking and Session Process]
+        Export[Export and QR Process]
+        AdminProc[Admin Approval Process]
+    end
+
+    subgraph Stores[MongoDB Data Stores]
+        Users[(Users)]
+        Patients[(Patients)]
+        Doctors[(Doctors)]
+        Medicines[(Medicines)]
+        Bookings[(Bookings)]
+        Logs[(Measurements / Symptoms / Notifications / Audit)]
+    end
+
+    P --> Auth
+    D --> Auth
+    A --> AdminProc
+    Auth --> Users
+    P --> Profile --> Patients
+    D --> Profile --> Doctors
+    P --> Med --> Medicines
+    Med --> Logs
+    P --> Booking --> Bookings
+    D --> Booking
+    Booking --> Patients
+    Booking --> Doctors
+    P --> Export --> Patients
+    Export --> Logs
+    AdminProc --> Doctors
+```
+
+### d. State Diagram
+
+#### Booking State Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> upcoming: booking created
+    upcoming --> cancelled: patient cancels
+    upcoming --> upcoming: reschedule
+    upcoming --> completed: session completed / appointment finished
+    completed --> [*]
+    cancelled --> [*]
+```
+
+#### Doctor Approval State Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> incomplete: doctor user created
+    incomplete --> pending: profile/license submitted
+    pending --> approved: admin approves
+    pending --> rejected: admin rejects
+    rejected --> pending: resubmission after fixes
+    approved --> [*]
+```
+
+### e. Algorithms or Pseudocode
+
+#### Slot Generation Pseudocode
+
+```text
+FUNCTION getDoctorSlots(doctorId, date):
+    doctor = find doctor by id
+    IF doctor not found: return 404
+    dayName = weekday(date)
+    IF dayName not in doctor.workingDays: return []
+
+    existingBookings = find bookings for doctor between startOfDay and endOfDay
+    IF existingBookings.count >= doctor.maxDailyPatients: return []
+
+    reservedTimes = existingBookings.map(date.time)
+    duration = doctor.consultationDuration OR 30
+    slots = []
+
+    FOR EACH workingHourBlock IN doctor.workingHours:
+        start = convert HH:mm to minutes
+        end = convert HH:mm to minutes
+        FOR t FROM start TO end-duration STEP duration:
+            time = convert minutes to HH:mm
+            IF time not in reservedTimes:
+                slots.push(time)
+
+    RETURN slots
+```
+
+#### Booking Creation Pseudocode
+
+```text
+FUNCTION createBooking(patientUserId, payload):
+    patient = find patient by userId
+    doctor = find doctor by doctorId
+    validate doctor supports packageType
+    validate doctor works on requested weekday
+    existingBookings = find active bookings for doctor and day
+    reject if maxDailyPatients exceeded
+    reject if requested time is already taken
+    create booking document
+    IF payment method is online/card/paymob:
+        create Paymob payment intention
+    connect patient to doctor if missing
+    create notification
+    return booking and payment information
+```
+
+#### Complexity Analysis
+
+| Function / Operation | Purpose | Time Complexity | Space Complexity | Risk Level |
+|---|---|---:|---:|---|
+| `getDoctorSlots` | Generate available slots from working hours minus bookings | O(B + H*S) | O(B + S) | Medium |
+| `createBooking` slot conflict check | Prevent duplicate bookings | O(B) | O(B) | High |
+| `rescheduleBooking` | Move booking to new date/time | O(B) | O(B) | Medium |
+| Medicine frequency validation | Enforce daily/weekly/specific exclusive shape | O(n) by array length | O(1) | Low |
+| Medicine schedule generation | Build dose schedule from recurrence fields | O(M*D*T) | O(M*D*T) | Medium |
+| Hive medication update/delete | Find local item by equality/fallback matching | O(N) | O(N) | Low |
+| Attach patient type document | Populate medications and measurements | O(M + L) | O(M + L) | Medium |
+| Gemini medication enrichment | Parse model JSON and update patient arrays | O(P + W) | O(P + W) | Medium |
+| Token refresh queue | Coordinate parallel 401s | O(R) | O(R) | Low |
+
+### f. UML Class Diagrams
+
+```mermaid
+classDiagram
+    class User {
+        ObjectId _id
+        String type
+        String firstName
+        String lastName
+        String email
+        String password
+        Boolean twoFA
+        Boolean confirmed
+        Settings settings
+    }
+
+    class Patient {
+        ObjectId userId
+        String[] chronicConditions
+        String[] allergies
+        ObjectId[] medications
+        ConnectedDoctor[] connectedDoctors
+        EmergencyContact emergencyContact
+        Caregiver caregiver
+    }
+
+    class Doctor {
+        ObjectId userId
+        String specialization
+        String status
+        String clinicName
+        String[] workingDays
+        WorkingHours[] workingHours
+        String[] appointmentTypes
+        Number walletBalance
+    }
+
+    class Medicine {
+        ObjectId patientId
+        String type
+        String frequency
+        String[] daily
+        WeeklyBlock[] weekly
+        SpecificBlock[] specific
+        String name
+        String activeIngredient
+        Boolean isChronic
+        String status
+    }
+
+    class Booking {
+        ObjectId patientId
+        ObjectId doctorId
+        DateTime date
+        Number duration
+        String packageType
+        String paymentStatus
+        String status
+        String sessionToken
+        Boolean sessionActive
+    }
+
+    class HealthMeasurement {
+        ObjectId patientId
+        String type
+        Number value
+        Number systolic
+        Number diastolic
+        Date date
+    }
+
+    User "1" --> "0..1" Patient
+    User "1" --> "0..1" Doctor
+    Patient "1" --> "0..*" Medicine
+    Patient "1" --> "0..*" Booking
+    Doctor "1" --> "0..*" Booking
+    Patient "1" --> "0..*" HealthMeasurement
+```
 
 ---
 
-## 5. Backend Engineering Documentation
+## 4. Implementation Aspects
 
-### 5.1 Mounted API Modules
+### a. Overall System Architecture (Blocks Diagram)
 
-| Mount Path | Router | Domain |
+```mermaid
+flowchart TB
+    subgraph Client[Flutter Mobile/Web Client]
+        UI[Screens and Widgets]
+        Router[GoRouter]
+        Cubits[flutter_bloc Cubits]
+        Repos[Feature Repositories]
+        Api[ApiService]
+        Dio[DioClient + Interceptors]
+        Hive[Hive Local Persistence]
+    end
+
+    subgraph API[Express Backend]
+        App[app.controller.js]
+        Middleware[JWT Auth / RBAC / Joi / Helmet / Rate Limit]
+        UserModule[User Module]
+        PatientModule[Patient Module]
+        DoctorModule[Doctor Module]
+        MedicineModule[Medicine Module]
+        HealthModule[Health Module]
+        BookingModule[Booking Module]
+        ExportModule[Export Module]
+        AdminModule[Admin Module]
+    end
+
+    subgraph Database[MongoDB]
+        Users[(Users)]
+        Patients[(Patients)]
+        Doctors[(Doctors)]
+        Medicines[(Medicines)]
+        Bookings[(Bookings)]
+        Operational[(Notifications, Audit, Health Logs)]
+    end
+
+    subgraph Integrations[External Integrations]
+        Cloudinary[Cloudinary Uploads]
+        SMTP[Nodemailer SMTP]
+        Google[Google OAuth]
+        Gemini[Google Gemini AI]
+        Paymob[Paymob Payments]
+    end
+
+    UI --> Router --> Cubits --> Repos --> Api --> Dio --> App
+    Hive <--> Dio
+    Hive <--> Cubits
+    App --> Middleware
+    Middleware --> UserModule
+    Middleware --> PatientModule
+    Middleware --> DoctorModule
+    Middleware --> MedicineModule
+    Middleware --> HealthModule
+    Middleware --> BookingModule
+    Middleware --> ExportModule
+    Middleware --> AdminModule
+    UserModule --> Database
+    PatientModule --> Database
+    DoctorModule --> Database
+    MedicineModule --> Database
+    HealthModule --> Database
+    BookingModule --> Database
+    ExportModule --> Database
+    AdminModule --> Database
+    API --> Integrations
+```
+
+#### Backend Request Lifecycle
+
+```mermaid
+flowchart TD
+    A[Client sends request] --> B[Express JSON/urlencoded parser]
+    B --> C[Helmet/CORS/Morgan/Rate Limit]
+    C --> D{Route requires JWT?}
+    D -- yes --> E[verifyToken]
+    D -- no --> G[Joi validation if configured]
+    E --> F[restrictTo role guard if configured]
+    F --> G
+    G --> H[Controller]
+    H --> I[Service]
+    I --> J[Mongoose / External API]
+    J --> K[JSON response]
+    I -- throws/errors --> L[errorHandler]
+```
+
+#### Frontend Runtime Architecture
+
+```mermaid
+flowchart TB
+    Main[main.dart]
+    Router[AppRouter / GoRouter]
+    Screen[Feature Screen]
+    Cubit[Feature Cubit]
+    Repo[Repository]
+    ApiService[ApiService]
+    DioClient[DioClient Interceptors]
+    HiveService[HiveService]
+    Backend[Express API]
+
+    Main --> Router --> Screen --> Cubit --> Repo --> ApiService --> DioClient --> Backend
+    DioClient <--> HiveService
+    Cubit <--> HiveService
+```
+
+### b. Tools, Technologies and/or Programming Languages Illustrated on the Diagram in Part 4.a
+
+| Layer | Technology | Purpose |
 |---|---|---|
-| `/users` | `user.controller.js` | Identity, auth, profile, settings |
-| `/patients` | `patient.controller.js` | Patient onboarding, caregivers, doctor links, SOS |
-| `/doctors` | `doctor.controller.js` | Doctor directory, onboarding, patient links, wallet |
-| `/medications` | `medicine.controller.js` | Medication CRUD and schedules |
-| `/health` | `health.controller.js` | Measurements and symptom logs |
-| `/bookings` | `booking.routes.js` | Appointment slots, bookings, sessions, payment callbacks |
-| `/messages` and `/users/:id/messages` | `message.controller.js` | Messaging and chat verification |
-| `/admin` | `admin.controller.js` | Doctor approval queue |
-| `/export` | `export.routes.js` | PDF/QR/shared health records |
+| Backend language/runtime | Node.js ES modules | API execution |
+| HTTP framework | Express 5 | Routing, middleware, JSON API |
+| Database | MongoDB | Document persistence |
+| ODM | Mongoose 9 | Models, schema constraints, indexes |
+| Validation | Joi | Request schema validation |
+| Authentication | JWT, bcrypt, nanoid | Tokens, password hashing, token IDs |
+| Security middleware | Helmet, CORS, express-rate-limit | Baseline HTTP hardening |
+| File uploads | Multer, Cloudinary | Avatar, cover, license uploads |
+| Payments | Paymob REST | Payment intention and webhook flow |
+| AI | Google Gemini SDK / REST | Medication enrichment and warning analysis |
+| Email | Nodemailer | Confirmation, OTP, email-change flows |
+| PDF/QR | PDFKit, QRCode | Health exports and shared records |
+| Frontend language/framework | Dart / Flutter | Cross-platform application UI |
+| State management | flutter_bloc Cubit | Feature state orchestration |
+| HTTP client | Dio | API transport and token refresh |
+| Local storage | Hive, shared_preferences | Tokens, user data, settings, medication cache |
+| Navigation | GoRouter | Declarative application routing |
+| Dependency injection | get_it | Repository and Cubit registration |
+| Device services | local notifications, alarm, audio, geolocation | Reminders, alarm sounds, location flows |
 
-### 5.2 Endpoint Inventory
+### c. Prototype (Screens of the Proposed System)
+
+The repository contains Flutter screens that represent the current prototype. The following table maps prototype areas to implemented route families and screen modules.
+
+| Prototype Area | Routes / Screens Present in Code |
+|---|---|
+| Splash and role selection | `/`, `/selectRole`, `/onboarding` |
+| Patient authentication | `/login/patient`, `/signUp/patient`, `/forgetPassword`, `/otp`, `/setPassword`, `/passwordChanged` |
+| Doctor authentication | `/login/doctor`, `/signUp/doctor`, `/doctorOtp` |
+| Patient profile completion | `/completeProfile`, questionnaire/profile screens |
+| Patient home shell | `/patient/main`, `/home` |
+| Medication flow | `/patient/addMedication`, `/patient/addMedication/stock`, `/medicine/dailySymptoms`, `/patient/editMedication`, `/patient/medicineInfo` |
+| Doctor browsing and booking | `/doctors/profile`, `/doctors/profile/book` |
+| Patient health measurements | `/healthMeasurements`, `/health/dailyLog` |
+| Patient profile/settings | `/patient/accountInfo`, `/patient/caregiverMode`, `/patient/changeEmail`, `/patient/changePassword` |
+| Notification sounds | `/notificationSound`, `/chooseSound` |
+| Doctor profile completion | `/doctor/completeProfile`, `/doctor/allowLocation`, `/doctor/manualLocation`, `/doctor/qFlow`, `/doctor/uploadLicense`, `/doctor/allowNotification`, `/doctorAllSetScreen` |
+| Doctor main app | `/doctor/mainLayout` |
+| Doctor schedule/settings | `/doctor/availability`, `/doctor/accountInformation`, `/doctor/payoutWithdrawal` |
+
+### Complete Project Structure Analysis
+
+```text
+mediApp/
+├── ENTERPRISE_TECHNICAL_DOCUMENTATION.md
+├── backend/
+│   ├── index.js
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── vercel.json
+│   ├── README.md
+│   ├── MediApp_Complete_API.postman_collection.json
+│   ├── MediApp_Final_Collection.json
+│   └── src/
+│       ├── app.controller.js
+│       ├── config/
+│       │   ├── DB.js
+│       │   ├── CONSTANTS.js
+│       │   ├── cloudinary.js
+│       │   └── env.js
+│       ├── middlewares/
+│       ├── models/
+│       ├── modules/
+│       │   ├── userModel/
+│       │   ├── patientModel/
+│       │   ├── doctorModel/
+│       │   ├── medicineModel/
+│       │   ├── healthModel/
+│       │   ├── bookingModel/
+│       │   ├── messageModel/
+│       │   ├── adminModel/
+│       │   └── exportModel/
+│       └── utils/
+└── frontend/
+    ├── pubspec.yaml
+    ├── analysis_options.yaml
+    ├── assets/
+    ├── android/ ios/ macos/ linux/ windows/ web/
+    └── lib/
+        ├── main.dart
+        ├── core/
+        │   ├── constants/
+        │   ├── enums/
+        │   ├── network/
+        │   ├── services/
+        │   ├── utils/
+        │   └── widgets/
+        └── features/
+            ├── shared/
+            ├── patient/
+            └── doctor/
+```
+
+| Folder | Responsibility | Cohesion Evaluation |
+|---|---|---|
+| `backend/src/config` | Database connection, constants, environment schema, Cloudinary config | High cohesion, but environment variable names should be standardized |
+| `backend/src/models` | Mongoose persistence schemas | High domain cohesion; constraints and indexes are implemented in schemas |
+| `backend/src/modules/*Model` | Route/controller, Joi validation, service per bounded context | Good modularity; naming mixes “Model” with service/controller concerns |
+| `backend/src/middlewares` | Cross-cutting HTTP concerns | Clear separation for auth, RBAC, validation, upload, and error handling |
+| `backend/src/utils` | External service clients and reusable primitives | Useful but mixed; OTP and cron share `utils/index.js` |
+| `frontend/lib/core` | Cross-feature constants, networking, DI, router, shared widgets/services | Strong foundation; base URL configuration should be environment-based |
+| `frontend/lib/features/shared` | Auth and splash feature modules | Cleanly separated reusable flows |
+| `frontend/lib/features/patient/features` | Patient-specific feature modules | Feature-first structure supports maintainability |
+| `frontend/lib/features/doctor/features` | Doctor onboarding, home, settings | Good separation; complete admin frontend was not detected |
+
+### Backend API Inventory
 
 | Method | Route | Auth | Roles | Purpose |
 |---|---|---|---|---|
@@ -491,7 +888,7 @@ Mongoose references are used extensively, but there are no database-level cascad
 | GET | `/doctors/patients` | Yes | doctor | List connected patients |
 | GET | `/doctors/wallet` | Yes | doctor | Wallet summary |
 | POST | `/doctors/wallet/withdraw` | Yes | doctor | Create withdrawal request |
-| PATCH | `/doctors/wallet/withdraw/:id/process` | Yes | doctor route + nested admin guard | Process withdrawal; routing guard likely prevents admin access because doctor router already restricts to doctor |
+| PATCH | `/doctors/wallet/withdraw/:id/process` | Yes | doctor route + nested admin guard | Process withdrawal; route guard should be refactored |
 | POST | `/medications` | Yes | patient/doctor | Add medicine, optionally audit doctor change |
 | GET | `/medications` | Yes | patient/doctor | List medicines by context/filter |
 | GET | `/medications/schedule` | Yes | patient/doctor | Generate adherence schedule |
@@ -526,417 +923,97 @@ Mongoose references are used extensively, but there are no database-level cascad
 | POST | `/export/qr-token` | Yes | patient | Generate shared-record QR token |
 | GET | `/export/shared/:qrToken` | No | Public token | Read shared record by QR token |
 
-### 5.3 Middleware Analysis
+### Middleware and Services Analysis
 
-| Middleware | Responsibility | Observations |
+| Middleware / Service Area | Responsibility | Observations |
 |---|---|---|
-| `verifyToken` | Parses/validates JWT and attaches `req.user` | Central auth gate; should ensure revoked tokens are checked consistently |
+| `verifyToken` | Parses/validates JWT and attaches `req.user` | Central authentication gate; revoked token checks should be verified consistently |
 | `restrictTo` | Role/type allowlist | Simple RBAC guard used per router/endpoint |
 | `validation` | Joi validation of body/params/query | Good schema boundary; some endpoints intentionally lack validation |
 | `isApprovedDoctor` | Messaging guard for approved doctors | Domain-specific authorization |
 | `cloudinaryUploadAvatarAndCover` | Multer upload and Cloudinary forwarding | Used in profile completion |
-| `errorHandler` / `notFound` | Terminal error handling | Response normalization is limited; several services catch and respond manually |
-| Helmet/rate-limit | Security headers and global throttling | Baseline hardening; CSP disabled |
+| `errorHandler` / `notFound` | Terminal error handling | Response normalization is limited because several services catch errors manually |
+| User service | Signup, signin, OTP, 2FA, password reset, profile, settings, delete account | Central identity and account workflow |
+| Patient service | Patient profile, caregiver, doctor connection, SOS | Patient domain workflow |
+| Doctor service | Doctor onboarding, schedule, patient links, wallet | Doctor domain workflow |
+| Medicine service | CRUD, schedule, taken logs, audit, AI enrichment | Medication workflow with async Gemini enrichment |
+| Booking service | Slots, booking, payment, QR sessions, call token | Appointment and session-limited access workflow |
+| Export service | Health passport, patient record, QR shared record | Medical record portability workflow |
 
-### 5.4 Background and Async Processing
+### Background and Async Processing
 
 | Process | Implementation | Risk |
 |---|---|---|
-| Weekly availability reset | `node-cron` scheduled Saturday 23:59 | In serverless/Vercel environments cron inside runtime is unreliable and may run on multiple instances |
-| Email sending | Async `sendEmailEvent`, `sendOTPEvent`, `sendEmailChangeConfirmEvent` | No durable queue or retry store |
+| Weekly availability reset | `node-cron` scheduled Saturday 23:59 | Serverless/Vercel runtime may not run cron reliably and may duplicate work |
+| Email sending | Async email functions for confirmation, OTP, email-change | No durable queue or retry store |
 | AI medication enrichment | Background promise calling Gemini and updating medicine/patient | No queue, idempotency key, or failure retry |
-| Paymob webhook | Public POST updates booking payment and doctor wallet | Should verify Paymob signature/HMAC before trust |
+| Paymob webhook | Public POST updates booking payment and doctor wallet | Should verify Paymob HMAC/signature before trust |
 
----
-
-## 6. Frontend Engineering Documentation
-
-### 6.1 UI Architecture
-
-The Flutter client uses a feature-first organization. Shared visual atoms such as primary/secondary buttons, text fields, date/time pickers, phone/gender fields, bottom navigation, avatar, toggles, and app bars live in `core/widgets`. Patient and doctor features own their screens and feature-specific widgets.
-
-```mermaid
-flowchart TB
-    App[MaterialApp.router]
-    Core[core widgets/theme/constants]
-    Shared[shared auth + splash]
-    Patient[patient features]
-    Doctor[doctor features]
-
-    App --> Core
-    App --> Shared
-    App --> Patient
-    App --> Doctor
-    Patient --> AddMedication
-    Patient --> Doctors
-    Patient --> HealthMeasurements
-    Patient --> Profile
-    Doctor --> CompleteProfile
-    Doctor --> Home
-    Doctor --> Settings
-```
-
-### 6.2 Routing System
-
-Routes are centralized in `AppRouter`. Major route families include:
-
-| Family | Representative Routes |
-|---|---|
-| Common onboarding/auth | `/`, `/selectRole`, `/onboarding`, `/login/patient`, `/signUp/patient`, `/forgetPassword`, `/otp`, `/setPassword` |
-| Patient shell | `/patient/main`, `/home`, `/completeProfile`, `/caregiverForm`, `/notificationSound`, `/chooseSound` |
-| Patient medication | `/patient/addMedication`, `/patient/addMedication/stock`, `/medicine/dailySymptoms`, `/patient/editMedication`, `/patient/medicineInfo` |
-| Patient doctors/booking | `/doctors/profile`, `/doctors/profile/book` |
-| Patient profile | `/patient/accountInfo`, `/patient/caregiverMode`, `/patient/changeEmail`, `/patient/changePassword` |
-| Doctor auth/onboarding | `/login/doctor`, `/signUp/doctor`, `/doctor/completeProfile`, `/doctor/allowLocation`, `/doctor/qFlow`, `/doctor/uploadLicense` |
-| Doctor app/settings | `/doctor/mainLayout`, `/doctor/availability`, `/doctor/accountInformation`, `/doctor/payoutWithdrawal` |
-| Health | `/healthMeasurements`, `/health/dailyLog` |
-
-### 6.3 State Management
-
-The frontend uses `flutter_bloc` with Cubits. `get_it` registers factories and repositories in `service_locator.dart`. State is split by feature: authentication Cubits, medication Cubits, profile Cubits, doctor profile Cubits, schedule Cubits, sound Cubits, and navigation Cubits.
-
-```mermaid
-flowchart LR
-    Screen --> BlocConsumer
-    BlocConsumer --> Cubit
-    Cubit --> Repo
-    Repo --> ApiService
-    ApiService --> DioClient
-    Cubit --> HiveService
-    Cubit --> State
-    State --> Screen
-```
-
-### 6.4 Networking
-
-`ApiService` exposes generic `get`, `post`, `put`, `patch`, and `delete` methods that call `DioClient`. `DioClient` adds `Authorization: Bearer <accessToken>` from Hive and handles 401 by calling `/users/refreshToken` with the refresh token. Concurrent refreshes are coordinated with `Completer` objects.
-
-### 6.5 Local Persistence
-
-Hive stores authentication tokens, challenge token, user/patient/doctor data, onboarding state, settings, and local medication records. This supports offline or fast local UI rendering, but the medication cache can diverge from backend state unless synchronization rules are defined.
-
-### 6.6 Performance Analysis
-
-| Area | Current Position | Recommendation |
-|---|---|---|
-| Navigation | Central GoRouter configuration | Consider route-level lazy module loading if web bundle becomes large |
-| State updates | Cubit-based state updates | Use Equatable consistently and avoid broad rebuilds |
-| API retries | Interceptor retries after token refresh | Add retry markers to prevent refresh loops on replayed requests |
-| Assets | Images/SVG/sounds included | Compress image assets and avoid bundling unused sounds |
-| Local medication list | Hive list operations use linear searches | Acceptable for small lists; index by backend ID for scale |
-
----
-
-## 7. Authentication & Authorization Analysis
-
-### 7.1 Token Strategy
-
-The backend issues JWT access tokens and refresh tokens using token utilities. Token payloads include user identity and role/type. Token IDs (`jti`) are generated with `nanoid` and stored for confirmation/reset/email-change workflows or revocation. The frontend stores access and refresh tokens in Hive and sends access tokens as bearer tokens.
-
-### 7.2 Role System
-
-| Role/Type | Backend Meaning |
-|---|---|
-| `patient` | Patient profile holder; can manage medicines, health logs, bookings, caregivers |
-| `doctor` | Doctor profile holder; can complete doctor profile, manage patients, wallet, sessions |
-| `admin` | Admin can approve/reject doctors through `/admin` routes |
-| `user` | Legacy/general type allowed in some user routes |
-
-### 7.3 Access Control Observations
-
-- Router-level RBAC is used heavily and is readable.
-- Domain ownership is often enforced inside services by comparing `req.user.id` to patient/doctor profile ownership.
-- Doctor elevated access to patient records is modeled by active booking sessions and QR session tokens.
-- The withdrawal processing endpoint is nested under a doctor-restricted router before an admin-only endpoint guard, making admin access likely unreachable without route refactoring.
-
-### 7.4 Security Weaknesses
-
-| Risk | Severity | Explanation | Recommendation |
-|---|---:|---|---|
-| Refresh token stored in Hive | High | Mobile local storage can be extracted on compromised devices | Consider secure storage/keychain and refresh-token rotation with device binding |
-| Paymob webhook trust | Critical | Webhook does not visibly verify HMAC/signature | Verify Paymob HMAC and reject unsigned payloads |
-| Slot booking race | High | Slot availability checked before insert without transaction/unique date/time booking constraint for active states | Add transaction or unique active booking lock |
-| Public profile endpoint | Medium | `/users/profile/:id` public route may leak excessive user data depending service response | Return minimal public projection |
-| CSP disabled | Medium | Helmet CSP disabled | Enable CSP for web deployment where feasible |
-| Config drift | Medium | `env.js` validates different names than `DB.js` reads | Standardize environment contract |
-
----
-
-## 8. Business Logic Documentation
-
-### 8.1 User Registration
-
-```mermaid
-flowchart TD
-    A[POST /users/signup] --> B[Validate Joi schema]
-    B --> C[Normalize email]
-    C --> D{Email exists?}
-    D -- yes --> E[400 duplicate]
-    D -- no --> F[Hash password]
-    F --> G[Create User]
-    G --> H{type}
-    H -- patient --> I[Create Patient]
-    H -- doctor --> J[Create Doctor]
-    I --> K[Generate confirmTokenId]
-    J --> K
-    K --> L[Send confirmation email async]
-    L --> M[Issue access + refresh tokens]
-    M --> N[201 response]
-```
-
-### 8.2 Sign-In with Optional 2FA
-
-1. Find user by normalized email and include password.
-2. Reject unknown or unconfirmed users.
-3. Compare bcrypt password.
-4. If `twoFA` is enabled, generate OTP, encrypt/store it, email the OTP, and return a challenge token.
-5. If `twoFA` is disabled, issue access/refresh tokens and attach the patient/doctor document.
-
-### 8.3 Doctor Onboarding
-
-Doctor completion is split into step endpoints:
-
-1. Step 1: profile basics/media/specialization.
-2. Location: clinic address/geolocation.
-3. Schedule: working days and working hours.
-4. Appointments: consultation duration, package types, daily capacity.
-5. License: license upload and pending status.
-6. Unified `/doctors/complete`: single request alternative.
-
-### 8.4 Booking Creation
-
-```mermaid
-flowchart TD
-    A[Patient creates booking] --> B[Resolve patient by userId]
-    B --> C[Find doctor]
-    C --> D[Validate package type]
-    D --> E[Validate doctor works requested day]
-    E --> F[Fetch existing bookings for date]
-    F --> G{Max daily patients reached?}
-    G -- yes --> H[400 fully booked]
-    G -- no --> I{Requested time already taken?}
-    I -- yes --> J[409 slot reserved]
-    I -- no --> K[Create Booking]
-    K --> L{Payment method online/card/paymob?}
-    L -- yes --> M[Create Paymob intention]
-    L -- no --> N[Skip payment]
-    M --> O[Connect patient to doctor if absent]
-    N --> O
-    O --> P[Create notification]
-    P --> Q[201 booking response]
-```
-
-### 8.5 QR Session Access
-
-A patient generates a QR/session token for a booking after payment validation. The doctor scans/submits the token, and the backend verifies doctor ownership, marks the session active, sets a two-hour expiration, and returns the patient record with medications and measurements. Ending the session clears token state and immediately expires elevated access.
-
-### 8.6 Medication Addition and AI Enhancement
-
-1. Resolve request context: patient self, connected doctor, or active session.
-2. Create medicine with patient ID and initial active ingredient fallback.
-3. Push medicine ID into patient medications.
-4. Start background AI enrichment to infer active ingredient, side effects, chronic status, and corrected type.
-5. If a doctor made the change, write an audit log.
-6. Return immediate response before AI completion.
-
-### 8.7 Caregiver and Doctor Connection Workflows
-
-Connection workflows are modeled as pending/approved/rejected statuses embedded in Patient/Doctor documents and/or caregiver request documents. The system supports patient-initiated doctor connections, doctor-initiated patient connections, caregiver requests, accept/cancel paths, and notification opportunities.
-
----
-
-## 9. Algorithm & Complexity Analysis
-
-| Function / Operation | Purpose | Time Complexity | Space Complexity | Risk Level | Notes |
-|---|---|---:|---:|---|---|
-| `getDoctorSlots` | Generate available slots from working hours minus bookings | O(B + H*S) | O(B + S) | Medium | B bookings for day, H working blocks, S generated slots |
-| `createBooking` slot conflict check | Prevent duplicate bookings | O(B) | O(B) | High | Race condition under concurrent requests |
-| `rescheduleBooking` | Move booking to new date/time | O(B) | O(B) | Medium | Excludes current booking from conflicts |
-| Medicine frequency pre-validation | Enforce daily/weekly/specific exclusive shape | O(1) to O(n) by array length | O(1) | Low | Clean schema-level invariant |
-| Medicine schedule generation | Build dose schedule from recurrence fields | O(M*D*T) | O(M*D*T) | Medium | M medicines, D days in requested period, T times/day |
-| Hive medication update/delete | Find local item by equality/fallback matching | O(N) | O(N) | Low | Acceptable for small patient medication lists |
-| Attach patient type doc | Populate medications and measurements | O(M + L) | O(M + L) | Medium | No pagination for measurements |
-| Gemini medication enrichment | Parse model JSON and update patient arrays | O(P + W) | O(P + W) | Medium | Depends on LLM latency and JSON validity |
-| Token refresh queue | Coordinate parallel 401s | O(R) | O(R) | Low | R waiting requests; prevents refresh storm |
-
----
-
-## 10. Real-Time & Async Systems
-
-No WebSocket, Socket.IO, Firebase realtime, or SignalR implementation was detected. Messaging is HTTP-based. Async behavior exists through background promises, webhook callbacks, cron, and local notifications/alarms on the Flutter side.
-
-```mermaid
-sequenceDiagram
-    participant User as Patient/Doctor App
-    participant API as Express API
-    participant Paymob as Paymob
-    participant DB as MongoDB
-
-    User->>API: POST /bookings with paymentMethod=paymob
-    API->>Paymob: create payment intention
-    API->>DB: create Booking pending/created
-    API-->>User: checkoutUrl/clientSecret
-    Paymob->>API: POST /bookings/webhook/paymob
-    API->>DB: mark booking paid and credit wallet
-    API-->>Paymob: 200 OK
-```
-
----
-
-## 11. Security Audit Documentation
-
-### 11.1 Security Score
+### Security Audit
 
 **Overall security score: 6.5 / 10**
-
-The project has a solid baseline with bcrypt, JWT, rate limiting, Helmet, Joi validation, role guards, token IDs, and sensitive field projections. Enterprise readiness requires stronger webhook verification, secure local token storage, transaction-safe booking, stricter input coverage, and observability.
-
-### 11.2 Risk Matrix
 
 | Severity | Finding | Impact | Remediation |
 |---|---|---|---|
 | Critical | Paymob webhook lacks visible HMAC verification | Fraudulent payment status updates and wallet credit | Validate Paymob HMAC/signature before mutation |
 | High | Booking slot race condition | Double bookings under concurrency | Add unique lock or MongoDB transaction with conflict handling |
-| High | Refresh tokens in non-secure Hive box | Token theft from compromised client | Use platform secure storage and rotate refresh tokens |
+| High | Refresh tokens in non-secure Hive box | Token theft from compromised client | Use platform secure storage and refresh-token rotation |
 | High | No durable queue for medical AI/email jobs | Lost tasks during process shutdown | Add BullMQ/SQS/Cloud Tasks with retries |
 | Medium | Multiple endpoints lack Joi validation | Injection/shape drift and inconsistent error behavior | Add schemas to every mutating endpoint |
 | Medium | No centralized audit for auth/admin changes | Compliance gaps | Add audit log entries for login, admin approval, profile changes |
 | Medium | Error responses sometimes expose raw messages | Information disclosure | Normalize service errors through centralized error middleware |
 | Low | Commented legacy code remains in production files | Maintainability and confusion risk | Remove dead code |
 
----
+### Performance and Scalability Analysis
 
-## 12. Performance Engineering Report
-
-### 12.1 Bottlenecks
-
-| Layer | Bottleneck | Recommendation |
+| Area | Current Position | Recommendation |
 |---|---|---|
-| API | Global JSON body limit is small enough for safety but uploads handled separately | Keep files multipart; document max image/license sizes |
-| DB | Booking and measurement list endpoints lack pagination | Add cursor pagination and date range filters |
-| DB | In-memory slot conflict checks | Use indexed unique reservation collection or transaction |
-| Backend async | Gemini calls can be slow and currently background best-effort | Move to queue with retry/backoff and result status |
-| Frontend | Central router imports many screens eagerly | Use deferred imports for web/large app builds |
-| Frontend local state | Medication Hive operations use full-list rewrite | Use keyed Hive objects by medication ID |
+| API lists | Booking, measurement, symptom, medication, and notification lists may grow | Add pagination, date windows, and cursor support |
+| Database | Useful indexes exist on foreign keys and status fields | Add compound indexes for frequent query paths |
+| Booking | Slot checking is in-memory after daily booking fetch | Add transaction-safe reservation mechanism |
+| Async work | Email and AI are best-effort promises | Move to durable queues with retry/backoff |
+| Frontend routing | Central GoRouter imports many screens | Consider deferred imports for web/large app builds |
+| Local medication cache | Hive list rewrite and linear search | Store keyed by backend medication ID |
+| Horizontal scaling | API is mostly stateless | Move cron outside app runtime and avoid local upload storage |
+| Caching | No server cache detected | Cache doctor directory/reference data with Redis/CDN when traffic grows |
 
-### 12.2 API Latency Risks
+### DevOps and Deployment
 
-- Population of nested documents can inflate response time.
-- AI should remain asynchronous and never block medication CRUD responses.
-- Paymob creation adds external latency to booking creation; consider separate payment-intent creation endpoint for retries.
-
----
-
-## 13. Scalability Analysis
-
-| Dimension | Current Readiness | Enterprise Recommendation |
+| Concern | Current State | Recommendation |
 |---|---|---|
-| Horizontal API scaling | Mostly stateless, compatible with multiple Node instances | Move cron to external scheduler; avoid local uploads path |
-| Database scaling | Uses indexes on major foreign keys | Add compound query indexes and monitor slow queries |
-| Caching | No server cache detected | Cache doctor directory and static reference data with Redis/CDN |
-| Queues | None | Add queue for emails, Gemini analysis, exports, notifications |
-| Files | Cloudinary used for profile assets | Ensure all upload paths use Cloudinary, not local filesystem |
-| Search | Basic Mongo filtering likely | Add Atlas Search or dedicated search if doctor directory grows |
-| Microservice readiness | Domain modules provide initial boundaries | Extract auth, notifications, payments, AI workers only after modular monolith stabilizes |
+| Backend start | `npm start` runs Node server/exported Vercel handler | Keep one deployment path documented |
+| Development | `npm run dev` with nodemon | Good local workflow |
+| Tests | Jest script exists | Expand backend and frontend test suites |
+| Lint/format | Placeholder scripts | Add ESLint/Prettier and Flutter analysis gate |
+| CI/CD | No pipeline file detected | Add install, lint, test, build, deploy workflow |
+| Environment | Multiple env names used for Mongo and token config | Standardize one config module and fail fast |
 
----
+Required environment categories include MongoDB URI, JWT secrets/TTLs, bcrypt rounds, Google client ID, Gemini API key, Paymob credentials, Cloudinary credentials, and SMTP credentials.
 
-## 14. DevOps & Deployment Documentation
+### Dependency Analysis
 
-### 14.1 Runtime Setup
+| Layer | Dependency | Purpose | Risk / Note |
+|---|---|---|---|
+| Backend | `express` | API framework | Express 5 compatibility should be verified |
+| Backend | `mongoose` | MongoDB ODM | Monitor version/runtime compatibility |
+| Backend | `jsonwebtoken`, `bcrypt`, `nanoid` | Auth and credentials | Secret handling and token lifecycle are critical |
+| Backend | `joi` | Validation | Should cover every mutating endpoint |
+| Backend | `helmet`, `cors`, `express-rate-limit` | Security | CSP disabled; CORS should be environment-specific |
+| Backend | `multer`, `cloudinary` | Uploads | Enforce file type/size and avoid local file dependence |
+| Backend | `nodemailer` | Email | Needs queue-backed retry |
+| Backend | `node-cron` | Scheduled reset | Not ideal for serverless deployment |
+| Backend | `pdfkit`, `qrcode` | Export/QR | Appropriate for medical record export |
+| Backend | `@google/generative-ai`, `google-auth-library` | Gemini and Google OAuth | Handle model latency, rate limits, and JSON failures |
+| Frontend | `flutter_bloc` | State management | Good production choice |
+| Frontend | `dio` | HTTP client | Refresh retry logic should be tested under concurrent 401s |
+| Frontend | `go_router` | Navigation | Centralized route management |
+| Frontend | `hive`, `hive_flutter` | Local persistence | Use secure storage for tokens |
+| Frontend | `get_it` | Dependency injection | Keep registrations deterministic |
+| Frontend | `flutter_local_notifications`, `alarm` | Reminders | Requires platform permission handling |
+| Frontend | `geolocator`, `geocoding` | Location | Requires privacy and permission clarity |
+| Frontend | `google_sign_in` | Google auth | Backend audience must match app client |
 
-Backend scripts:
-
-| Script | Purpose |
-|---|---|
-| `npm run dev` | Nodemon development server |
-| `npm start` | Node production start |
-| `npm test` | Jest with experimental VM modules |
-| `npm run lint` | Placeholder |
-| `npm run format` | Placeholder |
-
-### 14.2 Required Environment Variables
-
-| Variable | Used For |
-|---|---|
-| `MONGO_URI_ONLINE` / `MONGO_URI` | MongoDB connection in `DB.js` |
-| `MONGODB_URI` | Validated by `env.js`, currently not used by `DB.js` |
-| `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` | JWT signing/verification |
-| `JWT_EXPIRES_IN`, `JWT_ACCESS_TTL`, `JWT_REFRESH_TTL` | Token lifetimes |
-| `SALT_ROUNDS`, `BCRYPT_ROUNDS` | Password hashing cost |
-| `GOOGLE_CLIENT_ID` | Google auth validation |
-| `GEMINI_API_KEY` | AI medication analysis |
-| `PAYMOB_API_KEY`, `PAYMOB_INTEGRATION_ID` | Payment integration |
-| Cloudinary credentials | Upload destination configuration |
-| SMTP credentials | Nodemailer email delivery |
-
-### 14.3 Deployment Architecture
-
-```mermaid
-flowchart TB
-    Mobile[Flutter Client] --> CDN[App Store/Web Hosting/CDN]
-    Mobile --> API[Vercel/Node Express Function]
-    API --> Mongo[(MongoDB Atlas)]
-    API --> Cloudinary[Cloudinary]
-    API --> SMTP[SMTP Provider]
-    API --> Paymob[Paymob]
-    API --> Gemini[Google Gemini]
-```
-
-### 14.4 CI/CD Readiness
-
-The repository has package manifests and tests, but no CI pipeline file was detected. Recommended pipeline:
-
-1. Backend install: `npm ci`.
-2. Backend tests: `npm test`.
-3. Backend lint/type check once ESLint is added.
-4. Flutter install: `flutter pub get`.
-5. Flutter static analysis: `flutter analyze`.
-6. Flutter tests: `flutter test`.
-7. Build artifacts for target platforms.
-8. Deploy backend only after tests and migration checks pass.
-
----
-
-## 15. Dependency & Package Analysis
-
-### 15.1 Backend Dependencies
-
-| Package | Purpose | Risk / Notes |
-|---|---|---|
-| `express` | API framework | Express 5 behavior differs from Express 4; validate middleware compatibility |
-| `mongoose` | MongoDB ODM | Ensure version compatibility with Node runtime |
-| `jsonwebtoken` | JWT auth | Secrets and token rotation must be managed carefully |
-| `bcrypt` | Password hashing | Good baseline; cost must be tuned |
-| `joi` | Request validation | Use on all mutating endpoints |
-| `helmet`, `cors`, `express-rate-limit` | Security controls | CSP disabled; CORS should be environment-specific |
-| `multer`, `cloudinary` | Upload handling | Enforce file type/size and malware considerations |
-| `nodemailer` | Email | Add retry queue and bounce handling |
-| `node-cron` | Scheduled task | Not reliable in serverless multi-instance deployment |
-| `pdfkit`, `qrcode` | Export and QR generation | Suitable for records export |
-| `@google/generative-ai`, `google-auth-library` | Gemini and Google OAuth | Handle rate limits and JSON parse failures |
-| `twilio` | SMS/WhatsApp potential | Package present; integration should be audited if used |
-
-### 15.2 Frontend Dependencies
-
-| Package | Purpose | Risk / Notes |
-|---|---|---|
-| `flutter_bloc` | State management | Good production choice |
-| `dio` | HTTP client | Interceptor logic should be tested under concurrent 401s |
-| `go_router` | Navigation | Centralized routing is maintainable |
-| `hive`, `hive_flutter` | Local persistence | Use secure storage for tokens if possible |
-| `get_it` | Dependency injection | Keep registration centralized and deterministic |
-| `flutter_local_notifications`, `alarm`, `android_alarm_manager_plus` | Reminder and alarm functionality | Platform permission complexity |
-| `geolocator`, `geocoding` | Location | Requires explicit permission handling and privacy policy |
-| `google_sign_in` | Google auth | Ensure backend ID token audience matches app client |
-| `image_picker` | Profile/license image selection | Validate uploads server-side |
-| `fl_chart` | Health visualization | Monitor rendering performance with large datasets |
-
----
-
-## 16. Code Quality Review
-
-### 16.1 Scorecard
+### Code Quality and Testing Review
 
 | Category | Score | Rationale |
 |---|---:|---|
@@ -948,95 +1025,28 @@ The repository has package manifests and tests, but no CI pipeline file was dete
 | Testability | 5.5/10 | Some Jest tests exist, but service functions are response-coupled |
 | Observability | 4.5/10 | Morgan/log statements but no structured logs/metrics/tracing |
 
-### 16.2 Technical Debt
+Detected backend tests include `backend/src/modules/healthModel/health.service.test.js` and `backend/src/modules/medicineModel/medicine.service.test.js`. Recommended testing expansion includes unit tests for token utilities and slot generation, integration tests for auth/booking/medication/session flows, RBAC security tests, Cubit tests, E2E patient/doctor workflows, and booking concurrency load tests.
 
-- Remove large commented legacy service/controller blocks.
-- Refactor services to return domain results and throw typed errors; controllers should own HTTP responses.
-- Standardize route/controller style across modules.
-- Normalize environment variable names.
-- Add request validation to currently unvalidated endpoints.
-- Extract authorization policies for patient/doctor/active-session checks.
+### Engineering Recommendations
 
----
+| Priority | Recommendation |
+|---|---|
+| Critical | Verify Paymob webhook signatures before mutating bookings or wallet balances |
+| Critical | Make booking slot reservation transaction-safe or enforce a unique active doctor/date/time lock |
+| Critical | Move cron/email/AI/export jobs to a durable queue system |
+| Critical | Store refresh tokens using platform secure storage and implement refresh-token rotation/reuse detection |
+| High | Add pagination to booking, measurement, symptom, medicine, notification, and audit endpoints |
+| High | Add consistent Joi validation to every mutating endpoint |
+| High | Standardize environment variables and fail fast with one config module |
+| High | Refactor service functions away from direct `res` usage |
+| High | Add structured logging, request IDs, metrics, and external error monitoring |
+| Medium | Add a complete admin frontend or remove admin-only assumptions from client scope |
+| Medium | Introduce Redis caching for doctor directory and reference data |
+| Medium | Generate OpenAPI documentation from route schemas |
+| Medium | Remove commented legacy code and normalize module naming |
+| Low | Improve typo consistency and add pre-commit formatting/linting |
 
-## 17. Error Handling & Logging System
-
-The backend has `notFound` and `errorHandler` middleware, but many services catch errors and return responses directly. This creates inconsistent error shapes. Morgan provides request logging, while several services use `console.log`/`console.error` for external integrations.
-
-Recommended enterprise error taxonomy:
-
-| Error Type | HTTP Status | Example |
-|---|---:|---|
-| ValidationError | 400 | Joi schema mismatch |
-| AuthenticationError | 401 | Missing/expired token |
-| AuthorizationError | 403 | User not owner/role denied |
-| NotFoundError | 404 | Doctor/patient/booking not found |
-| ConflictError | 409 | Slot already reserved |
-| ExternalServiceError | 502 | Paymob/Gemini/SMTP failure |
-| RateLimitError | 429 | Too many requests |
-
-Frontend error handling wraps Dio failures into `ServerFailure`, but screens should consistently distinguish validation, auth expiration, network outage, and server errors.
-
----
-
-## 18. Testing Architecture
-
-### 18.1 Current Tests
-
-Detected backend tests include:
-
-- `backend/src/modules/healthModel/health.service.test.js`
-- `backend/src/modules/medicineModel/medicine.service.test.js`
-
-No full Flutter test inventory was inspected beyond standard `flutter_test` dependency.
-
-### 18.2 Testing Recommendations
-
-| Test Type | Priority | Scope |
-|---|---|---|
-| Unit tests | Critical | Token utilities, slot generation, medicine schedule generation, validation schemas |
-| Integration tests | Critical | Auth, booking, medication CRUD, session QR flow, Paymob webhook |
-| Security tests | High | RBAC access denial, revoked tokens, unconfirmed accounts, invalid JWTs |
-| Frontend Cubit tests | High | Auth, medication, profile, refresh-token behavior |
-| E2E tests | Medium | Patient signup → medication → booking; doctor onboarding → approval → session |
-| Load tests | Medium | Doctor slots and booking creation concurrency |
-
----
-
-## 19. Engineering Recommendations
-
-### Critical
-
-1. Verify Paymob webhook signatures before mutating bookings or wallet balances.
-2. Make booking slot reservation transaction-safe or enforce a unique active doctor/date/time lock.
-3. Move cron/email/AI tasks to a durable job system.
-4. Store refresh tokens using platform secure storage and implement refresh-token rotation/reuse detection.
-
-### High
-
-1. Add pagination to booking, measurement, symptom, medicine, notification, and audit endpoints.
-2. Add consistent Joi validation to every mutating endpoint.
-3. Standardize environment variables and fail fast with one config module.
-4. Refactor service functions away from direct `res` usage.
-5. Add structured logging, request IDs, and external error monitoring.
-
-### Medium
-
-1. Add a complete admin frontend or remove admin-only assumptions from client scope.
-2. Introduce Redis caching for doctor directory and reference data.
-3. Add OpenAPI documentation generated from route schemas.
-4. Remove commented legacy code and normalize module naming.
-5. Add feature flags for AI medication enrichment.
-
-### Low
-
-1. Improve typo consistency in field names such as `duraction` and widget names such as `Scetion`.
-2. Add Mermaid diagrams to developer docs in smaller module-specific files if this document becomes too large.
-3. Add pre-commit formatting and linting.
-
----
-
-## 20. Final Technical Evaluation
+### Final Technical Evaluation
 
 | Dimension | Score | Evaluation |
 |---|---:|---|
@@ -1047,13 +1057,7 @@ No full Flutter test inventory was inspected beyond standard `flutter_test` depe
 | Maintainability | 6.8/10 | Feature modularity helps; dead code and inconsistent service patterns hurt clarity |
 | Production readiness | 6.2/10 | Suitable for controlled beta; not yet enterprise production-ready without hardening |
 
-### Final Engineering Verdict
-
-MediApp is a promising modular healthcare platform with meaningful domain coverage: patient medication management, health telemetry, doctor onboarding, appointment scheduling, session-limited record access, caregiver support, and export workflows. The implementation demonstrates solid architectural instincts through separated backend modules, Mongoose schemas, Joi validators, Flutter feature modules, Cubit state management, and centralized networking.
-
-The main blockers for enterprise readiness are security and operational hardening rather than core product architecture. Payment webhooks must be verified, booking writes must be concurrency-safe, background tasks need durable queues, environment configuration should be unified, and observability/testing must be expanded. With these improvements, the system can evolve from a strong MVP codebase into a production-grade healthcare application architecture.
-
-### Suggested Roadmap
+MediApp is a promising modular healthcare platform with meaningful domain coverage: patient medication management, health telemetry, doctor onboarding, appointment scheduling, session-limited record access, caregiver support, and export workflows. The main blockers for enterprise readiness are payment webhook verification, concurrency-safe booking, durable background processing, unified environment configuration, broader test coverage, and observability.
 
 ```mermaid
 gantt
