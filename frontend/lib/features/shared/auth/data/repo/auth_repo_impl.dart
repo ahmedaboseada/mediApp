@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:medi/core/constants/app_keys.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/shared/auth/data/models/auth_token_model.dart';
 import 'package:medi/features/shared/auth/data/models/auth_response_model.dart';
@@ -12,6 +13,8 @@ import 'package:medi/features/shared/auth/data/models/doctor_model.dart';
 import 'package:medi/features/shared/auth/data/models/user_model.dart';
 import 'package:medi/features/shared/auth/data/models/patient_model.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo.dart';
+ import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
+ import 'package:zego_uikit_signaling_plugin/zego_uikit_signaling_plugin.dart';
 
 class AuthRepoImpl implements AuthRepo {
   final ApiService apiService;
@@ -80,6 +83,16 @@ class AuthRepoImpl implements AuthRepo {
         final doctor = DoctorModel.fromJson(response['doctor']);
         await HiveService.saveDoctorData(doctor);
       }
+    await ZegoUIKitPrebuiltCallInvitationService().init(
+ 
+    appID: AppKeys.appId /*input your AppID*/,
+    appSign: AppKeys.appSign /*input your AppSign*/,
+    userID: user.id,
+    userName: '${user.firstName} ${user.lastName}',
+    
+    plugins: [ZegoUIKitSignalingPlugin()],
+   
+  );
 
       log('Access Token saved via Hive: $accessToken');
       return Right(accessToken);
@@ -165,6 +178,8 @@ class AuthRepoImpl implements AuthRepo {
       // Clear all data using Hive
       await HiveService.clearAllData();
       await _googleSignIn.signOut();
+       ZegoUIKitPrebuiltCallInvitationService().uninit();
+
     } catch (e) {
       log('Logout error: $e');
     }

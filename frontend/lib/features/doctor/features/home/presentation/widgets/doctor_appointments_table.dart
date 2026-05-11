@@ -1,6 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/home/data/models/doctor_appointment_model.dart';
+import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
+import 'package:zego_uikit/zego_uikit.dart';
 
 class DoctorAppointmentsTable extends StatelessWidget {
   const DoctorAppointmentsTable({super.key, required this.appointments});
@@ -107,10 +111,30 @@ class DoctorAppointmentsDataRow extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
+               
+                 
+                    ZegoSendCallInvitationButton(
+                      isVideoCall: true,
+                      //You need to use the resourceID that you created in the subsequent steps.
+                      //Please continue reading this document.
+                      resourceID: "medi_call",
+                      invitees: [
+                        ZegoUIKitUser(
+                          id: appointment.userId ?? appointment.name,
+                          
+                          name: appointment.patientName ?? appointment.name,
+                        )
+                      ],
+                    ),
+                  
+                
                 _actionIcon(
                   icon: Icons.play_arrow_outlined,
                   bgColor: const Color(0xFFD7E8FF),
                   iconColor: AppColors.primary,
+                  onTap: () {
+                    // Handle play arrow icon tap
+                  },
                 ),
                 SizedBox(width: AppSizes.w8),
                 _actionIcon(
@@ -119,11 +143,11 @@ class DoctorAppointmentsDataRow extends StatelessWidget {
                   iconColor: const Color(0xFF22C55E),
                 ),
                 SizedBox(width: AppSizes.w8),
-                _actionIcon(
-                  icon: Icons.close_rounded,
-                  bgColor: const Color(0xFFFBD6DC),
-                  iconColor: const Color(0xFFEF4444),
-                ),
+                // _actionIcon(
+                //   icon: Icons.close_rounded,
+                //   bgColor: const Color(0xFFFBD6DC),
+                //   iconColor: const Color(0xFFEF4444),
+                // ),
               ],
             ),
           ),
@@ -136,12 +160,16 @@ class DoctorAppointmentsDataRow extends StatelessWidget {
     required IconData icon,
     required Color bgColor,
     required Color iconColor,
+    VoidCallback? onTap,
   }) {
-    return Container(
-      width: AppSizes.w24,
-      height: AppSizes.h24,
-      decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
-      child: Icon(icon, size: AppSizes.h18, color: iconColor),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: AppSizes.w24,
+        height: AppSizes.h24,
+        decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
+        child: Icon(icon, size: AppSizes.h18, color: iconColor),
+      ),
     );
   }
 }

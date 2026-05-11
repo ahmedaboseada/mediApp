@@ -8,7 +8,6 @@ import 'package:medi/features/doctor/features/complete_profile/presentation/cont
 import 'package:medi/features/doctor/features/complete_profile/presentation/controller/schedule_appointments/schedule_appointments_state.dart';
 import 'package:medi/features/doctor/features/settings/presentation/widgets/working_days_widget.dart';
 import 'package:medi/features/shared/auth/data/models/doctor_model.dart';
-import 'package:medi/features/shared/auth/data/repo/auth_repo.dart';
 
 class ScheduleAvailabilityScreen extends StatefulWidget {
   const ScheduleAvailabilityScreen({super.key, required this.doctor});
@@ -164,12 +163,12 @@ class _ScheduleAvailabilityScreenState
                               label: 'Start Time',
                               initialTime: TimeOfDay(
                                 hour: int.parse(
-                                  widget.doctor.workingHours.first.startHour!
+                                  widget.doctor.workingHours.first.startHour
                                       .split(':')
                                       .first,
                                 ),
                                 minute: int.parse(
-                                  widget.doctor.workingHours.first.startHour!
+                                  widget.doctor.workingHours.first.startHour
                                       .split(':')
                                       .last,
                                 ),
@@ -186,12 +185,12 @@ class _ScheduleAvailabilityScreenState
                               label: 'End Time',
                               initialTime: TimeOfDay(
                                 hour: int.parse(
-                                  widget.doctor.workingHours.first.endHour!
+                                  widget.doctor.workingHours.first.endHour
                                       .split(':')
                                       .first,
                                 ),
                                 minute: int.parse(
-                                  widget.doctor.workingHours.first.endHour!
+                                  widget.doctor.workingHours.first.endHour
                                       .split(':')
                                       .last,
                                 ),
