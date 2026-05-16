@@ -223,6 +223,17 @@ const calcDOBAndAge = (year) => {
     return { dob, age };
 };
 
+const formatEgyptianPhoneNumber = (phone) => {
+    if (!phone) return phone;
+    let cleaned = phone.toString().replace(/[^\d+]/g, '');
+    if (cleaned.startsWith('+20') && cleaned.length === 13) return cleaned;
+    if (cleaned.startsWith('0020') && cleaned.length === 14) return '+' + cleaned.substring(2);
+    if (cleaned.startsWith('20') && cleaned.length === 12) return '+' + cleaned;
+    if (cleaned.startsWith('01') && cleaned.length === 11) return '+20' + cleaned.substring(1);
+    if (cleaned.startsWith('1') && cleaned.length === 10) return '+20' + cleaned;
+    return phone;
+};
+
 // Screen: Complete Your Profile (basic)
 export const completeBasic = async (req, res) => {
     const userId = req.user.id;
@@ -681,6 +692,19 @@ export const completeProfile = async (req, res) => {
         if (typeof ec === 'string') {
             try { ec = JSON.parse(ec); } catch (e) { }
         }
+        if (ec && ec.phone) {
+            ec.phone = formatEgyptianPhoneNumber(ec.phone);
+            
+            let userPhoneFormatted = phone ? formatEgyptianPhoneNumber(phone) : null;
+            if (!userPhoneFormatted && user.phone) {
+                try {
+                    userPhoneFormatted = formatEgyptianPhoneNumber(await ET.decrypt(user.phone));
+                } catch(e) {}
+            }
+            if (userPhoneFormatted && userPhoneFormatted === ec.phone) {
+                return res.status(400).json({ message: 'Emergency contact cannot be your own phone number' });
+            }
+        }
         patch.emergencyContact = ec;
     }
 
@@ -729,7 +753,23 @@ export const completeProfile = async (req, res) => {
 
 export const setEmergencyContact = async (req, res) => {
     const userId = req.user.id;
-    const { name, phone, contactMethod } = req.body;
+    let { name, phone, contactMethod } = req.body;
+    
+    phone = formatEgyptianPhoneNumber(phone);
+
+    const user = await userModel.findById(userId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    
+    let userPhoneFormatted = null;
+    if (user.phone) {
+        try {
+            userPhoneFormatted = formatEgyptianPhoneNumber(await ET.decrypt(user.phone));
+        } catch(e) {}
+    }
+    
+    if (userPhoneFormatted && userPhoneFormatted === phone) {
+        return res.status(400).json({ message: 'Emergency contact cannot be your own phone number' });
+    }
 
     const patient = await patientModel.findOne({ userId });
     if (!patient) return res.status(404).json({ message: 'Patient not found' });
