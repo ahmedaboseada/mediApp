@@ -44,6 +44,76 @@ const fetchPatientData = async (patientIdFromReq, userId, userRole) => {
     return patient;
 };
 
+// Shared PDF builder for Health Passport
+const buildHealthPassportPDF = (patient, res) => {
+    // Build PDF
+    const doc = new PDFDocument({ margin: 50, size: 'A4' });
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=Health_Passport_${patient.userId.firstName}.pdf`);
+    doc.pipe(res);
+
+    // Header
+    doc.fontSize(24).fillColor('#2c3e50').text('Health Passport', { align: 'center' });
+    doc.moveDown();
+
+    // Identity
+    doc.fontSize(16).fillColor('#34495e').text('Identity', { underline: true });
+    doc.fontSize(12).fillColor('#000').moveDown(0.5);
+    doc.text(`Name: ${patient.userId.firstName} ${patient.userId.lastName}`);
+    const dob = patient.userId.DOB ? new Date(patient.userId.DOB).toLocaleDateString() : 'N/A';
+    doc.text(`Date of Birth: ${dob}`);
+    doc.text(`Blood group: ${patient.bloodTypes || 'Select'}`);
+    doc.moveDown();
+
+    // Allergies
+    doc.fontSize(16).fillColor('#34495e').text('Allergies', { underline: true }).moveDown(0.5);
+    doc.fontSize(12).fillColor('#000');
+    if (patient.allergies?.length > 0) {
+        patient.allergies.forEach(a => doc.text(`• ${a}`));
+    } else {
+        doc.text('None recorded.');
+    }
+    doc.moveDown();
+
+    // Medications
+    doc.fontSize(16).fillColor('#34495e').text('Medications', { underline: true }).moveDown(0.5);
+    doc.fontSize(12).fillColor('#000');
+    if (patient.medications?.length > 0) {
+        patient.medications.forEach(m => {
+            const medLabel = m.dosage ? `${m.name || m.activeIngredient} ${m.dosage}` : (m.name || m.activeIngredient);
+            doc.text(`• ${medLabel}`);
+        });
+    } else {
+        doc.text('None recorded.');
+    }
+    doc.moveDown();
+
+    // Conditions
+    doc.fontSize(16).fillColor('#34495e').text('Conditions', { underline: true }).moveDown(0.5);
+    doc.fontSize(12).fillColor('#000');
+    if (patient.chronicConditions?.length > 0) {
+        patient.chronicConditions.forEach(c => doc.text(`• ${c}`));
+    } else {
+        doc.text('None recorded.');
+    }
+    doc.moveDown();
+
+    // Emergency Contacts
+    doc.fontSize(16).fillColor('#34495e').text('Emergency Contacts', { underline: true }).moveDown(0.5);
+    doc.fontSize(12).fillColor('#000');
+    if (patient.emergencyContact && patient.emergencyContact.name) {
+        doc.text(`Name: ${patient.emergencyContact.name}`);
+        if (patient.emergencyContact.phone) {
+            doc.text(`Phone: ${patient.emergencyContact.phone}`);
+        }
+    } else {
+        doc.text('None recorded.');
+    }
+
+    doc.end();
+};
+
 // Generate Health Passport PDF
 export const generateHealthPassport = async (req, res) => {
     try {
@@ -52,46 +122,7 @@ export const generateHealthPassport = async (req, res) => {
 
         const patient = await fetchPatientData(patientIdFromReq, userId, role);
 
-        // Build PDF
-        const doc = new PDFDocument({ margin: 50, size: 'A4' });
-
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=Health_Passport_${patient.userId.firstName}.pdf`);
-        doc.pipe(res);
-
-        // Header
-        doc.fontSize(24).fillColor('#2c3e50').text('MediApp Health Passport', { align: 'center' });
-        doc.moveDown();
-
-        // Basic Info
-        doc.fontSize(16).fillColor('#34495e').text('Patient Information', { underline: true });
-        doc.fontSize(12).fillColor('#000').moveDown(0.5);
-        doc.text(`Name: ${patient.userId.firstName} ${patient.userId.lastName}`);
-        doc.text(`Email: ${patient.userId.email}`);
-        doc.text(`Age: ${patient.userId.age || 'N/A'}`);
-        doc.text(`Blood Type: ${patient.bloodTypes || 'Unknown'}`);
-        doc.moveDown();
-
-        // Chronic Conditions
-        doc.fontSize(16).fillColor('#34495e').text('Chronic Conditions', { underline: true }).moveDown(0.5);
-        doc.fontSize(12).fillColor('#000');
-        if (patient.chronicConditions?.length > 0) {
-            patient.chronicConditions.forEach(c => doc.text(`• ${c}`));
-        } else {
-            doc.text('None recorded.');
-        }
-        doc.moveDown();
-
-        // Allergies
-        doc.fontSize(16).fillColor('#34495e').text('Allergies', { underline: true }).moveDown(0.5);
-        doc.fontSize(12).fillColor('#000');
-        if (patient.allergies?.length > 0) {
-            patient.allergies.forEach(a => doc.text(`• ${a}`));
-        } else {
-            doc.text('None recorded.');
-        }
-
-        doc.end();
+        buildHealthPassportPDF(patient, res);
 
     } catch (error) {
         res.status(error.status || 500).json({ message: error.message || 'Internal Server Error' });
@@ -194,51 +225,13 @@ export const getSharedRecord = async (req, res) => {
         const decoded = jwt.verify(qrToken, process.env.JWT_SECRET || 'fallback_secret');
 
         const patient = await patientModel.findById(decoded.patientId)
-            .populate('userId', 'firstName lastName age bloodTypes email phone')
+            .populate('userId')
+            .populate('medications')
             .lean();
 
         if (!patient) return res.status(404).json({ message: 'Patient not found' });
 
-        // Build PDF
-        const doc = new PDFDocument({ margin: 50, size: 'A4' });
-        
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', `attachment; filename=Health_Passport_${patient.userId.firstName}.pdf`);
-        doc.pipe(res);
-
-        // Header
-        doc.fontSize(24).fillColor('#2c3e50').text('MediApp Health Passport', { align: 'center' });
-        doc.moveDown();
-
-        // Basic Info
-        doc.fontSize(16).fillColor('#34495e').text('Patient Information', { underline: true });
-        doc.fontSize(12).fillColor('#000').moveDown(0.5);
-        doc.text(`Name: ${patient.userId.firstName} ${patient.userId.lastName}`);
-        doc.text(`Email: ${patient.userId.email}`);
-        doc.text(`Age: ${patient.userId.age || 'N/A'}`);
-        doc.text(`Blood Type: ${patient.bloodTypes || 'Unknown'}`);
-        doc.moveDown();
-
-        // Chronic Conditions
-        doc.fontSize(16).fillColor('#34495e').text('Chronic Conditions', { underline: true }).moveDown(0.5);
-        doc.fontSize(12).fillColor('#000');
-        if (patient.chronicConditions?.length > 0) {
-            patient.chronicConditions.forEach(c => doc.text(`• ${c}`));
-        } else {
-            doc.text('None recorded.');
-        }
-        doc.moveDown();
-
-        // Allergies
-        doc.fontSize(16).fillColor('#34495e').text('Allergies', { underline: true }).moveDown(0.5);
-        doc.fontSize(12).fillColor('#000');
-        if (patient.allergies?.length > 0) {
-            patient.allergies.forEach(a => doc.text(`• ${a}`));
-        } else {
-            doc.text('None recorded.');
-        }
-
-        doc.end();
+        buildHealthPassportPDF(patient, res);
     } catch (error) {
         return res.status(401).json({ message: 'Invalid or expired QR token' });
     }
