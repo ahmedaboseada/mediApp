@@ -71,9 +71,14 @@ class _AddDoctorViewState extends State<AddDoctorView> {
   }
 
   void _cancelRequest() {
-    setState(() {
-      _flowState = _AddDoctorFlowState.form;
-    });
+    if (_submittedDoctorId.isEmpty) {
+      setState(() {
+        _flowState = _AddDoctorFlowState.form;
+      });
+      return;
+    }
+
+    context.read<AddDoctorCubit>().cancelConnectionRequest(_submittedDoctorId);
   }
 
   void _onViewDoctors() {
@@ -98,31 +103,21 @@ class _AddDoctorViewState extends State<AddDoctorView> {
 
   @override
   Widget build(BuildContext context) {
-    if (_flowState == _AddDoctorFlowState.pending) {
-      return RequestStatusScreen(
-        isConnected: false,
-        patientId: _submittedDoctorId,
-        onBack: _cancelRequest,
-        onPrimaryAction: _cancelRequest,
-      );
-    }
-
-    if (_flowState == _AddDoctorFlowState.connected) {
-      return RequestStatusScreen(
-        isConnected: true,
-        patientId: _submittedDoctorId,
-        onBack: _cancelRequest,
-        onPrimaryAction: _onViewDoctors,
-      );
-    }
-
     return BlocConsumer<AddDoctorCubit, AddDoctorState>(
       listener: (context, state) {
         if (state.status == AddDoctorStatus.success) {
           setState(() {
-            _flowState = _AddDoctorFlowState.pending;
+            _flowState = state.lastAction == AddDoctorAction.cancelRequest
+                ? _AddDoctorFlowState.form
+                : _AddDoctorFlowState.pending;
+            if (state.lastAction == AddDoctorAction.cancelRequest) {
+              _submittedDoctorId = '';
+            }
           });
-        } else if (state.status == AddDoctorStatus.failure) {
+          return;
+        }
+
+        if (state.status == AddDoctorStatus.failure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.errorMessage ?? 'Failed to send request'),
@@ -132,6 +127,24 @@ class _AddDoctorViewState extends State<AddDoctorView> {
       },
       builder: (context, state) {
         final isLoading = state.status == AddDoctorStatus.loading;
+
+        if (_flowState == _AddDoctorFlowState.pending) {
+          return RequestStatusScreen(
+            isConnected: false,
+            patientId: _submittedDoctorId,
+            onBack: _cancelRequest,
+            onPrimaryAction: _cancelRequest,
+          );
+        }
+
+        if (_flowState == _AddDoctorFlowState.connected) {
+          return RequestStatusScreen(
+            isConnected: true,
+            patientId: _submittedDoctorId,
+            onBack: _cancelRequest,
+            onPrimaryAction: _onViewDoctors,
+          );
+        }
 
         return Scaffold(
           backgroundColor: AppColors.background,
@@ -153,9 +166,7 @@ class _AddDoctorViewState extends State<AddDoctorView> {
                     title: 'By Doctor ID',
                     description:
                         'Enter the doctor\'s unique ID to send an access request',
-                    isExpanded: _expandedOptions.contains(
-                      _AddDoctorOption.byId,
-                    ),
+                    isExpanded: _expandedOptions.contains(_AddDoctorOption.byId),
                     onTap: () => _toggleOption(_AddDoctorOption.byId),
                     expandedChild: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -181,8 +192,7 @@ class _AddDoctorViewState extends State<AddDoctorView> {
                     icon: Icons.qr_code,
                     iconBackgroundColor: const Color(0xFFE8F5E9),
                     title: 'Scan QR Code',
-                    description:
-                        'Scan the Doctor\'s QR code for instant access',
+                    description: 'Scan the Doctor\'s QR code for instant access',
                     isExpanded: _expandedOptions.contains(_AddDoctorOption.qr),
                     onTap: () => _toggleOption(_AddDoctorOption.qr),
                     expandedChild: Column(

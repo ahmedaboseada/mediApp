@@ -7,6 +7,8 @@ import 'package:medi/features/patient/features/doctors/presentation/cubits/booki
 import 'package:medi/features/patient/features/doctors/presentation/widgets/doctor_availability_section.dart';
 import 'package:medi/features/patient/features/doctors/presentation/widgets/doctor_profile_calendar.dart';
 import 'package:medi/features/patient/features/doctors/presentation/widgets/doctor_profile_header.dart';
+import 'package:zego_uikit_signaling_plugin/zego_uikit_signaling_plugin.dart';
+import 'package:zego_zimkit/zego_zimkit.dart';
 
 class DoctorProfileScreen extends StatefulWidget {
   const DoctorProfileScreen({super.key, required this.doctor});
@@ -60,6 +62,27 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                 DoctorProfileHeader(
                   doctor: profileDoctor,
                   onBack: () => context.pop(),
+                 onInsightsTap: () {
+  final peerUserID = profileDoctor.user.id.isNotEmpty
+      ? profileDoctor.user.id
+      : profileDoctor.id;
+
+  final peerName =
+      '${profileDoctor.user.firstName} ${profileDoctor.user.lastName}'
+          .trim();
+
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) {
+        return ZIMKitMessageListPage(
+          conversationID: peerUserID,
+          conversationType: ZIMConversationType.peer,
+        );
+      },
+    ),
+  );
+},
                 ),
                 Expanded(
                   child: SingleChildScrollView(

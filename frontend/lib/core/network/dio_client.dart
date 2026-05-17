@@ -297,6 +297,7 @@ class DioClient {
           // Handle 401 Unauthorized
           if (error.response?.statusCode == 401 &&
               error.requestOptions.path != "/users/refreshToken") {
+                log(error.response.toString());
             log('[DioClient] 401 Unauthorized - Attempting token refresh');
             final requestOptions = error.requestOptions;
 

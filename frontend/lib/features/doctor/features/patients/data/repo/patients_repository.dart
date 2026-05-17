@@ -10,4 +10,5 @@ abstract class PatientsRepository {
   // Future<Either<ApiError, PatientModel>> getPatientById(String id);
 
   Future<Either<ApiError, void>> sendAddRequest(String patientId);
+  Future<Either<ApiError, void>> cancelPatientRequest(String patientId);
 }

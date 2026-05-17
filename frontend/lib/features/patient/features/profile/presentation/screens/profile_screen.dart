@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/home/presentation/widgets/support_section.dart';
+import 'package:medi/features/patient/features/profile/presentation/mappers/auth_response_model_mapper.dart';
 import 'package:medi/features/patient/features/profile/presentation/widgets/account_section.dart';
 import 'package:medi/features/patient/features/profile/presentation/widgets/connected_doctors_section.dart';
 import 'package:medi/features/patient/features/profile/presentation/widgets/log_out_tile.dart';
@@ -59,9 +60,14 @@ class ProfileScreen extends StatelessWidget {
                   SizedBox(height: AppSizes.h16),
                   SettingsSection(),
                   SizedBox(height: AppSizes.h16),
-                  MedicalRecordsSection(),
+                  BlocBuilder<UserProfileCubit, UserProfileState>(
+                    builder: (context, state) {
+                      return MedicalRecordsSection(
+                        patientData: state.profile?.toPatientData(),
+                      );
+                    },
+                  ),
                   SizedBox(height: AppSizes.h16),
-
                   BlocProvider(
                     create: (context) =>
                         getIt<ConnectedDoctorsCubit>()..loadConnectedDoctors(),

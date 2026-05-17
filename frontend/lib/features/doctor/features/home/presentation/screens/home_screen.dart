@@ -8,6 +8,11 @@ import 'package:medi/features/doctor/features/home/presentation/widgets/doctor_h
 import 'package:medi/features/patient/features/doctors/presentation/widgets/doctor_profile_calendar.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/user_profile/user_profile_cubit.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/user_profile/user_profile_state.dart';
+import 'package:medi/features/doctor/features/patients/presentation/screens/qr_scanner_screen.dart';
+import 'package:medi/features/patient/features/profile/presentation/controller/health_passport_export/health_passport_export_cubit.dart';
+import 'package:medi/features/patient/features/profile/presentation/controller/health_passport_export/health_passport_export_state.dart';
+import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
+import 'package:open_filex/open_filex.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -45,6 +50,59 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
     _appointmentsCubit.loadAppointmentsForDate(selected);
+  }
+
+  Future<void> _openQRScanner(BuildContext context) async {
+    final qrToken = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const QrScannerScreen(),
+      ),
+    );
+
+    if (qrToken != null && qrToken.isNotEmpty && mounted) {
+      _downloadSharedRecord(context, qrToken);
+    }
+  }
+
+  void _downloadSharedRecord(BuildContext context, String qrToken) {
+    final downloadCubit = SharedRecordDownloadCubit(getIt<ProfileRepo>());
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => BlocProvider.value(
+        value: downloadCubit,
+        child: BlocListener<SharedRecordDownloadCubit, SharedRecordDownloadState>(
+          listener: (context, state) {
+            if (state is SharedRecordDownloadSuccess) {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Record downloaded successfully'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              OpenFilex.open(state.filePath);
+            } else if (state is SharedRecordDownloadFailure) {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Failed to download: ${state.error}'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+          child: const Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      ),
+    );
+
+    // Trigger download
+    downloadCubit.downloadSharedRecord(qrToken);
   }
 
   @override
@@ -88,6 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           specialization: specialization,
                           id: id,
                           imageUrl: imageUrl,
+                          onQRScan: () => _openQRScanner(context),
                         ),
                       ),
                       SizedBox(height: AppSizes.h16),

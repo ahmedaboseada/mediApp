@@ -80,4 +80,24 @@ class PatientsRepositoryImpl implements PatientsRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<ApiError, void>> cancelPatientRequest(String patientId) async {
+    try {
+      final response = await _apiService.patch(
+        '/doctors/patients/cancel/$patientId',
+        {},
+      );
+
+      log('cancelPatientRequest response: $response');
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

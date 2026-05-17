@@ -20,6 +20,12 @@ class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
   List<CaregiverRequestModel> caregivingRequests = [];
   List<DoctorRequestModel> doctorRequests = [];
 
+  void _openCaregiverForm() {
+    context.push(
+      '${AppRouter.onboardingFlow}${AppRouter.caregiverFormScreen}?fromCaregiverMode=true',
+    );
+  }
+
   final List<Map<String, String>> caretakers = [
     {
       'name': 'Dr. James Wilson',
@@ -119,6 +125,11 @@ class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  PrimaryButton(
+                    text: 'Add Caregiver',
+                    onPressed: _openCaregiverForm,
+                  ),
+                  SizedBox(height: AppSizes.h24),
                   Text('Caregiving Requests', style: AppStyles.black18500),
                   SizedBox(height: AppSizes.h16),
                   if (state is CaregiverRequestsLoading)

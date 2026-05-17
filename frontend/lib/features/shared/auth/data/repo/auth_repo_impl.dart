@@ -15,6 +15,7 @@ import 'package:medi/features/shared/auth/data/models/patient_model.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo.dart';
  import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
  import 'package:zego_uikit_signaling_plugin/zego_uikit_signaling_plugin.dart';
+import 'package:zego_zimkit/zego_zimkit.dart';
 
 class AuthRepoImpl implements AuthRepo {
   final ApiService apiService;
@@ -66,7 +67,10 @@ class AuthRepoImpl implements AuthRepo {
       // Extract and save user data using Hive
       final user = UserModel.fromJson(response['user']);
       await HiveService.saveUserData(user);
-
+await ZIMKit().connectUser(
+  id: user.id,
+  name: '${user.firstName} ${user.lastName}',
+);
       // Save user role using Hive
       final userRole = user.type == 'doctor'
           ? UserRole.doctor
@@ -93,6 +97,7 @@ class AuthRepoImpl implements AuthRepo {
     plugins: [ZegoUIKitSignalingPlugin()],
    
   );
+
 
       log('Access Token saved via Hive: $accessToken');
       return Right(accessToken);

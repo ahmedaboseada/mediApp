@@ -10,6 +10,9 @@ import 'package:medi/features/shared/auth/data/models/auth_response_model.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/user_profile/user_profile_cubit.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/user_profile/user_profile_state.dart';
+import 'package:open_filex/open_filex.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
 
 class HealthPassportScreen extends StatelessWidget {
   const HealthPassportScreen({super.key});
@@ -123,6 +126,21 @@ class HealthPassportScreen extends StatelessWidget {
                         BlocListener<HealthPassportExportCubit,
                             HealthPassportExportState>(
                           listener: (context, exportState) {
+                            if (exportState is HealthPassportExportLoading) {
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (_) => const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                              return;
+                            }
+
+                            if (Navigator.canPop(context)) {
+                              Navigator.pop(context);
+                            }
+
                             if (exportState
                                 is HealthPassportExportSuccess) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -132,6 +150,7 @@ class HealthPassportScreen extends StatelessWidget {
                                   backgroundColor: Colors.green,
                                 ),
                               );
+                              OpenFilex.open(exportState.filePath);
                             } else if (exportState
                                 is HealthPassportExportFailure) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -148,12 +167,19 @@ class HealthPassportScreen extends StatelessWidget {
                               context
                                   .read<HealthPassportExportCubit>()
                                   .exportHealthPassport(
-                                    apiEndpoint:
-                                        'https://your-api.com/health-passport/export',
+                                    apiEndpoint: '/export/health-passport',
                                   );
                             },
                             onShowQR: () {
-                              // Handle QR code display
+                              showDialog(
+                                context: context,
+                                builder: (_) => BlocProvider(
+                                  create: (_) => QRTokenCubit(
+                                    getIt<ProfileRepo>(),
+                                  )..generateQRToken(),
+                                  child: _buildQRDialog(context),
+                                ),
+                              );
                             },
                           ),
                         ),
@@ -197,5 +223,90 @@ class HealthPassportScreen extends StatelessWidget {
           ),
         )
         .toList();
+  }
+
+  Widget _buildQRDialog(BuildContext context) {
+    return BlocConsumer<QRTokenCubit, QRTokenState>(
+      listener: (context, state) {
+        if (state is QRTokenFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to generate QR: ${state.error}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          Navigator.pop(context);
+        }
+      },
+      builder: (context, state) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.r16),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(AppSizes.w24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'Health Passport QR Code',
+                  style: AppStyles.black18500,
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: AppSizes.h16),
+                if (state is QRTokenLoading)
+                  const SizedBox(
+                    height: 200,
+                    width: 200,
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                else if (state is QRTokenSuccess)
+                  QrImageView(
+                    data: state.qrToken,
+                    version: QrVersions.auto,
+                    size: 200.0,
+                    gapless: false,
+                  )
+                else
+                  const SizedBox(
+                    height: 200,
+                    width: 200,
+                    child: Center(
+                      child: Text('Failed to load QR code'),
+                    ),
+                  ),
+                SizedBox(height: AppSizes.h16),
+                Text(
+                  'Share this QR code with your doctor to access your health passport',
+                  style: AppStyles.secondary12400,
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: AppSizes.h24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Close'),
+                    ),
+                    if (state is QRTokenSuccess)
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Regenerate'),
+                        onPressed: () {
+                          context.read<QRTokenCubit>().generateQRToken();
+                        },
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }

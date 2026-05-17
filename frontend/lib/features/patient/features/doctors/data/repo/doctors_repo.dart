@@ -22,5 +22,6 @@ abstract class DoctorsRepository {
     String time,
   );
   Future<Either<ApiError, void>> sendConnectionRequest(String doctorId);
-  Future<Either<ApiError, List<Doctordata>>> getConnectedDoctors();
+    Future<Either<ApiError, void>> cancelConnectionRequest(String doctorId);
+    Future<Either<ApiError, List<Doctordata>>> getConnectedDoctors();
 }

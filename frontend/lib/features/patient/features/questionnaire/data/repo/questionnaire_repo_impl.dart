@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/features/patient/features/questionnaire/data/models/caregiver_request_submission_result.dart';
 import 'package:medi/features/patient/features/questionnaire/data/repo/questionnaire_repo.dart';
 
 class QuestionnaireRepoImpl implements QuestionnaireRepo {
@@ -95,7 +96,7 @@ class QuestionnaireRepoImpl implements QuestionnaireRepo {
   }
 
   @override
-  Future<Either<ApiError, String>> sendCaregiverRequest({
+  Future<Either<ApiError, CaregiverRequestSubmissionResult>> sendCaregiverRequest({
     required String caregiverEmail,
     required String relationship,
   }) async {
@@ -123,12 +124,44 @@ class QuestionnaireRepoImpl implements QuestionnaireRepo {
         return Left(response);
       }
 
-      final message =
-          response['message'] ?? 'Caregiver request sent successfully';
-      return Right(message);
+      return Right(CaregiverRequestSubmissionResult.fromJson(
+        Map<String, dynamic>.from(response as Map),
+      ));
     } on DioException catch (e) {
       final serverFailure = ServerFailure.fromDioError(e);
       return Left(serverFailure);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<ApiError, String>> cancelCaregiverRequest({
+    required String requestId,
+  }) async {
+    try {
+      final token = HiveService.getAccessToken();
+      final headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      };
+
+      final dynamic response = await apiService.patch(
+        '/patients/caregiver/requests/$requestId/cancel',
+        {},
+        headers: headers,
+      );
+
+      log('Cancel Caregiver Request Response: ${response.toString()}');
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final message = response['message'] ?? 'Caregiver request cancelled successfully';
+      return Right(message.toString());
+    } on DioException catch (e) {
+      return Left(ServerFailure.fromDioError(e));
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }

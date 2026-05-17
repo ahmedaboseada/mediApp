@@ -45,4 +45,10 @@ abstract class ProfileRepo {
   Future<Either<ApiError, String>> exportHealthPassportPDF({
     required String apiEndpoint,
   });
+
+  Future<Either<ApiError, String>> generateQRToken();
+
+  Future<Either<ApiError, String>> downloadSharedRecord({
+    required String qrToken,
+  });
 }

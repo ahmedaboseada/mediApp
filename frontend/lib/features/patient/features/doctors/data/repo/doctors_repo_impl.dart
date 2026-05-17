@@ -186,6 +186,28 @@ class DoctorsRepositoryImpl implements DoctorsRepository {
   }
 
   @override
+  Future<Either<ApiError, void>> cancelConnectionRequest(String doctorId) async {
+    try {
+      final dynamic response = await apiService.patch(
+        '/patients/connected-doctors/cancel/$doctorId',
+        {},
+      );
+
+      log('Cancel Connection Request Response: ${response.toString()}');
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(ServerFailure.fromDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<ApiError, List<Doctordata>>> getConnectedDoctors() async {
     try {
       final dynamic response = await apiService.get(

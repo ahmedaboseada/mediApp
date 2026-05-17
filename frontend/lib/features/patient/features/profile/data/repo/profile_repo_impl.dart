@@ -7,6 +7,7 @@ import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/profile/data/models/caregiver_request_model.dart';
 import 'package:medi/features/patient/features/profile/data/models/doctor_request_model.dart';
 import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 
 class ProfileRepoImpl implements ProfileRepo {
@@ -377,42 +378,141 @@ class ProfileRepoImpl implements ProfileRepo {
     }
   }
 
-  @override
+ @override
   Future<Either<ApiError, String>> exportHealthPassportPDF({
     required String apiEndpoint,
   }) async {
     try {
-      final dio = Dio();
       final token = HiveService.getAccessToken();
-      final headers = {
-        'Authorization': 'Bearer $token',
-      };
 
-      final response = await dio.get(
+      final response = await apiService.downloadFile(
         apiEndpoint,
-        options: Options(
-          responseType: ResponseType.bytes,
-          headers: headers,
-        ),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
       );
 
-      // Get documents directory
-      final dir = await getApplicationDocumentsDirectory();
+      log('PDF export response status: ${response.statusCode}');
+      log('PDF export content-type: ${response.headers.value('content-type')}');
+
+      final downloadDirectory = await _resolveDownloadsDirectory();
       final fileName =
-          'health_passport_${DateTime.now().millisecondsSinceEpoch}.pdf';
-      final filePath = '${dir.path}/$fileName';
+          'patient_record_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      final filePath = '${downloadDirectory.path}/$fileName';
 
-      // Save file
       final file = File(filePath);
-      await file.writeAsBytes(response.data);
+      await file.writeAsBytes(List<int>.from(response.data));
 
-      log('Health passport saved at: $filePath');
+      log('PDF saved at: $filePath');
 
       return Right(filePath);
+    } on DioException catch (e, stackTrace) {
+      log('PDF export DioException: ${e.message}', stackTrace: stackTrace);
+      return Left(ServerFailure.fromDioError(e));
+    } catch (e, stackTrace) {
+      log('PDF export error: $e', stackTrace: stackTrace);
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<ApiError, String>> generateQRToken() async {
+    try {
+      final token = HiveService.getAccessToken();
+
+      final response = await apiService.post(
+        '/export/qr-token',
+        {},
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      log('Generate QR Token Response: ${response.toString()}');
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final qrToken = response['qrToken'] ?? response['token'] ?? '';
+      return Right(qrToken.toString());
     } on DioException catch (e) {
       return Left(ServerFailure.fromDioError(e));
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }
+  }
+
+  @override
+  Future<Either<ApiError, String>> downloadSharedRecord({
+    required String qrToken,
+  }) async {
+    try {
+      final response = await apiService.downloadFile(
+        '/export/shared/$qrToken',
+      );
+
+      log('Shared record download status: ${response.statusCode}');
+
+      final downloadDirectory = await _resolveDownloadsDirectory();
+      final fileName =
+          'health_record_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      final filePath = '${downloadDirectory.path}/$fileName';
+
+      final file = File(filePath);
+      await file.writeAsBytes(List<int>.from(response.data));
+
+      log('Shared record saved at: $filePath');
+
+      return Right(filePath);
+    } on DioException catch (e, stackTrace) {
+      log('Shared record download DioException: ${e.message}',
+          stackTrace: stackTrace);
+      return Left(ServerFailure.fromDioError(e));
+    } catch (e, stackTrace) {
+      log('Shared record download error: $e', stackTrace: stackTrace);
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  Future<Directory> _resolveDownloadsDirectory() async {
+  if (Platform.isAndroid) {
+
+    // Android 10 وأقل
+    final androidApiLevel = _androidApiLevel();
+
+    if (androidApiLevel != null && androidApiLevel <= 28) {
+      final status = await Permission.storage.request();
+
+      if (!status.isGranted) {
+        throw Exception('Storage permission denied');
+      }
+    }
+
+    final directory = Directory('/storage/emulated/0/Download');
+
+    if (!await directory.exists()) {
+      await directory.create(recursive: true);
+    }
+
+    return directory;
+  }
+
+  // iOS / Desktop
+  final directory = await getDownloadsDirectory();
+
+  if (directory == null) {
+    throw Exception('Unable to resolve Downloads directory');
+  }
+
+  return directory;
+}
+
+  int? _androidApiLevel() {
+    if (!Platform.isAndroid) return null;
+
+    final match = RegExp(r'API (\d+)').firstMatch(Platform.operatingSystemVersion);
+    return int.tryParse(match?.group(1) ?? '');
   }
 }

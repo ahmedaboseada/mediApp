@@ -12,6 +12,7 @@ class DoctorHomeHeader extends StatelessWidget {
     required this.imageUrl,
     this.onBack,
     this.onInsightsTap,
+    this.onQRScan,
   });
   final String name;
   final String specialization;
@@ -19,6 +20,7 @@ class DoctorHomeHeader extends StatelessWidget {
   final String imageUrl;
   final VoidCallback? onBack;
   final VoidCallback? onInsightsTap;
+  final VoidCallback? onQRScan;
 
   @override
   Widget build(BuildContext context) {
@@ -71,10 +73,13 @@ class DoctorHomeHeader extends StatelessWidget {
                         SizedBox(height: AppSizes.h8),
                         Row(
                           children: [
-                            Icon(
-                              Icons.qr_code_2_rounded,
-                              size: AppSizes.sp20,
-                              color: AppColors.primaryText,
+                            GestureDetector(
+                              onTap: onQRScan,
+                              child: Icon(
+                                Icons.qr_code_scanner_outlined,
+                                size: AppSizes.sp20,
+                                color: AppColors.primaryText,
+                              ),
                             ),
                             SizedBox(width: AppSizes.w8),
                             Flexible(

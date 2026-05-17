@@ -70,9 +70,14 @@ class _AddPatientViewState extends State<AddPatientView> {
   }
 
   void _cancelRequest() {
-    setState(() {
-      _flowState = _AddPatientFlowState.form;
-    });
+    if (_submittedPatientId.isEmpty) {
+      setState(() {
+        _flowState = _AddPatientFlowState.form;
+      });
+      return;
+    }
+
+    context.read<AddPatientCubit>().cancelPatientRequest(_submittedPatientId);
   }
 
   void _onViewPatients() {
@@ -96,30 +101,18 @@ class _AddPatientViewState extends State<AddPatientView> {
 
   @override
   Widget build(BuildContext context) {
-    if (_flowState == _AddPatientFlowState.pending) {
-      return RequestStatusScreen(
-        isConnected: false,
-        patientId: _submittedPatientId,
-        onBack: _cancelRequest,
-        onPrimaryAction: _cancelRequest,
-      );
-    }
-
-    if (_flowState == _AddPatientFlowState.connected) {
-      return RequestStatusScreen(
-        isConnected: true,
-        patientId: _submittedPatientId,
-        onBack: _cancelRequest,
-        onPrimaryAction: _onViewPatients,
-      );
-    }
-
     return BlocConsumer<AddPatientCubit, AddPatientState>(
       listener: (context, state) {
         if (state.status == AddPatientStatus.success) {
           setState(() {
-            _flowState = _AddPatientFlowState.pending;
+            _flowState = state.lastAction == AddPatientAction.cancelRequest
+                ? _AddPatientFlowState.form
+                : _AddPatientFlowState.pending;
+            if (state.lastAction == AddPatientAction.cancelRequest) {
+              _submittedPatientId = '';
+            }
           });
+          return;
         } else if (state.status == AddPatientStatus.failure) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -130,6 +123,24 @@ class _AddPatientViewState extends State<AddPatientView> {
       },
       builder: (context, state) {
         final isLoading = state.status == AddPatientStatus.loading;
+
+        if (_flowState == _AddPatientFlowState.pending) {
+          return RequestStatusScreen(
+            isConnected: false,
+            patientId: _submittedPatientId,
+            onBack: _cancelRequest,
+            onPrimaryAction: _cancelRequest,
+          );
+        }
+
+        if (_flowState == _AddPatientFlowState.connected) {
+          return RequestStatusScreen(
+            isConnected: true,
+            patientId: _submittedPatientId,
+            onBack: _cancelRequest,
+            onPrimaryAction: _onViewPatients,
+          );
+        }
 
         return Scaffold(
           backgroundColor: AppColors.background,

@@ -8,7 +8,13 @@ class AddPatientCubit extends Cubit<AddPatientState> {
   final PatientsRepository _repository;
 
   Future<void> sendAddRequest(String patientId) async {
-    emit(state.copyWith(status: AddPatientStatus.loading, clearError: true));
+    emit(
+      state.copyWith(
+        status: AddPatientStatus.loading,
+        lastAction: AddPatientAction.sendRequest,
+        clearError: true,
+      ),
+    );
 
     final result = await _repository.sendAddRequest(patientId);
 
@@ -17,13 +23,51 @@ class AddPatientCubit extends Cubit<AddPatientState> {
         emit(
           state.copyWith(
             status: AddPatientStatus.failure,
+            lastAction: AddPatientAction.sendRequest,
             errorMessage: error.message,
           ),
         );
       },
       (_) {
         emit(
-          state.copyWith(status: AddPatientStatus.success, clearError: true),
+          state.copyWith(
+            status: AddPatientStatus.success,
+            lastAction: AddPatientAction.sendRequest,
+            clearError: true,
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> cancelPatientRequest(String patientId) async {
+    emit(
+      state.copyWith(
+        status: AddPatientStatus.loading,
+        lastAction: AddPatientAction.cancelRequest,
+        clearError: true,
+      ),
+    );
+
+    final result = await _repository.cancelPatientRequest(patientId);
+
+    result.fold(
+      (error) {
+        emit(
+          state.copyWith(
+            status: AddPatientStatus.failure,
+            lastAction: AddPatientAction.cancelRequest,
+            errorMessage: error.message,
+          ),
+        );
+      },
+      (_) {
+        emit(
+          state.copyWith(
+            status: AddPatientStatus.success,
+            lastAction: AddPatientAction.cancelRequest,
+            clearError: true,
+          ),
         );
       },
     );

@@ -19,7 +19,7 @@ Future<void> main() async {
 
   /// 1.1.2: set navigator key to ZegoUIKitPrebuiltCallInvitationService
   ZegoUIKitPrebuiltCallInvitationService().setNavigatorKey(navigatorKey);
-   ZIMKit().init(
+  await ZIMKit().init(
     appID: AppKeys.chatAppId, // your appid
     appSign: AppKeys.chatAppSign, // your appSign
   );
@@ -36,12 +36,19 @@ Future<void> main() async {
       try {
         final savedUser = HiveService.getUserData();
         if (savedUser != null) {
+          await ZIMKit().connectUser(
+            id: savedUser.id,
+            name: '${savedUser.firstName} ${savedUser.lastName}',
+          );
           await ZegoUIKitPrebuiltCallInvitationService().init(
             appID: AppKeys.appId,
             appSign: AppKeys.appSign,
             userID: savedUser.id,
             userName: '${savedUser.firstName} ${savedUser.lastName}',
             plugins: [ZegoUIKitSignalingPlugin()],
+            requireConfig: (ZegoCallInvitationData data) {
+    return ZegoUIKitPrebuiltCallConfig.oneOnOneVideoCall();
+  },
           );
         }
       } catch (e) {

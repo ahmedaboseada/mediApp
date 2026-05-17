@@ -22,6 +22,7 @@ import 'package:medi/features/patient/features/profile/presentation/controller/p
 import 'package:medi/features/patient/features/profile/presentation/screens/account_info_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/caregiver_mode_screen.dart'
     as profile_caregiver;
+import 'package:medi/features/patient/features/chat/presentation/screens/zimkit_conversations_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/change_email_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/change_password_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/choose_method_screen.dart';
@@ -46,8 +47,8 @@ import 'package:medi/features/patient/features/doctors/presentation/screens/doct
 import 'package:medi/features/patient/features/doctors/presentation/screens/my_bookings_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/cancel_booking_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/search_doctors_screen.dart';
-import 'package:medi/features/patient/features/profile/presentation/screens/export_health_report_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/health_passport_screen.dart';
+import 'package:medi/features/patient/features/profile/presentation/screens/export_health_report_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/medicine_history_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/profile_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/symptom_log_screen.dart';
@@ -103,6 +104,39 @@ import 'package:medi/features/shared/splash/presentation/screens/select_screen.d
 import 'package:medi/features/shared/splash/presentation/screens/onboarding_screen.dart';
 import 'package:medi/features/shared/splash/presentation/screens/splash_screen.dart';
 import 'package:medi/main.dart';
+
+class KeyboardDismissObserver extends NavigatorObserver {
+  void _dismissKeyboard() {
+    FocusManager.instance.primaryFocus?.unfocus();
+  }
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    _dismissKeyboard();
+    super.didPush(route, previousRoute);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    _dismissKeyboard();
+    super.didPop(route, previousRoute);
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    _dismissKeyboard();
+    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+  }
+}
+
+bool _fromCaregiverMode(GoRouterState state) {
+  final extra = state.extra;
+  if (extra is bool) {
+    return extra;
+  }
+
+  return state.uri.queryParameters['fromCaregiverMode'] == 'true';
+}
 
 class AppRouter {
   // ========== SHARED ROUTES ==========
@@ -208,6 +242,7 @@ class AppRouter {
 
   static final router = GoRouter(
     navigatorKey: navigatorKey,
+    observers: [KeyboardDismissObserver()],
     initialLocation: '/',
     redirect: (context, state) {
       final uri = state.uri;
@@ -312,19 +347,22 @@ class AppRouter {
                 frequency: extra.frequency,
                 stock: extra.stock,
                 isChronic: extra.isChronic,
-                isCriticalMode:
-                    extra.status.trim().toLowerCase().contains('critical'),
+                isCriticalMode: extra.status.trim().toLowerCase().contains(
+                  'critical',
+                ),
                 medicationType: Medication.medicationTypeFromLabel(extra.type),
                 stockStatus: extra.stock <= 10
                     ? MedicationStockStatus.low
                     : (extra.stock <= 20
-                        ? MedicationStockStatus.medium
-                        : MedicationStockStatus.good),
+                          ? MedicationStockStatus.medium
+                          : MedicationStockStatus.good),
               ),
             );
           }
 
-          throw StateError('Unsupported medication payload: ${extra.runtimeType}');
+          throw StateError(
+            'Unsupported medication payload: ${extra.runtimeType}',
+          );
         },
       ),
 
@@ -346,11 +384,16 @@ class AppRouter {
           ),
           GoRoute(
             path: '$onboardingFlow/caregiverForm',
-            builder: (context, state) => const CaregiverFormScreen(),
+            builder: (context, state) => CaregiverFormScreen(
+              fromCaregiverMode: _fromCaregiverMode(state),
+            ),
           ),
           GoRoute(
             path: '$onboardingFlow/invitationSend',
-            builder: (context, state) => InvitationSendScreen(),
+            builder: (context, state) => InvitationSendScreen(
+              fromCaregiverMode: _fromCaregiverMode(state),
+              requestId: state.uri.queryParameters['requestId'],
+            ),
           ),
           GoRoute(
             path: '$onboardingFlow/allSet',
@@ -617,7 +660,9 @@ class AppRouter {
             routes: [
               GoRoute(
                 path: '/chat',
-                builder: (context, state) => Container(color: Colors.yellow),
+                builder: (context, state) {
+                  return ZIMKitDemoHomePage();
+                },
               ),
             ],
           ),
@@ -742,13 +787,23 @@ class AppRouter {
         path: doctorAllSetScreen,
         builder: (context, state) => const DoctorAllSetScreen(),
       ),
-      GoRoute(
-        path: exportHealthReportScreen,
-        builder: (context, state) => ExportHealthReportScreen(),
-      ),
+    
       GoRoute(
         path: exportHealthPassportScreen,
         builder: (context, state) => const HealthPassportScreen(),
+      ),
+
+      GoRoute(
+        path: exportHealthReportScreen,
+        builder: (context, state) {
+          final extra = state.extra;
+
+          if (extra is PatientData) {
+            return ExportHealthReportScreen(patient: extra);
+          }
+
+          throw StateError('ExportHealthReportScreen requires PatientData in extra');
+        },
       ),
 
       // ========== SHARED AUTH ROUTES ==========

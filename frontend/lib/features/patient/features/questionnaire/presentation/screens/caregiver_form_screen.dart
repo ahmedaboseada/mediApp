@@ -9,7 +9,9 @@ import 'package:medi/features/patient/features/questionnaire/presentation/cubit/
 import 'package:multi_dropdown/multi_dropdown.dart';
 
 class CaregiverFormScreen extends StatefulWidget {
-  const CaregiverFormScreen({super.key});
+  const CaregiverFormScreen({super.key, this.fromCaregiverMode = false});
+
+  final bool fromCaregiverMode;
 
   @override
   State<CaregiverFormScreen> createState() => _CaregiverFormScreenState();
@@ -54,14 +56,10 @@ class _CaregiverFormScreenState extends State<CaregiverFormScreen> {
             ScaffoldMessenger.of(
               context,
             ).showSnackBar(SnackBar(content: Text(state.error!)));
-          } else if (!state.isLoading && state.error == null) {
-            // Check if we just completed a caregiver request (not navigating from back button)
-            // Only navigate if the state changed from loading to not loading
-            if (state.error == null) {
-              context.go(
-                '${AppRouter.onboardingFlow}${AppRouter.invitationSendScreen}',
-              );
-            }
+          } else if (!state.isLoading && state.error == null && state.caregiverRequestId != null) {
+            context.go(
+              '${AppRouter.onboardingFlow}${AppRouter.invitationSendScreen}?fromCaregiverMode=${widget.fromCaregiverMode}&requestId=${state.caregiverRequestId}',
+            );
           }
         },
         builder: (context, state) {

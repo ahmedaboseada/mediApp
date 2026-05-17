@@ -12,8 +12,15 @@ class PatientsCubit extends Cubit<PatientsState> {
 
     final result = await _repository.getPatients();
 
+    if (isClosed) {
+      return;
+    }
+
     result.fold(
       (error) {
+        if (isClosed) {
+          return;
+        }
         emit(
           state.copyWith(
             status: PatientsStatus.failure,
@@ -22,6 +29,9 @@ class PatientsCubit extends Cubit<PatientsState> {
         );
       },
       (patients) {
+        if (isClosed) {
+          return;
+        }
         emit(
           state.copyWith(
             status: patients.isEmpty
@@ -58,8 +68,15 @@ class PatientsCubit extends Cubit<PatientsState> {
 
     final result = await _repository.getPatients(searchQuery: query);
 
+    if (isClosed) {
+      return;
+    }
+
     result.fold(
       (error) {
+        if (isClosed) {
+          return;
+        }
         emit(
           state.copyWith(
             status: PatientsStatus.failure,
@@ -68,6 +85,9 @@ class PatientsCubit extends Cubit<PatientsState> {
         );
       },
       (filteredPatients) {
+        if (isClosed) {
+          return;
+        }
         emit(
           state.copyWith(
             status: filteredPatients.isEmpty

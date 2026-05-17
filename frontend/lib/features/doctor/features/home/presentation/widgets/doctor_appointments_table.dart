@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
@@ -115,6 +114,13 @@ class DoctorAppointmentsDataRow extends StatelessWidget {
                  
                     ZegoSendCallInvitationButton(
                       isVideoCall: true,
+                      buttonSize: const Size(50, 50),
+                        //buttonSize: Size(AppSizes.w24, AppSizes.h24),
+                          iconSize: const Size(20, 20),
+                          clickableBackgroundColor: const Color(0xFFD7E8FF),
+                          
+
+                        icon:ButtonIcon(icon: Icon(Icons.play_arrow_outlined),backgroundColor: Color(0xFFD7E8FF)),
                       //You need to use the resourceID that you created in the subsequent steps.
                       //Please continue reading this document.
                       resourceID: "medi_call",
@@ -128,21 +134,21 @@ class DoctorAppointmentsDataRow extends StatelessWidget {
                     ),
                   
                 
-                _actionIcon(
-                  icon: Icons.play_arrow_outlined,
-                  bgColor: const Color(0xFFD7E8FF),
-                  iconColor: AppColors.primary,
-                  onTap: () {
-                    // Handle play arrow icon tap
-                  },
-                ),
-                SizedBox(width: AppSizes.w8),
-                _actionIcon(
-                  icon: Icons.visibility_outlined,
-                  bgColor: const Color(0xFFD7F7DD),
-                  iconColor: const Color(0xFF22C55E),
-                ),
-                SizedBox(width: AppSizes.w8),
+                // _actionIcon(
+                //   icon: Icons.play_arrow_outlined,
+                //   bgColor: const Color(0xFFD7E8FF),
+                //   iconColor: AppColors.primary,
+                //   onTap: () {
+                //     // Handle play arrow icon tap
+                //   },
+                // ),
+                // SizedBox(width: AppSizes.w8),
+                // _actionIcon(
+                //   icon: Icons.visibility_outlined,
+                //   bgColor: const Color(0xFFD7F7DD),
+                //   iconColor: const Color(0xFF22C55E),
+                // ),
+                // SizedBox(width: AppSizes.w8),
                 // _actionIcon(
                 //   icon: Icons.close_rounded,
                 //   bgColor: const Color(0xFFFBD6DC),
