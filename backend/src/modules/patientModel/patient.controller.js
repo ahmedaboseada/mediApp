@@ -64,6 +64,7 @@ patientRouter.post('/caregiver/request', validation(PVS.caregiverRequestSchema),
 // caregiver inbox/accept/reject (caregiver user logs in; still must be patient type in your design)
 // If caregiver can be any type, remove restrictTo(['patient']) and enforce inside service.
 patientRouter.get('/caregiver/requests', PS.listCaregiverRequests);
+patientRouter.get('/caregiver/patients', PS.listManagedPatients);
 patientRouter.patch('/caregiver/requests/:requestId/accept', validation(PVS.requestIdSchema), PS.acceptCaregiverRequest);
 patientRouter.patch('/caregiver/requests/:requestId/reject', validation(PVS.requestIdSchema), PS.rejectCaregiverRequest);
 patientRouter.patch('/caregiver/requests/:requestId/cancel', validation(PVS.requestIdSchema), PS.cancelCaregiverRequest);

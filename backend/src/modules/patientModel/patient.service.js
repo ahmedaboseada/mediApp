@@ -881,3 +881,37 @@ export const getAllData = async (req, res) => {
         return res.status(500).json({ message: 'Internal Server Error' });
     }
 };
+
+export const listManagedPatients = async (req, res) => {
+    const caregiverUserId = req.user.id;
+    
+    try {
+        const caregiverPatient = await patientModel.findOne({ userId: caregiverUserId })
+            .populate({
+                path: 'caregiver.giving',
+                populate: {
+                    path: 'userId',
+                    select: 'firstName lastName email type gender DOB age profilePicture phone'
+                }
+            }).lean();
+            
+        if (!caregiverPatient) {
+            return res.status(200).json({ patients: [] });
+        }
+        
+        // Decrypt phones if needed
+        const patients = caregiverPatient.caregiver?.giving || [];
+        for (const p of patients) {
+            if (p.userId && p.userId.phone) {
+                try {
+                    p.userId.phone = await ET.decrypt(p.userId.phone);
+                } catch(e) {}
+            }
+        }
+        
+        return res.status(200).json({ patients });
+    } catch (error) {
+        console.error('listManagedPatients Error:', error);
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
+};

@@ -1253,6 +1253,31 @@
                 }
               },
               "response": []
+            },
+            {
+              "name": "List Managed Patients (Caregiver Dashboard)",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{CAREGIVER_TOKEN}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{URL}}/patient/caregiver/patients",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "patient",
+                    "caregiver",
+                    "patients"
+                  ]
+                }
+              },
+              "response": []
             }
           ]
         },
