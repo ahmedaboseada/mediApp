@@ -1178,7 +1178,7 @@
                 "header": [
                   {
                     "key": "Authorization",
-                    "value": "Bearer {{PATIENT_TOKEN}}",
+                    "value": "bearer {{PATIENT_TOKEN}}",
                     "type": "text"
                   }
                 ],
@@ -1202,7 +1202,7 @@
                 "header": [
                   {
                     "key": "Authorization",
-                    "value": "Bearer {{CAREGIVER_TOKEN}}",
+                    "value": "bearer {{CAREGIVER_TOKEN}}",
                     "type": "text"
                   },
                   {
@@ -1232,7 +1232,7 @@
                 "header": [
                   {
                     "key": "Authorization",
-                    "value": "Bearer {{CAREGIVER_TOKEN}}",
+                    "value": "bearer {{CAREGIVER_TOKEN}}",
                     "type": "text"
                   },
                   {
@@ -1261,7 +1261,7 @@
                 "header": [
                   {
                     "key": "Authorization",
-                    "value": "Bearer {{CAREGIVER_TOKEN}}",
+                    "value": "bearer {{CAREGIVER_TOKEN}}",
                     "type": "text"
                   }
                 ],
