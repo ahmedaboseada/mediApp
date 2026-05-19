@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:medi/core/core.dart';
 import 'package:medi/core/services/hive_service.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_state.dart';
@@ -20,6 +21,24 @@ class MedicineCubit extends Cubit<MedicineState> {
     emit(state.copyWith(isLoading: true));
 
     try {
+      final isCaregiverMode = getIt<CaregiverModeCubit>().isManagingPatient;
+
+      if (isCaregiverMode) {
+        final managedProfile = getIt<ManagedPatientDashboardCubit>().state.profile;
+        final managedMedications = managedProfile?.patient?.medications ?? const <Medication>[];
+        _allMedications = managedMedications;
+
+        emit(
+          state.copyWith(
+            medications: _filterByTab(managedMedications, state.selectedTab),
+            isLoading: false,
+          ),
+        );
+
+        _syncFromServerSilently();
+        return;
+      }
+
       // 1) ALWAYS load local first (instant UI)
       final localData = HiveService.getMedications();
       _allMedications = localData;
@@ -43,6 +62,27 @@ class MedicineCubit extends Cubit<MedicineState> {
   // =========================
   Future<void> addMedication(Medication medication) async {
     try {
+      final isCaregiverMode = getIt<CaregiverModeCubit>().isManagingPatient;
+
+      if (isCaregiverMode) {
+        final result = await _medicineRepo.addMedicineFromMedication(medication);
+
+        result.fold(
+          (failure) => emit(state.copyWith(error: failure.message)),
+          (_) {
+            final updatedList = [..._allMedications, medication];
+            _allMedications = updatedList;
+
+            emit(
+              state.copyWith(
+                medications: _filterByTab(updatedList, state.selectedTab),
+              ),
+            );
+          },
+        );
+        return;
+      }
+
       // 1) UPDATE UI IMMEDIATELY (optimistic)
       final updatedList = [..._allMedications, medication];
       _allMedications = updatedList;
@@ -68,6 +108,32 @@ class MedicineCubit extends Cubit<MedicineState> {
     required Medication updated,
   }) async {
     try {
+      final isCaregiverMode = getIt<CaregiverModeCubit>().isManagingPatient;
+
+      if (isCaregiverMode) {
+        final result = await _medicineRepo.updateMedicineFromMedication(
+          medicationId: original.id,
+          medication: updated,
+        );
+
+        result.fold(
+          (failure) => emit(state.copyWith(error: failure.message)),
+          (_) {
+            final index = _allMedications.indexWhere((m) => m.id == original.id);
+            if (index != -1) {
+              _allMedications[index] = updated;
+            }
+
+            emit(
+              state.copyWith(
+                medications: _filterByTab(_allMedications, state.selectedTab),
+              ),
+            );
+          },
+        );
+        return;
+      }
+
       final index = _allMedications.indexOf(original);
 
       if (index != -1) {
@@ -91,6 +157,27 @@ class MedicineCubit extends Cubit<MedicineState> {
   // =========================
   Future<void> deleteMedication(Medication medication) async {
     try {
+      final isCaregiverMode = getIt<CaregiverModeCubit>().isManagingPatient;
+
+      if (isCaregiverMode) {
+        final result = await _medicineRepo.deleteMedication(
+          medicationId: medication.id,
+        );
+
+        result.fold(
+          (failure) => emit(state.copyWith(error: failure.message)),
+          (_) {
+            _allMedications.removeWhere((m) => m.id == medication.id);
+            emit(
+              state.copyWith(
+                medications: _filterByTab(_allMedications, state.selectedTab),
+              ),
+            );
+          },
+        );
+        return;
+      }
+
       _allMedications.removeWhere((m) => m.id == medication.id);
 
       emit(
@@ -111,6 +198,7 @@ class MedicineCubit extends Cubit<MedicineState> {
   Future<void> _syncFromServerSilently() async {
     try {
       final result = await _medicineRepo.getAllMedications();
+      final isCaregiverMode = getIt<CaregiverModeCubit>().isManagingPatient;
 
       result.fold(
         (_) {}, // ignore errors silently
@@ -123,8 +211,10 @@ class MedicineCubit extends Cubit<MedicineState> {
             ),
           );
 
-          // optional: update local cache
-          HiveService.saveMedications(serverData);
+          if (!isCaregiverMode) {
+            // optional: update local cache
+            HiveService.saveMedications(serverData);
+          }
         },
       );
     } catch (_) {

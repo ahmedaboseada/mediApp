@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/profile/data/models/caregiver_request_model.dart';
 import 'package:medi/features/patient/features/profile/data/models/doctor_request_model.dart';
+import 'package:medi/features/patient/features/profile/data/models/managed_patient_summary.dart';
 
 abstract class ProfileRepo {
   Future<Either<ApiError, String>> changePassword({
@@ -23,6 +24,8 @@ abstract class ProfileRepo {
   Future<Either<ApiError, String>> toggleTwoFactorAuth(bool enabled);
 
   Future<Either<ApiError, List<CaregiverRequestModel>>> listCaregiverRequests();
+
+  Future<Either<ApiError, List<ManagedPatientSummary>>> listManagedPatients();
 
   Future<Either<ApiError, String>> acceptCaregiverRequest({
     required String requestId,

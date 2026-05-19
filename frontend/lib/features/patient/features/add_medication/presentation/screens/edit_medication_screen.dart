@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/core/data/sync/sync_service.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
+import 'package:medi/features/patient/features/add_medication/data/repo/medicine_repo.dart';
 
 class _SpecificDateReminders {
   _SpecificDateReminders({required this.date, required List<String> times})
@@ -698,21 +699,41 @@ class _EditMedicationScreenState extends State<EditMedicationScreen> {
       specificSchedule: _isSpecificSelected ? _buildSpecificPayload() : null,
     );
 
-    // 🔥 Offline-sync (Optimistic)
-    await SyncService.addToQueue(
-      type: 'update',
-      entity: 'medication',
-      data: updated.toJson(),
-    );
+    if (getIt<CaregiverModeCubit>().isManagingPatient) {
+      final result = await getIt<MedicineRepo>().updateMedicineFromMedication(
+        medicationId: _originalMedication.id,
+        medication: updated,
+      );
 
-    await HiveService.updateMedication(
-      original: _originalMedication,
-      updated: updated,
-    );
-    await LocalNotificationService().rescheduleMedicationReminders(
-      previousMedication: _originalMedication,
-      updatedMedication: updated,
-    );
+      if (result.isLeft()) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              result.fold((failure) => failure.message, (_) => ''),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    } else {
+      // 🔥 Offline-sync (Optimistic)
+      await SyncService.addToQueue(
+        type: 'update',
+        entity: 'medication',
+        data: updated.toJson(),
+      );
+
+      await HiveService.updateMedication(
+        original: _originalMedication,
+        updated: updated,
+      );
+      await LocalNotificationService().rescheduleMedicationReminders(
+        previousMedication: _originalMedication,
+        updatedMedication: updated,
+      );
+    }
     if (!context.mounted) return;
     context.pop(updated);
   }

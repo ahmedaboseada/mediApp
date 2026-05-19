@@ -2,12 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/patient/features/profile/data/models/caregiver_request_model.dart';
-import 'package:medi/features/patient/features/profile/data/models/doctor_request_model.dart';
-import 'package:medi/features/patient/features/profile/presentation/controller/profile/profile_cubit.dart';
-import 'package:medi/features/patient/features/profile/presentation/widgets/caregiving_request_card.dart';
-import 'package:medi/features/patient/features/profile/presentation/widgets/caretaker_card.dart';
-import 'package:medi/features/patient/features/profile/presentation/widgets/doctor_request_card.dart';
+import 'package:medi/features/patient/features/profile/presentation/cubit/caregiver_hub_cubit.dart';
 
 class CaregiverModeScreen extends StatefulWidget {
   const CaregiverModeScreen({super.key});
@@ -17,35 +12,22 @@ class CaregiverModeScreen extends StatefulWidget {
 }
 
 class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
-  List<CaregiverRequestModel> caregivingRequests = [];
-  List<DoctorRequestModel> doctorRequests = [];
-
-  void _openCaregiverForm() {
-    context.push(
-      '${AppRouter.onboardingFlow}${AppRouter.caregiverFormScreen}?fromCaregiverMode=true',
-    );
-  }
-
-  final List<Map<String, String>> caretakers = [
-    {
-      'name': 'Dr. James Wilson',
-      'email': 'j.wilson@healthcare.com',
-      'since': 'Since 12/15/2023',
-      'initials': 'D',
-    },
-    {
-      'name': 'Maria Garcia',
-      'email': 'maria.g@email.com',
-      'since': 'Since 1/20/2024',
-      'initials': 'M',
-    },
-  ];
-
   @override
   void initState() {
     super.initState();
-    context.read<ProfileCubit>().listCaregiverRequests();
-    context.read<ProfileCubit>().listDoctorRequests();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CaregiverHubCubit>().loadHubData();
+    });
+  }
+
+  void _enterManagedPatientMode(String patientUserId) {
+    getIt<CaregiverModeCubit>().enterCaregiverMode(patientUserId);
+    getIt<ManagedPatientDashboardCubit>().loadManagedPatientData();
+    context.go('/home');
+  }
+
+  void _openCaregiverForm() {
+    context.push('${AppRouter.onboardingFlow}${AppRouter.caregiverFormScreen}?fromCaregiverMode=true');
   }
 
   String _formatRequestedOn(DateTime? date) {
@@ -59,181 +41,160 @@ class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+              return;
+            }
+
+            context.go('/profile');
+          },
         ),
-        title: Text('Caregiver Mode', style: AppStyles.black18500),
+        title: Text('Caregiver Hub', style: AppStyles.black18500),
         centerTitle: false,
         elevation: 0,
       ),
-      body: BlocConsumer<ProfileCubit, ProfileState>(
+      body: BlocConsumer<CaregiverHubCubit, CaregiverHubState>(
         listener: (context, state) {
-          if (state is CaregiverRequestsSuccess) {
-            setState(() {
-              caregivingRequests = state.requests;
-            });
+          final messenger = ScaffoldMessenger.of(context);
+          if (state.error != null) {
+            messenger
+              ..hideCurrentSnackBar()
+              ..showSnackBar(SnackBar(content: Text(state.error!)));
           }
 
-          if (state is CaregiverRequestActionSuccess) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
-          }
-
-          if (state is DoctorRequestsSuccess) {
-            setState(() {
-              doctorRequests = state.requests;
-            });
-          }
-
-          if (state is DoctorRequestActionSuccess) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
-          }
-
-          if (state is CaregiverRequestsFailure) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
-          }
-
-          if (state is CaregiverRequestActionFailure) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
-          }
-
-          if (state is DoctorRequestsFailure) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
-          }
-
-          if (state is DoctorRequestActionFailure) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
+          if (state.message != null) {
+            messenger
+              ..hideCurrentSnackBar()
+              ..showSnackBar(SnackBar(content: Text(state.message!)));
           }
         },
         builder: (context, state) {
-          final isActionLoading =
-              state is CaregiverRequestActionLoading ||
-              state is DoctorRequestActionLoading;
-          return SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.all(AppSizes.w16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  PrimaryButton(
-                    text: 'Add Caregiver',
-                    onPressed: _openCaregiverForm,
-                  ),
-                  SizedBox(height: AppSizes.h24),
-                  Text('Caregiving Requests', style: AppStyles.black18500),
-                  SizedBox(height: AppSizes.h16),
-                  if (state is CaregiverRequestsLoading)
-                    const Center(child: CircularProgressIndicator())
-                  else if (caregivingRequests.isEmpty)
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: AppSizes.h32),
-                      child: Center(
+          return RefreshIndicator(
+            onRefresh: () => context.read<CaregiverHubCubit>().loadHubData(),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Padding(
+                padding: EdgeInsets.all(AppSizes.w16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    PrimaryButton(
+                      onPressed: _openCaregiverForm,
+                      child: const Text('Add Caregiver'),
+                    ),
+                    Text('Pending requests', style: AppStyles.black18500),
+                    SizedBox(height: AppSizes.h16),
+                    if (state.isLoading)
+                      const Center(child: CircularProgressIndicator())
+                    else if (state.requests.isEmpty)
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: AppSizes.h20),
                         child: Text(
                           'No pending caregiver requests',
                           style: AppStyles.secondary12400,
                         ),
-                      ),
-                    )
-                  else
-                    ...caregivingRequests.map((request) {
-                      return CaregivingRequestCard(
-                        name: request.patientName,
-                        email: request.patientEmail,
-                        requestedOn: _formatRequestedOn(request.createdAt),
-                        onAccept: isActionLoading
-                            ? () {}
-                            : () {
-                                context
-                                    .read<ProfileCubit>()
-                                    .acceptCaregiverRequest(
-                                      requestId: request.id,
-                                    );
-                              },
-                        onReject: isActionLoading
-                            ? () {}
-                            : () {
-                                context
-                                    .read<ProfileCubit>()
-                                    .rejectCaregiverRequest(
-                                      requestId: request.id,
-                                    );
-                              },
-                      );
-                    }),
-                  SizedBox(height: AppSizes.h32),
-                  Text(
-                    'Doctor Connection Requests',
-                    style: AppStyles.black18500,
-                  ),
-                  SizedBox(height: AppSizes.h16),
-                  if (state is DoctorRequestsLoading)
-                    const Center(child: CircularProgressIndicator())
-                  else if (doctorRequests.isEmpty)
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: AppSizes.h32),
-                      child: Center(
-                        child: Text(
-                          'No pending doctor requests',
-                          style: AppStyles.secondary12400,
+                      )
+                    else
+                      ...state.requests.map(
+                        (request) => Card(
+                          child: Padding(
+                            padding: EdgeInsets.all(AppSizes.w16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  request.patientName,
+                                  style: AppStyles.black16400,
+                                ),
+                                SizedBox(height: AppSizes.h6),
+                                Text(
+                                  request.patientEmail,
+                                  style: AppStyles.secondary12400,
+                                ),
+                                SizedBox(height: AppSizes.h6),
+                                Text(
+                                  _formatRequestedOn(request.createdAt),
+                                  style: AppStyles.secondary12400,
+                                ),
+                                SizedBox(height: AppSizes.h12),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: OutlinedButton(
+                                        onPressed: state.isActionLoading
+                                            ? null
+                                            : () => context
+                                                .read<CaregiverHubCubit>()
+                                                .rejectCaregiverRequest(
+                                                  requestId: request.id,
+                                                ),
+                                        child: const Text('Reject'),
+                                      ),
+                                    ),
+                                    SizedBox(width: AppSizes.w12),
+                                    Expanded(
+                                      child: FilledButton(
+                                        onPressed: state.isActionLoading
+                                            ? null
+                                            : () => context
+                                                .read<CaregiverHubCubit>()
+                                                .acceptCaregiverRequest(
+                                                  requestId: request.id,
+                                                ),
+                                        child: const Text('Accept'),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                    )
-                  else
-                    ...doctorRequests.map((request) {
-                      return DoctorRequestCard(
-                        name: 'Dr. ${request.firstName} ${request.lastName}',
-                        specialty: request.specialization,
-                        clinicName: request.clinicName,
-                        profilePicture: request.profilePicture,
-                        onAccept: isActionLoading
-                            ? () {}
-                            : () {
-                                context
-                                    .read<ProfileCubit>()
-                                    .acceptDoctorRequest(doctorId: request.id);
-                              },
-                        onReject: isActionLoading
-                            ? () {}
-                            : () {
-                                context
-                                    .read<ProfileCubit>()
-                                    .rejectDoctorRequest(doctorId: request.id);
-                              },
-                      );
-                    }),
-                  SizedBox(height: AppSizes.h32),
-                  Text('My Caretakers', style: AppStyles.black18500),
-                  SizedBox(height: AppSizes.h16),
-                  if (caretakers.isEmpty)
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: AppSizes.h32),
-                      child: Center(
+                    SizedBox(height: AppSizes.h24),
+                    Text('Managed patients', style: AppStyles.black18500),
+                    SizedBox(height: AppSizes.h16),
+                    if (state.managedPatients.isEmpty)
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: AppSizes.h20),
                         child: Text(
-                          'No caretakers added',
+                          'No managed patients yet',
                           style: AppStyles.secondary12400,
                         ),
+                      )
+                    else
+                      ...state.managedPatients.map(
+                        (patient) => Card(
+                          child: ListTile(
+                            contentPadding: EdgeInsets.all(AppSizes.w16),
+                            onTap: () => _enterManagedPatientMode(patient.userId),
+                            leading: CircleAvatar(
+                              backgroundColor: AppColors.secondary,
+                              foregroundImage: patient.profilePicture.isNotEmpty
+                                  ? NetworkImage(patient.profilePicture)
+                                  : null,
+                              child: Text(
+                                patient.name.isNotEmpty
+                                    ? patient.name[0].toUpperCase()
+                                    : 'P',
+                              ),
+                            ),
+                            title: Text(patient.name, style: AppStyles.black16400),
+                            subtitle: Text(
+                              [
+                                if (patient.email.isNotEmpty) patient.email,
+                                if (patient.relationship.isNotEmpty)
+                                  patient.relationship,
+                              ].join(' · '),
+                              style: AppStyles.secondary12400,
+                            ),
+                            trailing: const Icon(Icons.chevron_right_rounded),
+                          ),
+                        ),
                       ),
-                    )
-                  else
-                    ...caretakers.map((caretaker) {
-                      return CaretakerCard(
-                        name: caretaker['name'] ?? '',
-                        email: caretaker['email'] ?? '',
-                        since: caretaker['since'] ?? '',
-                        initials: caretaker['initials'] ?? '',
-                      );
-                    }),
-                ],
+                  ],
+                ),
               ),
             ),
           );

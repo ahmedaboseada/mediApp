@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:medi/core/enums/user_role.dart';
@@ -12,6 +13,7 @@ import 'package:medi/features/shared/auth/data/models/patient_model.dart';
 import 'package:medi/features/shared/auth/data/models/working_hours_model.dart';
 import 'package:medi/core/data/sync/sync_service.dart';
 import 'package:medi/core/data/sync/sync_action.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 class HiveService {
@@ -78,8 +80,38 @@ class HiveService {
       } catch (deleteError) {
         log('Failed to delete box $boxName: $deleteError');
       }
+
+      try {
+        await _forceDeleteBoxFiles(boxName);
+      } catch (forceDeleteError) {
+        log('Failed to force-delete box $boxName files: $forceDeleteError');
+      }
+
       log('the deleted box is $boxName');
-      return await Hive.openBox(boxName);
+
+      try {
+        return await Hive.openBox(boxName);
+      } catch (reopenError) {
+        log('Failed to reopen box $boxName after cleanup: $reopenError');
+        rethrow;
+      }
+    }
+  }
+
+  static Future<void> _forceDeleteBoxFiles(String boxName) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final candidates = <String>[
+      '$boxName',
+      '$boxName.hive',
+      '$boxName.lock',
+      '$boxName.hive.lock',
+    ];
+
+    for (final name in candidates) {
+      final file = File('${directory.path}${Platform.pathSeparator}$name');
+      if (await file.exists()) {
+        await file.delete();
+      }
     }
   }
 

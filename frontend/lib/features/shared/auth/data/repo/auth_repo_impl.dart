@@ -243,6 +243,23 @@ class AuthRepoImpl implements AuthRepo {
   @override
   Future<Either<ApiError, AuthResponseModel>> getMe() async {
     try {
+      final caregiverMode = getIt<CaregiverModeCubit>();
+
+      if (caregiverMode.isManagingPatient) {
+        final dynamic response = await apiService.get('/patient/all-data');
+        log('Get Managed Patient Data Response: ${response.toString()}');
+
+        if (response is ServerFailure) {
+          return Left(response);
+        }
+
+        return Right(
+          AuthResponseModel.fromManagedPatientAllData(
+            response as Map<String, dynamic>,
+          ),
+        );
+      }
+
       final dynamic response = await apiService.get('/users/me');
       log('Get Me Response: ${response.toString()}');
       if (response is ServerFailure) {
@@ -285,6 +302,7 @@ class AuthRepoImpl implements AuthRepo {
     String? medicalLicenseId,
   }) async {
     try {
+      final caregiverMode = getIt<CaregiverModeCubit>();
       final data = <String, dynamic>{};
 
       if (firstName != null) data['firstName'] = firstName;
@@ -313,14 +331,16 @@ class AuthRepoImpl implements AuthRepo {
         response as Map<String, dynamic>,
       );
 
-      await HiveService.saveUserData(profile.user);
+      if (!caregiverMode.isManagingPatient) {
+        await HiveService.saveUserData(profile.user);
 
-      if (profile.user.type == 'doctor' && profile.doctor != null) {
-        await HiveService.saveDoctorData(profile.doctor!);
-      }
-      if (profile.user.type == 'patient' && profile.patient != null) {
-        await HiveService.savePatientData(profile.patient!);
-        await HiveService.saveMedications(profile.patient!.medications);
+        if (profile.user.type == 'doctor' && profile.doctor != null) {
+          await HiveService.saveDoctorData(profile.doctor!);
+        }
+        if (profile.user.type == 'patient' && profile.patient != null) {
+          await HiveService.savePatientData(profile.patient!);
+          await HiveService.saveMedications(profile.patient!.medications);
+        }
       }
 
       return Right(profile);

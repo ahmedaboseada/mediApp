@@ -95,6 +95,21 @@ final class CaregiverRequestsFailure extends ProfileState {
   CaregiverRequestsFailure(this.message, [this.errors = const []]);
 }
 
+final class ManagedPatientsLoading extends ProfileState {}
+
+final class ManagedPatientsSuccess extends ProfileState {
+  final List<ManagedPatientSummary> patients;
+
+  ManagedPatientsSuccess(this.patients);
+}
+
+final class ManagedPatientsFailure extends ProfileState {
+  final String message;
+  final List<String> errors;
+
+  ManagedPatientsFailure(this.message, [this.errors = const []]);
+}
+
 final class CaregiverRequestActionLoading extends ProfileState {}
 
 final class CaregiverRequestActionSuccess extends ProfileState {

@@ -262,6 +262,8 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
+import 'package:medi/core/state/caregiver_mode_cubit.dart';
+import 'package:medi/core/utils/service_locator.dart';
 import 'package:medi/core/services/hive_service.dart';
 
 typedef OnAuthenticationFailure = Future<void> Function();
@@ -288,6 +290,12 @@ class DioClient {
 
           if (token != null) {
             options.headers["Authorization"] = "Bearer $token";
+          }
+
+          final patientUserId =
+              getIt<CaregiverModeCubit>().currentManagingPatientUserId;
+          if (patientUserId != null) {
+            options.headers['x-patient-user-id'] = patientUserId;
           }
 
           return handler.next(options);

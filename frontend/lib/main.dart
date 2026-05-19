@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
@@ -103,16 +104,25 @@ class _MediState extends State<medi> {
 
   @override
   Widget build(BuildContext context) {
+    final caregiverModeCubit = getIt<CaregiverModeCubit>();
+    final managedPatientDashboardCubit = getIt<ManagedPatientDashboardCubit>();
+
     return ScreenUtilInit(
       designSize: const Size(393, 852),
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
-        return MaterialApp.router(
-          theme: lightTheme,
-          //ThemeData(scaffoldBackgroundColor: Color(0xFFF5F7FB)), new login suignup pages
-          debugShowCheckedModeBanner: false,
-          routerConfig: AppRouter.router,
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: caregiverModeCubit),
+            BlocProvider.value(value: managedPatientDashboardCubit),
+          ],
+          child: MaterialApp.router(
+            theme: lightTheme,
+            //ThemeData(scaffoldBackgroundColor: Color(0xFFF5F7FB)), new login suignup pages
+            debugShowCheckedModeBanner: false,
+            routerConfig: AppRouter.router,
+          ),
         );
       },
     );

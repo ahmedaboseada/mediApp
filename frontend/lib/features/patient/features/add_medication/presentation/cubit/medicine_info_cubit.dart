@@ -164,10 +164,17 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
   }
 
   Future<void> _persistMedication(Medication updated) async {
-    await HiveService.updateMedication(
-      original: _sourceMedication,
-      updated: updated,
-    );
+    if (getIt<CaregiverModeCubit>().isManagingPatient) {
+      await _medicineRepo.updateMedicineFromMedication(
+        medicationId: _sourceMedication.id,
+        medication: updated,
+      );
+    } else {
+      await HiveService.updateMedication(
+        original: _sourceMedication,
+        updated: updated,
+      );
+    }
     _sourceMedication = updated;
   }
 
@@ -199,8 +206,18 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
       _sourceMedication,
     );
 
-    // 2) Delete locally + queue sync (Optimistic)
-    await HiveService.deleteMedication(_sourceMedication);
+    // 2) Delete locally or from server depending on the active mode.
+    if (getIt<CaregiverModeCubit>().isManagingPatient) {
+      final result = await _medicineRepo.deleteMedication(
+        medicationId: _sourceMedication.id,
+      );
+
+      if (result.isLeft()) {
+        return result;
+      }
+    } else {
+      await HiveService.deleteMedication(_sourceMedication);
+    }
 
     // 3) Update UI
     _emitIfOpen(state.copyWith(isDeleted: true));

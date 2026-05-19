@@ -19,6 +19,8 @@ import 'package:medi/features/patient/features/health_measurements/presentation/
 import 'package:medi/features/patient/features/home/presentation/screens/confirm_emergency_alert_screen.dart';
 import 'package:medi/features/patient/features/home/presentation/screens/set_emergency_contact_dialog.dart';
 import 'package:medi/features/patient/features/profile/presentation/controller/profile/profile_cubit.dart';
+import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
+import 'package:medi/features/patient/features/profile/presentation/cubit/caregiver_hub_cubit.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/account_info_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/caregiver_mode_screen.dart'
     as profile_caregiver;
@@ -416,7 +418,7 @@ class AppRouter {
       GoRoute(
         path: patientCaregiverModeScreen,
         builder: (context, state) => BlocProvider(
-          create: (context) => getIt<ProfileCubit>(),
+          create: (context) => CaregiverHubCubit(getIt<ProfileRepo>()),
           child: const profile_caregiver.CaregiverModeScreen(),
         ),
       ),

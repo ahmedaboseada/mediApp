@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/features/patient/features/profile/data/models/caregiver_request_model.dart';
 import 'package:medi/features/patient/features/profile/data/models/doctor_request_model.dart';
+import 'package:medi/features/patient/features/profile/data/models/managed_patient_summary.dart';
 import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
 import 'package:meta/meta.dart';
 
@@ -93,6 +94,19 @@ class ProfileCubit extends Cubit<ProfileState> {
       (failure) =>
           emit(CaregiverRequestsFailure(failure.message, failure.errors)),
       (requests) => emit(CaregiverRequestsSuccess(requests)),
+    );
+  }
+
+  Future<void> listManagedPatients() async {
+    emit(ManagedPatientsLoading());
+
+    final result = await profileRepo.listManagedPatients();
+
+    if (isClosed) return;
+
+    result.fold(
+      (failure) => emit(ManagedPatientsFailure(failure.message, failure.errors)),
+      (patients) => emit(ManagedPatientsSuccess(patients)),
     );
   }
 

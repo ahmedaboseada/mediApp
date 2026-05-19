@@ -1,5 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:medi/core/network/api_service.dart';
+import 'package:medi/core/state/caregiver_mode_cubit.dart';
+import 'package:medi/core/state/managed_patient_dashboard_cubit.dart';
 import 'package:medi/core/services/audio_player_service.dart';
 import 'package:medi/core/services/payment_flow_cache.dart';
 import 'package:medi/features/patient/features/add_medication/data/repo/medicine_repo.dart';
@@ -59,6 +61,17 @@ final getIt = GetIt.instance;
 Future<void> setupServiceLocator() async {
   if (!getIt.isRegistered<ApiService>()) {
     getIt.registerLazySingleton<ApiService>(() => ApiService());
+  }
+  if (!getIt.isRegistered<CaregiverModeCubit>()) {
+    getIt.registerLazySingleton<CaregiverModeCubit>(() => CaregiverModeCubit());
+  }
+  if (!getIt.isRegistered<ManagedPatientDashboardCubit>()) {
+    getIt.registerLazySingleton<ManagedPatientDashboardCubit>(
+      () => ManagedPatientDashboardCubit(
+        getIt<ApiService>(),
+        getIt<CaregiverModeCubit>(),
+      ),
+    );
   }
   if (!getIt.isRegistered<MedicineRepo>()) {
     getIt.registerLazySingleton<MedicineRepo>(

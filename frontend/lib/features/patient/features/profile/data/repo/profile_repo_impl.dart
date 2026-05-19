@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/profile/data/models/caregiver_request_model.dart';
 import 'package:medi/features/patient/features/profile/data/models/doctor_request_model.dart';
+import 'package:medi/features/patient/features/profile/data/models/managed_patient_summary.dart';
 import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
@@ -208,6 +209,7 @@ class ProfileRepoImpl implements ProfileRepo {
       if (response is ServerFailure) {
         return Left(response);
       }
+      log('List Caregiver Requests Response: ${response.toString()}');
 
       final requestsJson = (response['requests'] as List<dynamic>? ?? []);
       final requests = requestsJson
@@ -276,6 +278,45 @@ class ProfileRepoImpl implements ProfileRepo {
 
       final message = response['message'] ?? 'Request rejected';
       return Right(message.toString());
+    } on DioException catch (e) {
+      return Left(ServerFailure.fromDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<ApiError, List<ManagedPatientSummary>>> listManagedPatients() async {
+    try {
+      final token = HiveService.getAccessToken();
+      final headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      };
+
+      Future<dynamic> fetch(String endpoint) async {
+        return apiService.get(endpoint, headers: headers);
+      }
+
+      var response = await fetch('/patients/caregiver/patients');
+    
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+      log('List Managed Patients Response: ${response.toString()}');
+      final patientsJson =
+          (response['patients'] as List<dynamic>?) ??
+          (response['managedPatients'] as List<dynamic>?) ??
+          (response['data'] as List<dynamic>?) ??
+          const [];
+
+      final patients = patientsJson
+          .whereType<Map<String, dynamic>>()
+          .map(ManagedPatientSummary.fromJson)
+          .toList();
+
+      return Right(patients);
     } on DioException catch (e) {
       return Left(ServerFailure.fromDioError(e));
     } catch (e) {

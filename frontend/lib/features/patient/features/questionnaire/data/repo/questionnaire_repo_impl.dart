@@ -147,7 +147,7 @@ class QuestionnaireRepoImpl implements QuestionnaireRepo {
       };
 
       final dynamic response = await apiService.patch(
-        '/patients/caregiver/requests/$requestId/cancel',
+        '/patients/caregiver/requests/$requestId/reject',
         {},
         headers: headers,
       );
@@ -158,7 +158,8 @@ class QuestionnaireRepoImpl implements QuestionnaireRepo {
         return Left(response);
       }
 
-      final message = response['message'] ?? 'Caregiver request cancelled successfully';
+        final message =
+          response['message'] ?? '';
       return Right(message.toString());
     } on DioException catch (e) {
       return Left(ServerFailure.fromDioError(e));
