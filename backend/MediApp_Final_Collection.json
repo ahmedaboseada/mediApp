@@ -1183,7 +1183,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{URL}}/patient/all-data",
+                  "raw": "{{URL}}/patients/all-data",
                   "host": [
                     "{{URL}}"
                   ],
@@ -1213,7 +1213,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{URL}}/patient/all-data",
+                  "raw": "{{URL}}/patients/all-data",
                   "host": [
                     "{{URL}}"
                   ],
@@ -1243,7 +1243,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{URL}}/medicine",
+                  "raw": "{{URL}}/medications",
                   "host": [
                     "{{URL}}"
                   ],
@@ -1266,7 +1266,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{URL}}/patient/caregiver/patients",
+                  "raw": "{{URL}}/patients/caregiver/patients",
                   "host": [
                     "{{URL}}"
                   ],
