@@ -2406,6 +2406,89 @@
               }
             }
           ]
+        },
+        {
+          "name": "Fetch All Patient Data (As Patient)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{PATIENT_TOKEN}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}/patient/all-data",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "patient",
+                "all-data"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Fetch All Patient Data (As Caregiver)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{CAREGIVER_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "x-patient-user-id",
+                "value": "{{PATIENT_USER_ID}}",
+                "type": "text",
+                "description": "User ID of the patient"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}/patient/all-data",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "patient",
+                "all-data"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Patient Medicines (As Caregiver)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{CAREGIVER_TOKEN}}",
+                "type": "text"
+              },
+              {
+                "key": "x-patient-user-id",
+                "value": "{{PATIENT_USER_ID}}",
+                "type": "text",
+                "description": "User ID of the patient"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}/medicine",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "medicine"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },

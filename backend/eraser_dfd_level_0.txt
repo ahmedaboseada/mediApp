@@ -1,0 +1,24 @@
+// DFD Level 0 (Context Diagram) for MediApp
+// Copy and paste this directly into Eraser.io's code editor!
+
+// External Entities (Actors)
+Patient [shape: rectangle, icon: user]
+Doctor [shape: rectangle, icon: user]
+Admin [shape: rectangle, icon: user]
+Caregiver [shape: rectangle, icon: user]
+Payment Gateway [shape: rectangle, icon: credit-card]
+
+// Central System Process
+MediApp System [shape: oval]
+
+// Data Flows
+Patient > MediApp System: Registration, Bookings, Health Data, Payments
+MediApp System > Patient: Confirmations, Reminders, Search Results
+Doctor > MediApp System: Availability, Prescription Edits, License Info
+MediApp System > Doctor: Booking Requests, Patient Health Files
+Admin > MediApp System: Profile Approvals, Processed Withdrawals
+MediApp System > Admin: Audit Logs, Pending Doctor Registrations
+Caregiver > MediApp System: View Requests, Responses
+MediApp System > Caregiver: Dependent Health & Medicine Adherence
+MediApp System > Payment Gateway: Process Tokens
+Payment Gateway > MediApp System: Transaction Status Updates

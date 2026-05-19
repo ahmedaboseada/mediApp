@@ -1,0 +1,141 @@
+You are an expert software architect and diagram designer. I need you to generate a massive, exhaustive, and fully detailed Use Case Diagram for a comprehensive healthcare platform called "MediApp", based on my exact database schema. 
+
+Please read this entire prompt carefully and generate the diagram using your best layout practices. Do not leave out any details, as this represents a complex production system.
+
+### 1. System Boundary
+The system boundary is the "MediApp Platform". All use cases must exist inside this boundary.
+
+### 2. Actors and Inheritance
+Define the following Actors. Note the inheritance structure:
+- **Guest / Unauthenticated User**: An actor outside the system who hasn't logged in.
+- **User (Base Actor)**: The core authenticated user.
+- **Patient**: Inherits from "User".
+- **Doctor**: Inherits from "User".
+- **Admin**: Inherits from "User".
+- **Caregiver**: A role played by a "User" who manages a specific "Patient". Inherits from "User".
+- **System**: An automated background actor (handles cron jobs, token expirations, automatic low-stock notifications).
+
+### 3. Exhaustive Use Cases by Actor
+
+#### For the "Guest / Unauthenticated User":
+- Register new account (User, Patient, Doctor)
+- Request Authentication OTP
+- Verify OTP (for email confirmation or password reset)
+- Login with Email and Password
+- Request Password Reset
+
+#### For the "User" (Base level authenticated actions):
+- Update Base Profile (First Name, Last Name, Gender, DOB, Phone number)
+- Upload / Update Profile Picture
+- Initiate Email Change Flow (Generates pendingEmail and token)
+- Enable / Disable Two-Factor Authentication (2FA)
+- Manage Notification Settings (Toggle Push notifications, Toggle Email notifications)
+- Manage Privacy Settings (Toggle Caregiver Access, Toggle Doctor Access)
+- View System Notifications (Update read status)
+- Logout (Triggers Revoke Token)
+
+#### For the "Patient":
+**Profile & Medical File:**
+- Complete Patient Profile (Set Blood Type)
+- Log Chronic Conditions
+- Log Allergies
+- Log Active Ingredients (to avoid)
+- Manage Emergency Contacts (Add Name, Phone, Contact Method: SMS/WhatsApp)
+- Manage Payment Methods (Save Card, Set Expiry Date, Toggle Save Option)
+- Toggle "Reaction to Medication" Flag
+- Toggle "Allergy Alerts" Flag
+
+**Health Tracking:**
+- Log Health Measurements (Record Blood Pressure systolic/diastolic, Blood Sugar, Weight, Heart Rate)
+- Log Symptoms (List symptoms, Set Severity: none/mild/moderate/severe, Add notes)
+
+**Medicine Management:**
+- Add New Medicine (Set Name, Active Ingredient, Dosage, Dates)
+- Configure Medicine Frequency (Daily times, Weekly blocks, Specific dates)
+- Manage Medicine Inventory (Set current Stock, Set Left Threshold)
+- Mark Medicine Adherence (Mark specific times/dates as 'taken')
+- Submit Daily Medicine Feedback (Add text, Set level: low/medium/high)
+- Flag Medicine Side Effects
+- Toggle "Critical Mode" for a Medicine
+- Mark Medicine as "Chronic"
+
+**Bookings & Doctors:**
+- Search and Filter Doctors
+- View Doctor Profiles, Working Days, and Consultation Durations
+- Send Connection Request to a Doctor
+- Book an Appointment (Select Date, Time, Duration, Package Type: online/in-person)
+- Specify Booking Subject (Self vs. Dependent/Other, Age, Gender)
+- Pay for Booking (Updates payment status: pending/paid/failed/refunded)
+- Join Online Consultation Session (Consumes Session Token)
+- Cancel Booking (Provide Cancelled Reason)
+- Submit Doctor Review (Provide Rating 1-5)
+
+**Caregiver Management:**
+- Initiate Caregiver Request to another User (Set relationship type)
+- Revoke Caregiver Access
+
+#### For the "Caregiver":
+- Accept / Reject Incoming Caregiver Request
+- Monitor Dependent Patient's Health Measurements
+- Monitor Dependent Patient's Symptom Logs
+- Track Dependent Patient's Medicine Adherence
+
+#### For the "Doctor":
+**Onboarding & Profile:**
+- Complete Medical Profile (Specialization, Medical License ID)
+- Upload Medical License Image
+- Configure Clinic Details (Clinic Name, Address, Location Lat/Lng)
+- Set Working Schedule (Working Days, Working Hours start/end)
+- Set Appointment Preferences (Consultation Duration: 15/30/45/60, Appointment Types, Max Daily Patients)
+
+**Patient & Medical Management:**
+- Accept / Reject Patient Connection Requests
+- View Connected Patient's Complete Medical File (Allergies, Chronic conditions, Measurements)
+- Add New Medicine to Patient Prescription
+- Modify Existing Patient Medicine
+- Stop / Delete Patient Medicine
+- Edit Patient Health Data
+*(Note: All actions modifying patient health/medicine MUST include an audit logging step).*
+
+**Bookings & Consultations:**
+- View Upcoming Bookings
+- Accept / Complete Appointment
+- Generate/Activate Secure Session Token (For Online Appointments)
+- View Accumulated Reviews & Ratings Count
+
+**Financials:**
+- View Wallet Balance
+- Submit Withdrawal Request (Specify Amount, Bank Name, Account Number, Account Holder Name)
+
+#### For the "Admin":
+- Review Doctor Registrations
+- Approve or Reject Doctor Profiles (Updates status from 'pending' to 'approved'/'rejected')
+- Review Doctor Withdrawal Requests
+- Process Withdrawals (Add Admin Notes, Change status to 'processed', Set processedAt date)
+- Monitor System Audit Logs (Review doctor-initiated changes to patient files)
+
+#### For the "System" (Automated Backend Processes):
+- Expire OTPs and Session Tokens (Based on createdAt/ExpiresAt TTL)
+- Check Medicine Stock vs "Left Threshold"
+- Send Low Medicine Stock Notification (<<extends>> Check Medicine Stock)
+- Send Upcoming Booking Reminders
+
+### 4. Critical UML Relationships (<<include>> and <<extend>>)
+Make sure to visually map these specific dependencies in the diagram:
+- "Book an Appointment" **<<include>>** "Pay for Booking"
+- "Login with Email and Password" **<<extend>>** "Verify OTP" (Condition: If 2FA is enabled)
+- "Add New Medicine to Patient Prescription" (Doctor) **<<include>>** "Create Audit Log"
+- "Modify Existing Patient Medicine" (Doctor) **<<include>>** "Create Audit Log"
+- "Stop / Delete Patient Medicine" (Doctor) **<<include>>** "Create Audit Log"
+- "Edit Patient Health Data" (Doctor) **<<include>>** "Create Audit Log"
+- "Change Email Address" **<<include>>** "Verify OTP"
+
+### 5. Communication (Shared Use Cases)
+Draw an explicit subsystem or grouping for "Chat System" where both **Patient** and **Doctor** connect to the following shared use cases:
+- Initiate Chat Session
+- Send Text Message
+- Send Voice Note (Records duration)
+- Send File Attachment (Image/PDF)
+- Read Messages (Updates message status to 'seen')
+
+Please render this comprehensively using best practices for large-scale enterprise system Use Case diagrams. Use clean grouping (packages) for: User Account Management, Medical & Health Tracking, Scheduling & Bookings, Doctor Operations, Admin Operations, and Communication.

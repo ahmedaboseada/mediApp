@@ -1,0 +1,59 @@
+sequenceDiagram
+    autonumber
+    actor Patient
+    participant API as Booking Controller
+    participant BService as Booking Service
+    participant DService as Doctor Service
+    participant DB as Database (MongoDB)
+    participant Notif as Notification Service
+    actor Doctor
+
+    %% Step 1: Check Availability
+    Patient->>+API: GET /api/doctors/{id}/availability
+    API->>+DService: getAvailableSlots(doctorId, date)
+    DService->>+DB: Query Doctor workingHours & existing Bookings
+    DB-->>-DService: Return availability data
+    DService-->>-API: List of available time slots
+    API-->>-Patient: 200 OK (Slots array)
+
+    %% Step 2: Create Booking
+    Patient->>+API: POST /api/bookings (doctorId, date, time)
+    API->>+BService: createBooking(payload)
+    
+    %% Validation
+    BService->>+DB: Find Doctor by ID
+    DB-->>-BService: Doctor data (verified approved status)
+    
+    BService->>+DB: Check for existing booking conflicts
+    DB-->>-BService: No conflicts found
+    
+    %% Create records
+    BService->>+DB: Insert new Booking (status: 'pending')
+    DB-->>-BService: Booking created (Booking ID)
+    
+    %% Side effects (Audit & Notification)
+    par Audit Logging
+        BService->>DB: Insert AuditLog (action: create_booking)
+    and Notifications
+        BService->>+Notif: notifyDoctor(doctorId, Booking ID)
+        Notif->>DB: Insert Notification record
+        Notif-->>-Doctor: Push Notification / Email (New Appointment!)
+    end
+    
+    BService-->>-API: Booking success response
+    API-->>-Patient: 201 Created (Booking Details)
+
+    %% Step 3: Doctor Responds to Booking
+    Doctor->>+API: PATCH /api/bookings/{id}/status (status: 'confirmed')
+    API->>+BService: updateBookingStatus(id, 'confirmed')
+    BService->>+DB: Update Booking status -> 'confirmed'
+    DB-->>-BService: Updated successfully
+    
+    par Notifications
+        BService->>+Notif: notifyPatient(patientId)
+        Notif->>DB: Insert Notification record
+        Notif-->>-Patient: Push Notification (Booking Confirmed!)
+    end
+    
+    BService-->>-API: Success response
+    API-->>-Doctor: 200 OK

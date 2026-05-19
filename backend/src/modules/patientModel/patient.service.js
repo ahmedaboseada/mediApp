@@ -856,3 +856,28 @@ export const triggerSOS = async (req, res) => {
         twilioError
     });
 };
+
+export const getAllData = async (req, res) => {
+    const userId = req.user.id;
+    
+    try {
+        const user = await userModel.findById(userId).lean();
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        
+        const patient = await patientModel.findOne({ userId }).populate('medications longTermMedication').lean();
+        if (!patient) return res.status(404).json({ message: 'Patient not found' });
+        
+        const medicines = await medicineModel.find({ patientId: patient._id }).lean();
+        
+        const data = {
+            user: await publicUser(user),
+            patient,
+            medicines
+        };
+        
+        return res.status(200).json({ message: 'Patient data fetched successfully', data });
+    } catch (error) {
+        console.error('getAllData Error:', error);
+        return res.status(500).json({ message: 'Internal Server Error' });
+    }
+};

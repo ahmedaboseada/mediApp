@@ -34,6 +34,7 @@
 import { Router } from 'express';
 import { validation } from '../../middlewares/validation.js';
 import { verifyToken } from '../../middlewares/authentication.js';
+import { applyCaregiverContext } from '../../middlewares/caregiverContext.js';
 import { restrictTo } from '../../middlewares/restrictTo.js';
 
 import * as PVS from './patient.validation.js';
@@ -42,8 +43,11 @@ import { cloudinaryUploadAvatarAndCover } from '../../middlewares/cloudinary.js'
 
 const patientRouter = Router();
 
-patientRouter.use(verifyToken);
+patientRouter.use(verifyToken, applyCaregiverContext);
 patientRouter.use(restrictTo(['patient']));
+
+// fetch all patient data (useful for caregiver)
+patientRouter.get('/all-data', PS.getAllData);
 
 // screens: complete profile (merged)
 patientRouter.patch('/complete', ...cloudinaryUploadAvatarAndCover({ folder: 'patients' }), validation(PVS.completeProfileSchema), PS.completeProfile);

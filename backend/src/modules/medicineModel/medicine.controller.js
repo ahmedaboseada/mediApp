@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { validation } from '../../middlewares/validation.js';
 import { verifyToken } from '../../middlewares/authentication.js';
+import { applyCaregiverContext } from '../../middlewares/caregiverContext.js';
 import { restrictTo } from '../../middlewares/restrictTo.js';
 
 import * as MVS from './medicine.validation.js';
@@ -9,7 +10,7 @@ import * as MS from './medicine.service.js';
 const medicineRouter = Router();
 
 // all medicine routes require authentication and must be patient or doctor
-medicineRouter.use(verifyToken);
+medicineRouter.use(verifyToken, applyCaregiverContext);
 medicineRouter.use(restrictTo(['patient', 'doctor']));
 
 medicineRouter.post('/', validation(MVS.addMedicineSchema), MS.addMedicine);

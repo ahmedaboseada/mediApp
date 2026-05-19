@@ -1,0 +1,270 @@
+classDiagram
+    class User {
+        +ObjectId _id
+        +String type
+        +String firstName
+        +String lastName
+        +String email
+        +String password
+        +String phone
+        +Date DOB
+        +Number age
+        +String gender
+        +Boolean twoFA
+        +String otp
+        +Boolean confirmed
+        +String pendingEmail
+        +Date pendingEmailRequestedAt
+        +String profilePicture
+        +ObjectId[] notifications
+        +ObjectId[] booking
+        +Date otpExpires
+        +String confirmTokenId
+        +String resetTokenId
+        +String emailChangeTokenId
+        +Object settings
+        +Date createdAt
+        +Date updatedAt
+    }
+
+    class Doctor {
+        +ObjectId _id
+        +ObjectId userId
+        +String specialization
+        +String clinicName
+        +String medicalLicenseId
+        +String status
+        +String clinicAddress
+        +Object clinicLocation
+        +String[] workingDays
+        +Object[] workingHours
+        +Number consultationDuration
+        +String[] appointmentTypes
+        +Number maxDailyPatients
+        +String licenseImage
+        +Object[] connectedPatients
+        +ObjectId[] reviews
+        +Number reviewsCount
+        +Number walletBalance
+        +Date createdAt
+        +Date updatedAt
+    }
+
+    class Patient {
+        +ObjectId _id
+        +ObjectId userId
+        +String[] chronicConditions
+        +String[] allergies
+        +String[] activeIngredients
+        +ObjectId[] longTermMedication
+        +ObjectId[] medications
+        +Object[] connectedDoctors
+        +String card
+        +String expiryDate
+        +Boolean saveOption
+        +String bloodTypes
+        +Object emergencyContact
+        +Object caregiver
+        +Boolean reactionToMedication
+        +Boolean allergyAlerts
+        +Object healthMeasurements
+        +Date createdAt
+        +Date updatedAt
+    }
+
+    class Booking {
+        +ObjectId _id
+        +ObjectId patientId
+        +ObjectId doctorId
+        +Object date
+        +Number duration
+        +String packageType
+        +String bookingFor
+        +Number patientAge
+        +String patientGender
+        +String problem
+        +String paymentMethod
+        +String paymentStatus
+        +Number price
+        +String appointmentId
+        +String sessionToken
+        +Boolean sessionActive
+        +Date sessionExpiresAt
+        +String status
+        +String clinicAddress
+        +String cancelledReason
+        +Date createdAt
+        +Date updatedAt
+    }
+
+    class HealthMeasurement {
+        +ObjectId _id
+        +ObjectId patientId
+        +String type
+        +Number value
+        +Number systolic
+        +Number diastolic
+        +Number heartRate
+        +Date date
+        +String notes
+        +Date createdAt
+        +Date updatedAt
+    }
+
+    class Medicine {
+        +ObjectId _id
+        +ObjectId patientId
+        +String type
+        +String frequency
+        +String[] daily
+        +Object[] weekly
+        +Object[] specific
+        +Date startDate
+        +Date endDate
+        +Date expiryDate
+        +String dosage
+        +Number stock
+        +Number leftThreshold
+        +Boolean isChronic
+        +String name
+        +String activeIngredient
+        +Boolean criticalMode
+        +String status
+        +String[] sideEffects
+        +Object[] dates
+        +String notes
+        +Object[] dailyFeedback
+        +Date createdAt
+        +Date updatedAt
+    }
+
+    class Chat {
+        +ObjectId _id
+        +String name
+        +String profileImage
+        +String status
+        +ObjectId[] messages
+        +ObjectId patientId
+        +ObjectId doctorId
+        +Date createdAt
+        +Date updatedAt
+    }
+
+    class Message {
+        +ObjectId _id
+        +ObjectId senderId
+        +ObjectId receiverId
+        +String message
+        +Date time
+        +String status
+        +Object[] files
+        +Object voiceNote
+        +Date createdAt
+        +Date updatedAt
+    }
+
+    class Notification {
+        +ObjectId _id
+        +String type
+        +String header
+        +String message
+        +Date time
+        +Boolean read
+        +ObjectId userId
+        +Date createdAt
+        +Date updatedAt
+    }
+
+    class CaregiverRequest {
+        +ObjectId _id
+        +ObjectId patientId
+        +ObjectId caregiverUserId
+        +String relationship
+        +String status
+        +Date respondedAt
+        +Date createdAt
+        +Date updatedAt
+    }
+
+    class WithdrawalRequest {
+        +ObjectId _id
+        +ObjectId doctorId
+        +Number amount
+        +String status
+        +Object bankDetails
+        +String adminNotes
+        +Date processedAt
+        +Date createdAt
+        +Date updatedAt
+    }
+
+    class Review {
+        +ObjectId _id
+        +ObjectId doctorId
+        +ObjectId PatientId
+        +Number rating
+        +Date createdAt
+        +Date updatedAt
+    }
+
+    class AuditLog {
+        +ObjectId _id
+        +ObjectId patientId
+        +ObjectId doctorId
+        +ObjectId bookingId
+        +String action
+        +String details
+        +Date createdAt
+        +Date updatedAt
+    }
+
+    class SymptomLog {
+        +ObjectId _id
+        +ObjectId patientId
+        +String[] symptoms
+        +String severity
+        +Date date
+        +String notes
+        +Date createdAt
+        +Date updatedAt
+    }
+
+    class RevokeToken {
+        +ObjectId _id
+        +String tokenId
+        +Date expiredAt
+        +Date createdAt
+        +Date updatedAt
+    }
+
+    %% Relationships
+    Doctor "*" --> "1" User : userId
+    Patient "*" --> "1" User : userId
+    
+    Booking "*" --> "1" Patient : patientId
+    Booking "*" --> "1" Doctor : doctorId
+    
+    HealthMeasurement "*" --> "1" Patient : patientId
+    
+    Medicine "*" --> "1" Patient : patientId
+    
+    Chat "*" --> "1" Patient : patientId
+    Chat "*" --> "1" Doctor : doctorId
+    Chat "1" o-- "*" Message : messages
+    
+    Message "*" --> "1" User : senderId
+    Message "*" --> "1" User : receiverId
+    
+    Notification "*" --> "1" User : userId
+    
+    CaregiverRequest "*" --> "1" Patient : patientId
+    CaregiverRequest "*" --> "1" User : caregiverUserId
+    
+    WithdrawalRequest "*" --> "1" Doctor : doctorId
+    
+    Review "*" --> "1" Doctor : doctorId
+    Review "*" --> "1" Patient : PatientId
+    
+    AuditLog "*" --> "1" Patient : patientId
+    AuditLog "*" --> "1" Doctor : doctorId
+    AuditLog "*" --> "1" Booking : bookingId

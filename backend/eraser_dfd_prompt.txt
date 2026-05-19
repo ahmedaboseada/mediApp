@@ -1,0 +1,79 @@
+You are an expert systems architect. I need you to generate a fully comprehensive and detailed Data Flow Diagram (DFD) covering both **Level 0 (Context Diagram)** and **Level 1** for my healthcare platform called "MediApp". 
+
+Please read the following requirements carefully and generate the diagram/code that best utilizes Eraser.io's AI diagramming capabilities.
+
+---
+
+### Part 1: DFD Level 0 (Context Diagram)
+
+**Central Process:**
+- **[0.0] MediApp System**: The core platform coordinating all healthcare operations.
+
+**External Entities (Actors):**
+1. **Patient**: Primary end-user interacting with health and booking features.
+2. **Doctor**: Medical professional providing care and consultations.
+3. **Admin**: System administrator managing verifications and finances.
+4. **Caregiver**: A user authorized to monitor a patient's health.
+5. **Payment Gateway** (External): Handles external financial transactions.
+
+**Data Flows for Level 0:**
+- **Patient** -> *[0.0] MediApp System*: Registration Details, Profile Updates, Health Measurements, Symptom Logs, Medicine Inputs (add/adherence), Booking Requests, Chat Messages, Payments, Doctor Reviews, Caregiver Requests.
+- *[0.0] MediApp System* -> **Patient**: Booking Confirmations, Doctor Search Results, Chat Messages, Notifications, Medicine Reminders.
+- **Doctor** -> *[0.0] MediApp System*: Medical License Info, Working Hours & Preferences, Booking Responses (Accept/Cancel), Patient Prescription Updates (add/edit medicines), Chat Messages, Withdrawal Requests.
+- *[0.0] MediApp System* -> **Doctor**: Connected Patient Health Data, Booking Requests, Audit Log Triggers, Notifications, Wallet Balance Updates.
+- **Admin** -> *[0.0] MediApp System*: Doctor Profile Approvals/Rejections, Processed Withdrawal Confirmations.
+- *[0.0] MediApp System* -> **Admin**: Pending Doctor Registrations, Pending Withdrawal Requests, System Audit Logs.
+- **Caregiver** -> *[0.0] MediApp System*: Caregiver Request Responses, Requests to view dependent data.
+- *[0.0] MediApp System* -> **Caregiver**: Dependent's Health Measurements, Dependent's Medication Adherence Data.
+- *[0.0] MediApp System* <-> **Payment Gateway**: Payment Tokens, Transaction Status Updates, Refund Requests.
+
+---
+
+### Part 2: DFD Level 1 (Subsystem Decomposition)
+
+Break down process [0.0] into the following six major Sub-Processes and map the flows between the Entities, Processes, and Data Stores.
+
+**Data Stores:**
+- **D1: User DB** (Credentials, Profiles, 2FA, Settings)
+- **D2: Doctor DB** (Doctor Profiles, Schedules, Wallets)
+- **D3: Patient DB** (Patient Medical Files, Caregiver Links)
+- **D4: Health Data DB** (Measurements, Symptoms, Medicines)
+- **D5: Booking DB** (Appointments, Session Tokens)
+- **D6: Communications DB** (Chats, Messages, Notifications)
+- **D7: Audit & Feedback DB** (Audit Logs, Reviews, Withdrawals)
+
+**Sub-Processes & Data Flows:**
+
+**[1.0] User Management & Auth Process**
+- **Inputs**: Registration & Login Credentials (from Patient/Doctor), Caregiver linking requests, Profile Approval decisions (from Admin).
+- **Outputs**: Auth Tokens/OTPs, Auth status, Caregiver Link success.
+- **Reads/Writes**: D1 (User DB), D2 (Doctor DB), D3 (Patient DB).
+
+**[2.0] Health & Medical Tracking Process**
+- **Inputs**: Health measurements, Symptom logs, Medication updates (from Patient); Prescription additions/edits (from Doctor).
+- **Outputs**: Health Data view (to Doctor/Caregiver), Medication reminders (to Patient).
+- **Reads/Writes**: D4 (Health Data DB). (If Doctor modifies D4, trigger flow to Process 6.0).
+
+**[3.0] Scheduling & Booking Process**
+- **Inputs**: Search queries, Booking requests, Date/Time selections (from Patient); Availability schedules, Booking accepts/cancels (from Doctor).
+- **Outputs**: Available time slots (to Patient), Booking Confirmations/Session Tokens (to Patient & Doctor).
+- **Reads/Writes**: D2 (Doctor DB - for schedule check), D5 (Booking DB).
+
+**[4.0] Communication & Notification Process**
+- **Inputs**: Text messages, Audio files, PDFs (from Patient/Doctor).
+- **Outputs**: Real-time messages, System Notifications (to Patient/Doctor).
+- **Reads/Writes**: D6 (Communications DB).
+
+**[5.0] Financial & Billing Process**
+- **Inputs**: Payment details (from Patient); Withdrawal requests (from Doctor); Transaction Status (from Payment Gateway); Processed Confirmations (from Admin).
+- **Outputs**: Payment successful status (to Patient), Wallet Balance updates (to Doctor).
+- **Reads/Writes**: D2 (Doctor DB - for wallet), D5 (Booking DB - for payment status), D7 (Audit & Feedback DB - for withdrawal requests).
+
+**[6.0] Auditing & Feedback Process**
+- **Inputs**: Audit log triggers (from Process 2.0 when Doctor alters prescriptions); Rating & Review submissions (from Patient).
+- **Outputs**: Audit Logs (to Admin), Aggregated Reviews (to Doctor).
+- **Reads/Writes**: D7 (Audit & Feedback DB).
+
+---
+*Instructions for Eraser.io AI:*
+Please draw the Level 0 Context Diagram and the Level 1 DFD separately. Use clear standard DFD notation (Gane-Sarson or Yourdon/DeMarco). Ensure all Data Stores (D1-D7) are explicitly shown in Level 1, and make sure the "Audit Log Trigger" flows clearly between the Health Tracking process [2.0] and the Auditing process [6.0].

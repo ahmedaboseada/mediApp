@@ -1,0 +1,158 @@
+MediApp - Comprehensive Functional and Non-Functional Requirements
+
+1. Functional Requirements
+==========================
+Functional requirements define the core capabilities, features, and behaviors of the MediApp system based on its intended use cases.
+
+1.1 User & Role Management
+- The system shall support multiple user roles, including Admin, Doctor, and Patient, each with distinct permission levels.
+- The system shall allow users to register using email/password, phone number, or third-party OAuth providers.
+- The system shall allow users to log in securely with optional two-factor authentication (2FA) support.
+- The system shall allow users to view, manage, and continuously update their personal profiles and contact information.
+- Doctors must be able to complete an automated onboarding process, including uploading medical credentials for verification.
+- Doctors shall be able to easily define their consultation fees, working days, and exact hourly availability schedules.
+- The system shall support password recovery via secure, time-limited reset links sent via email or SMS.
+- The system shall allow users to manage their active sessions and securely log out from all connected devices.
+- The system shall enable patients to link family members or dependents under a primary account for centralized management.
+
+1.2 Booking & Scheduling
+- Patients shall be able to view doctor availability in real-time on a calendar interface and select available time slots.
+- The system shall handle complex scheduling constraints, dynamically adjusting for working days, holidays, and exceptions.
+- The system shall strictly prevent double-booking or scheduling conflicts through database-level locks and validations.
+- The system shall support bidirectional request flows, requiring doctor approval for specific consultation types before confirmation.
+- Patients and doctors shall be able to view a comprehensive dashboard of their upcoming, past, and canceled booking history.
+- The system shall allow users to cancel or reschedule appointments within a predefined time window, triggering automatic calendar updates.
+
+1.3 Payments & Transactions
+- The system shall integrate with external payment gateways (e.g., Paymob) to process digital consultation fees securely.
+- The system shall validate payment intents and process status webhooks from providers to asynchronously confirm transactions.
+- The system shall generate temporary session IDs and secure transaction tokens during checkout processes.
+- The system shall maintain an immutable, detailed transaction history and ledger for both patients and doctors.
+- The system shall automatically handle refund processing and provide dispute management statuses for canceled or failed consultations.
+- The system shall allow admins and doctors to view detailed financial reports, including daily earnings and platform fees deducted.
+
+1.4 Consultations & Communication
+- The system shall provide a secure, real-time messaging interface between doctors and connected patients.
+- The system shall generate session-based QR tokens that patients can scan to authorize physical in-person visits securely.
+- The system shall validate QR tokens instantly to trigger the official start of a consultation session on the doctor's interface.
+- The system shall meticulously log the exact start time, end time, and total duration of active consultation sessions.
+- The system shall restrict direct messaging capabilities solely to patients and doctors with an active or recent appointment.
+
+1.5 Health & Medication Tracking
+- The system shall allow patients to manually record and update vital health measurements (e.g., blood pressure, heart rate, blood sugar).
+- The system shall graphically display historical health trends using charts over varying time ranges (weekly, monthly).
+- The system shall allow patients to catalog their ongoing medications, including dosages, frequencies, and specific instructions.
+- The system shall track medication inventory, maintaining an accurate pill count that decreases based on required dosage consumption.
+- The system shall support a toggle functionality to mark medication as "taken" or "not taken", dynamically updating the inventory logic.
+- Doctors shall be granted access to view their connected patients' complete health measurements and medication compliance histories.
+
+1.6 Emergency & SOS
+- The system shall provide a prominently visible, single-tap emergency SOS trigger button accessible tient dashboard.
+- The system shall allow patients to pre-configure up to five designated emergency contacts within their profile.
+- The system shall automatically dispatch critical alerts via SMS (e.g., using Twilio) to emergency contacts when the SOS is triggered.
+- The system shall automatically append the patient's real-time GPS geolocation data to the emergency alert message if location services are enabled.
+- The system shall log all SOS events with precise timestamps in a highly available, secure table for audit and review purposes.
+
+1.7 Search & Discovery
+- The system shall provide a global search bar allowing patients to find doctors by exact name, clinic name, or specific medical condition.
+- The system shall implement a geographic proximity logic, sorting doctors based on their physical distance from the patient's current location.
+- The system shall allow filtering of search results by medical specialty, gender, spoken languages, and accepted insurances.
+- The system shall allow sorting of search results based on consultation fees (low to high), highest patient ratings, and soonest availability.
+- The system shall implement pagination or infinite scrolling for search results to ensure fast loading times with large datasets.
+
+1.8 Notifications & Alerts
+- The system shall dispatch push notifications, SMS, or email alerts upon appointment creation, confirmation, and cancellation.
+- The system shall deliver automated reminders to patients 24 hours and 1 hour prior to their scheduled consultation times.
+- The system shall alert patients via local notifications exactly when it is time to consume their prescribed medication.
+- The system shall proactively notify doctors when a new booking request is submitted or when a patient sends an urgent message.
+- The system shall allow users to granularly configure their notification preferences, toggling specific alert types on or off.
+
+1.9 Ratings & Reviews
+- The system shall prompt patients to submit a standardized rating (1-5 stars) and a written review immediately after a consultation concludes.
+- The system shall prevent users from reviewing doctors they have never had a verified, completed appointment with.
+- The system shall calculate and publicly display an aggregated average rating and total review count on each doctor's public profile.
+- The system shall allow doctors to view their incoming reviews and publicly reply to patient feedback in a professional manner.
+- The system shall flag reviews containing inappropriate language for manual admin review before they are published to the platform.
+
+1.10 File & Document Management
+- The system shall allow patients to upload, categorize, and securely store standard medical documents (e.g., PDFs, JPGs, lab results).
+- The system shall compress and validate the file types and sizes of all uploaded media to prevent malicious file execution.
+- The system shall allow doctors to digitally generate, sign, and instantly share standard medical prescriptions directly to the patient's profile.
+- The system shall allow users to seamlessly preview uploaded medical documents or x-rays within an integrated secure document viewer.
+- The system shall strictly enforce access controls, ensuring medical files are only accessible to the patient and their explicitly authorized doctors.
+
+1.11 Data Export & Reporting
+- The system shall allow patients to generate and download comprehensive PDF summaries of their health measurement logs.
+- The system shall provide functionalities for patients to export their medication histories in standard formats (e.g., CSV, Excel) for sharing with external specialists.
+- The system shall allow doctors to export daily or weekly rosters of scheduled appointments for offline viewing or printing.
+- The system shall automatically compile post-consultation summaries, including prescribed medications and doctor's notes, into a downloadable report.
+- The system shall process large data export requests asynchronously, notifying the user via email once the compiled file is ready for download.
+
+1.12 Admin Dashboard & System Management
+- The system shall provide a secure web-based administrative dashboard exclusively accessible by authenticated Admin accounts.
+- The system shall empower admins to suspend, deactivate, or permanently delete user accounts that violate terms of service.
+- The system shall feature an analytics overview displaying key performance indicators (KPIs) like active daily users, total successful bookings, and gross platform revenue.
+- The system shall allow admins to globally configure system-wide variables, such as platform transaction fees or supported medical specialties.
+- The system shall provide a centralized dispute resolution interface for admins to review patient complaints, check logs, and authorize manual refunds.
+
+
+2. Non-Functional Requirements
+==============================
+Non-functional requirements specify the system's operational criteria, performance expectations, and security constraints.
+
+2.1 Security & Privacy
+- Sensitive patient data (such as phone numbers, medical history, and health measurements) must be AES-256 encrypted at rest.
+- Authentication must be handled using secure, short-lived JSON Web Tokens (JWT) passed via HTTP-only cookies or Authorization headers.
+- The system must enforce strict Role-Based Access Control (RBAC), verifying role permissions via middleware on every protected API endpoint.
+- The system must maintain an immutable, tamper-evident audit log for sensitive actions like medical edits, prescription creations, and profile deletions.
+- External API keys (Paymob, Twilio, DB URIs) must be managed securely through environment variables and never hardcoded into the source code.
+- All data transmission between the client applications and the backend server must be encrypted using TLS 1.2 or higher (HTTPS).
+
+2.2 Performance & Responsiveness
+- Critical API endpoints (e.g., SOS trigger, authentication, messaging) must respond within a latency threshold of less than 200 milliseconds.
+- Database queries, particularly complex spatial proximity searches and historical aggregations, must utilize optimized indexing strategies.
+- The system must leverage in-memory caching mechanisms (e.g., Redis) to quickly serve frequently accessed, non-volatile data like doctor lists and specialties.
+- The system must implement pagination for all endpoints returning collections of data to minimize payload sizes and reduce memory overhead.
+- Media uploads (e.g., profile pictures, medical documents) must be processed asynchronously and served via a globally distributed Content Delivery Network (CDN).
+
+2.3 Scalability
+- The application architecture must be entirely stateless to support seamless horizontal scaling across multiple containerized server instances.
+- The system must be capable of smoothly handling a minimum of 1,000 concurrent user connections without significant degradation in response times.
+- The database infrastructure must support read replicas to offload heavy analytical or search queries from the primary write node.
+- Real-time communication services (e.g., WebSockets for messaging) must be designed to scale independently from the core HTTP REST APIs.
+- The system must incorporate auto-scaling policies triggered by CPU utilization and memory consumption metrics during peak usage hours.
+
+2.4 Reliability & Availability
+- The core platform, specifically emergency SOS services and primary APIs, must target a high availability Service Level Agreement (SLA) of 99.9% uptime.
+- Database interactions must implement robust ACID transactions to completely prevent data corruption during partial failures, such as concurrent inventory updates.
+- The system must implement robust fallback mechanisms, such as retry logic with exponential backoff for failed integrations with external APIs (e.g., SMS delivery).
+- The system must gracefully degrade non-critical features (like reviews or profile pictures) to ensure core functionalities (like SOS and booking) remain operational during partial outages.
+- The backend services must employ automated health checks and self-healing mechanisms to automatically restart failed Node.js processes.
+
+2.5 Compliance & Legal
+- The system must strictly comply with relevant healthcare data protection regulations (e.g., HIPAA in the US, GDPR in Europe) regarding patient medical records.
+- The system must ensure explicit, logged user consent is obtained before processing sensitive biometric data or sharing information with third parties.
+- The system must provide automated, compliant mechanisms for data anonymization and permanent data deletion upon a verified user request.
+- The system must maintain strict data retention policies, automatically purging temporary logs and inactive session data after defined periods (e.g., 90 days).
+- The system must display comprehensive Terms of Service and Privacy Policy agreements, tracking the specific version accepted by each user during registration.
+
+2.6 Usability & Interoperability
+- All backend APIs must be comprehensively documented using OpenAPI specifications (e.g., Swagger/ApiDog) to facilitate seamless frontend and third-party integration.
+- The system APIs must adhere strictly to RESTful design principles, returning consistent, predictable JSON response structures and standard HTTP status codes.
+- The backend must expose a clearly defined versioning strategy (e.g., /api/v1/...) to allow backwards compatibility when introducing breaking changes.
+- The backend application must be easily accessible remotely by mobile devices operating on the same local network during local development and testing phases.
+- Error messages returned by the API must be user-friendly, localized, and strictly omit sensitive stack traces or internal server architecture details.
+
+2.7 Maintainability & Deployment
+- The system architecture must adhere to modular design patterns, maintaining strict separation of concerns (e.g., independent modules for users, bookings, medicine).
+- The complete application environment must be thoroughly containerized (e.g., using Docker) to guarantee reproducible deployments across staging and production.
+- The codebase must enforce rigorous coding standards through automated linting, formatting rules, and mandatory pre-commit hooks.
+- The repository must include comprehensive automated test coverage (unit and integration tests) specifically targeting critical business logic flows like payment webhooks.
+- The system must utilize a CI/CD (Continuous Integration/Continuous Deployment) pipeline to automatically build, test, and deploy code changes to a VPS or cloud provider.
+
+2.8 Backup, Recovery & Rate Limiting
+- The system must automatically execute comprehensive daily backups of the entire database, securely encrypting and storing them in an isolated off-site location.
+- The platform must define and document a clear Disaster Recovery Plan (DRP) with a Recovery Time Objective (RTO) of less than 4 hours.
+- The system must implement robust rate limiting on public-facing endpoints (e.g., login, registration) to proactively block brute-force attacks.
+- The system must throttle resource-intensive endpoints (e.g., data exports, complex searches) to prevent individual users from monopolizing server resources (DoS attacks).
+- The system must actively monitor API request patterns and automatically temporarily ban IP addresses exhibiting malicious or unusually high traffic volumes.

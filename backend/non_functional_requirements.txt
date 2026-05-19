@@ -1,0 +1,27 @@
+System Non Functional Requirements
+How a system should operate, focusing on quality attributes like performance, security,
+usability, reliability, and scalability, rather than what specific functions it performs.
+
+3.6.1 Performance
+Fast navigation across all application screens, doctor and patient data loads within two seconds, instant calculation of available booking slots and medicine stock, and buttons respond within one second of first press.
+
+3.6.2 Reliability
+Immediate saving of user data to prevent loss, local data caching during internet outages, automatic data synchronization after connectivity is restored, and stable operation without crashes during section switching.
+
+3.6.3 Security
+Encrypt patient health, medical, and prescription data in the database, secure server communication using HTTPS, protect user files with secure device permissions, detect and block repeated failed login attempts, and restrict database access using role-based service-level permissions.
+
+3.6.4 Usability
+Clear interface with consistent icons and colors, easy access to bookings, health measurements, chats, and prescriptions, simple design understandable within one minute, and organized and readable presentation of all medical information.
+
+3.6.5 Scalability
+Support increased user numbers without performance loss, add doctors, patients, and new health trackers with minimal code changes, distribute data across databases as size grows, and maintain speed as content and chat volume increases.
+
+3.6.6 Compatibility
+Operate on Android 8 and above as well as modern iOS devices, adapt to different screen sizes without distortion, and support audio voice notes and PDF attachments at multiple resolutions.
+
+3.6.7 Maintainability
+Use layered architecture for independent module updates, allow easy addition of future medical features, apply reusable UI components across sections, and provide clear and concise code documentation for future developers.
+
+3.6.8 Availability
+Allow usage with weak or no internet via cached health data and restore last saved state after unexpected interruption.

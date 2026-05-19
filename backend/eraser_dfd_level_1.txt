@@ -1,0 +1,59 @@
+// DFD Level 1 (Subsystem Diagram) for MediApp
+// Copy and paste this directly into Eraser.io's code editor!
+
+// External Entities
+Patient [shape: rectangle, icon: user]
+Doctor [shape: rectangle, icon: user]
+Admin [shape: rectangle, icon: user]
+
+// Sub-Processes (Level 1)
+1.0 User Management [shape: oval]
+2.0 Health Tracking [shape: oval]
+3.0 Scheduling Booking [shape: oval]
+4.0 Communication [shape: oval]
+5.0 Billing Financials [shape: oval]
+6.0 Auditing Reviews [shape: oval]
+
+// Data Stores
+D1 Users DB [shape: cylinder]
+D2 Doctors DB [shape: cylinder]
+D3 Patients DB [shape: cylinder]
+D4 Health Data DB [shape: cylinder]
+D5 Bookings DB [shape: cylinder]
+D6 Messages DB [shape: cylinder]
+D7 Audits DB [shape: cylinder]
+
+// Data Flows: 1.0 User Management
+Patient > 1.0 User Management: Registration Data, Credentials
+Doctor > 1.0 User Management: Medical License, Profile Info
+Admin > 1.0 User Management: Profile Approval Decisions
+1.0 User Management > D1 Users DB: Save Auth Credentials
+1.0 User Management > D2 Doctors DB: Update Doctor Status
+1.0 User Management > D3 Patients DB: Save Patient Profile
+
+// Data Flows: 2.0 Health Tracking
+Patient > 2.0 Health Tracking: Health Measurements, Symptoms, Medicine Adherence
+Doctor > 2.0 Health Tracking: Add/Edit Patient Medicine
+2.0 Health Tracking > D4 Health Data DB: Store Measurements & Medicine
+2.0 Health Tracking > 6.0 Auditing Reviews: Trigger Audit (if Doctor edits)
+
+// Data Flows: 3.0 Scheduling & Booking
+Patient > 3.0 Scheduling Booking: Search Queries, Book Appointment
+Doctor > 3.0 Scheduling Booking: Accept/Cancel Slot, Working Hours
+3.0 Scheduling Booking > D5 Bookings DB: Store Appointments & Tokens
+
+// Data Flows: 4.0 Communication
+Patient > 4.0 Communication: Send Chat Messages, Audio
+Doctor > 4.0 Communication: Send Chat Messages, Files
+4.0 Communication > D6 Messages DB: Store Chat History & Status
+
+// Data Flows: 5.0 Billing & Financials
+Patient > 5.0 Billing Financials: Pay for Booking
+Doctor > 5.0 Billing Financials: Withdrawal Request
+5.0 Billing Financials > D5 Bookings DB: Update Payment Status
+5.0 Billing Financials > D2 Doctors DB: Deduct Wallet Balance
+
+// Data Flows: 6.0 Auditing & Feedback
+Patient > 6.0 Auditing Reviews: Submit Doctor Rating & Review
+6.0 Auditing Reviews > D7 Audits DB: Store Audit Logs & Reviews
+6.0 Auditing Reviews > Admin: View System Logs

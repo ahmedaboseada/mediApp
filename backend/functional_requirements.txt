@@ -1,0 +1,148 @@
+User Functional Requirements
+What a system must do from the end-user's perspective, detailing specific features, actions, and behaviors like login, search, or data processing needed for users to achieve their goals.
+
+1. User Registration and Authentication
+Account creation for Patients and Doctors, secure login and logout using email and password, password reset functionalities, and two-factor authentication (2FA) support.
+
+2. Patient Profile Management
+Complete profile with chronic conditions, allergies, active ingredients to avoid, emergency contacts, and payment method integration.
+
+3. Doctor Profile and Verification
+Submit medical license for verification, setup clinic location, define working days and hours, and manage consultation preferences (duration, type).
+
+4. Appointment Booking and Scheduling
+Search for doctors, filter by specialization, book online or in-person appointments, specify booking subjects (self or dependent), and handle booking payments.
+
+5. Health and Medical Tracking
+Log health measurements (blood pressure, blood sugar, weight, heart rate), track daily symptoms and severity, and monitor general wellbeing.
+
+6. Medicine Management and Adherence
+Add new medicines with specific frequencies and dosages, track medicine inventory and stock alerts, mark adherence (taken/missed), and submit daily feedback.
+
+7. Caregiver Connection
+Send caregiver requests to other users, accept or reject requests, and monitor dependent patient's health data and medicine adherence.
+
+8. Communication and Chat
+Initiate chat sessions between connected doctors and patients, send text messages, voice notes, and file attachments, and track message status.
+
+9. Doctor Patient Management
+Accept or reject patient connections, view complete patient medical files, add or modify patient prescriptions, and track audit logs for medical alterations.
+
+10. Financial Management
+Process payments for appointments, track doctor wallet balances, and submit withdrawal requests to bank accounts.
+
+11. Admin Operations
+Approve or reject doctor registrations, process withdrawal requests, and monitor system-wide audit logs.
+
+---
+
+System Functional Requirements (FR)
+What a system must do, detailing specific behaviors, features, and functions like user authentication, data processing, calculations, and workflows.
+
+1. User Management - Registration & Auth
+- FR-1 Register Patient account with email, password, and first/last name.
+- FR-2 Register Doctor account with email, password, and first/last name.
+- FR-3 Send OTP via email upon registration for verification.
+- FR-4 Verify email address by confirming OTP.
+- FR-5 Support secure User login returning JWT authentication tokens.
+- FR-6 Support secure User logout by blacklisting/revoking the session token.
+- FR-7 Initiate password reset by requesting a password recovery email.
+- FR-8 Update account password using the recovery OTP.
+- FR-9 Request email address change generating a pendingEmail state.
+- FR-10 Confirm new email address using OTP.
+- FR-11 Toggle Two-Factor Authentication (2FA) for enhanced security.
+
+2. Profile Management & Settings
+- FR-12 Update basic profile information (gender, date of birth, phone number).
+- FR-13 Upload, update, or remove profile picture.
+- FR-14 Manage Notification Settings (Toggle Push Notifications, Toggle Email Notifications).
+- FR-15 Manage Privacy Settings (Toggle Caregiver Access, Toggle Doctor Access).
+- FR-16 Complete Patient Medical Profile (log blood type, chronic conditions, allergies, active ingredients to avoid).
+- FR-17 Add, update, or delete Patient Emergency Contacts (Name, Phone, Relation, Contact Method).
+- FR-18 Add, update, or delete Patient Bank Card details (Card Number, Expiry, Toggle Save option).
+- FR-19 Complete Doctor Professional Profile (Specialization, License ID, Profile Summary).
+- FR-20 Upload Doctor Medical License image for Admin verification.
+- FR-21 Setup Doctor Clinic Location (Label, Address, Latitude, Longitude).
+- FR-22 Define Doctor Working Schedule (Days of the week, Start time, End time).
+- FR-23 Configure Doctor Consultation Preferences (Allowed Durations, Session Type, Max Daily Patients).
+
+3. Booking & Scheduling Module
+- FR-24 Fetch paginated list of approved Doctors with active schedules.
+- FR-25 Filter Doctors by specialization, availability, and rating.
+- FR-26 View detailed Doctor Profile including availability slots for a specific date.
+- FR-27 Calculate and return valid available time slots based on Doctor's working hours and existing bookings.
+- FR-28 Submit an Appointment Booking (Doctor ID, Date, Time, Duration, Type, Problem Description).
+- FR-29 Specify Booking Target (Self or Dependent/Family Member with Age and Gender).
+- FR-30 Validate Doctor's maximum daily patient limit before accepting new bookings.
+- FR-31 Detect and prevent overlapping bookings or double-booking conflicts.
+- FR-32 Process booking payment via Payment Gateway and update payment status (pending -> paid).
+- FR-33 Generate unique secure Session Token for Online Consultations.
+- FR-34 Update booking lifecycle statuses (upcoming, pending, completed, cancelled).
+- FR-35 Allow Patient to cancel booking with a provided cancellation reason.
+- FR-36 Allow Doctor to approve or reject pending booking requests.
+
+4. Health Tracking Module
+- FR-37 Record daily Health Measurements (Systolic BP, Diastolic BP, Heart Rate).
+- FR-38 Record body weight and blood sugar measurements with notes.
+- FR-39 Store and aggregate historical health measurement data for trend analysis.
+- FR-40 Log daily Symptoms with customizable severity levels (none, mild, moderate, severe).
+- FR-41 Provide daily graphical charts and dashboards for Patient Health progress.
+
+5. Medicine & Prescription Module
+- FR-42 Add new Medicine to a Patient's prescription (Name, Active Ingredient, Start/End Date).
+- FR-43 Configure Medicine intake frequency (Daily time arrays, Weekly blocks, or specific explicit dates).
+- FR-44 Manage Medicine Dosage details and usage instructions.
+- FR-45 Track current Medicine Stock levels against a defined Left Threshold.
+- FR-46 Toggle Medicine 'Critical Mode' and 'Is Chronic' flags.
+- FR-47 Mark specific medicine doses as taken or missed for a given date/time.
+- FR-48 Automatically increment/decrement Medicine Stock based on 'taken' status toggles.
+- FR-49 Submit daily textual feedback and rating (low/medium/high) for medicine effectiveness.
+- FR-50 Flag or log specific side effects experienced from a medication.
+- FR-51 Send automated system alerts to Patient when medicine stock drops below the Left Threshold.
+
+6. Caregiver Module
+- FR-52 Create Caregiver Request linking a User to a Patient.
+- FR-53 Define relationship type in Caregiver Request.
+- FR-54 Accept or reject pending Caregiver Requests.
+- FR-55 Grant approved Caregiver read-only access to Dependent's Health Measurements.
+- FR-56 Grant approved Caregiver read-only access to Dependent's Medicine Adherence and Stock.
+- FR-57 Revoke or terminate an active Caregiver connection.
+
+7. Communication & Chat Module
+- FR-58 Initiate chat sessions between a Patient and an approved connected Doctor.
+- FR-59 Send and store real-time text messages in active Chat sessions.
+- FR-60 Upload and send File Attachments (Images, PDFs) within a Chat session.
+- FR-61 Upload and send Voice Notes with duration tracking in a Chat session.
+- FR-62 Track and update message read receipts (unseen -> seen).
+- FR-63 Fetch paginated message history for a specific Chat ID.
+
+8. Doctor Operations & Medical Auditing
+- FR-64 View a paginated list of all Patients connected to a Doctor.
+- FR-65 Accept or reject Patient connection requests.
+- FR-66 View full Medical History (allergies, symptoms, health measurements) of a connected Patient.
+- FR-67 Doctor explicitly adds a new Medicine to a Patient's profile.
+- FR-68 Doctor modifies an existing Medicine (dosage, frequency) in a Patient's profile.
+- FR-69 Doctor deletes or stops an active Medicine in a Patient's profile.
+- FR-70 Automatically generate an immutable Audit Log record when a Doctor alters a Patient's medical data.
+- FR-71 Store previous and new values within the Audit Log for accountability.
+
+9. Financials & Wallet Module
+- FR-72 Retrieve and display Doctor's current Wallet Balance.
+- FR-73 Automatically credit Doctor Wallet Balance upon the completion of a paid consultation.
+- FR-74 Submit a Wallet Withdrawal Request (Amount, Bank Name, Account Number, Account Holder).
+- FR-75 Validate requested withdrawal amount against available Wallet Balance.
+- FR-76 View history of all past and pending Withdrawal Requests.
+
+10. Admin & System Operations
+- FR-77 Fetch list of unverified Doctors pending approval.
+- FR-78 Admin approves or rejects Doctor registrations, updating their status flag.
+- FR-79 Admin fetches list of pending Withdrawal Requests.
+- FR-80 Admin processes Withdrawal Request, adds internal Admin Notes, and sets processed timestamp.
+- FR-81 Fetch paginated System Audit Logs for administrative review and compliance checks.
+
+11. Notifications Module
+- FR-82 Generate and store in-app Notification records for booking updates.
+- FR-83 Push real-time notifications to Doctors for new appointment requests.
+- FR-84 Push real-time notifications to Patients for booking confirmations/cancellations.
+- FR-85 Mark fetched notifications as read by the user.
+- FR-86 Execute cron job to expire unused OTPs and Session Tokens automatically.

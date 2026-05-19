@@ -1,0 +1,279 @@
+erDiagram
+    %% Core Identity Relations
+    User ||--o| Doctor : "is a"
+    User ||--o| Patient : "is a"
+    
+    %% Booking Relations
+    Patient ||--o{ Booking : "makes"
+    Doctor ||--o{ Booking : "receives"
+    User ||--o{ Booking : "tracks (via array)"
+    
+    %% Medical & Health Relations
+    Patient ||--o{ HealthMeasurement : "logs"
+    Patient ||--o{ SymptomLog : "logs"
+    Patient ||--o{ Medicine : "takes"
+    
+    %% Doctor/Patient Connections
+    Doctor }o--o{ Patient : "connected to"
+    
+    %% Communication Relations
+    Patient ||--o{ Chat : "participates in"
+    Doctor ||--o{ Chat : "participates in"
+    Chat ||--o{ Message : "contains"
+    User ||--o{ Message : "sends"
+    User ||--o{ Message : "receives"
+    
+    %% Notification & System Relations
+    User ||--o{ Notification : "receives"
+    Doctor ||--o{ WithdrawalRequest : "makes"
+    Doctor ||--o{ Review : "receives"
+    Patient ||--o{ Review : "writes"
+    
+    %% Caregiver Relations
+    Patient ||--o{ CaregiverRequest : "initiates"
+    User ||--o{ CaregiverRequest : "requested as caregiver"
+    Patient }o--o{ Patient : "gives care to"
+    Patient ||--o| User : "takes care from"
+    
+    %% Audit Relations
+    Patient ||--o{ AuditLog : "owns"
+    Doctor ||--o{ AuditLog : "initiates"
+    Booking ||--o{ AuditLog : "has"
+
+    User {
+        ObjectId _id PK
+        String type "enum: user, patient, doctor, admin"
+        String firstName
+        String lastName
+        String email
+        String password
+        String phone "encrypted"
+        Date DOB
+        Number age
+        String gender
+        Boolean twoFA
+        String otp
+        Boolean confirmed
+        String pendingEmail
+        Date pendingEmailRequestedAt
+        String profilePicture
+        Array notifications "ObjectId[]"
+        Array booking "ObjectId[]"
+        Date otpExpires
+        String confirmTokenId
+        String resetTokenId
+        String emailChangeTokenId
+        Object settings
+        Date createdAt
+        Date updatedAt
+    }
+
+    Doctor {
+        ObjectId _id PK
+        ObjectId userId FK
+        String specialization
+        String clinicName
+        String medicalLicenseId
+        String status
+        String clinicAddress
+        Object clinicLocation
+        Array workingDays
+        Array workingHours
+        Number consultationDuration
+        Array appointmentTypes
+        Number maxDailyPatients
+        String licenseImage "encrypted url"
+        Array connectedPatients
+        Array reviews "ObjectId[]"
+        Number reviewsCount
+        Number walletBalance
+        Date createdAt
+        Date updatedAt
+    }
+
+    Patient {
+        ObjectId _id PK
+        ObjectId userId FK
+        Array chronicConditions
+        Array allergies
+        Array activeIngredients
+        Array longTermMedication "ObjectId[]"
+        Array medications "ObjectId[]"
+        Array connectedDoctors
+        String card
+        String expiryDate
+        Boolean saveOption
+        String bloodTypes
+        Object emergencyContact
+        Object caregiver
+        Boolean reactionToMedication
+        Boolean allergyAlerts
+        Object healthMeasurements
+        Date createdAt
+        Date updatedAt
+    }
+
+    Booking {
+        ObjectId _id PK
+        ObjectId patientId FK
+        ObjectId doctorId FK
+        Object date
+        Number duration
+        String packageType
+        String bookingFor
+        Number patientAge
+        String patientGender
+        String problem
+        String paymentMethod
+        String paymentStatus
+        Number price
+        String appointmentId UK
+        String sessionToken
+        Boolean sessionActive
+        Date sessionExpiresAt
+        String status
+        String clinicAddress
+        String cancelledReason
+        Date createdAt
+        Date updatedAt
+    }
+
+    HealthMeasurement {
+        ObjectId _id PK
+        ObjectId patientId FK
+        String type
+        Number value
+        Number systolic
+        Number diastolic
+        Number heartRate
+        Date date
+        String notes
+        Date createdAt
+        Date updatedAt
+    }
+
+    Medicine {
+        ObjectId _id PK
+        ObjectId patientId FK
+        String type
+        String frequency
+        Array daily
+        Array weekly
+        Array specific
+        Date startDate
+        Date endDate
+        Date expiryDate
+        String dosage
+        Number stock
+        Number leftThreshold
+        Boolean isChronic
+        String name
+        String activeIngredient
+        Boolean criticalMode
+        String status
+        Array sideEffects
+        Array dates
+        String notes
+        Array dailyFeedback
+        Date createdAt
+        Date updatedAt
+    }
+
+    Chat {
+        ObjectId _id PK
+        String name
+        String profileImage
+        String status
+        Array messages "ObjectId[]"
+        ObjectId patientId FK
+        ObjectId doctorId FK
+        Date createdAt
+        Date updatedAt
+    }
+
+    Message {
+        ObjectId _id PK
+        ObjectId senderId FK
+        ObjectId receiverId FK
+        String message
+        Date time
+        String status
+        Array files
+        Object voiceNote
+        Date createdAt
+        Date updatedAt
+    }
+
+    Notification {
+        ObjectId _id PK
+        String type
+        String header
+        String message
+        Date time
+        Boolean read
+        ObjectId userId FK
+        Date createdAt
+        Date updatedAt
+    }
+
+    CaregiverRequest {
+        ObjectId _id PK
+        ObjectId patientId FK
+        ObjectId caregiverUserId FK
+        String relationship
+        String status
+        Date respondedAt
+        Date createdAt
+        Date updatedAt
+    }
+
+    WithdrawalRequest {
+        ObjectId _id PK
+        ObjectId doctorId FK
+        Number amount
+        String status
+        Object bankDetails
+        String adminNotes
+        Date processedAt
+        Date createdAt
+        Date updatedAt
+    }
+
+    Review {
+        ObjectId _id PK
+        ObjectId doctorId FK
+        ObjectId PatientId FK
+        Number rating
+        Date createdAt
+        Date updatedAt
+    }
+
+    AuditLog {
+        ObjectId _id PK
+        ObjectId patientId FK
+        ObjectId doctorId FK
+        ObjectId bookingId FK
+        String action
+        String details
+        Date createdAt
+        Date updatedAt
+    }
+
+    SymptomLog {
+        ObjectId _id PK
+        ObjectId patientId FK
+        Array symptoms
+        String severity
+        Date date
+        String notes
+        Date createdAt
+        Date updatedAt
+    }
+
+    RevokeToken {
+        ObjectId _id PK
+        String tokenId UK
+        Date expiredAt
+        Date createdAt
+        Date updatedAt
+    }
