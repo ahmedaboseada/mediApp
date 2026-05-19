@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/features/doctor/features/patients/data/models/patient_data.dart';
 import 'package:medi/features/doctor/features/patients/presentation/cubit/manage_meds/mange_meds_cubit.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/reminder_grouped_list_view.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/reminder_simple_list_view.dart';
@@ -25,10 +26,14 @@ class AddPatientMedicationDialog extends StatefulWidget {
     super.key,
     required this.patientName,
     required this.patientId,
+    this.medication,
+    this.isEditMode = false,
   });
 
   final String patientName;
   final String patientId;
+  final MedicationModel? medication;
+  final bool isEditMode;
 
   @override
   State<AddPatientMedicationDialog> createState() =>
@@ -69,13 +74,13 @@ class _AddPatientMedicationDialogState
   ];
 
   final List<String> _weekDays = <String>[
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-    'Sunday',
+    'monday',
+    'tuesday',
+    'wednesday',
+    'thursday',
+    'friday',
+    'saturday',
+    'sunday',
   ];
 
   final List<String> _reminders = <String>[];
@@ -86,6 +91,18 @@ class _AddPatientMedicationDialogState
   bool get _isWeeklySelected => _selectedFrequency == 'weekly';
   bool get _isSpecificSelected => _selectedFrequency == 'specific';
   bool get _isAsNeededSelected => _selectedFrequency == 'as needed';
+
+  @override
+  void initState() {
+    super.initState();
+    final medication = widget.medication;
+    if (medication != null) {
+      _medicationNameController.text = medication.name;
+      _dosageController.text = medication.dosage;
+      _selectedType = _normalizeInitialType(medication.type);
+      _selectedFrequency = _normalizeInitialFrequency(medication.frequency);
+    }
+  }
 
   @override
   void dispose() {
@@ -262,11 +279,33 @@ class _AddPatientMedicationDialogState
         .toList();
   }
 
+  List<Map<String, dynamic>> _buildWeeklyPayload() {
+    return _weeklyReminders
+        .map(
+          (entry) => <String, dynamic>{
+            'day': entry.day.trim(),
+            'times': entry.times.map(_normalizeTimeString).toList(),
+          },
+        )
+        .toList();
+  }
+
   List<String> _flattenSpecificTimes() {
     return _specificReminders
         .expand((entry) => entry.times)
         .map(_normalizeTimeString)
         .toSet()
+        .toList();
+  }
+
+  List<Map<String, dynamic>> _buildSpecificPayload() {
+    return _specificReminders
+        .map(
+          (entry) => <String, dynamic>{
+            'day': entry.date.trim(),
+            'times': entry.times.map(_normalizeTimeString).toList(),
+          },
+        )
         .toList();
   }
 
@@ -278,9 +317,9 @@ class _AddPatientMedicationDialogState
 
   String _normalizeTimeString(String value) {
     final trimmed = value.trim();
-    final match = RegExp(r'^(\d{1,2}):(\d{2})\s*([AaPp][Mm])$').firstMatch(
-      trimmed,
-    );
+    final match = RegExp(
+      r'^(\d{1,2}):(\d{2})\s*([AaPp][Mm])$',
+    ).firstMatch(trimmed);
 
     if (match == null) {
       return trimmed;
@@ -297,6 +336,62 @@ class _AddPatientMedicationDialogState
     }
 
     return '${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
+  }
+
+  String? _normalizeInitialType(String value) {
+    final normalized = value.trim().toLowerCase();
+    if (normalized.isEmpty) {
+      return null;
+    }
+
+    switch (normalized) {
+      case 'pill':
+      case 'tablet':
+        return 'tablet';
+      case 'syringe':
+      case 'injection':
+        return 'injection';
+      case 'bottle':
+      case 'syrup':
+        return 'syrup';
+      case 'drop':
+      case 'drops':
+        return 'drop';
+      case 'cream':
+        return 'cream';
+      case 'ointment':
+        return 'ointment';
+      case 'inhaler':
+        return 'inhaler';
+      case 'capsule':
+        return 'capsule';
+      default:
+        return normalized;
+    }
+  }
+
+  String? _normalizeInitialFrequency(String value) {
+    final normalized = value.trim().toLowerCase();
+    if (normalized.isEmpty) {
+      return null;
+    }
+
+    switch (normalized) {
+      case 'once daily':
+      case 'daily':
+      case 'every day':
+      case 'twice daily':
+        return 'daily';
+      case 'weekly':
+        return 'weekly';
+      case 'specific':
+      case 'specific date':
+        return 'specific';
+      case 'as needed':
+        return 'as needed';
+      default:
+        return normalized;
+    }
   }
 
   Future<void> _handleAdd() async {
@@ -332,18 +427,41 @@ class _AddPatientMedicationDialogState
       }
     }
 
-    final result = await context.read<ManageMedsCubit>().addMedication(
-      patientId: widget.patientId,
-      name: _medicationNameController.text.trim(),
-      type: _selectedType!.trim(),
-      dosage: _dosageController.text.trim(),
-      frequency: _selectedFrequency!,
-      daily: _isWeeklySelected
-          ? _flattenWeeklyTimes()
-          : _isSpecificSelected
-          ? _flattenSpecificTimes()
-          : _reminders,
-    );
+    final medicationId = widget.medication?.id;
+    final name = _medicationNameController.text.trim();
+    final type = _selectedType!.trim();
+    final dosage = _dosageController.text.trim();
+    final frequency = _selectedFrequency!;
+    final daily = _isWeeklySelected
+        ? _flattenWeeklyTimes()
+        : _isSpecificSelected
+        ? _flattenSpecificTimes()
+        : _reminders;
+    final weekly = _isWeeklySelected ? _buildWeeklyPayload() : null;
+    final specific = _isSpecificSelected ? _buildSpecificPayload() : null;
+
+    final result = widget.isEditMode && medicationId != null
+        ? await context.read<ManageMedsCubit>().updateMedication(
+            medicationId: medicationId,
+            patientId: widget.patientId,
+            name: name,
+            type: type,
+            dosage: dosage,
+            frequency: frequency,
+            daily: daily,
+            weekly: weekly,
+            specific: specific,
+          )
+        : await context.read<ManageMedsCubit>().addMedication(
+            patientId: widget.patientId,
+            name: name,
+            type: type,
+            dosage: dosage,
+            frequency: frequency,
+            daily: daily,
+            weekly: weekly,
+            specific: specific,
+          );
 
     if (!mounted) {
       return;
@@ -354,18 +472,13 @@ class _AddPatientMedicationDialogState
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(
-            SnackBar(
-              content: Text(error.message),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text(error.message), backgroundColor: Colors.red),
           );
       },
       (message) {
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(content: Text(message)),
-          );
+          ..showSnackBar(SnackBar(content: Text(message)));
         Navigator.of(context).pop();
       },
     );
@@ -409,15 +522,21 @@ class _AddPatientMedicationDialogState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Add New Medication',
+                          widget.isEditMode
+                              ? 'Modify medication'
+                              : 'Add New Medication',
                           style: AppStyles.black24700.copyWith(
                             fontSize: AppSizes.sp22,
                           ),
+                          textAlign: TextAlign.center,
                         ),
                         SizedBox(height: AppSizes.h6),
                         Text(
-                          "Add a new medication to ${widget.patientName}'s treatment plan.",
+                          widget.isEditMode
+                              ? "Modify medication in ${widget.patientName}'s treatment plan."
+                              : "Add a new medication to ${widget.patientName}'s treatment plan.",
                           style: AppStyles.secondary12400,
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
@@ -633,15 +752,20 @@ class _AddPatientMedicationDialogState
                     ),
                   ),
                   SizedBox(width: AppSizes.w12),
-                  Expanded(child: BlocBuilder<ManageMedsCubit, ManageMedsState>(
-                    builder: (context, state) {
-                      final isLoading = state.status == ManageMedsStatus.loading;
-                      return PrimaryButton(
-                        onPressed: isLoading ? null : _handleAdd,
-                        text: isLoading ? 'Adding...' : 'Add',
-                      );
-                    },
-                  )),
+                  Expanded(
+                    child: BlocBuilder<ManageMedsCubit, ManageMedsState>(
+                      builder: (context, state) {
+                        final isLoading =
+                            state.status == ManageMedsStatus.loading;
+                        return PrimaryButton(
+                          onPressed: isLoading ? null : _handleAdd,
+                          text: isLoading
+                              ? (widget.isEditMode ? 'Saving...' : 'Adding...')
+                              : (widget.isEditMode ? 'Save' : 'Add'),
+                        );
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),

@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class QrScannerScreen extends StatefulWidget {
-  const QrScannerScreen({super.key, this.mockToken});
+  const QrScannerScreen({super.key});
 
-  final String? mockToken;
 
   @override
   State<QrScannerScreen> createState() => _QrScannerScreenState();
@@ -33,17 +32,7 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
               }
             },
           ),
-          if (widget.mockToken != null && widget.mockToken!.isNotEmpty)
-            Positioned(
-              left: 16,
-              right: 16,
-              bottom: 24,
-              child: FilledButton.icon(
-                onPressed: () => Navigator.pop(context, widget.mockToken),
-                icon: const Icon(Icons.science_outlined),
-                label: const Text('Use mock patient token'),
-              ),
-            ),
+        
         ],
       ),
     );

@@ -8,5 +8,8 @@ abstract class SosRepo {
     required String contactMethod,
   });
 
-  Future<Either<ApiError, String>> triggerSos();
+  Future<Either<ApiError, String>> triggerSos({
+    required double lat,
+    required double lng,
+  });
 }

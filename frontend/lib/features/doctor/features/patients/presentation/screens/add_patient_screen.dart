@@ -128,7 +128,7 @@ class _AddPatientViewState extends State<AddPatientView> {
           return RequestStatusScreen(
             isConnected: false,
             patientId: _submittedPatientId,
-            onBack: _cancelRequest,
+          
             onPrimaryAction: _cancelRequest,
           );
         }
@@ -137,7 +137,6 @@ class _AddPatientViewState extends State<AddPatientView> {
           return RequestStatusScreen(
             isConnected: true,
             patientId: _submittedPatientId,
-            onBack: _cancelRequest,
             onPrimaryAction: _onViewPatients,
           );
         }

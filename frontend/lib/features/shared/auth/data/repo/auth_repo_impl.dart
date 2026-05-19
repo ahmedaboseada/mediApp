@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:medi/core/constants/app_keys.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/core/services/call_service.dart';
 import 'package:medi/features/shared/auth/data/models/auth_token_model.dart';
 import 'package:medi/features/shared/auth/data/models/auth_response_model.dart';
 import 'package:medi/features/shared/auth/data/models/verify_otp_reponse.dart';
@@ -13,8 +14,8 @@ import 'package:medi/features/shared/auth/data/models/doctor_model.dart';
 import 'package:medi/features/shared/auth/data/models/user_model.dart';
 import 'package:medi/features/shared/auth/data/models/patient_model.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo.dart';
- import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
- import 'package:zego_uikit_signaling_plugin/zego_uikit_signaling_plugin.dart';
+import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
+import 'package:zego_uikit_signaling_plugin/zego_uikit_signaling_plugin.dart';
 import 'package:zego_zimkit/zego_zimkit.dart';
 
 class AuthRepoImpl implements AuthRepo {
@@ -67,10 +68,11 @@ class AuthRepoImpl implements AuthRepo {
       // Extract and save user data using Hive
       final user = UserModel.fromJson(response['user']);
       await HiveService.saveUserData(user);
-await ZIMKit().connectUser(
-  id: user.id,
-  name: '${user.firstName} ${user.lastName}',
-);
+      await CallService.instance.ensureZimKitInitialized();
+      await ZIMKit().connectUser(
+        id: user.id,
+        name: '${user.firstName} ${user.lastName}',
+      );
       // Save user role using Hive
       final userRole = user.type == 'doctor'
           ? UserRole.doctor
@@ -87,19 +89,19 @@ await ZIMKit().connectUser(
         final doctor = DoctorModel.fromJson(response['doctor']);
         await HiveService.saveDoctorData(doctor);
       }
-    await ZegoUIKitPrebuiltCallInvitationService().init(
- 
-    appID: AppKeys.appId /*input your AppID*/,
-    appSign: AppKeys.appSign /*input your AppSign*/,
-    userID: user.id,
-    userName: '${user.firstName} ${user.lastName}',
-    
-    plugins: [ZegoUIKitSignalingPlugin()],
-   
-  );
+      await ZegoUIKitPrebuiltCallInvitationService().init(
+        appID: AppKeys.appId /*input your AppID*/,
+        appSign: AppKeys.appSign /*input your AppSign*/,
+        userID: user.id,
+        userName: '${user.firstName} ${user.lastName}',
 
+        plugins: [ZegoUIKitSignalingPlugin()],
+      );
 
       log('Access Token saved via Hive: $accessToken');
+
+      log('Refresh Token saved via Hive: $refreshToken');
+
       return Right(accessToken);
     } on DioException catch (e) {
       final serverFailure = ServerFailure.fromDioError(e);
@@ -144,6 +146,9 @@ await ZIMKit().connectUser(
         return Left(ServerFailure('Missing accessToken in Google response'));
       }
 
+      await CallService.instance.ensureZimKitInitialized();
+      await ZIMKit().connectUser(id: user.id, name: user.displayName ?? '');
+
       await HiveService.saveAccessToken(token.accessToken);
 
       if (token.refreshToken != null && token.refreshToken!.isNotEmpty) {
@@ -183,8 +188,7 @@ await ZIMKit().connectUser(
       // Clear all data using Hive
       await HiveService.clearAllData();
       await _googleSignIn.signOut();
-       ZegoUIKitPrebuiltCallInvitationService().uninit();
-
+      ZegoUIKitPrebuiltCallInvitationService().uninit();
     } catch (e) {
       log('Logout error: $e');
     }

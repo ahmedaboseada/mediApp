@@ -15,8 +15,6 @@ import 'package:medi/features/patient/features/add_medication/presentation/widge
 class PatientsScreen extends StatelessWidget {
   const PatientsScreen({super.key});
 
-  static const String _mockPatientToken = 'mock_patient_token_001';
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -179,9 +177,7 @@ class PatientsScreen extends StatelessWidget {
 
   Future<void> _onQrTap(BuildContext context) async {
     final scannedToken = await Navigator.of(context).push<String>(
-      MaterialPageRoute<String>(
-        builder: (_) => const QrScannerScreen(mockToken: _mockPatientToken),
-      ),
+      MaterialPageRoute<String>(builder: (_) => const QrScannerScreen()),
     );
 
     if (!context.mounted || scannedToken == null || scannedToken.isEmpty) {
@@ -227,27 +223,23 @@ class PatientsScreen extends StatelessWidget {
             ),
           );
 
-        final patient = _resolvePatientFromToken(context, scannedToken);
+        final patient = session.patient;
+
+        if (patient == null) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              const SnackBar(
+                content: Text('Session started, but patient data is missing'),
+              ),
+            );
+          return;
+        }
 
         Navigator.of(context).push(
           MaterialPageRoute<void>(
             builder: (_) => PatientProfileScreen(
-              patient:
-                  patient ??
-                  PatientData(
-                    id: session.bookingId,
-                    name: 'Patient',
-                    age: 0,
-                    gender: '',
-                    bloodType: '',
-                    status: PatientStatus.normal,
-                    avatarAsset: AppAssets.avatar1,
-                    email: '',
-                    phone: '',
-                    allergies: const [],
-                    chronicConditions: const [],
-                    medications: const [],
-                  ),
+              patient: patient,
               showAddMedicationAction: true,
               bookingSessionCubit: sessionCubit,
               bookingSession: session,
@@ -270,44 +262,6 @@ class PatientsScreen extends StatelessWidget {
 
     if (fromLoaded.isNotEmpty) {
       return fromLoaded.first;
-    }
-
-    if (normalized == _mockPatientToken) {
-      return PatientData(
-        id: 'mock-patient-001',
-        name: 'Mai Ali',
-        age: 25,
-        gender: 'female',
-        bloodType: 'O+',
-        status: PatientStatus.abnormal,
-        avatarAsset: AppAssets.avatar1,
-        email: 'mai.ali@email.com',
-        phone: '+20 100 000 0000',
-        allergies: ['Penicillin'],
-        chronicConditions: ['Hypertension'],
-        medications: [
-          MedicationModel(
-            name: 'Lisinopril',
-            dosage: '10 mg once daily',
-            frequency: 'Daily',
-            id: '',
-            type: '',
-            stock: 12,
-            isChronic: true,
-            status: '',
-          ),
-          MedicationModel(
-            name: 'Atorvastatin',
-            dosage: '20 mg once daily',
-            frequency: 'Daily',
-            id: '',
-            type: '',
-            stock: 5,
-            isChronic: true,
-            status: '',
-          ),
-        ],
-      );
     }
 
     return null;

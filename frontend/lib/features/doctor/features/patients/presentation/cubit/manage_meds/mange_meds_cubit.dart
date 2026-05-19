@@ -18,6 +18,8 @@ class ManageMedsCubit extends Cubit<ManageMedsState> {
     required String dosage,
     required String frequency,
     List<String>? daily,
+    List<Map<String, dynamic>>? weekly,
+    List<Map<String, dynamic>>? specific,
   }) async {
     emit(state.copyWith(status: ManageMedsStatus.loading, clearError: true));
 
@@ -28,6 +30,8 @@ class ManageMedsCubit extends Cubit<ManageMedsState> {
       dosage: dosage,
       frequency: frequency,
       daily: daily,
+      weekly: weekly,
+      specific: specific,
     );
 
     result.fold(
@@ -61,6 +65,8 @@ class ManageMedsCubit extends Cubit<ManageMedsState> {
     String? dosage,
     String? frequency,
     List<String>? daily,
+    List<Map<String, dynamic>>? weekly,
+    List<Map<String, dynamic>>? specific,
     String? instructions,
   }) async {
     emit(state.copyWith(status: ManageMedsStatus.loading, clearError: true));
@@ -73,6 +79,8 @@ class ManageMedsCubit extends Cubit<ManageMedsState> {
       dosage: dosage,
       frequency: frequency,
       daily: daily,
+      weekly: weekly,
+      specific: specific,
       instructions: instructions,
     );
 

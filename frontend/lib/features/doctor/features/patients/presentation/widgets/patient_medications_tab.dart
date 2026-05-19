@@ -16,8 +16,8 @@ class PatientMedicationsTab extends StatelessWidget {
   final PatientData patient;
   final bool showAddMedicationAction;
   final VoidCallback? onAddMedication;
-  final VoidCallback? onEditMedication;
-  final VoidCallback? onDeleteMedication;
+  final ValueChanged<MedicationModel>? onEditMedication;
+  final ValueChanged<MedicationModel>? onDeleteMedication;
 
   @override
   Widget build(BuildContext context) {
@@ -63,9 +63,9 @@ class PatientMedicationsTab extends StatelessWidget {
             (medication) => Padding(
               padding: EdgeInsets.only(bottom: AppSizes.h12),
               child: PatientMedicationCard(
-                canEdit:showAddMedicationAction,
-                onEdit: () => onEditMedication?.call(),
-                onDelete: () => onDeleteMedication?.call(),
+                canEdit: showAddMedicationAction,
+                onEdit: () => onEditMedication?.call(medication),
+                onDelete: () => onDeleteMedication?.call(medication),
                 name: medication.name,
                 dosage: medication.dosage,
                 frequency: medication.frequency,

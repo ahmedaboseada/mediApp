@@ -77,7 +77,10 @@ class SosRepoImpl implements SosRepo {
   }
 
   @override
-  Future<Either<ApiError, String>> triggerSos() async {
+  Future<Either<ApiError, String>> triggerSos({
+    required double lat,
+    required double lng,
+  }) async {
     try {
       final token = HiveService.getAccessToken();
       log('Triggering SOS - Token: ${token != null ? "EXISTS" : "NULL"}');
@@ -93,11 +96,10 @@ class SosRepoImpl implements SosRepo {
         "Authorization": "Bearer $token",
       };
 
-      final dynamic response = await apiService.post(
-        '/patients/sos',
-        {},
-        headers: headers,
-      );
+      final dynamic response = await apiService.post('/patients/sos', {
+        'lat': lat,
+        'lng': lng,
+      }, headers: headers);
 
       log('Trigger SOS Response: ${response.toString()}');
 

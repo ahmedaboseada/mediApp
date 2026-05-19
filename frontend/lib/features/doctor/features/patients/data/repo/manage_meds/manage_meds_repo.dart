@@ -9,6 +9,8 @@ abstract class ManageMedsRepo {
     required String dosage,
     required String frequency,
     List<String>? daily,
+    List<Map<String, dynamic>>? weekly,
+    List<Map<String, dynamic>>? specific,
   });
 
   Future<Either<ApiError, String>> updateMedication({
@@ -19,6 +21,8 @@ abstract class ManageMedsRepo {
     String? dosage,
     String? frequency,
     List<String>? daily,
+    List<Map<String, dynamic>>? weekly,
+    List<Map<String, dynamic>>? specific,
     String? instructions,
   });
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 
 class RequestStatusScreen extends StatelessWidget {
@@ -6,13 +7,11 @@ class RequestStatusScreen extends StatelessWidget {
     super.key,
     required this.isConnected,
     required this.patientId,
-    required this.onBack,
     required this.onPrimaryAction,
   });
 
   final bool isConnected;
   final String patientId;
-  final VoidCallback onBack;
   final VoidCallback onPrimaryAction;
 
   @override
@@ -38,7 +37,7 @@ class RequestStatusScreen extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(AppSizes.r40),
-                  onTap: onBack,
+                  onTap: () => context.pop(),
                   child: Container(
                     width: AppSizes.w40,
                     height: AppSizes.w40,

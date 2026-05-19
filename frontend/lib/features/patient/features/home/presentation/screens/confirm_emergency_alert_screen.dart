@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/home/data/repo/sos_repo.dart';
 import 'package:medi/features/patient/features/home/presentation/controller/sos/sos_cubit.dart';
@@ -33,6 +34,47 @@ class _ConfirmEmergencyAlertScreenState
 
   //   );
   // }
+
+  Future<Position> _getCurrentLocation() async {
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      throw Exception('Location services are disabled');
+    }
+
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        throw Exception('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      throw Exception('Location permissions are permanently denied');
+    }
+
+    return Geolocator.getCurrentPosition(
+      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+    );
+  }
+
+  Future<void> _sendSos() async {
+    try {
+      final position = await _getCurrentLocation();
+      if (!mounted) return;
+
+      await context.read<SosCubit>().triggerSos(
+        lat: position.latitude,
+        lng: position.longitude,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceFirst('Exception: ', ''))),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -123,7 +165,7 @@ class _ConfirmEmergencyAlertScreenState
                               onPressed: isLoading
                                   ? null
                                   : () {
-                                      context.read<SosCubit>().triggerSos();
+                                      _sendSos();
                                     },
                               //  isLoading: isLoading,
                             ),

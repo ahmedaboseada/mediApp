@@ -234,6 +234,10 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
   }
 
   Future<void> _openAddMedicationDialog() async {
+    await _openMedicationDialog();
+  }
+
+  Future<void> _openMedicationDialog({MedicationModel? medication}) async {
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -242,8 +246,53 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
         child: AddPatientMedicationDialog(
           patientName: widget.patient.name,
           patientId: widget.patient.id,
+          medication: medication,
+          isEditMode: medication != null,
         ),
       ),
+    );
+  }
+
+  Future<void> _handleDeleteMedication(MedicationModel medication) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirm delete'),
+        content: Text('Delete ${medication.name}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    final cubit = getIt<ManageMedsCubit>();
+    final result = await cubit.deleteMedication(
+      medicationId: medication.id,
+      patientId: widget.patient.id,
+    );
+
+    if (!mounted) return;
+
+    result.fold(
+      (error) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(error.message)));
+      },
+      (message) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(message)));
+      },
     );
   }
 
@@ -285,7 +334,12 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                     ],
                     if (_selectedTabIndex == 1) ...[
                       PatientMedicationsTab(
-                        onEditMedication: _openAddMedicationDialog,
+                        onEditMedication: (medication) {
+                          _openMedicationDialog(medication: medication);
+                        },
+                        onDeleteMedication: (medication) {
+                          _handleDeleteMedication(medication);
+                        },
                         patient: widget.patient,
                         showAddMedicationAction: widget.showAddMedicationAction,
                         onAddMedication: _openAddMedicationDialog,

@@ -7,6 +7,9 @@ import 'package:medi/features/patient/features/add_medication/data/repo/medicine
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_cubit.dart';
 import 'package:medi/features/doctor/features/complete_profile/data/repo/doctor_complete_profile_repo.dart';
 import 'package:medi/features/doctor/features/complete_profile/data/repo/doctor_complete_profile_repo_impl.dart';
+import 'package:medi/features/doctor/features/settings/data/repo/wallet_repo.dart';
+import 'package:medi/features/doctor/features/settings/data/repo/wallet_repo_impl.dart';
+import 'package:medi/features/doctor/features/settings/presentation/controller/cubit/wallet_cubit.dart';
 import 'package:medi/features/doctor/features/home/data/repo/appointments_repository.dart';
 import 'package:medi/features/doctor/features/home/data/repo/appointments_repository_impl.dart';
 import 'package:medi/features/doctor/features/home/presentation/cubit/appointments_cubit.dart';
@@ -166,6 +169,14 @@ Future<void> setupServiceLocator() async {
     getIt.registerFactory<ManageMedsCubit>(
       () => ManageMedsCubit(getIt<ManageMedsRepo>()),
     );
+  }
+  if (!getIt.isRegistered<WalletRepo>()) {
+    getIt.registerLazySingleton<WalletRepo>(
+      () => WalletRepoImpl(getIt<ApiService>()),
+    );
+  }
+  if (!getIt.isRegistered<WalletCubit>()) {
+    getIt.registerFactory<WalletCubit>(() => WalletCubit(getIt<WalletRepo>()));
   }
   final sharedPreferences = await SharedPreferences.getInstance();
   if (!getIt.isRegistered<SharedPreferences>()) {

@@ -34,10 +34,10 @@ class SosCubit extends Cubit<SosState> {
     );
   }
 
-  Future<void> triggerSos() async {
+  Future<void> triggerSos({required double lat, required double lng}) async {
     emit(const SosLoading());
 
-    final result = await sosRepo.triggerSos();
+    final result = await sosRepo.triggerSos(lat: lat, lng: lng);
 
     result.fold(
       (failure) => emit(SosFailure(message: failure.message)),
