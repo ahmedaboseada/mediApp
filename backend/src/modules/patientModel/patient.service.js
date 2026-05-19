@@ -367,6 +367,16 @@ export const requestCaregiver = async (req, res) => {
     if (!caregiverUser) return res.status(404).json({ message: 'Caregiver user not found' });
     if (String(caregiverUser._id) === String(userId)) return res.status(400).json({ message: 'Invalid caregiver' });
 
+    const existingReq = await caregiverRequestModel.findOne({
+        patientId: patient._id,
+        caregiverUserId: caregiverUser._id,
+        status: { $in: ['pending', 'accepted'] }
+    });
+    
+    if (existingReq) {
+        return res.status(400).json({ message: `A request is already ${existingReq.status}` });
+    }
+
     const r = await caregiverRequestModel.create({
         patientId: patient._id,
         caregiverUserId: caregiverUser._id,
@@ -420,7 +430,15 @@ export const acceptCaregiverRequest = async (req, res) => {
 
     r.status = 'accepted';
     r.respondedAt = new Date();
-    await r.save();
+    try {
+        await r.save();
+    } catch (error) {
+        if (error.code === 11000) {
+            await caregiverRequestModel.findByIdAndDelete(r._id);
+        } else {
+            throw error;
+        }
+    }
 
     await notificationModel.create({
         type: 'caregiverRequestAccepted',
@@ -443,7 +461,15 @@ export const rejectCaregiverRequest = async (req, res) => {
 
     r.status = 'rejected';
     r.respondedAt = new Date();
-    await r.save();
+    try {
+        await r.save();
+    } catch (error) {
+        if (error.code === 11000) {
+            await caregiverRequestModel.findByIdAndDelete(r._id);
+        } else {
+            throw error;
+        }
+    }
 
     const patient = await patientModel.findById(r.patientId);
     if (patient) {
@@ -472,7 +498,15 @@ export const cancelCaregiverRequest = async (req, res) => {
 
     r.status = 'cancelled';
     r.respondedAt = new Date();
-    await r.save();
+    try {
+        await r.save();
+    } catch (error) {
+        if (error.code === 11000) {
+            await caregiverRequestModel.findByIdAndDelete(r._id);
+        } else {
+            throw error;
+        }
+    }
 
     return res.status(200).json({ message: 'Caregiver request cancelled successfully' });
 };
