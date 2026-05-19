@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/core/services/accessibility_service.dart';
 import 'package:medi/features/patient/features/add_medication/data/repo/medicine_repo.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_cubit.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/floating_actions_menu.dart';
@@ -10,12 +11,26 @@ import 'package:medi/features/patient/features/home/presentation/widgets/upcomin
 import 'package:medi/features/patient/features/home/presentation/widgets/user_widget.dart';
 import 'package:medi/features/patient/features/home/presentation/widgets/your_schedule.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  bool _announced = false;
   final List<String> selected = <String>[];
 
   @override
   Widget build(BuildContext context) {
+    if (!_announced) {
+      _announced = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        AccessibilityService.announceWithRTL('Home screen');
+      });
+    }
+
     final caregiverModeCubit = getIt<CaregiverModeCubit>();
 
     return Scaffold(
@@ -70,26 +85,33 @@ class HomeScreen extends StatelessWidget {
                                     );
                                   }
                                 },
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: AppSizes.w8,
-                                    vertical: AppSizes.h6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.error,
-                                    borderRadius: BorderRadius.circular(
-                                      AppSizes.r40,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.error_outline,
-                                        color: AppColors.surfaceColor,
+                                child: Semantics(
+                                  button: true,
+                                  label: 'Emergency SOS',
+                                  child: Tooltip(
+                                    message: 'Emergency SOS',
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: AppSizes.w8,
+                                        vertical: AppSizes.h6,
                                       ),
-                                      Text(' SOS', style: AppStyles.white14500),
-                                    ],
+                                      decoration: BoxDecoration(
+                                        color: AppColors.error,
+                                        borderRadius: BorderRadius.circular(
+                                          AppSizes.r40,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.error_outline,
+                                            color: AppColors.surfaceColor,
+                                          ),
+                                          Text(' SOS', style: AppStyles.white14500),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),

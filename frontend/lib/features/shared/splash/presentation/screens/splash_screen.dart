@@ -110,7 +110,10 @@ class _SplashScreenState extends State<SplashScreen>
                 scale: _scaleAnimation,
                 child: FadeTransition(
                   opacity: _fadeAnimation,
-                  child: Image.asset(AppAssets.welcomPng),
+                  child: Image.asset(
+                    AppAssets.welcomPng,
+                    excludeFromSemantics: true,
+                  ),
                 ),
               ),
             ),

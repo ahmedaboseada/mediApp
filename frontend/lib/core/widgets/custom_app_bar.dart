@@ -15,15 +15,32 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios),
-        onPressed: () {
-          context.pop();
-        },
+      leading: Semantics(
+        button: true,
+        label: 'Back',
+        child: Tooltip(
+          message: 'Back',
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back_ios),
+            onPressed: () {
+              context.pop();
+            },
+          ),
+        ),
       ),
       title: Text(title),
       centerTitle: true,
-      actions: [IconButton(icon: Icon(actionIcon), onPressed: onpressed)],
+      actions: [
+        if (actionIcon != null)
+          Semantics(
+            button: true,
+            label: 'More options',
+            child: Tooltip(
+              message: 'More options',
+              child: IconButton(icon: Icon(actionIcon), onPressed: onpressed),
+            ),
+          ),
+      ],
     );
   }
 

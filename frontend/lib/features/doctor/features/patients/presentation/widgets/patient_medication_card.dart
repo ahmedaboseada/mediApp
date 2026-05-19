@@ -11,7 +11,7 @@ class PatientMedicationCard extends StatelessWidget {
     required this.frequency,
     required this.startDate,
     this.instructions,
-    this.canEdit=false,
+    this.canEdit = false,
     this.onEdit,
     this.onDelete,
   });
@@ -27,99 +27,122 @@ class PatientMedicationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(AppSizes.w16),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceColor,
-        borderRadius: BorderRadius.circular(AppSizes.r24),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              SvgPicture.asset(AppAssets.meds, width: 24, height: 24),
-              SizedBox(width: AppSizes.w12),
-              Text(name, style: AppStyles.black16400),
-              if(canEdit)...[
-                Spacer(),
-              GestureDetector(
-                onTap: onEdit,
-                child: SvgPicture.asset(AppAssets.edit),
-                ),
-              SizedBox(width: AppSizes.w8),
-              GestureDetector(
-                onTap: onDelete,
-                child: SvgPicture.asset(AppAssets.trash),
-                ),
+    final summaryLabel =
+        'Medication $name, dosage $dosage, frequency $frequency, stock $startDate';
 
-              ]
-            ],
-          ),
-          SizedBox(height: AppSizes.h16),
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSizes.w16,
-              vertical: AppSizes.h16,
-            ),
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.circular(AppSizes.r16),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Semantics(
+      container: true,
+      label: summaryLabel,
+      child: Container(
+        padding: EdgeInsets.all(AppSizes.w16),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceColor,
+          borderRadius: BorderRadius.circular(AppSizes.r24),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                MedicationDetailCol(
-                  icon: AppAssets.meds,
-                  label: 'Dosage',
-                  value: dosage,
+                Semantics(
+                  label: 'Medication icon',
+                  child: SvgPicture.asset(AppAssets.meds, width: 24, height: 24),
                 ),
-                MedicationDetailCol(
-                  icon: AppAssets.timer,
-                  label: 'Frequency',
-                  value: frequency,
-                ),
-                MedicationDetailCol(
-                  icon: AppAssets.medicineBox,
-                  label: 'Stock',
-                  value: '$startDate',
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: AppSizes.h12),
-          Container(
-            padding: EdgeInsets.all(AppSizes.w16),
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.circular(AppSizes.r16),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.description_outlined,
-                      color: AppColors.primary,
-                      size: 20,
+                SizedBox(width: AppSizes.w12),
+                Expanded(child: Text(name, style: AppStyles.black16400)),
+                if (canEdit) ...[
+                  const Spacer(),
+                  Semantics(
+                    button: true,
+                    label: 'Edit medication $name',
+                    child: Tooltip(
+                      message: 'Edit medication',
+                      child: GestureDetector(
+                        onTap: onEdit,
+                        child: SvgPicture.asset(AppAssets.edit),
+                      ),
                     ),
-                    SizedBox(width: AppSizes.w8),
-                    Text('Instructions', style: AppStyles.black14500),
-                  ],
-                ),
-                SizedBox(height: AppSizes.h8),
-                Text(
-                  instructions ?? 'No special instructions.',
-                  style: AppStyles.secondary12400.copyWith(
-                    fontSize: 14,
-                    color: AppColors.secondaryText,
                   ),
-                ),
+                  SizedBox(width: AppSizes.w8),
+                  Semantics(
+                    button: true,
+                    label: 'Delete medication $name',
+                    child: Tooltip(
+                      message: 'Delete medication',
+                      child: GestureDetector(
+                        onTap: onDelete,
+                        child: SvgPicture.asset(AppAssets.trash),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
-          ),
-        ],
+            SizedBox(height: AppSizes.h16),
+            Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSizes.w16,
+                vertical: AppSizes.h16,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(AppSizes.r16),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  MedicationDetailCol(
+                    icon: AppAssets.meds,
+                    label: 'Dosage',
+                    value: dosage,
+                  ),
+                  MedicationDetailCol(
+                    icon: AppAssets.timer,
+                    label: 'Frequency',
+                    value: frequency,
+                  ),
+                  MedicationDetailCol(
+                    icon: AppAssets.medicineBox,
+                    label: 'Stock',
+                    value: '$startDate',
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: AppSizes.h12),
+            Container(
+              padding: EdgeInsets.all(AppSizes.w16),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(AppSizes.r16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.description_outlined,
+                        color: AppColors.primary,
+                        size: 20,
+                      ),
+                      SizedBox(width: AppSizes.w8),
+                      Text('Instructions', style: AppStyles.black14500),
+                    ],
+                  ),
+                  SizedBox(height: AppSizes.h8),
+                  Text(
+                    instructions ?? 'No special instructions.',
+                    style: AppStyles.secondary12400.copyWith(
+                      fontSize: 14,
+                      color: AppColors.secondaryText,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

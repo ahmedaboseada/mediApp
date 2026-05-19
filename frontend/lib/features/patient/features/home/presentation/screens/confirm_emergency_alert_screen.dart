@@ -58,12 +58,11 @@ class _ConfirmEmergencyAlertScreenState
     );
   }
 
-  Future<void> _sendSos() async {
+  Future<void> _sendSos(BuildContext ctx) async {
     try {
       final position = await _getCurrentLocation();
       if (!mounted) return;
-
-      await context.read<SosCubit>().triggerSos(
+      await ctx.read<SosCubit>().triggerSos(
         lat: position.latitude,
         lng: position.longitude,
       );
@@ -165,9 +164,8 @@ class _ConfirmEmergencyAlertScreenState
                               onPressed: isLoading
                                   ? null
                                   : () {
-                                      _sendSos();
+                                      _sendSos(context);
                                     },
-                              //  isLoading: isLoading,
                             ),
                           );
                         },

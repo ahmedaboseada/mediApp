@@ -33,7 +33,11 @@ class UserInfoScetion extends StatelessWidget {
             child: ClipOval(
               child: isLoading
                   ? Container(color: Colors.white)
-                  : _buildAvatarImageWith(networkImageUrl),
+                  : Semantics(
+                      image: true,
+                      label: '$name profile photo',
+                      child: _buildAvatarImageWith(networkImageUrl),
+                    ),
             ),
           ),
           SizedBox(width: 16),

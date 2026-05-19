@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/core/services/accessibility_service.dart';
 
 class DeleteButton extends StatefulWidget {
   const DeleteButton({super.key, required this.onConfirmedDelete});
@@ -15,6 +16,11 @@ class _DeleteButtonState extends State<DeleteButton> {
   bool _pressed = false;
 
   Future<void> _showDeleteConfirmation() async {
+    await AccessibilityService.announceDialog(
+      'Delete medication',
+      'Are you sure you want to delete this medication?',
+    );
+
     final confirmed = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -93,30 +99,34 @@ class _DeleteButtonState extends State<DeleteButton> {
           setState(() => _pressed = false);
           _showDeleteConfirmation();
         },
-        child: AnimatedScale(
-          duration: const Duration(milliseconds: 150),
-          scale: _pressed ? 0.97 : 1,
-          child: Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(vertical: AppSizes.h16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFF3B30),
-              borderRadius: BorderRadius.circular(AppSizes.r80),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFFFF3B30).withOpacity(0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Center(
-              child: Text(
-                'Delete',
-                style: TextStyle(
-                  fontSize: AppSizes.sp16,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
+        child: Semantics(
+          button: true,
+          label: 'Delete medication',
+          child: AnimatedScale(
+            duration: const Duration(milliseconds: 150),
+            scale: _pressed ? 0.97 : 1,
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(vertical: AppSizes.h16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF3B30),
+                borderRadius: BorderRadius.circular(AppSizes.r80),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFFFF3B30).withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Text(
+                  'Delete',
+                  style: TextStyle(
+                    fontSize: AppSizes.sp16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),

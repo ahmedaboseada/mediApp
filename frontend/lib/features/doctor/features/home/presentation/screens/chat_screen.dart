@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/core/services/accessibility_service.dart';
 import 'package:zego_zimkit/zego_zimkit.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -12,11 +13,23 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  bool _announced = false;
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_announced) {
+        _announced = true;
+        AccessibilityService.announceWithRTL('Chats screen');
+      }
+    });
   }
 
   @override
@@ -72,17 +85,27 @@ class _ChatScreenState extends State<ChatScreen> {
                     },
                     decoration: InputDecoration(
                       hintText: 'Search',
-                      prefixIcon: const Icon(Icons.search),
+                      prefixIcon: Semantics(
+                        label: 'Search conversations',
+                        child: Icon(Icons.search),
+                      ),
                       suffixIcon: _searchController.text.isEmpty
                           ? null
-                          : IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                _searchController.clear();
-                                setState(() {
-                                  _searchQuery = '';
-                                });
-                              },
+                          : Semantics(
+                              button: true,
+                              label: 'Clear search',
+                              child: Tooltip(
+                                message: 'Clear search',
+                                child: IconButton(
+                                  icon: const Icon(Icons.clear),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    setState(() {
+                                      _searchQuery = '';
+                                    });
+                                  },
+                                ),
+                              ),
                             ),
                       border: InputBorder.none,
                       enabledBorder: InputBorder.none,
@@ -145,6 +168,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 conversation,
                 defaultWidget,
               ) {
+                final semanticLabel = _conversationSemanticLabel(conversation);
+
                 return Container(
                   margin: EdgeInsets.symmetric(
                     horizontal: 16,
@@ -164,7 +189,12 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                     ],
                   ),
-                  child: defaultWidget,
+                  child: Semantics(
+                    button: true,
+                    container: true,
+                    label: semanticLabel,
+                    child: defaultWidget,
+                  ),
                 );
               },
             ),
@@ -195,5 +225,23 @@ class _ChatScreenState extends State<ChatScreen> {
 
     parts.add(item.toString());
     return parts.join(' ').toLowerCase();
+  }
+
+  String _conversationSemanticLabel(dynamic conversation) {
+    try {
+      final dynamic value = conversation.value;
+      final name = (value?.name ?? conversation.conversation?.name ?? 'Conversation')
+          .toString();
+      final lastMessage = (value?.lastMessage ?? conversation.conversation?.lastMessage)
+          ?.toString();
+
+      if (lastMessage != null && lastMessage.isNotEmpty) {
+        return 'Conversation with $name, last message $lastMessage';
+      }
+
+      return 'Conversation with $name';
+    } catch (_) {
+      return 'Conversation item';
+    }
   }
 }

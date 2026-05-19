@@ -89,39 +89,50 @@ class _CircularAvatarState extends State<CircularAvatar> {
           width: avatarSize,
           decoration: const BoxDecoration(shape: BoxShape.circle),
           child: ClipOval(
-            child: imagePath != null
-                ? Image.file(File(imagePath), fit: BoxFit.cover)
-                : (widget.networkImageUrl != null &&
-                      widget.networkImageUrl!.isNotEmpty)
-                ? Image.network(
-                    widget.networkImageUrl!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, err, builder) =>
-                        const Icon(Icons.person),
-                  )
-                : Image.asset(AppAssets.avatar1, fit: BoxFit.cover),
+            child: Semantics(
+              image: true,
+              label: 'Profile photo',
+              child: imagePath != null
+                  ? Image.file(File(imagePath), fit: BoxFit.cover)
+                  : (widget.networkImageUrl != null &&
+                        widget.networkImageUrl!.isNotEmpty)
+                  ? Image.network(
+                      widget.networkImageUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, err, builder) =>
+                          const Icon(Icons.person),
+                    )
+                  : Image.asset(AppAssets.avatar1, fit: BoxFit.cover),
+            ),
           ),
         ),
         Positioned(
           bottom: 0,
           right: 0,
-          child: GestureDetector(
-            onTap: () => _pickImage(context),
-            child: Container(
-              height: AppSizes.h34,
-              width: AppSizes.w34,
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-              ),
-              child: SvgPicture.asset(
-                height: AppSizes.h18,
-                width: AppSizes.w18,
-                AppAssets.lineEdit,
-                fit: BoxFit.scaleDown,
-                colorFilter: const ColorFilter.mode(
-                  Colors.white,
-                  BlendMode.srcIn,
+          child: Semantics(
+            button: true,
+            label: 'Change profile photo',
+            child: Tooltip(
+              message: 'Change profile photo',
+              child: GestureDetector(
+                onTap: () => _pickImage(context),
+                child: Container(
+                  height: AppSizes.h34,
+                  width: AppSizes.w34,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: SvgPicture.asset(
+                    height: AppSizes.h18,
+                    width: AppSizes.w18,
+                    AppAssets.lineEdit,
+                    fit: BoxFit.scaleDown,
+                    colorFilter: const ColorFilter.mode(
+                      Colors.white,
+                      BlendMode.srcIn,
+                    ),
+                  ),
                 ),
               ),
             ),

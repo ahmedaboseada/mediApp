@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/core/services/accessibility_service.dart';
 import 'package:medi/features/doctor/features/home/presentation/widgets/support_section.dart';
 import 'package:medi/features/patient/features/profile/presentation/mappers/auth_response_model_mapper.dart';
 import 'package:medi/features/patient/features/profile/presentation/widgets/account_section.dart';
@@ -15,11 +16,25 @@ import 'package:medi/features/shared/auth/presentation/cubit/user_profile/user_p
 
 import 'package:medi/features/patient/features/doctors/presentation/cubits/connected_doctors_cubit.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  bool _announced = false;
+
+  @override
   Widget build(BuildContext context) {
+    if (!_announced) {
+      _announced = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        AccessibilityService.announceWithRTL('Profile screen');
+      });
+    }
+
     return BlocProvider(
       create: (_) => UserProfileCubit(getIt<AuthRepoImpl>())..getMe(),
       child: Scaffold(

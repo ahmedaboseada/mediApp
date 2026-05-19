@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/core/services/accessibility_service.dart';
 import 'package:medi/features/patient/features/home/data/repo/sos_repo.dart';
 import 'package:medi/features/patient/features/home/presentation/controller/sos/sos_cubit.dart';
 
@@ -40,11 +41,13 @@ class _SetEmergencyContactscreenState extends State<SetEmergencyContactscreen> {
             listener: (context, state) {
               if (state is EmergencyContactSetSuccess) {
                 // Show success dialog
+                AccessibilityService.announceSuccess('Emergency contact saved successfully');
                 _showSuccessDialog(context, state);
               } else if (state is SosFailure) {
                 ScaffoldMessenger.of(
                   context,
                 ).showSnackBar(SnackBar(content: Text(state.message)));
+                AccessibilityService.announceError(state.message);
               }
             },
             child: SingleChildScrollView(
@@ -166,6 +169,11 @@ class _SetEmergencyContactscreenState extends State<SetEmergencyContactscreen> {
     BuildContext context,
     EmergencyContactSetSuccess state,
   ) {
+    AccessibilityService.announceDialog(
+      'Saved successfully',
+      'Emergency contact details were saved successfully.',
+    );
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -175,41 +183,45 @@ class _SetEmergencyContactscreenState extends State<SetEmergencyContactscreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSizes.r16),
           ),
-          child: Padding(
-            padding: EdgeInsets.all(AppSizes.h32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Success icon
-                Icon(
-                  Icons.check_circle,
-                  size: AppSizes.w48,
-                  color: AppColors.success,
-                ),
-                SizedBox(height: AppSizes.h24),
-
-                // Message
-                Text(
-                  'Saved successfully',
-                  style: AppStyles.black18500.copyWith(
-                    fontWeight: FontWeight.w900,
+          child: Semantics(
+            namesRoute: true,
+            label: 'Emergency contact saved dialog',
+            child: Padding(
+              padding: EdgeInsets.all(AppSizes.h32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Success icon
+                  Icon(
+                    Icons.check_circle,
+                    size: AppSizes.w48,
+                    color: AppColors.success,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: AppSizes.h32),
+                  SizedBox(height: AppSizes.h24),
 
-                // Done button
-                SizedBox(
-                  width: double.infinity,
-                  child: PrimaryButton(
-                    text: 'Done',
-                    onPressed: () {
-                      context.pop(); // Close success dialog
-                      context.pop(); // Close main dialog
-                    },
+                  // Message
+                  Text(
+                    'Saved successfully',
+                    style: AppStyles.black18500.copyWith(
+                      fontWeight: FontWeight.w900,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-              ],
+                  SizedBox(height: AppSizes.h32),
+
+                  // Done button
+                  SizedBox(
+                    width: double.infinity,
+                    child: PrimaryButton(
+                      text: 'Done',
+                      onPressed: () {
+                        context.pop(); // Close success dialog
+                        context.pop(); // Close main dialog
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );

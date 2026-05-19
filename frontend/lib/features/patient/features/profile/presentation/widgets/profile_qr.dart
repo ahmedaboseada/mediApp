@@ -8,16 +8,24 @@ class ProfileQR extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _showQrDialog(context),
-      child: QrImageView(
-        data: qrData,
-        size: 60, // 👈 صغير
+    return Semantics(
+      button: true,
+      label: 'Show profile QR code',
+      child: Tooltip(
+        message: 'Show profile QR code',
+        child: GestureDetector(
+          onTap: () => _showQrDialog(context),
+          child: QrImageView(
+            data: qrData,
+            size: 60,
+          ),
+        ),
       ),
     );
   }
 
   void _showQrDialog(BuildContext context) {
+    // TODO(accessibility): Consider adding an explicit close button if this dialog becomes more complex.
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -35,52 +43,60 @@ class QrDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Colors.transparent,
-      child: Container(
-        padding: EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(25),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              "Scan your QR Code",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
+      child: Semantics(
+        namesRoute: true,
+        label: 'Profile QR code dialog',
+        child: Container(
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(25),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Scan your QR Code",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
 
             SizedBox(height: 20),
 
-            Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  QrImageView(data: qrData, size: 220),
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Semantics(
+                      image: true,
+                      label: 'Profile QR code',
+                      child: QrImageView(data: qrData, size: 220),
+                    ),
 
-                  /// Corners
-                  Positioned(top: 0, left: 0, child: _corner()),
-                  Positioned(top: 0, right: 0, child: _corner(isRight: true)),
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    child: _corner(isBottom: true),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: _corner(isRight: true, isBottom: true),
-                  ),
-                ],
+                    /// Corners
+                    Positioned(top: 0, left: 0, child: _corner()),
+                    Positioned(top: 0, right: 0, child: _corner(isRight: true)),
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      child: _corner(isBottom: true),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: _corner(isRight: true, isBottom: true),
+                    ),
+                  ],
+                ),
               ),
-            ),
 
-            SizedBox(height: 20),
-          ],
+              SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );

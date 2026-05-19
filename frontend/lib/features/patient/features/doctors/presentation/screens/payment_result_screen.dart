@@ -53,7 +53,11 @@ class _PaymentResultScreenState extends State<PaymentResultScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      body: Semantics(
+        liveRegion: true,
+        label: 'Processing payment result',
+        child: Center(child: CircularProgressIndicator(color: AppColors.primary)),
+      ),
     );
   }
 }
