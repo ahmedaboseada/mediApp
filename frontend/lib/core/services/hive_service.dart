@@ -1,3 +1,6 @@
+import 'dart:developer';
+import 'dart:io';
+
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:medi/core/enums/user_role.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
@@ -8,6 +11,10 @@ import 'package:medi/features/shared/auth/data/models/doctor_model.dart';
 import 'package:medi/features/shared/auth/data/models/user_model.dart';
 import 'package:medi/features/shared/auth/data/models/patient_model.dart';
 import 'package:medi/features/shared/auth/data/models/working_hours_model.dart';
+import 'package:medi/core/data/sync/sync_service.dart';
+import 'package:medi/core/data/sync/sync_action.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
 
 class HiveService {
   static const String _authBox = 'authBox';
@@ -15,6 +22,8 @@ class HiveService {
   static const String _settingsBox = 'settingsBox';
   static const String _medicationsBox = 'medicationsBox';
   static const String _medicationsKey = 'medications';
+  static const String _earlyVoiceAlertsKey = 'earlyVoiceAlerts';
+  static const String _notificationsEnabledKey = 'notificationsEnabled';
 
   // Keys
   static const String _accessTokenKey = 'accessToken';
@@ -25,7 +34,9 @@ class HiveService {
   static const String _doctorDataKey = 'doctorData';
   static const String _userRoleKey = 'userRole';
   static const String _onboardingCompletedKey = 'onboardingCompleted';
+  static const String _completeProfileRequiredKey = 'completeProfileRequired';
   static const String _userCountryKey = 'userCountry';
+  static const String _emergencyContactKey = 'emergencyContact';
   static Future<void>? _initFuture;
 
   static Future<void> _ensureInitialized() {
@@ -57,13 +68,56 @@ class HiveService {
     return Hive.box(_settingsBox);
   }
 
+  /// Safely open a Hive box, recovering from corrupted/stale data.
+  static Future<Box> _safeOpenBox(String boxName) async {
+    try {
+      return await Hive.openBox(boxName);
+    } catch (e) {
+      // Box contains data from a removed adapter or stale on-disk state.
+      // Delete if possible, but keep startup alive even if the lock file is already gone.
+      try {
+        await Hive.deleteBoxFromDisk(boxName);
+      } catch (deleteError) {
+        log('Failed to delete box $boxName: $deleteError');
+      }
+
+      try {
+        await _forceDeleteBoxFiles(boxName);
+      } catch (forceDeleteError) {
+        log('Failed to force-delete box $boxName files: $forceDeleteError');
+      }
+
+      log('the deleted box is $boxName');
+
+      try {
+        return await Hive.openBox(boxName);
+      } catch (reopenError) {
+        log('Failed to reopen box $boxName after cleanup: $reopenError');
+        rethrow;
+      }
+    }
+  }
+
+  static Future<void> _forceDeleteBoxFiles(String boxName) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final candidates = <String>[
+      '$boxName',
+      '$boxName.hive',
+      '$boxName.lock',
+      '$boxName.hive.lock',
+    ];
+
+    for (final name in candidates) {
+      final file = File('${directory.path}${Platform.pathSeparator}$name');
+      if (await file.exists()) {
+        await file.delete();
+      }
+    }
+  }
+
   /// Initialize Hive
   static Future<void> init() async {
-    if (!Hive.isBoxOpen(_authBox) ||
-        !Hive.isBoxOpen(_userBox) ||
-        !Hive.isBoxOpen(_settingsBox)) {
-      await Hive.initFlutter();
-    }
+    await Hive.initFlutter();
 
     // Register adapters
     if (!Hive.isAdapterRegistered(0)) {
@@ -91,11 +145,21 @@ class HiveService {
       Hive.registerAdapter(MedicationAdapter());
     }
 
-    // Open boxes
-    await Hive.openBox(_authBox);
-    await Hive.openBox(_userBox);
-    await Hive.openBox(_settingsBox);
-    await Hive.openBox(_medicationsBox);
+    // if (!Hive.isAdapterRegistered(9)) {
+    //    Hive.registerAdapter(MedicationScheduleTimeAdapter());
+    // }
+    if (!Hive.isAdapterRegistered(10)) {
+      Hive.registerAdapter(SyncActionAdapter());
+    }
+
+    // Open boxes (with recovery for corrupted/stale data)
+    await _safeOpenBox(_authBox);
+    await _safeOpenBox(_userBox);
+    await _safeOpenBox(_settingsBox);
+    await _safeOpenBox(_medicationsBox);
+
+    // Trigger sync on app start
+    SyncService.processQueue();
   }
 
   static Future<Box> _openMedicationsBox() async {
@@ -280,6 +344,28 @@ class HiveService {
     }
   }
 
+  // ========== EMERGENCY CONTACT HELPERS ==========
+
+  /// Save emergency contact locally
+  static Future<void> saveEmergencyContact(Map<String, dynamic> contact) async {
+    final settings = await _openSettingsBox();
+    await settings.put(_emergencyContactKey, contact);
+  }
+
+  /// Get locally saved emergency contact
+  static Map<String, dynamic>? getEmergencyContact() {
+    if (!Hive.isBoxOpen(_settingsBox)) return null;
+    final raw = Hive.box(_settingsBox).get(_emergencyContactKey);
+    if (raw == null) return null;
+    return Map<String, dynamic>.from(raw as Map);
+  }
+
+  /// Clear locally saved emergency contact
+  static Future<void> clearEmergencyContact() async {
+    final settings = await _openSettingsBox();
+    await settings.delete(_emergencyContactKey);
+  }
+
   // ========== USER ROLE MANAGEMENT ==========
 
   /// Save user role
@@ -317,6 +403,29 @@ class HiveService {
     return Hive.box(
           _settingsBox,
         ).get(_onboardingCompletedKey, defaultValue: false)
+        as bool;
+  }
+
+  // ========== COMPLETE PROFILE FLOW MANAGEMENT ==========
+
+  /// Mark complete profile as required.
+  static Future<void> markCompleteProfileAsRequired() async {
+    final settings = await _openSettingsBox();
+    await settings.put(_completeProfileRequiredKey, true);
+  }
+
+  /// Mark complete profile as completed.
+  static Future<void> markCompleteProfileAsCompleted() async {
+    final settings = await _openSettingsBox();
+    await settings.put(_completeProfileRequiredKey, false);
+  }
+
+  /// Check if complete profile flow is required.
+  static bool isCompleteProfileRequired() {
+    if (!Hive.isBoxOpen(_settingsBox)) return false;
+    return Hive.box(
+          _settingsBox,
+        ).get(_completeProfileRequiredKey, defaultValue: false)
         as bool;
   }
 
@@ -374,6 +483,36 @@ class HiveService {
     }
   }
 
+  // ========== EARLY VOICE ALERTS ==========
+
+  /// Save the early voice alerts preference
+  static Future<void> setEarlyVoiceAlerts(bool enabled) async {
+    if (!Hive.isBoxOpen(_settingsBox)) return;
+    await Hive.box(_settingsBox).put(_earlyVoiceAlertsKey, enabled);
+  }
+
+  /// Get whether early voice alerts are enabled
+  static bool getEarlyVoiceAlerts() {
+    if (!Hive.isBoxOpen(_settingsBox)) return false;
+    return Hive.box(_settingsBox).get(_earlyVoiceAlertsKey, defaultValue: false)
+        as bool;
+  }
+
+  /// Save the notifications enabled preference
+  static Future<void> setNotificationsEnabled(bool enabled) async {
+    if (!Hive.isBoxOpen(_settingsBox)) return;
+    await Hive.box(_settingsBox).put(_notificationsEnabledKey, enabled);
+  }
+
+  /// Get whether notifications are enabled (defaults to true)
+  static bool getNotificationsEnabled() {
+    if (!Hive.isBoxOpen(_settingsBox)) return true;
+    return Hive.box(
+          _settingsBox,
+        ).get(_notificationsEnabledKey, defaultValue: true)
+        as bool;
+  }
+
   // ========== MEDICATION MANAGEMENT ==========
 
   /// Get locally saved medications
@@ -395,9 +534,24 @@ class HiveService {
 
   /// Add a single medication to the saved list
   static Future<void> addMedication(Medication medication) async {
+    var medicationWithId = medication;
+    if (medication.id.isEmpty) {
+      medicationWithId = medication.copyWith(id: const Uuid().v4());
+    }
+
+    // Set as not synced initially for offline-first tracking
+    medicationWithId = medicationWithId.copyWith(isSynced: false);
+
     final current = getMedications();
-    current.add(medication);
+    current.add(medicationWithId);
     await saveMedications(current);
+
+    // Push to sync queue
+    await SyncService.addToQueue(
+      type: 'add',
+      entity: 'medication',
+      data: medicationWithId.toJson(),
+    );
   }
 
   /// Update a medication in the locally saved list.
@@ -419,13 +573,22 @@ class HiveService {
       );
     }
 
+    final medicationToSync = updated.copyWith(isSynced: false);
+
     if (index == -1) {
-      current.add(updated);
+      current.add(medicationToSync);
     } else {
-      current[index] = updated;
+      current[index] = medicationToSync;
     }
 
     await saveMedications(current);
+
+    // Push to sync queue
+    await SyncService.addToQueue(
+      type: 'update',
+      entity: 'medication',
+      data: medicationToSync.toJson(),
+    );
   }
 
   /// Delete a medication from the locally saved list.
@@ -447,6 +610,38 @@ class HiveService {
     if (index != -1) {
       current.removeAt(index);
       await saveMedications(current);
+
+      // Push to sync queue
+      await SyncService.addToQueue(
+        type: 'delete',
+        entity: 'medication',
+        data: medication.toJson(),
+      );
+    }
+  }
+
+  // ========== SYNC HELPERS ==========
+
+  /// Mark a medication as synced in local storage
+  static Future<void> markMedicationSynced(String id) async {
+    final current = getMedications();
+    final index = current.indexWhere((m) => m.id == id);
+    if (index != -1) {
+      current[index] = current[index].copyWith(isSynced: true);
+      await saveMedications(current);
+    }
+  }
+
+  /// Update a temporary ID with a server-generated ID
+  static Future<void> updateMedicationServerId(
+    String tempId,
+    String serverId,
+  ) async {
+    final current = getMedications();
+    final index = current.indexWhere((m) => m.id == tempId);
+    if (index != -1) {
+      current[index] = current[index].copyWith(id: serverId, isSynced: true);
+      await saveMedications(current);
     }
   }
 
@@ -462,6 +657,10 @@ class HiveService {
     await userBox.clear();
     await settings.clear();
     await meds.clear();
+    await Hive.deleteBoxFromDisk(_authBox);
+    await Hive.deleteBoxFromDisk(_userBox);
+    await Hive.deleteBoxFromDisk(_settingsBox);
+    await Hive.deleteBoxFromDisk(_medicationsBox);
   }
 
   /// Close all boxes

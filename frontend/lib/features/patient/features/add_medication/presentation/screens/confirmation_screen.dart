@@ -2,40 +2,100 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_cubit.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_cubit.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medication_data_state.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/custom_stepper.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/navigation_buttons.dart';
 
-class ConfirmationScreen extends StatelessWidget {
+class ConfirmationScreen extends StatefulWidget {
   const ConfirmationScreen({super.key});
 
-  Future<void> _handleAddMedication(BuildContext context) async {
-    final medication = context.read<MedicationDataCubit>().state.medicationData;
-    final result = await context.read<MedicineCubit>().addMedication(
-      medication,
-    );
-    await HiveService.addMedication(medication);
+  @override
+  State<ConfirmationScreen> createState() => _ConfirmationScreenState();
+}
 
-    result.fold(
-      (error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error.message), backgroundColor: Colors.red),
-        );
-      },
-      (message) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message), backgroundColor: Colors.green),
-        );
-        LocalNotificationService().scheduleMedicationReminders(medication);
-        LocalNotificationService().showNotification(
-          title: 'Medication Added',
-          body: '${medication.medicationName} has been added to your list.',
-        );
-        context.go('/medicine');
-      },
-    );
+class _ConfirmationScreenState extends State<ConfirmationScreen> {
+  bool _isSubmitting = false;
+
+  String _formatReminderSummary(Medication medication) {
+    if (medication.frequency.trim().toLowerCase() == 'weekly' &&
+        medication.weeklySchedule.isNotEmpty) {
+      return medication.weeklySchedule
+          .map((entry) {
+            final day = (entry['day'] as String? ?? '').trim();
+            final times =
+                (entry['times'] as List?)?.whereType<String>().toList() ??
+                const <String>[];
+            final title = day.isEmpty
+                ? 'Day'
+                : '${day[0].toUpperCase()}${day.substring(1)}';
+            return '$title: ${times.join(', ')}';
+          })
+          .join('\n');
+    }
+
+    if (medication.frequency.trim().toLowerCase() == 'specific' &&
+        medication.specificSchedule.isNotEmpty) {
+      return medication.specificSchedule
+          .map((entry) {
+            final date = (entry['day'] as String? ?? '').trim();
+            final times =
+                (entry['times'] as List?)?.whereType<String>().toList() ??
+                const <String>[];
+            return '$date: ${times.join(', ')}';
+          })
+          .join('\n');
+    }
+
+    return medication.reminders.isNotEmpty
+        ? medication.reminders.join('\n')
+        : 'No reminders set';
+  }
+
+  Future<void> _handleAddMedication() async {
+    if (_isSubmitting) return;
+
+    setState(() => _isSubmitting = true);
+
+    final medication = context.read<MedicationDataCubit>().state.medicationData;
+
+    try {
+      // 🔥 Offline-first save (always succeeds locally)
+      await context.read<MedicineCubit>().addMedication(medication);
+
+      if (!mounted) return;
+
+      // Success UI
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Medication saved locally'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Notifications
+      LocalNotificationService().scheduleMedicationReminders(medication);
+      LocalNotificationService().showNotification(
+        title: 'Medication Added',
+        body: '${medication.medicationName} has been added to your list.',
+      );
+
+      // Navigate
+      context.pushReplacement('/medicine');
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() => _isSubmitting = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Something went wrong: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -118,9 +178,7 @@ class ConfirmationScreen extends StatelessWidget {
                       items: [
                         _buildSummaryItem(
                           'Time',
-                          medicationData.reminders.isNotEmpty
-                              ? medicationData.reminders.join('\n')
-                              : 'No reminders set',
+                          _formatReminderSummary(medicationData),
                         ),
                       ],
                     ),
@@ -161,10 +219,10 @@ class ConfirmationScreen extends StatelessWidget {
 
                     // Back and Add Buttons
                     NavigationButtons(
-                      onBackPressed: () => context.pop(),
-                      nextEnabled: true,
-                      onNextPressed: () => _handleAddMedication(context),
-                      nextText: 'Add Medication',
+                      onBackPressed: _isSubmitting ? null : () => context.pop(),
+                      nextEnabled: !_isSubmitting,
+                      onNextPressed: _handleAddMedication,
+                      nextText: _isSubmitting ? 'Adding...' : 'Add Medication',
                     ),
                   ],
                 ),

@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/features/patient/features/questionnaire/data/models/caregiver_request_submission_result.dart';
 
 abstract class QuestionnaireRepo {
   Future<Either<ApiError, String>> completeHealthStep1({
@@ -14,8 +15,12 @@ abstract class QuestionnaireRepo {
     required bool allergyAlerts,
   });
 
-  Future<Either<ApiError, String>> sendCaregiverRequest({
+  Future<Either<ApiError, CaregiverRequestSubmissionResult>> sendCaregiverRequest({
     required String caregiverEmail,
     required String relationship,
+  });
+
+  Future<Either<ApiError, String>> cancelCaregiverRequest({
+    required String requestId,
   });
 }

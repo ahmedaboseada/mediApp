@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
@@ -33,32 +31,32 @@ class _SplashScreenState extends State<SplashScreen>
     _animationController.forward();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(_initializeAndNavigate());
+      _navigateToNextScreen();
     });
   }
 
-  Future<void> _initializeAndNavigate() async {
-    final startedAt = DateTime.now();
-    final initResult = await AppStartupInitializer.initializeCoreServices();
+  // Future<void> _initializeAndNavigate() async {
+  //   final startedAt = DateTime.now();
+  //   final initResult = await AppStartupInitializer.initializeCoreServices();
 
-    // Keep splash visible briefly for smoother transition and branding.
-    const minSplashDuration = Duration(milliseconds: 1200);
-    final elapsed = DateTime.now().difference(startedAt);
-    if (elapsed < minSplashDuration) {
-      await Future<void>.delayed(minSplashDuration - elapsed);
-    }
+  //   // Keep splash visible briefly for smoother transition and branding.
+  //   const minSplashDuration = Duration(milliseconds: 1200);
+  //   final elapsed = DateTime.now().difference(startedAt);
+  //   if (elapsed < minSplashDuration) {
+  //     await Future<void>.delayed(minSplashDuration - elapsed);
+  //   }
 
-    if (initResult.hadFailures) {
-      for (final error in initResult.errors) {
-        debugPrint(error);
-      }
-    }
+  //   if (initResult.hadFailures) {
+  //     for (final error in initResult.errors) {
+  //       debugPrint(error);
+  //     }
+  //   }
 
-    if (!mounted) return;
+  //   if (!mounted) return;
 
-    AppStartupInitializer.initializeDeferredServices();
-    _navigateToNextScreen();
-  }
+  //   AppStartupInitializer.initializeDeferredServices();
+  //   _navigateToNextScreen();
+  // }
 
   void _navigateToNextScreen() {
     if (!mounted) return;
@@ -66,8 +64,18 @@ class _SplashScreenState extends State<SplashScreen>
     final accessToken = HiveService.getAccessToken();
     final userRole = HiveService.getUserRole();
     final isOnboardingCompleted = HiveService.isOnboardingCompleted();
+    final isCompleteProfileRequired = HiveService.isCompleteProfileRequired();
 
     if (accessToken != null && accessToken.isNotEmpty) {
+      if (isCompleteProfileRequired) {
+        context.go(
+          userRole == UserRole.doctor
+              ? AppRouter.doctorCompleteProfile
+              : AppRouter.completeProfile,
+        );
+        return;
+      }
+
       // User is logged in, go to home based on role
       if (userRole == UserRole.doctor) {
         context.go(AppRouter.mainLayout);
@@ -97,11 +105,16 @@ class _SplashScreenState extends State<SplashScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ScaleTransition(
-              scale: _scaleAnimation,
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: Image.asset(AppAssets.welcomPng),
+            Flexible(
+              child: ScaleTransition(
+                scale: _scaleAnimation,
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Image.asset(
+                    AppAssets.welcomPng,
+                    excludeFromSemantics: true,
+                  ),
+                ),
               ),
             ),
             // SizedBox(height: AppSizes.h20),

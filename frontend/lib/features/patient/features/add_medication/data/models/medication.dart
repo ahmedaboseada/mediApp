@@ -25,6 +25,8 @@ class Medication extends Equatable {
     this.startDate = '',
     this.endDate = '',
     this.reminders = const <String>[],
+    this.weeklySchedule = const <Map<String, dynamic>>[],
+    this.specificSchedule = const <Map<String, dynamic>>[],
     this.expiryDate = '',
     this.isCriticalMode = false,
     this.schedule = '',
@@ -35,6 +37,7 @@ class Medication extends Equatable {
     this.isChronic = false,
     this.medicationType = MedicationType.pill,
     this.sideEffects = const <String>[],
+    this.isSynced = true,
   });
 
   final String id;
@@ -46,7 +49,8 @@ class Medication extends Equatable {
   final String startDate;
   final String endDate;
   final List<String> reminders;
-  // final String currentStock;
+  final List<Map<String, dynamic>> weeklySchedule;
+  final List<Map<String, dynamic>> specificSchedule;
   final String schedule;
   final int stock;
   final String expiryDate;
@@ -57,6 +61,7 @@ class Medication extends Equatable {
   final bool isChronic;
   final MedicationType medicationType;
   final List<String> sideEffects;
+  final bool isSynced;
 
   static MedicationType medicationTypeFromLabel(String? label) {
     switch (label?.trim().toLowerCase()) {
@@ -103,6 +108,8 @@ class Medication extends Equatable {
     String? startDate,
     String? endDate,
     List<String>? reminders,
+    List<Map<String, dynamic>>? weeklySchedule,
+    List<Map<String, dynamic>>? specificSchedule,
     String? currentStock,
     String? schedule,
     int? stock,
@@ -114,6 +121,7 @@ class Medication extends Equatable {
     bool? isChronic,
     MedicationType? medicationType,
     List<String>? sideEffects,
+    bool? isSynced,
   }) {
     return Medication(
       id: id ?? this.id,
@@ -125,6 +133,8 @@ class Medication extends Equatable {
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       reminders: reminders ?? this.reminders,
+      weeklySchedule: weeklySchedule ?? this.weeklySchedule,
+      specificSchedule: specificSchedule ?? this.specificSchedule,
       // currentStock: currentStock ?? this.currentStock,
       schedule: schedule ?? this.schedule,
       stock: stock ?? this.stock,
@@ -136,6 +146,7 @@ class Medication extends Equatable {
       isChronic: isChronic ?? this.isChronic,
       medicationType: medicationType ?? this.medicationType,
       sideEffects: sideEffects ?? this.sideEffects,
+      isSynced: isSynced ?? this.isSynced,
     );
   }
 
@@ -150,6 +161,8 @@ class Medication extends Equatable {
       'startDate': startDate,
       'endDate': endDate,
       'reminders': reminders,
+      'weeklySchedule': weeklySchedule,
+      'specificSchedule': specificSchedule,
       //  'currentStock': currentStock,
       'schedule': schedule,
       'stock': stock,
@@ -160,6 +173,7 @@ class Medication extends Equatable {
       'isChronic': isChronic,
       'medicationType': medicationType.index,
       'sideEffects': sideEffects,
+      'isSynced': isSynced,
     };
   }
 
@@ -180,6 +194,22 @@ class Medication extends Equatable {
             .whereType<String>()
             .toList();
 
+    final parsedWeeklySchedule =
+        ((json['weekly'] as List?) ??
+                (json['weeklySchedule'] as List?) ??
+                const [])
+            .whereType<Map>()
+            .map((item) => Map<String, dynamic>.from(item))
+            .toList();
+
+    final parsedSpecificSchedule =
+        ((json['specific'] as List?) ??
+                (json['specificSchedule'] as List?) ??
+                const [])
+            .whereType<Map>()
+            .map((item) => Map<String, dynamic>.from(item))
+            .toList();
+
     final parsedStockStatus = stockValue <= leftThreshold
         ? MedicationStockStatus.low
         : (stockValue <= leftThreshold * 2
@@ -196,6 +226,8 @@ class Medication extends Equatable {
       startDate: (json['startDate'] as String?) ?? '',
       endDate: (json['endDate'] as String?) ?? '',
       reminders: parsedReminders,
+      weeklySchedule: parsedWeeklySchedule,
+      specificSchedule: parsedSpecificSchedule,
       // currentStock: (json['currentStock'] as String?) ?? '',
       schedule: (json['schedule'] as String?) ?? '',
       stock: stockValue,
@@ -218,6 +250,7 @@ class Medication extends Equatable {
       sideEffects:
           (json['sideEffects'] as List?)?.whereType<String>().toList() ??
           const <String>[],
+      isSynced: (json['isSynced'] as bool?) ?? true,
     );
   }
 
@@ -232,6 +265,8 @@ class Medication extends Equatable {
     startDate,
     endDate,
     reminders,
+    weeklySchedule,
+    specificSchedule,
     // currentStock,
     schedule,
     stock,
@@ -243,6 +278,7 @@ class Medication extends Equatable {
     isChronic,
     medicationType,
     sideEffects,
+    isSynced,
   ];
 }
 
@@ -302,6 +338,7 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       isChronic: fields[14] as bool? ?? false,
       medicationType: parsedType,
       sideEffects: (fields[17] as List?)?.cast<String>() ?? const <String>[],
+      isSynced: fields[18] as bool? ?? true,
     );
   }
 
@@ -344,7 +381,9 @@ class MedicationAdapter extends TypeAdapter<Medication> {
       ..writeByte(16)
       ..write(obj.id)
       ..writeByte(17)
-      ..write(obj.sideEffects);
+      ..write(obj.sideEffects)
+      ..writeByte(18)
+      ..write(obj.isSynced);
   }
 
   @override

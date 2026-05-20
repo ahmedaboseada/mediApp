@@ -150,7 +150,7 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
       };
 
       final data = {
-        'workingDays': workingDays,
+        'workingDays': _formatWorkingDays(workingDays),
         'workingHours': [
           {'startHour': startHour, 'endHour': endHour},
         ],
@@ -222,6 +222,72 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }
+  }
+
+  @override
+  Future<Either<ApiError, String>> updateSchedule({
+    required List<String> workingDays,
+    required String startHour,
+    required String endHour,
+    required int consultationDuration,
+    required List<String> appointmentTypes,
+    required int maxDailyPatients,
+  }) async {
+    try {
+      final token = HiveService.getAccessToken();
+      if (token == null || token.isEmpty) {
+        return Left(
+          ServerFailure('Access token is missing. Please login again.'),
+        );
+      }
+
+      final headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      };
+
+      final data = {
+        'workingDays': _formatWorkingDays(workingDays),
+        'workingHours': [
+          {'startHour': startHour, 'endHour': endHour},
+        ],
+        'consultationDuration': consultationDuration,
+        'appointmentTypes': appointmentTypes,
+        'maxDailyPatients': maxDailyPatients,
+      };
+
+      final dynamic response = await apiService.patch(
+        '/doctors/schedule',
+        data,
+        headers: headers,
+      );
+      log('Doctor Update Schedule Response: ${response.toString()}');
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final message = response['message'] ?? 'Schedule updated successfully';
+      return Right(message.toString());
+    } on DioException catch (e) {
+      return Left(ServerFailure.fromDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  List<String> _formatWorkingDays(List<String> days) {
+    final Map<String, String> dayMap = {
+      'Mon': 'monday',
+      'Tue': 'tuesday',
+      'Wed': 'wednesday',
+      'Thu': 'thursday',
+      'Fri': 'friday',
+      'Sat': 'saturday',
+      'Sun': 'sunday',
+    };
+
+    return days.map((day) => dayMap[day] ?? day.toLowerCase()).toList();
   }
 
   @override

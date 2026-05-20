@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_cubit.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_state.dart';
+import 'package:medi/features/patient/features/profile/presentation/widgets/profile_qr.dart';
 
 class FloatingActionsMenu extends StatelessWidget {
   const FloatingActionsMenu({super.key});
@@ -40,7 +41,7 @@ class FloatingActionsMenu extends StatelessWidget {
               label: AppStrings.generateQr,
               icon: Icons.qr_code_2_outlined,
               backgroundColor: AppColors.medicineFabGenerateQrBackground,
-              onTap: () {},
+              onTap: () => _onGenerateQrTap(context),
             ),
             FloatingActionItemData(
               label: AppStrings.chatBot,
@@ -52,6 +53,39 @@ class FloatingActionsMenu extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _onGenerateQrTap(BuildContext context) async {
+    final cubit = context.read<MedicineCubit>();
+
+    if (cubit.state.isFabExpanded) {
+      cubit.toggleFabMenu();
+    }
+
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final token = await cubit.generateDoctorMedicationAccessToken();
+
+      if (!context.mounted) return;
+      Navigator.of(context, rootNavigator: true).pop();
+
+      showDialog<void>(
+        context: context,
+        builder: (_) => QrDialog(qrData: token),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      Navigator.of(context, rootNavigator: true).pop();
+
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(e.toString())));
+    }
   }
 }
 

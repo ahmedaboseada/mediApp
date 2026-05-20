@@ -22,7 +22,7 @@ class LogsRepoImpl implements LogsRepo {
         'type': type,
         'systolic': systolic,
         'diastolic': diastolic,
-        if (heartRate != null) 'heartRate': heartRate,
+        'heartRate': ?heartRate,
       };
 
       final dynamic response = await apiService.post(

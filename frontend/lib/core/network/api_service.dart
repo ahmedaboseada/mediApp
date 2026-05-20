@@ -4,7 +4,29 @@ import 'package:medi/core/core.dart';
 class ApiService {
   final DioClient _dioClient = DioClient();
 
+  /// Get DioClient instance
+  DioClient get dioClient => _dioClient;
+
   /// CRUD METHODS
+  Future<Response<dynamic>> downloadFile(
+    String endPoint, {
+    Map<String, dynamic>? headers,
+   }) async {
+    return _dioClient.dio.get(
+      endPoint,
+      options: Options(
+        headers: headers,
+        responseType: ResponseType.bytes,
+      ),
+    );
+   }
+
+  Future<Response<dynamic>> getPdf(
+    String endPoint, {
+    Map<String, dynamic>? headers,
+  }) {
+    return downloadFile(endPoint, headers: headers);
+  }
 
   /// get
   Future<dynamic> get(String endPoint, {Map<String, String>? headers}) async {

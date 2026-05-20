@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:dartz/dartz.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_state.dart';
+import 'package:medi/core/services/hive_service.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_state.dart';
 import 'package:medi/features/patient/features/add_medication/data/repo/medicine_repo.dart';
 
 class MedicineCubit extends Cubit<MedicineState> {
@@ -10,85 +10,262 @@ class MedicineCubit extends Cubit<MedicineState> {
     : super(MedicineState.initial(const <Medication>[]));
 
   final MedicineRepo _medicineRepo;
-  List<Medication> _allMedications = const <Medication>[];
-  List<Medication> _activeMedications = const <Medication>[];
 
-  int get allCount => _allMedications.length;
+  List<Medication> _allMedications = [];
+  //final List<Medication> _activeMedications = [];
 
-  int get activeCount => _activeMedications.isNotEmpty
-      ? _activeMedications.length
-      : _allMedications.where(_isMedicationActive).length;
-
-  int get chronicCount => _allMedications.where((m) => m.isChronic).length;
-
+  // =========================
+  // LOAD MEDICATIONS (LOCAL FIRST)
+  // =========================
   Future<void> loadMedications() async {
-    final result = await _medicineRepo.getAllMedications();
-    final medications = result.fold(
-      (_) => HiveService.getMedications(),
-      (items) => items,
-    );
-    _allMedications = medications;
+    emit(state.copyWith(isLoading: true));
 
-    if (state.selectedTab == MedicineTab.active) {
-      await loadActiveMedications();
-      return;
+    try {
+      final isCaregiverMode = getIt<CaregiverModeCubit>().isManagingPatient;
+
+      if (isCaregiverMode) {
+        final managedProfile = getIt<ManagedPatientDashboardCubit>().state.profile;
+        final managedMedications = managedProfile?.patient?.medications ?? const <Medication>[];
+        _allMedications = managedMedications;
+
+        emit(
+          state.copyWith(
+            medications: _filterByTab(managedMedications, state.selectedTab),
+            isLoading: false,
+          ),
+        );
+
+        _syncFromServerSilently();
+        return;
+      }
+
+      // 1) ALWAYS load local first (instant UI)
+      final localData = HiveService.getMedications();
+      _allMedications = localData;
+
+      emit(
+        state.copyWith(
+          medications: _filterByTab(localData, state.selectedTab),
+          isLoading: false,
+        ),
+      );
+
+      // 2) Try sync in background (non-blocking UI)
+      _syncFromServerSilently();
+    } catch (e) {
+      emit(state.copyWith(isLoading: false));
     }
-
-    emit(state.copyWith(medications: _filterList(_allMedications)));
   }
 
-  Future<void> loadActiveMedications() async {
-    final result = await _medicineRepo.getActiveMedications();
-    final medications = result.fold(
-      (_) => _allMedications.where(_isMedicationActive).toList(),
-      (items) => items,
-    );
+  // =========================
+  // ADD MEDICATION (OFFLINE-FIRST)
+  // =========================
+  Future<void> addMedication(Medication medication) async {
+    try {
+      final isCaregiverMode = getIt<CaregiverModeCubit>().isManagingPatient;
 
-    _activeMedications = medications;
-    emit(state.copyWith(medications: medications));
-  }
+      if (isCaregiverMode) {
+        final result = await _medicineRepo.addMedicineFromMedication(medication);
 
-  Future<Either<ApiError, String>> addMedication(Medication medication) async {
-    final result = await _medicineRepo.addMedicineFromMedication(medication);
-    if (result.isRight()) {
+        result.fold(
+          (failure) => emit(state.copyWith(error: failure.message)),
+          (_) {
+            final updatedList = [..._allMedications, medication];
+            _allMedications = updatedList;
+
+            emit(
+              state.copyWith(
+                medications: _filterByTab(updatedList, state.selectedTab),
+              ),
+            );
+          },
+        );
+        return;
+      }
+
+      // 1) UPDATE UI IMMEDIATELY (optimistic)
+      final updatedList = [..._allMedications, medication];
+      _allMedications = updatedList;
+
+      emit(
+        state.copyWith(
+          medications: _filterByTab(updatedList, state.selectedTab),
+        ),
+      );
+
+      // 2) SAVE LOCALLY + QUEUE SYNC
       await HiveService.addMedication(medication);
-      await loadMedications();
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
     }
-    return result;
   }
 
+  // =========================
+  // UPDATE MEDICATION
+  // =========================
+  Future<void> updateMedication({
+    required Medication original,
+    required Medication updated,
+  }) async {
+    try {
+      final isCaregiverMode = getIt<CaregiverModeCubit>().isManagingPatient;
+
+      if (isCaregiverMode) {
+        final result = await _medicineRepo.updateMedicineFromMedication(
+          medicationId: original.id,
+          medication: updated,
+        );
+
+        result.fold(
+          (failure) => emit(state.copyWith(error: failure.message)),
+          (_) {
+            final index = _allMedications.indexWhere((m) => m.id == original.id);
+            if (index != -1) {
+              _allMedications[index] = updated;
+            }
+
+            emit(
+              state.copyWith(
+                medications: _filterByTab(_allMedications, state.selectedTab),
+              ),
+            );
+          },
+        );
+        return;
+      }
+
+      final index = _allMedications.indexOf(original);
+
+      if (index != -1) {
+        _allMedications[index] = updated;
+
+        emit(
+          state.copyWith(
+            medications: _filterByTab(_allMedications, state.selectedTab),
+          ),
+        );
+      }
+
+      await HiveService.updateMedication(original: original, updated: updated);
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
+    }
+  }
+
+  // =========================
+  // DELETE MEDICATION
+  // =========================
+  Future<void> deleteMedication(Medication medication) async {
+    try {
+      final isCaregiverMode = getIt<CaregiverModeCubit>().isManagingPatient;
+
+      if (isCaregiverMode) {
+        final result = await _medicineRepo.deleteMedication(
+          medicationId: medication.id,
+        );
+
+        result.fold(
+          (failure) => emit(state.copyWith(error: failure.message)),
+          (_) {
+            _allMedications.removeWhere((m) => m.id == medication.id);
+            emit(
+              state.copyWith(
+                medications: _filterByTab(_allMedications, state.selectedTab),
+              ),
+            );
+          },
+        );
+        return;
+      }
+
+      _allMedications.removeWhere((m) => m.id == medication.id);
+
+      emit(
+        state.copyWith(
+          medications: _filterByTab(_allMedications, state.selectedTab),
+        ),
+      );
+
+      await HiveService.deleteMedication(medication);
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
+    }
+  }
+
+  // =========================
+  // SYNC FROM SERVER (BACKGROUND ONLY)
+  // =========================
+  Future<void> _syncFromServerSilently() async {
+    try {
+      final result = await _medicineRepo.getAllMedications();
+      final isCaregiverMode = getIt<CaregiverModeCubit>().isManagingPatient;
+
+      result.fold(
+        (_) {}, // ignore errors silently
+        (serverData) {
+          _allMedications = serverData;
+
+          emit(
+            state.copyWith(
+              medications: _filterByTab(serverData, state.selectedTab),
+            ),
+          );
+
+          if (!isCaregiverMode) {
+            // optional: update local cache
+            HiveService.saveMedications(serverData);
+          }
+        },
+      );
+    } catch (_) {
+      // ignore silently
+    }
+  }
+
+  // =========================
+  // TAB MANAGEMENT
+  // =========================
   void changeTab(MedicineTab tab) {
     emit(state.copyWith(selectedTab: tab));
 
-    if (tab == MedicineTab.active) {
-      loadActiveMedications();
-      return;
-    }
+    emit(state.copyWith(medications: _filterByTab(_allMedications, tab)));
+  }
 
-    filterMedications();
+  // =========================
+  // FILTERING
+  // =========================
+  List<Medication> _filterByTab(List<Medication> all, MedicineTab tab) {
+    switch (tab) {
+      case MedicineTab.all:
+        return all;
+
+      case MedicineTab.active:
+        return all.where((m) => m.isActive).toList();
+
+      case MedicineTab.chronic:
+        return all.where((m) => m.isChronic).toList();
+    }
   }
 
   void toggleFabMenu() {
     emit(state.copyWith(isFabExpanded: !state.isFabExpanded));
   }
 
-  void filterMedications() {
-    emit(state.copyWith(medications: _filterList(_allMedications)));
+  Future<String> generateDoctorMedicationAccessToken() async {
+    final result = await _medicineRepo.getDoctorMedicationAccessToken();
+
+    return result.fold(
+      (failure) => throw Exception(failure.message),
+      (token) => token,
+    );
   }
 
-  List<Medication> _filterList(List<Medication> all) {
-    return _filterByTab(all, state.selectedTab);
-  }
+  // =========================
+  // STATS
+  // =========================
+  int get allCount => _allMedications.length;
 
-  static List<Medication> _filterByTab(List<Medication> all, MedicineTab tab) {
-    return switch (tab) {
-      MedicineTab.all => all,
-      MedicineTab.active => all.where(_isMedicationActive).toList(),
-      MedicineTab.chronic => all.where((m) => m.isChronic).toList(),
-    };
-  }
+  int get activeCount => _allMedications.where((m) => m.isActive).length;
 
-  static bool _isMedicationActive(Medication medication) {
-    return medication.isActive;
-  }
+  int get chronicCount => _allMedications.where((m) => m.isChronic).length;
 }

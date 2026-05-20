@@ -5,14 +5,10 @@ import 'package:medi/features/patient/features/add_medication/data/models/medica
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/medicine_status_badge.dart';
 
 class MedicineStockRow extends StatelessWidget {
-  const MedicineStockRow({
-    super.key,
-    required this.stock,
-    required this.stockStatus,
-  });
+  const MedicineStockRow({super.key, required this.stock, this.stockStatus});
 
   final int stock;
-  final MedicationStockStatus stockStatus;
+  final MedicationStockStatus? stockStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +26,7 @@ class MedicineStockRow extends StatelessWidget {
           style: AppStyles.secondary12400.copyWith(fontSize: AppSizes.sp12),
         ),
         SizedBox(width: AppSizes.w8),
-        MedicineStatusBadge(status: stockStatus),
+        if (stockStatus != null) ...[MedicineStatusBadge(status: stockStatus!)],
       ],
     );
   }

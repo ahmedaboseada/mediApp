@@ -4,16 +4,22 @@ import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/health_measurements/data/models/measurement_model.dart';
 
 class MeasurementGridItem extends StatelessWidget {
-  const MeasurementGridItem({super.key, required this.measurement});
+  const MeasurementGridItem({
+    this.backgroundColor,
+    this.textColor,
+    super.key,
+    required this.measurement,
+  });
 
   final MeasurementModel measurement;
-
+  final Color? backgroundColor;
+  final Color? textColor;
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(AppSizes.w12),
       decoration: BoxDecoration(
-        color: AppColors.cardBackground,
+        color: backgroundColor ?? AppColors.cardBackground,
         borderRadius: BorderRadius.circular(AppSizes.r20),
       ),
       child: Column(
@@ -53,7 +59,7 @@ class MeasurementGridItem extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: AppColors.whiteText,
+                              color: textColor ?? AppColors.whiteText,
                               fontSize: AppSizes.sp12,
                               fontWeight: FontWeight.w600,
                             ),
@@ -67,7 +73,7 @@ class MeasurementGridItem extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.end,
                       style: TextStyle(
-                        color: AppColors.whiteText,
+                        color: textColor ?? AppColors.whiteText,
                         fontSize: AppSizes.sp14,
                         fontWeight: FontWeight.w700,
                       ),
@@ -85,7 +91,9 @@ class MeasurementGridItem extends StatelessWidget {
                 measurement.title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: AppStyles.white14500,
+                style: AppStyles.white14500.copyWith(
+                  color: textColor ?? AppColors.whiteText,
+                ),
               ),
             ],
           ),

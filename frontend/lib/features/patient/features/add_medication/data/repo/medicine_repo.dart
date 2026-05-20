@@ -69,4 +69,6 @@ abstract class MedicineRepo {
     required String text,
     required String level,
   });
+
+  Future<Either<ApiError, String>> getDoctorMedicationAccessToken();
 }

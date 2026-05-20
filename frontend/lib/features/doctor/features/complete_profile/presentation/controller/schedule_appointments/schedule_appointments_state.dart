@@ -1,6 +1,18 @@
 import 'package:flutter/material.dart';
 
+enum SubmitStatus { idle, loading, success, error }
+
 class ScheduleAppointmentsState {
+  final List<String> workingDays;
+  final TimeOfDay? startTime;
+  final TimeOfDay? endTime;
+  final int? consultationDuration;
+  final List<String> appointmentTypes;
+  final int? maxDailyPatients;
+
+  final SubmitStatus status;
+  final String? errorMessage;
+
   const ScheduleAppointmentsState({
     this.workingDays = const [],
     this.startTime,
@@ -8,22 +20,13 @@ class ScheduleAppointmentsState {
     this.consultationDuration,
     this.appointmentTypes = const [],
     this.maxDailyPatients,
-    this.isSubmitting = false,
-    this.isSuccess = false,
-    this.showFieldErrors = false,
+    this.status = SubmitStatus.idle,
     this.errorMessage,
   });
 
-  final List<String> workingDays;
-  final TimeOfDay? startTime;
-  final TimeOfDay? endTime;
-  final int? consultationDuration;
-  final List<String> appointmentTypes;
-  final int? maxDailyPatients;
-  final bool isSubmitting;
-  final bool isSuccess;
-  final bool showFieldErrors;
-  final String? errorMessage;
+  bool get isLoading => status == SubmitStatus.loading;
+  bool get isSuccess => status == SubmitStatus.success;
+  bool get isError => status == SubmitStatus.error;
 
   ScheduleAppointmentsState copyWith({
     List<String>? workingDays,
@@ -32,11 +35,8 @@ class ScheduleAppointmentsState {
     int? consultationDuration,
     List<String>? appointmentTypes,
     int? maxDailyPatients,
-    bool? isSubmitting,
-    bool? isSuccess,
-    bool? showFieldErrors,
+    SubmitStatus? status,
     String? errorMessage,
-    bool clearError = false,
   }) {
     return ScheduleAppointmentsState(
       workingDays: workingDays ?? this.workingDays,
@@ -45,10 +45,8 @@ class ScheduleAppointmentsState {
       consultationDuration: consultationDuration ?? this.consultationDuration,
       appointmentTypes: appointmentTypes ?? this.appointmentTypes,
       maxDailyPatients: maxDailyPatients ?? this.maxDailyPatients,
-      isSubmitting: isSubmitting ?? this.isSubmitting,
-      isSuccess: isSuccess ?? this.isSuccess,
-      showFieldErrors: showFieldErrors ?? this.showFieldErrors,
-      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      status: status ?? this.status,
+      errorMessage: errorMessage,
     );
   }
 }

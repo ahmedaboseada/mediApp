@@ -10,6 +10,22 @@ class PatientModelAdapter extends TypeAdapter<PatientModel> {
   @override
   final int typeId = 1;
 
+  List<T> _readList<T>(dynamic value) {
+    if (value is List) {
+      return value.whereType<T>().toList();
+    }
+
+    if (value == null) {
+      return <T>[];
+    }
+
+    if (value is T) {
+      return <T>[value];
+    }
+
+    return <T>[];
+  }
+
   @override
   PatientModel read(BinaryReader reader) {
     final numOfFields = reader.readByte();
@@ -17,19 +33,19 @@ class PatientModelAdapter extends TypeAdapter<PatientModel> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return PatientModel(
-      patientId: fields[0] as String,
-      userId: fields[1] as String,
-      chronicConditions: (fields[2] as List).cast<String>(),
-      allergies: (fields[3] as List).cast<String>(),
-      activeIngredients: (fields[4] as List).cast<String>(),
-      longTermMedication: (fields[5] as List).cast<String>(),
-      medications: (fields[6] as List).cast<Medication>(),
-      saveOption: fields[7] as bool,
-      connectedDoctors: (fields[8] as List).cast<String>(),
-      createdAt: fields[9] as String,
-      updatedAt: fields[10] as String,
-      allergyAlerts: fields[11] as bool,
-      reactionToMedication: fields[12] as bool,
+      patientId: fields[0] as String? ?? '',
+      userId: fields[1] as String? ?? '',
+      chronicConditions: _readList<String>(fields[2]),
+      allergies: _readList<String>(fields[3]),
+      activeIngredients: _readList<String>(fields[4]),
+      longTermMedication: _readList<String>(fields[5]),
+      medications: _readList<Medication>(fields[6]),
+      saveOption: fields[7] as bool? ?? false,
+      connectedDoctors: _readList<String>(fields[8]),
+      createdAt: fields[9] as String? ?? '',
+      updatedAt: fields[10] as String? ?? '',
+      allergyAlerts: fields[11] as bool? ?? false,
+      reactionToMedication: fields[12] as bool? ?? false,
       caregiver: fields[13] as CaregiverModel?,
     );
   }

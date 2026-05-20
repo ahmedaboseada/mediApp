@@ -4,19 +4,45 @@ import 'package:flutter_svg/svg.dart';
 import 'package:horizontal_calender_mz/horizontal_calender_mz.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/add_medication/data/repo/medicine_repo.dart';
+import 'package:medi/features/patient/features/home/presentation/controller/schedule/home_schedule_refresh_bus.dart';
 import 'package:medi/features/patient/features/home/presentation/controller/schedule/schedule_cubit.dart';
 
-class YourSchedule extends StatelessWidget {
-  YourSchedule({super.key});
+class YourSchedule extends StatefulWidget {
+  const YourSchedule({super.key});
 
-  final ValueNotifier<DateTime?> _selectedDate = ValueNotifier<DateTime?>(
-    DateTime.now(),
-  );
+  @override
+  State<YourSchedule> createState() => _YourScheduleState();
+}
+
+class _YourScheduleState extends State<YourSchedule> {
+  late final ValueNotifier<DateTime?> _selectedDate;
+  late final ScheduleCubit _scheduleCubit;
+
+  void _handleRefreshSignal() {
+    _scheduleCubit.loadForSelectedDate();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = ValueNotifier<DateTime?>(DateTime.now());
+    _scheduleCubit = ScheduleCubit(getIt<MedicineRepo>())
+      ..loadForSelectedDate();
+    HomeScheduleRefreshBus.signal.addListener(_handleRefreshSignal);
+  }
+
+  @override
+  void dispose() {
+    HomeScheduleRefreshBus.signal.removeListener(_handleRefreshSignal);
+    _selectedDate.dispose();
+    _scheduleCubit.close();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<ScheduleCubit>(
-      create: (_) =>
-          ScheduleCubit(getIt<MedicineRepo>())..loadForSelectedDate(),
+    return BlocProvider<ScheduleCubit>.value(
+      value: _scheduleCubit,
       child: Builder(
         builder: (blocContext) => Card(
           color: const Color(0xFFF3F6FD),
@@ -131,14 +157,14 @@ class _MedicationScheduleCard extends StatelessWidget {
   final ScheduleMedication medication;
   final DateTime selectedDate;
 
-  Future<void> _cancelReminderForPrimaryTime(BuildContext context) async {
+  Future<void> _toggleReminderForPrimaryTime(BuildContext context) async {
     if (medication.primaryTime == '--:--') {
       return;
     }
 
     final errorMessage = await context
         .read<ScheduleCubit>()
-        .cancelPrimaryReminderNotification(medication);
+        .togglePrimaryReminderNotification(medication);
 
     if (!context.mounted) {
       return;
@@ -249,32 +275,31 @@ class _MedicationScheduleCard extends StatelessWidget {
           if (medication.isCritical) SizedBox(height: AppSizes.h4),
           Row(
             children: [
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppSizes.w8,
-                  vertical: AppSizes.h4,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.lightBackground,
-                  borderRadius: BorderRadius.circular(AppSizes.r24),
-                  border: Border.all(color: AppColors.surfaceColor, width: 1),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      constraints: BoxConstraints(
-                        maxWidth: AppSizes.w24,
-                        maxHeight: AppSizes.h24,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.whiteText,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Center(
-                        child: InkWell(
-                          onTap: () => _cancelReminderForPrimaryTime(context),
-                          borderRadius: BorderRadius.circular(AppSizes.r24),
+              GestureDetector(
+                onTap: () => _toggleReminderForPrimaryTime(context),
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSizes.w8,
+                    vertical: AppSizes.h4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.lightBackground,
+                    borderRadius: BorderRadius.circular(AppSizes.r24),
+                    border: Border.all(color: AppColors.surfaceColor, width: 1),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        constraints: BoxConstraints(
+                          maxWidth: AppSizes.w24,
+                          maxHeight: AppSizes.h24,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.whiteText,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
                           child: Icon(
                             isMuted
                                 ? Icons.volume_off_rounded
@@ -284,13 +309,13 @@ class _MedicationScheduleCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(width: AppSizes.w8),
-                    Text(
-                      medication.primaryTime,
-                      style: AppStyles.primaryDark12400,
-                    ),
-                  ],
+                      SizedBox(width: AppSizes.w8),
+                      Text(
+                        medication.primaryTime,
+                        style: AppStyles.primaryDark12400,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               SizedBox(width: AppSizes.w8),

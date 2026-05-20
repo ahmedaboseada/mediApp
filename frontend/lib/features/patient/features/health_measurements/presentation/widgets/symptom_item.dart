@@ -16,6 +16,7 @@ class SymptomItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFFEEF4FF),
         borderRadius: BorderRadius.circular(AppSizes.r24),
+        border: Border.all(color: const Color(0xFFD1E4FF)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

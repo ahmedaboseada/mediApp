@@ -19,6 +19,8 @@ class AppAssets {
   static const String avatar3 = '${path}person3.png';
   static const String lineEdit = '${path}line_edit.svg';
   static const String calendar = '${path}calendar.svg';
+  static const String dollarCircle = '${path}dollar_circle.svg';
+  static const String timer = '${path}timer.svg';
   static const String chats = '${path}chats.svg';
   static const String connectedDoctors = '${path}connected_doctors.svg';
   static const String profile = '${path}profile.svg';
@@ -49,6 +51,14 @@ class AppAssets {
   static const String chat = '${path}Chat.svg';
   static const String video = '${path}video.svg';
   static const String offline = '${path}offline.svg';
+  static const String paypal = '${path}paypal.svg';
+  static const String card = '${path}card.svg';
+  static const String check = '${path}check.svg';
+  static const String setSos = '${path}setsos.svg';
+  static const String location = '${path}location.svg';
+  static const String sos = '${path}sos.svg';
+  static const String trash = '${path}trash.svg';
+  //assets\images\sos.svg
   // Health measurement icons
   static const String bloodPressureIcon = '${svgPath}blood_pressure.svg';
   static const String bloodSugarIcon = '${svgPath}blood_sugar.svg';
@@ -58,7 +68,7 @@ class AppAssets {
   static const String addSymptom = '${path}add_symptom.svg';
 
   // Medicine item icons
-  //syringe.svg
+  //syringe.svgassets/images/syringe.svg
   static const String syringe = '${path}syringe.svg';
   static const String heartRate = '${path}heartrate.svg';
   static const String injection = '${path}injection.png';
@@ -70,6 +80,7 @@ class AppAssets {
   static const String medicineCream = '${path}cream.svg';
   static const String medicineOintment = '${path}ointment.svg';
   static const String medicineInhaler = '${path}inhaler.svg';
+  static const String meds = '${path}meds.svg';
 
   static String getMedicineIcon(dynamic medicationType) {
     // Import required: import 'package:medi/features/patient/features/add_medication/presentation/models/medication.dart';

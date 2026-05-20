@@ -1,6 +1,6 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:dartz/dartz.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 import 'package:medi/features/patient/features/add_medication/data/repo/medicine_repo.dart';
@@ -84,18 +84,37 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
     String? time,
   }) async {
     final previousTaken = state.isTaken;
-    _emitIfOpen(state.copyWith(isTaken: value));
-
-    if (state.medication.id.trim().isEmpty) {
-      return Right('Medication status updated locally');
-    }
+    final previousScheduleTimes = state.scheduleTimes;
+    final previousNextScheduleTime = state.nextScheduleTime;
 
     final selectedTime = (time ?? state.nextScheduleTime).trim();
     if (selectedTime.isEmpty) {
-      _emitIfOpen(state.copyWith(isTaken: previousTaken));
       return Left(
         ServerFailure('Unable to determine the next medication time'),
       );
+    }
+
+    final baseTimes = state.scheduleTimes.isNotEmpty
+        ? state.scheduleTimes
+        : _fallbackScheduleTimes();
+    final updatedScheduleTimes = baseTimes.map((entry) {
+      if (entry.time.trim() == selectedTime) {
+        return entry.copyWith(taken: value);
+      }
+      return entry;
+    }).toList();
+    final nextUntaken = _nextUntakenEntry(updatedScheduleTimes);
+
+    _emitIfOpen(
+      state.copyWith(
+        isTaken: value,
+        scheduleTimes: updatedScheduleTimes,
+        nextScheduleTime: nextUntaken?.time ?? selectedTime,
+      ),
+    );
+
+    if (state.medication.id.trim().isEmpty) {
+      return Right('Medication status updated locally');
     }
 
     final now = DateTime.now();
@@ -110,7 +129,13 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
     );
 
     if (result.isLeft()) {
-      _emitIfOpen(state.copyWith(isTaken: previousTaken));
+      _emitIfOpen(
+        state.copyWith(
+          isTaken: previousTaken,
+          scheduleTimes: previousScheduleTimes,
+          nextScheduleTime: previousNextScheduleTime,
+        ),
+      );
       return result;
     }
     return result;
@@ -127,24 +152,11 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
       return Left(ServerFailure('Please enter a valid stock amount'));
     }
 
-    final previous = state.medication;
     final updatedStock = state.stock + amount;
     final updated = state.medication.copyWith(
       stock: updatedStock,
-      currentStock: updatedStock.toString(),
       stockStatus: _statusForStock(updatedStock),
     );
-
-    final medicationId = previous.id.trim();
-    if (medicationId.isNotEmpty) {
-      final result = await _medicineRepo.updateMedicineFromMedication(
-        medicationId: medicationId,
-        medication: updated,
-      );
-      if (result.isLeft()) {
-        return result;
-      }
-    }
 
     _emitIfOpen(state.copyWith(medication: updated));
     await _persistMedication(updated);
@@ -152,10 +164,17 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
   }
 
   Future<void> _persistMedication(Medication updated) async {
-    await HiveService.updateMedication(
-      original: _sourceMedication,
-      updated: updated,
-    );
+    if (getIt<CaregiverModeCubit>().isManagingPatient) {
+      await _medicineRepo.updateMedicineFromMedication(
+        medicationId: _sourceMedication.id,
+        medication: updated,
+      );
+    } else {
+      await HiveService.updateMedication(
+        original: _sourceMedication,
+        updated: updated,
+      );
+    }
     _sourceMedication = updated;
   }
 
@@ -181,22 +200,29 @@ class MedicineInfoCubit extends Cubit<MedicineInfoState> {
     );
   }
 
+  // 1) Cancel notifications
   Future<Either<ApiError, String>> deleteMedication() async {
-    if (_sourceMedication.id.trim().isNotEmpty) {
-      final result = await _medicineRepo.deleteMedication(
-        medicationId: _sourceMedication.id,
-      );
-      if (result.isLeft()) {
-        return result;
-      }
-    }
-
     await LocalNotificationService().cancelMedicationReminders(
       _sourceMedication,
     );
-    await HiveService.deleteMedication(_sourceMedication);
+
+    // 2) Delete locally or from server depending on the active mode.
+    if (getIt<CaregiverModeCubit>().isManagingPatient) {
+      final result = await _medicineRepo.deleteMedication(
+        medicationId: _sourceMedication.id,
+      );
+
+      if (result.isLeft()) {
+        return result;
+      }
+    } else {
+      await HiveService.deleteMedication(_sourceMedication);
+    }
+
+    // 3) Update UI
     _emitIfOpen(state.copyWith(isDeleted: true));
     _emitIfOpen(state.copyWith(isDeleted: false));
+
     return const Right('Medication deleted successfully');
   }
 

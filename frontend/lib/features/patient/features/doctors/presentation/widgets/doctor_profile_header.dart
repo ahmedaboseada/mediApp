@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/doctors/data/models/doctor_summary.dart';
 import 'package:medi/features/patient/features/doctors/presentation/widgets/zigzag_bottom_clipper.dart';
@@ -11,7 +12,7 @@ class DoctorProfileHeader extends StatelessWidget {
     this.onInsightsTap,
   });
 
-  final DoctorSummary doctor;
+  final Doctordata doctor;
   final VoidCallback? onBack;
   final VoidCallback? onInsightsTap;
 
@@ -55,17 +56,20 @@ class DoctorProfileHeader extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          doctor.specialty,
+                          doctor.specialization,
                           style: AppStyles.tertiary14500.copyWith(
                             color: AppColors.quaternaryText,
                           ),
                         ),
                         SizedBox(height: AppSizes.h4),
                         Text(
-                          doctor.name.replaceAll('\n', ' '),
+                          "${doctor.user.firstName} ${doctor.user.lastName}"
+                              .replaceAll('\n', ' '),
                           style: AppStyles.black18500.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                         SizedBox(height: AppSizes.h8),
                         Row(
@@ -76,21 +80,24 @@ class DoctorProfileHeader extends StatelessWidget {
                               color: AppColors.primaryText,
                             ),
                             SizedBox(width: AppSizes.w8),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: AppSizes.w10,
-                                vertical: AppSizes.h6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.surfaceColor,
-                                borderRadius: BorderRadius.circular(
-                                  AppSizes.r20,
+                            Flexible(
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: AppSizes.w10,
+                                  vertical: AppSizes.h6,
                                 ),
-                              ),
-                              child: Text(
-                                'ID:32157832',
-                                style: AppStyles.tertiary40012.copyWith(
-                                  color: AppColors.secondaryText,
+                                decoration: BoxDecoration(
+                                  color: AppColors.surfaceColor,
+                                  borderRadius: BorderRadius.circular(
+                                    AppSizes.r20,
+                                  ),
+                                ),
+                                child: Text(
+                                  'ID:${doctor.id}',
+                                  style: AppStyles.tertiary40012.copyWith(
+                                    color: AppColors.secondaryText,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ),
@@ -116,7 +123,7 @@ class DoctorProfileHeader extends StatelessWidget {
                               ),
                               SizedBox(width: AppSizes.w4),
                               Text(
-                                'Rating ${doctor.rating.toStringAsFixed(1)}',
+                                'Rating ${doctor.reviewsCount.toStringAsFixed(1)}',
                                 style: AppStyles.white12400.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -131,11 +138,28 @@ class DoctorProfileHeader extends StatelessWidget {
                 SizedBox(width: AppSizes.w8),
                 Hero(
                   tag: doctor.id,
-                  child: Image.asset(
-                    doctor.imageAsset,
-                    height: AppSizes.h170,
-                    fit: BoxFit.contain,
-                  ),
+                  child:
+                      (doctor.user.profilePicture.isNotEmpty &&
+                          doctor.user.profilePicture.startsWith('http'))
+                      ? CachedNetworkImage(
+                          imageUrl: doctor.user.profilePicture,
+                          height: AppSizes.h170,
+                          fit: BoxFit.contain,
+                          placeholder: (context, url) =>
+                              const Center(child: CircularProgressIndicator()),
+                          errorWidget: (context, url, error) => Image.asset(
+                            AppAssets.avatar1,
+                            height: AppSizes.h170,
+                            fit: BoxFit.contain,
+                          ),
+                        )
+                      : Image.asset(
+                          doctor.user.profilePicture.isNotEmpty
+                              ? doctor.user.profilePicture
+                              : AppAssets.avatar1,
+                          height: AppSizes.h170,
+                          fit: BoxFit.contain,
+                        ),
                 ),
               ],
             ),

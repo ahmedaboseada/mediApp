@@ -49,6 +49,7 @@ class _AccountInformationScreenState extends State<AccountInformationScreen> {
     _lastNameController.text = user.lastName;
     _emailController.text = user.email;
     _phoneController.text = user.phone ?? '';
+    _selectedSpecialization = doctor?.specialization;
 
     setState(() {
       _selectedGender = user.gender;
@@ -215,6 +216,10 @@ class _AccountInformationScreenState extends State<AccountInformationScreen> {
                               ),
                               SizedBox(height: AppSizes.h24),
                               QTextField(
+                                initialSelectedValues:
+                                    _selectedSpecialization != null
+                                    ? [_selectedSpecialization!]
+                                    : [],
                                 onSelectionChange: (value) {
                                   if (value.isNotEmpty) {
                                     setState(() {

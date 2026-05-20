@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'package:hive_flutter/hive_flutter.dart';
+
 import 'package:alarm/alarm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -5,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:medi/core/widgets/alarm_notification.dart';
 import 'package:medi/core/services/alarm_service.dart';
+import 'package:medi/core/services/hive_service.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 import 'package:medi/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,6 +38,8 @@ Future<void> onAlarmFired(AlarmSettings alarmSettings) async {
     fullScreenIntent: true,
     category: AndroidNotificationCategory.alarm,
     ongoing: true,
+    autoCancel: false,
+    timeoutAfter: 14400000,
     sound: const RawResourceAndroidNotificationSound('pill_shaking'),
     enableVibration: true,
     enableLights: true,
@@ -69,6 +75,14 @@ class LocalNotificationService {
   static const String _storagePrefix = 'medicine_notification_ids_';
   static const String _criticalStoragePrefix =
       'medicine_critical_notification_ids_';
+  static const String _alarmStoragePrefix = 'medicine_alarm_notification_ids_';
+  static const String _appointmentRemindersPrefix = 'appointment_remind_me_';
+  // static const String _earlyAlertStoragePrefix = 'medicine_early_alert_ids_';
+  static const String _dndPromptShownKey = 'dnd_prompt_shown_v1';
+  static const String _batteryPromptShownKey = 'battery_prompt_shown_v1';
+  static const MethodChannel _androidSystemChannel = MethodChannel(
+    'medi/system_settings',
+  );
   static const int _maxScheduledNotifications = 500;
   static bool _isInitialized = false;
 
@@ -78,7 +92,13 @@ class LocalNotificationService {
         _channelName,
         channelDescription: _channelDescription,
         importance: Importance.max,
-        priority: Priority.high,
+        priority: Priority.max,
+        category: AndroidNotificationCategory.reminder,
+        ongoing: true,
+        autoCancel: false,
+        timeoutAfter: 21600000,
+        visibility: NotificationVisibility.public,
+        enableVibration: true,
       );
 
   static final NotificationDetails _notificationDetails = NotificationDetails(
@@ -86,8 +106,7 @@ class LocalNotificationService {
   );
 
   @pragma('vm:entry-point')
-  static void onTap(NotificationResponse notificationResponse) {
-    // Notification tap handler.
+  static void onTap(NotificationResponse notificationResponse) async {
     navigatorKey.currentState?.push(
       MaterialPageRoute(
         builder: (_) => AlarmScreen(
@@ -98,8 +117,7 @@ class LocalNotificationService {
   }
 
   @pragma('vm:entry-point')
-  static void onBackgroundTap(NotificationResponse notificationResponse) {
-    // Background notification tap handler.
+  static void onBackgroundTap(NotificationResponse notificationResponse) async {
     navigatorKey.currentState?.push(
       MaterialPageRoute(
         builder: (_) => AlarmScreen(
@@ -139,6 +157,7 @@ class LocalNotificationService {
     await androidImplementation?.requestNotificationsPermission();
     await androidImplementation?.requestExactAlarmsPermission();
     await androidImplementation?.requestFullScreenIntentPermission();
+    await _requestAndroidReliabilityPermissions();
 
     // Create notification channels
     await androidImplementation?.createNotificationChannel(
@@ -165,6 +184,119 @@ class LocalNotificationService {
     );
 
     _isInitialized = true;
+  }
+
+  static void saveAppointmentRemindMe(String appointmentId, bool value) {
+    if (!Hive.isBoxOpen('settingsBox')) return;
+    final settings = Hive.box('settingsBox');
+    settings.put('$_appointmentRemindersPrefix$appointmentId', value);
+  }
+
+  static bool getAppointmentRemindMe(String appointmentId) {
+    if (!Hive.isBoxOpen('settingsBox')) return false;
+    final settings = Hive.box('settingsBox');
+    return settings.get(
+          '$_appointmentRemindersPrefix$appointmentId',
+          defaultValue: false,
+        )
+        as bool;
+  }
+
+  static Future<void> scheduleAppointmentReminder(
+    String appointmentId,
+    String doctorName,
+    DateTime date,
+    String time,
+  ) async {
+    await init();
+    final parsedTime = _parseReminderTime(time);
+    if (parsedTime == null) return;
+
+    final scheduledDateTime = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      parsedTime.$1,
+      parsedTime.$2,
+    );
+
+    // Don't schedule if it's in the past
+    if (!scheduledDateTime.isAfter(DateTime.now())) return;
+
+    final id = appointmentId.hashCode.abs();
+
+    final settings = AlarmSettings(
+      id: id,
+      dateTime: scheduledDateTime,
+      assetAudioPath: 'assets/sounds/pill_shaking.mp3',
+      loopAudio: true,
+      vibrate: true,
+      warningNotificationOnKill: false,
+      androidFullScreenIntent: true,
+      androidStopAlarmOnTermination: false,
+      volumeSettings: VolumeSettings.fade(
+        volume: 0.9,
+        fadeDuration: const Duration(seconds: 5),
+        volumeEnforced: true,
+      ),
+      notificationSettings: NotificationSettings(
+        title: 'APPOINTMENT: Dr. $doctorName',
+        body: 'Your appointment is starting now at $time',
+        stopButton: 'Stop alarm',
+        icon: 'notification_icon',
+      ),
+    );
+
+    await Alarm.set(alarmSettings: settings);
+  }
+
+  static Future<void> cancelAppointmentReminder(String appointmentId) async {
+    final id = appointmentId.hashCode.abs();
+    await Alarm.stop(id);
+    await flutterLocalNotificationsPlugin.cancel(id: id);
+  }
+
+  static Future<void> _requestAndroidReliabilityPermissions() async {
+    if (!Platform.isAndroid) {
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+
+    final dndPromptShown = prefs.getBool(_dndPromptShownKey) ?? false;
+    final batteryPromptShown = prefs.getBool(_batteryPromptShownKey) ?? false;
+
+    try {
+      final hasDndAccess =
+          await _androidSystemChannel.invokeMethod<bool>(
+            'isNotificationPolicyAccessGranted',
+          ) ??
+          false;
+      if (!hasDndAccess && !dndPromptShown) {
+        await _androidSystemChannel.invokeMethod<void>(
+          'openNotificationPolicyAccessSettings',
+        );
+        await prefs.setBool(_dndPromptShownKey, true);
+      }
+    } on PlatformException {
+      // No-op: keep app functional on devices that block this API.
+    }
+
+    try {
+      final ignoringBatteryOptimizations =
+          await _androidSystemChannel.invokeMethod<bool>(
+            'isIgnoringBatteryOptimizations',
+          ) ??
+          false;
+      if (!ignoringBatteryOptimizations && !batteryPromptShown) {
+        await _androidSystemChannel.invokeMethod<void>(
+          'openIgnoreBatteryOptimizationSettings',
+        );
+        await prefs.setBool(_batteryPromptShownKey, true);
+      }
+    } on PlatformException {
+      // No-op: keep app functional on devices that block this API.
+    }
   }
 
   /// Debug utility to print all scheduled reminders and their fire times.
@@ -305,25 +437,30 @@ class LocalNotificationService {
     DateTime time,
     int id,
     Set<int>? knownActiveIds,
+    bool isCritical,
   ) async {
     final settings = AlarmSettings(
       id: id,
       dateTime: time,
-      assetAudioPath: 'assets/sounds/pill_shaking.mp3',
-      loopAudio: true,
+      //assetAudioPath: 'assets/sounds/pill_shaking.mp3',
+      loopAudio: isCritical,
       vibrate: true,
       warningNotificationOnKill: false,
-      androidFullScreenIntent: true,
+      androidFullScreenIntent: isCritical,
       androidStopAlarmOnTermination: false,
-      volumeSettings: VolumeSettings.fade(
-        volume: 0.8,
-        fadeDuration: const Duration(seconds: 5),
-        volumeEnforced: true,
-      ),
+      volumeSettings: isCritical
+          ? VolumeSettings.fade(
+              volume: 0.9,
+              fadeDuration: const Duration(seconds: 5),
+              volumeEnforced: true,
+            )
+          : const VolumeSettings.fixed(volume: 0.9, volumeEnforced: true),
       notificationSettings: NotificationSettings(
-        title: 'CRITICAL: ${medication.name}',
+        title: isCritical
+            ? 'CRITICAL: ${medication.name}'
+            : 'Medicine Reminder',
         body: 'Time to take your medicine',
-        stopButton: 'Stop alarm',
+        stopButton: isCritical ? 'Stop alarm' : 'Dismiss',
         icon: 'notification_icon',
       ),
     );
@@ -341,6 +478,9 @@ class LocalNotificationService {
     await init();
     await cancelMedicationReminders(medication);
 
+    // Skip scheduling if notifications are globally disabled
+    if (!HiveService.getNotificationsEnabled()) return;
+
     final reminderTimes = _buildReminderDateTimes(
       medication,
       now: DateTime.now(),
@@ -351,8 +491,10 @@ class LocalNotificationService {
 
     final storageKey = _storageKeyForMedication(medication);
     final criticalStorageKey = _criticalStorageKeyForMedication(medication);
+    final alarmStorageKey = _alarmStorageKeyForMedication(medication);
     final scheduledIds = <String>[];
     final criticalIds = <String>[];
+    final alarmBackedIds = <String>[];
     final activeAlarms = await _alarmService.getActiveAlarms();
     final knownActiveIds = activeAlarms.map((alarm) => alarm.id).toSet();
 
@@ -378,14 +520,30 @@ class LocalNotificationService {
             reminderTime,
             id,
             knownActiveIds,
+            true,
           );
           criticalIds.add(id.toString());
+          alarmBackedIds.add(id.toString());
         } on MissingPluginException {
-          // Fallback to local notification path when alarm plugin is unavailable.
+          await scheduleWithLocalNotifications(medication, reminderTime, id);
+        } on PlatformException {
           await scheduleWithLocalNotifications(medication, reminderTime, id);
         }
       } else {
-        await scheduleWithLocalNotifications(medication, reminderTime, id);
+        try {
+          await scheduleWithAlarmPackage(
+            medication,
+            reminderTime,
+            id,
+            knownActiveIds,
+            false,
+          );
+          alarmBackedIds.add(id.toString());
+        } on MissingPluginException {
+          await scheduleWithLocalNotifications(medication, reminderTime, id);
+        } on PlatformException {
+          await scheduleWithLocalNotifications(medication, reminderTime, id);
+        }
       }
     }
 
@@ -395,6 +553,11 @@ class LocalNotificationService {
       await prefs.setStringList(criticalStorageKey, criticalIds);
     } else {
       await prefs.remove(criticalStorageKey);
+    }
+    if (alarmBackedIds.isNotEmpty) {
+      await prefs.setStringList(alarmStorageKey, alarmBackedIds);
+    } else {
+      await prefs.remove(alarmStorageKey);
     }
   }
 
@@ -411,6 +574,7 @@ class LocalNotificationService {
     final prefs = await SharedPreferences.getInstance();
     final storageKey = _storageKeyForMedication(medication);
     final criticalStorageKey = _criticalStorageKeyForMedication(medication);
+    final alarmStorageKey = _alarmStorageKeyForMedication(medication);
     final ids =
         prefs
             .getStringList(storageKey)
@@ -427,16 +591,26 @@ class LocalNotificationService {
         const <int>{};
     final shouldTreatAllAsCritical =
         medication.isCriticalMode && criticalIds.isEmpty;
+    final alarmIds =
+        prefs
+            .getStringList(alarmStorageKey)
+            ?.map(int.tryParse)
+            .whereType<int>()
+            .toSet() ??
+        const <int>{};
 
     for (final id in ids) {
       await flutterLocalNotificationsPlugin.cancel(id: id);
-      if (shouldTreatAllAsCritical || criticalIds.contains(id)) {
+      if (shouldTreatAllAsCritical ||
+          criticalIds.contains(id) ||
+          alarmIds.contains(id)) {
         await _alarmService.cancelAlarm(id);
       }
     }
 
     await prefs.remove(storageKey);
     await prefs.remove(criticalStorageKey);
+    await prefs.remove(alarmStorageKey);
   }
 
   Future<bool> cancelSingleReminderByTime({
@@ -467,6 +641,7 @@ class LocalNotificationService {
 
     final storageKey = '$_storagePrefix$remoteId';
     final criticalStorageKey = '$_criticalStoragePrefix$remoteId';
+    final alarmStorageKey = '$_alarmStoragePrefix$remoteId';
     final id = _notificationIdFromSeed(storageKey, scheduledDateTime);
 
     final prefs = await SharedPreferences.getInstance();
@@ -485,18 +660,159 @@ class LocalNotificationService {
       await prefs.setStringList(criticalStorageKey, criticalIds);
     }
 
-    await flutterLocalNotificationsPlugin.cancel(id: id);
-    if (isCritical) {
-      await _alarmService.cancelAlarm(id);
+    final alarmIds = (prefs.getStringList(alarmStorageKey) ?? const <String>[])
+        .where((value) => value != id.toString())
+        .toList();
+    if (alarmIds.isEmpty) {
+      await prefs.remove(alarmStorageKey);
+    } else {
+      await prefs.setStringList(alarmStorageKey, alarmIds);
     }
 
+    await flutterLocalNotificationsPlugin.cancel(id: id);
+
+    //   await _alarmService.cancelAlarm(id);
+
+    final alarms = await Alarm.getAlarms();
+
+    for (final alarm in alarms) {
+      if (alarm.dateTime.isAtSameMomentAs(scheduledDateTime)) {
+        await Alarm.stop(alarm.id);
+      }
+    }
     return true;
+  }
+
+  Future<bool> restoreSingleReminderByTime({
+    required String medicationId,
+    required String medicationName,
+    required DateTime date,
+    required String time,
+    required bool isCritical,
+  }) async {
+    final remoteId = medicationId.trim();
+    if (remoteId.isEmpty) {
+      return false;
+    }
+
+    final parsed = _parseReminderTime(time);
+    if (parsed == null) {
+      return false;
+    }
+
+    final scheduledDateTime = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      parsed.$1,
+      parsed.$2,
+    );
+
+    if (!scheduledDateTime.isAfter(DateTime.now())) {
+      return false;
+    }
+
+    await init();
+
+    final storageKey = '$_storagePrefix$remoteId';
+    final criticalStorageKey = '$_criticalStoragePrefix$remoteId';
+    final alarmStorageKey = '$_alarmStoragePrefix$remoteId';
+    final id = _notificationIdFromSeed(storageKey, scheduledDateTime);
+
+    await _alarmService.cancelAlarm(id);
+    final scheduled = await _alarmService.scheduleAlarm(
+      settings: AlarmSettings(
+        id: id,
+        dateTime: scheduledDateTime,
+        assetAudioPath: 'assets/sounds/pill_shaking.mp3',
+        loopAudio: isCritical,
+        vibrate: isCritical,
+        warningNotificationOnKill: false,
+        androidFullScreenIntent: isCritical,
+        androidStopAlarmOnTermination: false,
+        volumeSettings: isCritical
+            ? VolumeSettings.fade(
+                volume: 0.8,
+                fadeDuration: const Duration(seconds: 5),
+                volumeEnforced: true,
+              )
+            : const VolumeSettings.fixed(volume: 0.3, volumeEnforced: false),
+        notificationSettings: NotificationSettings(
+          title: isCritical ? 'CRITICAL: $medicationName' : 'Medicine Reminder',
+          body: 'Time to take your medicine',
+          stopButton: isCritical ? 'Stop alarm' : 'Dismiss',
+          icon: 'notification_icon',
+        ),
+      ),
+      skipDuplicateCheck: true,
+    );
+    if (!scheduled) {
+      if (isCritical) {
+        return false;
+      }
+
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        id: id,
+        title: 'Medicine Reminder',
+        body: 'It\'s time to take $medicationName.',
+        scheduledDate: tz.TZDateTime.from(scheduledDateTime, tz.local),
+        notificationDetails: _notificationDetails,
+        payload: medicationName,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final ids = Set<String>.from(
+      prefs.getStringList(storageKey) ?? const <String>[],
+    )..add(id.toString());
+    await prefs.setStringList(storageKey, ids.toList());
+
+    if (isCritical) {
+      final criticalIds = Set<String>.from(
+        prefs.getStringList(criticalStorageKey) ?? const <String>[],
+      )..add(id.toString());
+      await prefs.setStringList(criticalStorageKey, criticalIds.toList());
+    }
+
+    final alarmIds = Set<String>.from(
+      prefs.getStringList(alarmStorageKey) ?? const <String>[],
+    )..add(id.toString());
+    await prefs.setStringList(alarmStorageKey, alarmIds.toList());
+
+    return true;
+  }
+
+  String _alarmStorageKeyForMedication(Medication medication) {
+    final remoteId = medication.id.trim();
+    if (remoteId.isNotEmpty) {
+      return '$_alarmStoragePrefix$remoteId';
+    }
+
+    final fallbackIdentity = [
+      medication.name,
+      medication.type,
+      medication.frequency,
+      medication.startDate,
+      medication.endDate,
+      medication.reminders.join('|'),
+    ].join('::');
+    return '$_alarmStoragePrefix${fallbackIdentity.hashCode.abs()}';
   }
 
   List<DateTime> _buildReminderDateTimes(
     Medication medication, {
     required DateTime now,
   }) {
+    final frequency = medication.frequency.trim().toLowerCase();
+    if (frequency == 'as needed') {
+      return const <DateTime>[];
+    }
+
+    if (frequency == 'specific') {
+      return _buildSpecificReminderDateTimes(medication, now: now);
+    }
+
     final reminderMinutes =
         medication.reminders
             .map(_parseMinutesSinceMidnight)
@@ -506,11 +822,6 @@ class LocalNotificationService {
           ..sort();
 
     if (reminderMinutes.isEmpty) {
-      return const <DateTime>[];
-    }
-
-    final frequency = medication.frequency.trim().toLowerCase();
-    if (frequency == 'as needed') {
       return const <DateTime>[];
     }
 
@@ -549,7 +860,92 @@ class LocalNotificationService {
     }
 
     scheduled.sort();
-    return scheduled.take(_maxScheduledNotifications).toList();
+    final limitedSchedule = scheduled.take(_maxScheduledNotifications).toList();
+
+    // If early voice alerts are enabled, add 15-minute-early entries
+    if (HiveService.getEarlyVoiceAlerts()) {
+      final earlyAlerts = <DateTime>[];
+      for (final time in List<DateTime>.from(limitedSchedule)) {
+        final earlyTime = time.subtract(const Duration(minutes: 15));
+        if (earlyTime.isAfter(now)) {
+          earlyAlerts.add(earlyTime);
+        }
+      }
+      limitedSchedule.addAll(earlyAlerts);
+      limitedSchedule.sort();
+    }
+
+    return limitedSchedule;
+  }
+
+  List<DateTime> _buildSpecificReminderDateTimes(
+    Medication medication, {
+    required DateTime now,
+  }) {
+    final reminderMinutes =
+        medication.specificSchedule
+            .expand((entry) {
+              final rawTimes = entry['times'];
+              final times = rawTimes is List
+                  ? rawTimes.whereType<String>()
+                  : const <String>[];
+              return times.map(_parseMinutesSinceMidnight).whereType<int>();
+            })
+            .toSet()
+            .toList()
+          ..sort();
+
+    final specificDates = medication.specificSchedule
+        .map(
+          (entry) =>
+              _parseDate((entry['day'] ?? entry['date'] ?? '').toString()),
+        )
+        .whereType<DateTime>()
+        .toList();
+
+    if (specificDates.isEmpty || reminderMinutes.isEmpty) {
+      final fallbackDate = _parseDate(medication.startDate);
+      if (fallbackDate == null) {
+        return const <DateTime>[];
+      }
+      specificDates.add(fallbackDate);
+    }
+
+    final scheduled = <DateTime>[];
+    for (final date in specificDates) {
+      for (final minute in reminderMinutes) {
+        final hour = minute ~/ 60;
+        final minutes = minute % 60;
+        final dateTime = DateTime(
+          date.year,
+          date.month,
+          date.day,
+          hour,
+          minutes,
+        );
+        if (dateTime.isAfter(now)) {
+          scheduled.add(dateTime);
+        }
+      }
+    }
+
+    scheduled.sort();
+    final limitedSchedule = scheduled.take(_maxScheduledNotifications).toList();
+
+    // If early voice alerts are enabled, add 15-minute-early entries
+    if (HiveService.getEarlyVoiceAlerts()) {
+      final earlyAlerts = <DateTime>[];
+      for (final time in List<DateTime>.from(limitedSchedule)) {
+        final earlyTime = time.subtract(const Duration(minutes: 15));
+        if (earlyTime.isAfter(now)) {
+          earlyAlerts.add(earlyTime);
+        }
+      }
+      limitedSchedule.addAll(earlyAlerts);
+      limitedSchedule.sort();
+    }
+
+    return limitedSchedule;
   }
 
   List<DateTime> _datesByFrequency({
@@ -579,6 +975,7 @@ class LocalNotificationService {
     }
 
     final dayStep = switch (frequency) {
+      'weekly' => 7,
       'every 2 days' => 2,
       'every 3 days' => 3,
       'every week' => 7,
@@ -643,7 +1040,7 @@ class LocalNotificationService {
     return DateTime(year, month, day);
   }
 
-  int? _parseMinutesSinceMidnight(String raw) {
+  static int? _parseMinutesSinceMidnight(String raw) {
     final value = raw.trim();
     if (value.isEmpty) {
       return null;
@@ -676,7 +1073,7 @@ class LocalNotificationService {
     return (hour * 60) + minute;
   }
 
-  String _storageKeyForMedication(Medication medication) {
+  static String _storageKeyForMedication(Medication medication) {
     final remoteId = medication.id.trim();
     if (remoteId.isNotEmpty) {
       return '$_storagePrefix$remoteId';
@@ -693,7 +1090,7 @@ class LocalNotificationService {
     return '$_storagePrefix${fallbackIdentity.hashCode.abs()}';
   }
 
-  String _criticalStorageKeyForMedication(Medication medication) {
+  static String _criticalStorageKeyForMedication(Medication medication) {
     final remoteId = medication.id.trim();
     if (remoteId.isNotEmpty) {
       return '$_criticalStoragePrefix$remoteId';
@@ -710,17 +1107,17 @@ class LocalNotificationService {
     return '$_criticalStoragePrefix${fallbackIdentity.hashCode.abs()}';
   }
 
-  int _notificationIdFor(String storageKey, DateTime dateTime) {
+  static int _notificationIdFor(String storageKey, DateTime dateTime) {
     final seed = '$storageKey|${dateTime.toIso8601String()}';
     return seed.hashCode & 0x7fffffff;
   }
 
-  int _notificationIdFromSeed(String storageKey, DateTime dateTime) {
+  static int _notificationIdFromSeed(String storageKey, DateTime dateTime) {
     final seed = '$storageKey|${dateTime.toIso8601String()}';
     return seed.hashCode & 0x7fffffff;
   }
 
-  (int, int)? _parseReminderTime(String raw) {
+  static (int, int)? _parseReminderTime(String raw) {
     final value = raw.trim();
     if (value.isEmpty || value == '--:--') {
       return null;

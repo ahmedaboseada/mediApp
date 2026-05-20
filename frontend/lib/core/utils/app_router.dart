@@ -10,12 +10,21 @@ import 'package:medi/features/patient/features/add_medication/presentation/cubit
 import 'package:medi/features/patient/features/add_medication/presentation/screens/daily_symptoms_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/edit_medication_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/medicine_info_screen.dart';
+import 'package:medi/features/patient/features/doctors/data/models/booking_model.dart';
+import 'package:medi/features/patient/features/doctors/data/repo/doctors_repo.dart';
+import 'package:medi/features/patient/features/doctors/presentation/cubits/my_bookings_cubit.dart';
+import 'package:medi/features/patient/features/doctors/presentation/screens/add_doctor_screen.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/screens/add_daily_log_screen.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/screens/health_measurements_screen.dart';
+import 'package:medi/features/patient/features/home/presentation/screens/confirm_emergency_alert_screen.dart';
+import 'package:medi/features/patient/features/home/presentation/screens/set_emergency_contact_dialog.dart';
 import 'package:medi/features/patient/features/profile/presentation/controller/profile/profile_cubit.dart';
+import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
+import 'package:medi/features/patient/features/profile/presentation/cubit/caregiver_hub_cubit.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/account_info_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/caregiver_mode_screen.dart'
     as profile_caregiver;
+import 'package:medi/features/patient/features/chat/presentation/screens/zimkit_conversations_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/change_email_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/change_password_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/choose_method_screen.dart';
@@ -25,12 +34,29 @@ import 'package:medi/features/patient/features/add_medication/presentation/scree
 import 'package:medi/features/patient/features/add_medication/presentation/screens/stock_expiry_screen.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/screens/confirmation_screen.dart';
 import 'package:medi/features/patient/features/doctors/data/models/doctor_summary.dart';
+import 'package:medi/features/patient/features/doctors/data/models/appointment_review_data.dart';
+import 'package:medi/features/patient/features/doctors/presentation/screens/review_summary_screen.dart';
+import 'package:medi/features/patient/features/doctors/presentation/screens/payment_result_screen.dart';
+import 'package:medi/features/patient/features/doctors/presentation/screens/payment_success_screen.dart';
+import 'package:medi/features/patient/features/doctors/presentation/screens/payment_failure_screen.dart';
+import 'package:medi/features/patient/features/doctors/presentation/screens/my_appointment_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/patient_details_screen.dart';
+import 'package:medi/features/patient/features/doctors/presentation/screens/payment_method_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/select_package_screen.dart';
+import 'package:medi/features/patient/features/doctors/presentation/cubits/booking_cubit.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/browse_doctors_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/doctor_profile_screen.dart';
+import 'package:medi/features/patient/features/doctors/presentation/screens/my_bookings_screen.dart';
+import 'package:medi/features/patient/features/doctors/presentation/screens/cancel_booking_screen.dart';
 import 'package:medi/features/patient/features/doctors/presentation/screens/search_doctors_screen.dart';
+import 'package:medi/features/patient/features/profile/presentation/screens/health_passport_screen.dart';
+import 'package:medi/features/patient/features/profile/presentation/screens/export_health_report_screen.dart';
+import 'package:medi/features/patient/features/profile/presentation/screens/medicine_history_screen.dart';
 import 'package:medi/features/patient/features/profile/presentation/screens/profile_screen.dart';
+import 'package:medi/features/patient/features/profile/presentation/screens/symptom_log_screen.dart';
+import 'package:medi/features/doctor/features/patients/data/models/patient_data.dart';
+import 'package:medi/features/patient/features/questionnaire/presentation/screens/take_info_screen.dart';
+import 'package:medi/features/shared/auth/data/models/doctor_model.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/complete_profile/complete_profile_cubit.dart';
 import 'package:medi/features/shared/auth/presentation/cubit/forget_password/forget_password_cubit.dart';
@@ -59,6 +85,7 @@ import 'package:medi/features/doctor/features/complete_profile/presentation/scre
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/upload_license_screen.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/widgets/q_flow.dart';
 import 'package:medi/features/doctor/features/home/presentation/screens/main_layout.dart';
+import 'package:medi/features/doctor/features/patients/presentation/screens/add_patient_screen.dart';
 import 'package:medi/features/doctor/features/settings/presentation/controller/cubit/schedule_cubit.dart';
 import 'package:medi/features/doctor/features/settings/presentation/screens/account_information_screen.dart';
 import 'package:medi/features/doctor/features/settings/presentation/screens/payout_withdrawal_screen.dart';
@@ -75,11 +102,43 @@ import 'package:medi/features/patient/features/questionnaire/presentation/screen
 import 'package:medi/features/patient/features/questionnaire/presentation/screens/invitation_send_screen.dart';
 import 'package:medi/features/patient/features/questionnaire/presentation/screens/q3_caregiver_mode_screen.dart';
 import 'package:medi/features/patient/features/questionnaire/questionnaire_flow.dart';
-import 'package:medi/features/patient/features/questionnaire/presentation/screens/take_info_screen.dart';
 import 'package:medi/features/shared/splash/presentation/screens/select_screen.dart';
 import 'package:medi/features/shared/splash/presentation/screens/onboarding_screen.dart';
 import 'package:medi/features/shared/splash/presentation/screens/splash_screen.dart';
 import 'package:medi/main.dart';
+
+class KeyboardDismissObserver extends NavigatorObserver {
+  void _dismissKeyboard() {
+    FocusManager.instance.primaryFocus?.unfocus();
+  }
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    _dismissKeyboard();
+    super.didPush(route, previousRoute);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    _dismissKeyboard();
+    super.didPop(route, previousRoute);
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    _dismissKeyboard();
+    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+  }
+}
+
+bool _fromCaregiverMode(GoRouterState state) {
+  final extra = state.extra;
+  if (extra is bool) {
+    return extra;
+  }
+
+  return state.uri.queryParameters['fromCaregiverMode'] == 'true';
+}
 
 class AppRouter {
   // ========== SHARED ROUTES ==========
@@ -131,6 +190,22 @@ class AppRouter {
   static const String doctorBookAppointmentScreen = '/doctors/profile/book';
   static const String patientDetailsScreen =
       '/doctors/profile/book/patient-details';
+  static const String patientPaymentMethodScreen =
+      '/doctors/profile/book/patient-details/payment-method';
+  static const String patientReviewSummaryScreen =
+      '/doctors/profile/book/patient-details/payment-method/review-summary';
+  static const String patientPaymentFailureScreen = '/payment-failure';
+  static const String patientPaymentReturnScreen = '/payment-return';
+  static const String patientPaymentSuccessScreen =
+      '/doctors/profile/book/patient-details/payment-method/review-summary/success';
+  static const String patientMyAppointmentScreen =
+      '/doctors/profile/book/patient-details/payment-method/review-summary/success/my-appointment';
+  static const String patientCancelBookingScreen = '/doctors/cancel-booking';
+  static const String patientAddDoctorScreen = '/patient/add-doctor';
+  static const String symptomLogScreen = '/health/symptom-log';
+  static const String exportHealthReportScreen = '/health/export-report';
+  static const String exportHealthPassportScreen = '/health/export-passport';
+  static const String medicineHistoryScreen = '/health/medicine-history';
   // ========== DOCTOR ROUTES ==========
   static const String doctorLogin = '/login/doctor';
   static const String doctorSignUpScreen = '/signUp/doctor';
@@ -147,12 +222,40 @@ class AppRouter {
   static const String uploadLicenseScreen = '/doctor/uploadLicense';
   static const String allowNotificationScreen = '/doctor/allowNotification';
   static const String doctorAllSetScreen = '/doctorAllSetScreen';
+  static const String addPatientScreen = '/doctor/addPatient';
   static const String healthMeasurements = '/healthMeasurements';
   static const String dailyHealthLogScreen = '/health/dailyLog';
+  static const String setEmergencyContactscreen = '/home/sos';
+  static const String confirmEmergencyAlertScreen = '/home/sendsos';
+
+  static String _resolvePaymentStatus(Uri uri) {
+    final normalized = uri.toString().toLowerCase();
+
+    if (normalized.contains('success')) {
+      return 'success';
+    }
+
+    if (normalized.contains('paid')) {
+      return 'paid';
+    }
+
+    return 'failure';
+  }
 
   static final router = GoRouter(
     navigatorKey: navigatorKey,
+    observers: [KeyboardDismissObserver()],
     initialLocation: '/',
+    redirect: (context, state) {
+      final uri = state.uri;
+
+      if (uri.scheme == 'medi' && uri.host == 'payment') {
+        final status = _resolvePaymentStatus(uri);
+        return '$patientPaymentReturnScreen?status=$status';
+      }
+
+      return null;
+    },
     routes: [
       // ========== SHARED/SPLASH ROUTES ==========
       GoRoute(
@@ -209,12 +312,6 @@ class AppRouter {
           );
         },
       ),
-      GoRoute(
-        path: takeInfoScreen,
-        builder: (context, state) {
-          return const TakeInfoScreen();
-        },
-      ),
 
       GoRoute(
         path: notificationSoundScreen,
@@ -224,6 +321,49 @@ class AppRouter {
           return BlocProvider.value(
             value: cubit,
             child: const NotificationSoundScreen(),
+          );
+        },
+      ),
+      GoRoute(
+        path: takeInfoScreen,
+        builder: (context, state) {
+          return const TakeInfoScreen();
+        },
+      ),
+      GoRoute(
+        path: medicineHistoryScreen,
+        builder: (context, state) {
+          final extra = state.extra;
+
+          if (extra is Medication) {
+            return MedicineHistoryScreen(medicine: extra);
+          }
+
+          if (extra is MedicationModel) {
+            return MedicineHistoryScreen(
+              medicine: Medication(
+                id: extra.id,
+                name: extra.name,
+                type: extra.type,
+                dosage: extra.dosage,
+                frequency: extra.frequency,
+                stock: extra.stock,
+                isChronic: extra.isChronic,
+                isCriticalMode: extra.status.trim().toLowerCase().contains(
+                  'critical',
+                ),
+                medicationType: Medication.medicationTypeFromLabel(extra.type),
+                stockStatus: extra.stock <= 10
+                    ? MedicationStockStatus.low
+                    : (extra.stock <= 20
+                          ? MedicationStockStatus.medium
+                          : MedicationStockStatus.good),
+              ),
+            );
+          }
+
+          throw StateError(
+            'Unsupported medication payload: ${extra.runtimeType}',
           );
         },
       ),
@@ -246,11 +386,16 @@ class AppRouter {
           ),
           GoRoute(
             path: '$onboardingFlow/caregiverForm',
-            builder: (context, state) => const CaregiverFormScreen(),
+            builder: (context, state) => CaregiverFormScreen(
+              fromCaregiverMode: _fromCaregiverMode(state),
+            ),
           ),
           GoRoute(
             path: '$onboardingFlow/invitationSend',
-            builder: (context, state) => InvitationSendScreen(),
+            builder: (context, state) => InvitationSendScreen(
+              fromCaregiverMode: _fromCaregiverMode(state),
+              requestId: state.uri.queryParameters['requestId'],
+            ),
           ),
           GoRoute(
             path: '$onboardingFlow/allSet',
@@ -273,7 +418,7 @@ class AppRouter {
       GoRoute(
         path: patientCaregiverModeScreen,
         builder: (context, state) => BlocProvider(
-          create: (context) => getIt<ProfileCubit>(),
+          create: (context) => CaregiverHubCubit(getIt<ProfileRepo>()),
           child: const profile_caregiver.CaregiverModeScreen(),
         ),
       ),
@@ -290,6 +435,10 @@ class AppRouter {
           create: (context) => getIt<ProfileCubit>(),
           child: ChangePasswordScreen(),
         ),
+      ),
+      GoRoute(
+        path: patientAddDoctorScreen,
+        builder: (context, state) => const AddDoctorScreen(),
       ),
       GoRoute(
         path: healthMeasurements,
@@ -310,6 +459,34 @@ class AppRouter {
           final medication = state.extra as Medication?;
           return MedicineInfoScreen(medication: medication);
         },
+      ),
+
+      GoRoute(
+        path: patientPaymentReturnScreen,
+        builder: (context, state) => PaymentResultScreen(
+          status: state.uri.queryParameters['status'] ?? 'failure',
+        ),
+      ),
+      GoRoute(
+        path: patientPaymentSuccessScreen,
+        builder: (context, state) => PaymentSuccessScreen(
+          reviewData: state.extra as AppointmentReviewData,
+        ),
+        routes: [
+          GoRoute(
+            path: 'my-appointment',
+            builder: (context, state) => MyAppointmentScreen(
+              reviewData: state.extra as AppointmentReviewData?,
+            ),
+          ),
+        ],
+      ),
+
+      GoRoute(
+        path: patientPaymentFailureScreen,
+        builder: (context, state) => const PaymentFailureScreen(
+          errorMessage: 'Payment was cancelled or failed. Please try again.',
+        ),
       ),
 
       /// ================= PATIENT SHELL =================
@@ -395,24 +572,81 @@ class AppRouter {
                 builder: (context, state) => const BrowseDoctorsScreen(),
                 routes: [
                   GoRoute(
+                    path: 'my-bookings',
+                    builder: (context, state) => const MyBookingsScreen(),
+                  ),
+                  GoRoute(
+                    path: 'cancel-booking',
+                    builder: (context, state) {
+                      final extra = state.extra as Map<String, dynamic>;
+                      return BlocProvider.value(
+                        value: extra['cubit'] as MyBookingsCubit,
+                        child: CancelBookingScreen(
+                          booking: extra['booking'] as BookingModel,
+                          cubit: extra['cubit'] as MyBookingsCubit,
+                        ),
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: 'browse',
+                    builder: (context, state) => const BrowseDoctorsScreen(),
+                  ),
+                  GoRoute(
                     path: 'search',
                     builder: (context, state) => const SearchDoctorsScreen(),
                   ),
-                  GoRoute(
-                    path: 'profile',
-                    builder: (context, state) => DoctorProfileScreen(
-                      doctor: state.extra as DoctorSummary?,
+                  ShellRoute(
+                    builder: (context, state, child) => BlocProvider(
+                      create: (context) => BookingCubit(
+                        doctorsRepository: getIt<DoctorsRepository>(),
+                      ),
+                      child: child,
                     ),
                     routes: [
                       GoRoute(
-                        path: 'book',
-                        builder: (context, state) => SelectPackageScreen(
-                          doctor: state.extra as DoctorSummary?,
+                        path: 'profile',
+                        builder: (context, state) => DoctorProfileScreen(
+                          doctor: state.extra as Doctordata,
                         ),
                         routes: [
                           GoRoute(
-                            path: 'patient-details',
-                            builder: (context, state) => const PatientDetailsScreen(),
+                            path: 'book',
+                            builder: (context, state) => SelectPackageScreen(
+                              doctor: state.extra as Doctordata,
+                            ),
+                            routes: [
+                              GoRoute(
+                                path: 'patient-details',
+                                builder: (context, state) =>
+                                    PatientDetailsScreen(
+                                      initialData:
+                                          state.extra as AppointmentReviewData?,
+                                    ),
+                                routes: [
+                                  GoRoute(
+                                    path: 'payment-method',
+                                    builder: (context, state) =>
+                                        PaymentMethodScreen(
+                                          initialData:
+                                              state.extra
+                                                  as AppointmentReviewData?,
+                                        ),
+                                    routes: [
+                                      GoRoute(
+                                        path: 'review-summary',
+                                        builder: (context, state) =>
+                                            ReviewSummaryScreen(
+                                              reviewData:
+                                                  state.extra
+                                                      as AppointmentReviewData?,
+                                            ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -428,7 +662,9 @@ class AppRouter {
             routes: [
               GoRoute(
                 path: '/chat',
-                builder: (context, state) => Container(color: Colors.yellow),
+                builder: (context, state) {
+                  return ZIMKitDemoHomePage();
+                },
               ),
             ],
           ),
@@ -451,6 +687,32 @@ class AppRouter {
             ],
           ),
         ],
+      ),
+
+      GoRoute(
+        path: symptomLogScreen,
+        builder: (context, state) => const SymptomLogScreen(),
+      ),
+      GoRoute(
+        path: setEmergencyContactscreen,
+        builder: (context, state) => SetEmergencyContactscreen(),
+      ),
+      GoRoute(
+        path: confirmEmergencyAlertScreen,
+        builder: (context, state) {
+          final contactName =
+              (state.extra as Map<String, dynamic>?)?['contactName']
+                  as String? ??
+              '';
+          final contactMethod =
+              (state.extra as Map<String, dynamic>?)?['contactMethod']
+                  as String? ??
+              'whatsapp';
+          return ConfirmEmergencyAlertScreen(
+            contactName: contactName,
+            contactMethod: contactMethod,
+          );
+        },
       ),
       // ========== DOCTOR ROUTES ==========
       GoRoute(
@@ -492,7 +754,7 @@ class AppRouter {
         path: availabilityScreen,
         builder: (context, state) => BlocProvider(
           create: (context) => ScheduleCubit(),
-          child: const ScheduleAvailabilityScreen(),
+          child: ScheduleAvailabilityScreen(doctor: state.extra as DoctorModel),
         ),
       ),
       GoRoute(
@@ -520,8 +782,30 @@ class AppRouter {
         builder: (context, state) => AllowNotificationScreen(),
       ),
       GoRoute(
+        path: addPatientScreen,
+        builder: (context, state) => const AddPatientScreen(),
+      ),
+      GoRoute(
         path: doctorAllSetScreen,
         builder: (context, state) => const DoctorAllSetScreen(),
+      ),
+    
+      GoRoute(
+        path: exportHealthPassportScreen,
+        builder: (context, state) => const HealthPassportScreen(),
+      ),
+
+      GoRoute(
+        path: exportHealthReportScreen,
+        builder: (context, state) {
+          final extra = state.extra;
+
+          if (extra is PatientData) {
+            return ExportHealthReportScreen(patient: extra);
+          }
+
+          throw StateError('ExportHealthReportScreen requires PatientData in extra');
+        },
       ),
 
       // ========== SHARED AUTH ROUTES ==========

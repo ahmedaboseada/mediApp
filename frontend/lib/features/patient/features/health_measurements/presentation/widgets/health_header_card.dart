@@ -84,7 +84,11 @@ class HealthHeaderCard extends StatelessWidget {
               childAspectRatio: AppSizes.w160 / AppSizes.h120,
             ),
             itemBuilder: (BuildContext context, int index) {
-              return MeasurementGridItem(measurement: measurements[index]);
+              return MeasurementGridItem(
+                measurement: measurements[index],
+                textColor: AppColors.whiteText,
+                backgroundColor: AppColors.cardBackground,
+              );
             },
           ),
         ],

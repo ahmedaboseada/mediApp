@@ -7,10 +7,11 @@ import 'package:medi/features/doctor/features/complete_profile/data/repo/doctor_
 import 'package:medi/features/doctor/features/complete_profile/presentation/controller/schedule_appointments/schedule_appointments_cubit.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/controller/schedule_appointments/schedule_appointments_state.dart';
 import 'package:medi/features/doctor/features/settings/presentation/widgets/working_days_widget.dart';
+import 'package:medi/features/shared/auth/data/models/doctor_model.dart';
 
 class ScheduleAvailabilityScreen extends StatefulWidget {
-  const ScheduleAvailabilityScreen({super.key});
-
+  const ScheduleAvailabilityScreen({super.key, required this.doctor});
+  final DoctorModel doctor;
   @override
   State<ScheduleAvailabilityScreen> createState() =>
       _ScheduleAvailabilityScreenState();
@@ -20,11 +21,27 @@ class _ScheduleAvailabilityScreenState
     extends State<ScheduleAvailabilityScreen> {
   late TextEditingController _maxPatientsController;
   final _formKey = GlobalKey<FormState>();
+  List<String> _formatWorkingDays(List<String> days) {
+    final Map<String, String> dayMap = {
+      'monday ': 'Mon',
+      'tuesday': 'Tue',
+      'wednesday': 'Wed',
+      'thursday': 'Thu',
+      'friday': 'Fri',
+      'saturday': 'Sat',
+      'sunday': 'Sun',
+    };
+
+    return days.map((day) => dayMap[day] ?? day.toLowerCase()).toList();
+  }
 
   @override
   void initState() {
     super.initState();
-    _maxPatientsController = TextEditingController();
+
+    _maxPatientsController = TextEditingController(
+      text: widget.doctor.maxDailyPatients.toString(),
+    );
   }
 
   @override
@@ -37,10 +54,11 @@ class _ScheduleAvailabilityScreenState
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) =>
-          ScheduleAppointmentsCubit(getIt<DoctorCompleteProfileRepo>()),
+          ScheduleAppointmentsCubit(getIt<DoctorCompleteProfileRepo>())
+            ..loadDoctorSchedule(),
       child: BlocConsumer<ScheduleAppointmentsCubit, ScheduleAppointmentsState>(
         listener: (context, state) {
-          if (state.errorMessage != null && !state.showFieldErrors) {
+          if (state.isError && state.errorMessage != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.errorMessage!),
@@ -52,10 +70,11 @@ class _ScheduleAvailabilityScreenState
           if (state.isSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Schedule and appointments updated successfully'),
+                content: Text('Saved successfully'),
                 backgroundColor: Colors.green,
               ),
             );
+
             context.pop();
           }
         },
@@ -99,6 +118,10 @@ class _ScheduleAvailabilityScreenState
                             ),
                             SizedBox(height: AppSizes.h16),
                             WorkingDaysWidget(
+                              initialDays: _formatWorkingDays(
+                                // state.workingDays,
+                                widget.doctor.workingDays,
+                              ),
                               onDaysSelected: (days) {
                                 context
                                     .read<ScheduleAppointmentsCubit>()
@@ -107,7 +130,16 @@ class _ScheduleAvailabilityScreenState
                             ),
 
                             SizedBox(height: AppSizes.h24),
-                            CustomDropdown(
+                            QTextField(
+                              initialSelectedValues:
+                                  state.consultationDuration != null
+                                  ? [
+                                      widget.doctor.consultationDuration
+                                          .toString(),
+                                    ]
+                                  : [],
+
+                              singleSelect: true,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'Please select consultation duration';
@@ -116,55 +148,71 @@ class _ScheduleAvailabilityScreenState
                               },
                               label: 'How long is each consultation?',
                               hint: 'Select Time',
-                              items: ['15 min', '30 min', '45 min', '60 min'],
-                              onChanged: (value) {
+                              items: DoctorConstants().consultationDurations,
+                              onSelectionChange: (value) {
                                 context
                                     .read<ScheduleAppointmentsCubit>()
-                                    .updateConsultationDuration(value);
+                                    .updateConsultationDuration(
+                                      value.isNotEmpty ? value.first : '',
+                                    );
                               },
                             ),
 
                             SizedBox(height: AppSizes.h16),
                             TimePickerField(
                               label: 'Start Time',
+                              initialTime: TimeOfDay(
+                                hour: int.parse(
+                                  widget.doctor.workingHours.first.startHour
+                                      .split(':')
+                                      .first,
+                                ),
+                                minute: int.parse(
+                                  widget.doctor.workingHours.first.startHour
+                                      .split(':')
+                                      .last,
+                                ),
+                              ),
                               onTimeSelected: (time) {
                                 context
                                     .read<ScheduleAppointmentsCubit>()
                                     .updateStartTime(time);
-                              },
-                              validator: (time) {
-                                if (time == null) {
-                                  return 'Please select start time';
-                                }
-                                return null;
                               },
                             ),
 
                             SizedBox(height: AppSizes.h16),
                             TimePickerField(
                               label: 'End Time',
+                              initialTime: TimeOfDay(
+                                hour: int.parse(
+                                  widget.doctor.workingHours.first.endHour
+                                      .split(':')
+                                      .first,
+                                ),
+                                minute: int.parse(
+                                  widget.doctor.workingHours.first.endHour
+                                      .split(':')
+                                      .last,
+                                ),
+                              ),
                               onTimeSelected: (time) {
                                 context
                                     .read<ScheduleAppointmentsCubit>()
                                     .updateEndTime(time);
                               },
-                              validator: (time) {
-                                if (time == null) {
-                                  return 'Please select end time';
-                                }
-                                return null;
-                              },
                             ),
 
                             SizedBox(height: AppSizes.h16),
                             QTextField(
+                              initialSelectedValues:
+                                  widget.doctor.appointmentTypes,
                               validator: (types) {
                                 if (types == null || types.isEmpty) {
                                   return 'Please select appointment types';
                                 }
                                 return null;
                               },
-                              onSelectionChange: (List<String> types) {
+                              onSelectionChange: (types) {
                                 context
                                     .read<ScheduleAppointmentsCubit>()
                                     .updateAppointmentTypes(types);
@@ -175,53 +223,58 @@ class _ScheduleAvailabilityScreenState
 
                             SizedBox(height: AppSizes.h16),
                             CustomTextField(
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Please enter max patients per day';
-                                }
-                                if (int.tryParse(value) == null) {
-                                  return 'Please enter a valid number';
-                                }
-                                return null;
-                              },
                               controller: _maxPatientsController,
                               hintText: 'Max patients per day',
                               keyboardType: TextInputType.number,
                               label: 'Max patients per day',
                             ),
-
                             SizedBox(height: AppSizes.h24),
                             PrimaryButton(
-                              onPressed: state.isSubmitting
+                              onPressed: state.isLoading
                                   ? null
                                   : () {
-                                      if (_formKey.currentState!.validate()) {
-                                        if (_maxPatientsController
-                                            .text
-                                            .isNotEmpty) {
-                                          context
-                                              .read<ScheduleAppointmentsCubit>()
-                                              .updateMaxDailyPatients(
-                                                _maxPatientsController.text,
-                                              );
-                                        }
-                                        context
-                                            .read<ScheduleAppointmentsCubit>()
-                                            .submitScheduleAndAppointments();
-                                      }
+                                      final cubit = context
+                                          .read<ScheduleAppointmentsCubit>();
+
+                                      cubit.updateMaxDailyPatients(
+                                        _maxPatientsController.text,
+                                      );
+
+                                      cubit.submitScheduleAndAppointments();
                                     },
-                              text: 'Save',
-                              child: state.isSubmitting
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : null,
+                              text: state.isLoading ? 'Saving...' : 'Save',
                             ),
+                            // PrimaryButton(
+                            //   onPressed: state.isSubmitting
+                            //       ? null
+                            //       : () {
+                            //           if (_formKey.currentState!.validate()) {
+                            //             if (_maxPatientsController
+                            //                 .text
+                            //                 .isNotEmpty) {
+                            //               context
+                            //                   .read<ScheduleAppointmentsCubit>()
+                            //                   .updateMaxDailyPatients(
+                            //                     _maxPatientsController.text,
+                            //                   );
+                            //             }
+                            //             context
+                            //                 .read<ScheduleAppointmentsCubit>()
+                            //                 .submitScheduleAndAppointments();
+                            //           }
+                            //         },
+                            //   text: 'Save',
+                            //   child: state.isSubmitting
+                            //       ? const SizedBox(
+                            //           height: 20,
+                            //           width: 20,
+                            //           child: CircularProgressIndicator(
+                            //             strokeWidth: 2,
+                            //             color: Colors.white,
+                            //           ),
+                            //         )
+                            //       : null,
+                            // ),
                             SizedBox(height: AppSizes.h24),
                           ],
                         ),

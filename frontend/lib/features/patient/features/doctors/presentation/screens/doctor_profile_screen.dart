@@ -1,24 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:horizontal_calender_mz/horizontal_calender_mz.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/doctors/data/models/doctor_summary.dart';
+import 'package:medi/features/patient/features/doctors/presentation/cubits/booking_cubit.dart';
 import 'package:medi/features/patient/features/doctors/presentation/widgets/doctor_availability_section.dart';
+import 'package:medi/features/patient/features/doctors/presentation/widgets/doctor_profile_calendar.dart';
 import 'package:medi/features/patient/features/doctors/presentation/widgets/doctor_profile_header.dart';
+import 'package:zego_uikit_signaling_plugin/zego_uikit_signaling_plugin.dart';
+import 'package:zego_zimkit/zego_zimkit.dart';
 
 class DoctorProfileScreen extends StatefulWidget {
-  const DoctorProfileScreen({super.key, this.doctor});
+  const DoctorProfileScreen({super.key, required this.doctor});
 
-  final DoctorSummary? doctor;
-
-  static const List<String> _timeSlots = [
-    '01:30 PM',
-    '3:00 PM',
-    '5:00 PM',
-    '7:00 PM',
-    '9:00 PM',
-    '10:00 PM',
-  ];
+  final Doctordata doctor;
 
   @override
   State<DoctorProfileScreen> createState() => _DoctorProfileScreenState();
@@ -31,8 +26,20 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedDate = ValueNotifier<DateTime?>(DateTime.now());
-    _selectedTimeSlot = ValueNotifier<String?>(null);
+    final bookingCubit = context.read<BookingCubit>();
+    final profileDoctor = widget.doctor;
+    bookingCubit.setDoctor(profileDoctor);
+
+    _selectedDate = ValueNotifier<DateTime?>(bookingCubit.state.selectedDate);
+    _selectedTimeSlot = ValueNotifier<String?>(
+      bookingCubit.state.selectedTimeSlot,
+    );
+    _selectedDate.addListener(() {
+      final value = _selectedDate.value;
+      if (value != null) {
+        bookingCubit.updateSelectedDate(value);
+      }
+    });
   }
 
   @override
@@ -44,110 +51,88 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final DoctorSummary profileDoctor =
-        widget.doctor ??
-        const DoctorSummary(
-          id: 'dr_marvin_kinney',
-          name: 'Dr. Marvin\nKinney',
-          specialty: 'Cardiologist',
-          rating: 4.8,
-          reviewsCount: 82,
-          imageAsset: AppAssets.avatar1,
+    return BlocBuilder<BookingCubit, BookingState>(
+      builder: (context, state) {
+        final Doctordata profileDoctor = state.appointmentReviewData.doctor!;
+
+        return Scaffold(
+          body: SafeArea(
+            child: Column(
+              children: [
+                DoctorProfileHeader(
+                  doctor: profileDoctor,
+                  onBack: () => context.pop(),
+                 onInsightsTap: () {
+  final peerUserID = profileDoctor.user.id.isNotEmpty
+      ? profileDoctor.user.id
+      : profileDoctor.id;
+
+  final peerName =
+      '${profileDoctor.user.firstName} ${profileDoctor.user.lastName}'
+          .trim();
+
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) {
+        return ZIMKitMessageListPage(
+          conversationID: peerUserID,
+          conversationType: ZIMConversationType.peer,
         );
-
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            DoctorProfileHeader(
-              doctor: profileDoctor,
-              onBack: () => context.pop(),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(
-                  AppSizes.w16,
-                  AppSizes.h16,
-                  AppSizes.w16,
-                  AppSizes.h16,
+      },
+    ),
+  );
+},
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    HorizontalCalenderMZ(
-                      selectedDate: _selectedDate,
-                      header: ValueListenableBuilder<DateTime?>(
-                        valueListenable: _selectedDate,
-                        builder: (context, selected, _) {
-                          final DateTime value = selected ?? DateTime.now();
-                          return Text(
-                            '${_monthName(value.month)} ${value.year}',
-                            style: AppStyles.black18500.copyWith(
-                              fontWeight: FontWeight.w700,
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(
+                      AppSizes.w16,
+                      AppSizes.h16,
+                      AppSizes.w16,
+                      AppSizes.h16,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        DoctorProfileCalendar(selectedDate: _selectedDate),
+                        SizedBox(height: AppSizes.h24),
+                        state.isLoadingSlots
+                            ? const Center(child: CircularProgressIndicator())
+                            : DoctorAvailabilitySection(
+                                timeSlots: state.availableSlots,
+                                selectedTimeSlot: _selectedTimeSlot,
+                                onTimeSlotSelected: (timeSlot) {
+                                  _selectedTimeSlot.value = timeSlot;
+                                  context
+                                      .read<BookingCubit>()
+                                      .updateSelectedTimeSlot(timeSlot);
+                                },
+                              ),
+                        SizedBox(height: AppSizes.h24),
+                        if (state.availableSlots.isNotEmpty) ...[
+                          SizedBox(
+                            width: double.infinity,
+                            child: PrimaryButton(
+                              text: 'Book Appointment',
+                              onPressed: () => context.push(
+                                '/doctors/profile/book',
+                                extra: profileDoctor,
+                              ),
                             ),
-                          );
-                        },
-                      ),
-                      selectedbgcolor: AppColors.primary,
-                      unselectedbgcolor:
-                          AppColors.medicineTabUnselectedCountBackground,
-                      seldaynamecolor: AppColors.whiteText,
-                      seldaynumbercolor: AppColors.primary,
-                      unseldaynamecolor: AppColors.tertiaryText,
-                      unseldaynumbercolor: AppColors.primaryText,
-                      selectedbordercolor: Colors.transparent,
-                      unselectedbordercolor: Colors.transparent,
-                      calendericon: Icon(
-                        Icons.chevron_right_rounded,
-                        size: AppSizes.sp20,
-                        color: AppColors.secondaryText,
-                      ),
+                          ),
+                        ] else ...[
+                          const Center(child: Text('No available slots')),
+                        ],
+                      ],
                     ),
-                    SizedBox(height: AppSizes.h24),
-                    DoctorAvailabilitySection(
-                      timeSlots: DoctorProfileScreen._timeSlots,
-                      selectedTimeSlot: _selectedTimeSlot,
-                      onTimeSlotSelected: (timeSlot) {
-                        _selectedTimeSlot.value = timeSlot;
-                      },
-                    ),
-
-                    SizedBox(height: AppSizes.h24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: PrimaryButton(
-                        text: 'Book Appointment',
-                        onPressed: () => context.push(
-                          '/doctors/profile/book',
-                          extra: profileDoctor,
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
-  }
-
-  String _monthName(int month) {
-    const List<String> months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return months[month - 1];
   }
 }
