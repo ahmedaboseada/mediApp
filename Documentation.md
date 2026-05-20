@@ -220,7 +220,7 @@ The system has societal importance because medication non-adherence, missing hea
 
 The survey results strongly support MediApp's implemented feature set. The age chart shows a young digital-first respondent base, while chronic-disease prevalence of 67.3% validates the chronic-care orientation of the system. The gender and role charts show that both patients and caregivers are primary stakeholders. The medication-tracking chart is particularly important: 70.4% rely on memory and 0% reported using smart applications, which directly justifies the medication schedule, local alarms, notification sounds, and taken-dose tracking. The challenge chart shows forgetting doses at 74.1%, doctor-instruction confusion at 44.4%, medicine running out at 40.7%, and difficulty recording side effects at 29.6%; these data points map directly to dose reminders, stock thresholds, medication notes, feedback logs, and exportable records.
 
-Caregiver results validate caregiver mode because 81% of caregiver respondents follow an elderly person at home and 76.2% have an elderly person in the household. The top caregiver challenges—ensuring correct-time medication and confirming whether a dose was actually taken, both 66.7%—support shared medication visibility and dose status tracking. QR sharing is also justified because 92.6% of respondents are willing to share records either always or with trusted doctors. Doctor responses, although only two responses, point to lack of regular reports as a 100% problem and give maximum importance to QR medical records and telemedicine. The payment chart supports multiple payment options because credit card, cash, e-wallet, Fawry, and bank cards all received visible demand. Finally, 84% chatbot demand and 54% beta interest indicate openness to intelligent assistance and iterative product testing.
+Caregiver results validate caregiver mode because 81% of caregiver respondents follow an elderly person at home and 76.2% have an elderly person in the household. The top caregiver challenges—ensuring correct-time medication and confirming whether a dose was actually taken, both 66.7%—support shared medication visibility and dose status tracking. QR sharing is also justified because 92.6% of respondents are willing to share records either always or with trusted doctors. Doctor responses, although only two responses, point to lack of regular reports as a 100% problem and give maximum importance to QR medical records and telemedicine. The payment chart supports multiple payment options because credit card, cash, e-wallet, Fawry, and bank cards all received visible demand. Finally, 84% chatbot demand and 54% beta interest indicate openness to intelligent assistance and iterative product testing, while chatbot support remains a post-MVP feature rather than part of the final MVP.
 
 # Chapter 2: Related Work
 
@@ -238,77 +238,107 @@ Personal health record systems consolidate measurements, history, allergies, med
 
 ## 2.4 Available Solutions and Feature Matrix
 
-| Feature | Medisafe | MyTherapy | CareClinic | Mango Health | Practo | MyChart | Teladoc Health | Ada Health | MediApp |
-|---|---|---|---|---|---|---|---|---|---|
-| F1: Role-based registration and login | Partial | Partial | Partial | Partial | Yes | Yes | Yes | Partial | Yes |
-| F2: Email confirmation | Partial | Partial | Partial | Partial | Yes | Yes | Yes | Partial | Yes |
-| F3: OTP and two-factor authentication | Partial | Partial | Partial | Partial | Yes | Yes | Yes | Partial | Yes |
-| F4: Google authentication | Partial | Partial | Partial | Partial | Yes | Yes | Yes | Partial | Yes |
-| F5: Refresh-token lifecycle | Partial | Partial | Partial | Partial | Yes | Yes | Yes | Partial | Yes |
-| F6: User profile and settings | Partial | Partial | Partial | Partial | Yes | Yes | Yes | Partial | Yes |
-| F7: Patient profile completion | Partial | Partial | Partial | Partial | Partial | Partial | Partial | No | Yes |
-| F8: Doctor profile completion | No | No | No | No | Partial | Partial | Partial | No | Yes |
-| F9: Doctor approval governance | No | No | No | No | Partial | Partial | Partial | No | Yes |
-| F10: Medication CRUD | Yes | Yes | Yes | Yes | No | Limited | No | No | Yes |
-| F11: Medication scheduling | Yes | Yes | Yes | Yes | No | Limited | No | No | Yes |
-| F12: Dose taken tracking | Yes | Yes | Yes | Yes | No | Limited | No | No | Yes |
-| F13: Medication feedback logging | Partial | Partial | Partial | Partial | Partial | Partial | Partial | No | Yes |
-| F14: Stock and expiry awareness | Yes | Yes | Yes | Yes | No | Limited | No | No | Yes |
-| F15: AI medicine enrichment | No | No | Partial | No | No | No | Partial | Yes | Yes |
-| F16: Local reminders and sounds | Yes | Yes | Yes | Yes | No | Limited | No | No | Yes |
-| F17: Health measurement logging | Partial | Partial | Yes | No | Partial | Yes | Partial | Partial | Yes |
-| F18: Symptom logging | Partial | Partial | Yes | No | Partial | Yes | Partial | Partial | Yes |
-| F19: Health visualization | Partial | Partial | Yes | No | Partial | Yes | Partial | Partial | Yes |
-| F20: Caregiver mode | Yes | Partial | Partial | No | No | Partial | No | No | Yes |
-| F21: Caregiver request workflow | Yes | Partial | Partial | No | No | Partial | No | No | Yes |
-| F22: Doctor directory | No | No | No | No | Yes | Yes | Yes | No | Yes |
-| F23: Doctor-patient connections | No | No | No | No | Partial | Partial | Partial | No | Yes |
-| F24: Doctor slot generation | No | No | No | No | Yes | Yes | Yes | No | Yes |
-| F25: Appointment booking | No | No | No | No | Yes | Yes | Yes | No | Yes |
-| F26: Booking management | No | No | No | No | Yes | Yes | Yes | No | Yes |
-| F27: Payment gateway integration | No | No | No | No | Yes | Yes | Yes | No | Yes |
-| F28: QR consultation session | No | No | No | No | Partial | Partial | Partial | No | Yes |
-| F29: Live-session call gating | No | No | No | No | Partial | Partial | Partial | No | Yes |
-| F30: Messaging | No | No | No | No | Yes | Yes | Yes | No | Yes |
-| F31: Medical export | Partial | Partial | Yes | No | Partial | Yes | Partial | Partial | Yes |
-| F32: Shared-record QR token | No | No | No | No | No | Limited | No | No | Yes |
-| F33: Doctor wallet and withdrawal | No | No | No | No | Partial | Partial | Partial | No | Yes |
+The following matrix is transcribed from the attached competitor-analysis images, with the final column named **Proposed Product**. Status values use the same meaning as the handwritten matrix: **Yes** means a visible check mark, **No** means a visible cross mark, **Partial** means a tilde, limited note, or constrained availability, and **Planned/Future** means the capability is outside the final MVP scope.
+
+![Feature matrix source part 1](docs/feature-matrix/feature-matrix-part-1.png)
+
+![Feature matrix source part 2](docs/feature-matrix/feature-matrix-part-2.png)
+
+![Feature matrix source part 3](docs/feature-matrix/feature-matrix-part-3.png)
+
+### 2.4.1 Medication, Reminder, and Adherence Features
+
+| Feature / Competitor | MyTherapy | Medisafe | MedControl | Elfie | CareClinic | DoseCast | Pill Reminder | Pillo | Mr Pillster | MedHome | Proposed Product |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Pill Reminder | Yes | Yes | Yes (limited) | Yes | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
+| Health Measurements | Yes | Yes | Yes | Yes | Yes | Partial | No | Partial | Partial | Partial | Yes |
+| Meal Reminder | No | No | No | No | Partial | No | No | Yes | No | No | Planned |
+| Daily feedback / symptoms | Yes | Yes | Yes | Yes | Yes | Partial | No | Yes | Yes | No | Yes |
+| Export logs (pdf/csv) | Yes (PDF) | Yes (pdf) | Yes | No | Yes | Yes | Yes | Yes | Partial | Partial | Yes |
+| Doctor Profiles | No | No | No | No | Partial | Partial | No | Partial | Partial | Yes | Yes |
+| Parenting Mode | Yes | Yes | Yes | Yes | Yes | No | No | No | Partial | No | Yes |
+| Guest Mode | Yes | Yes | Yes | No | No | Yes | Yes | No | No | No | Yes |
+| Appointment Calendar reminders | Yes | Yes | Yes | No | Yes | Yes | No | Partial | Yes | Yes | Yes |
+| Doctor / Pharmacy Info Management | Yes | Yes | Partial | No | Yes | Yes | No | Partial | Partial | Yes | Partial (doctor only) |
+| Drug search | Yes | No | No | No | No | Yes (US only) | No | No | No | Yes | Planned |
+| Restock alerts | Yes | Yes | Yes | No | Partial | Yes | No | Yes | Yes | Partial | Yes |
+| Expiration Alerts | No | No | Yes | No | Partial | Partial | No | No | Partial | No | Yes |
+| Prescription OCR | No | No | No | Yes | No | No | No | No | Yes | No | Planned |
+| Barcode Scan | No | Partial | No | Yes | No | No | No | No | No | Yes | Planned |
+| Icons by Medication type | Yes | Yes | Yes | Yes | Yes | Partial | Yes | Partial | Partial | Partial | Yes |
+| Critical mode reminders | Yes | No | No | No | Partial | Partial | No | Partial | Partial | No | Yes |
+
+### 2.4.2 Records, Care Coordination, and Support Features
+
+| Feature / Competitor | MyTherapy | Medisafe | MedControl | Elfie | CareClinic | DoseCast | Pill Reminder | Pillo | Mr Pillster | MedHome | Proposed Product |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Custom Voice Alerts | Partial | Partial | Partial | No | Yes | No | No | No | No | No | Planned |
+| Early voice alerts | No | No | No | No | No | No | No | No | No | No | Yes |
+| Patient records / History Viewer | No | No | Yes | Yes | Yes | Yes | No | Yes | Yes | Partial | Yes |
+| QR Export of records | No | No | No | Yes | Partial | Partial | No | Partial | No | Partial | Yes |
+| Doctor Access | No | No | No | No | No | Yes | No | Partial | Partial | Yes | Yes |
+| Doctor sharing | No | Yes | No | No | Yes | Partial | No | No | Partial | Yes | Yes |
+| Chatbot | Yes | No | No | Yes | Partial | No | No | No | No | Yes | Future |
+| Symptoms Crisis Log | Yes | Yes | Yes | Yes | Yes | No | No | Yes | Partial | No | Future |
+| Weight Tracking | No | No | No | Yes | Yes | No | No | Partial | Yes | No | Yes |
+| Sleep Monitoring | No | No | No | Yes | Partial | No | No | No | No | No | No |
+| Stop Smoking Programs | No | No | No | Yes | No | No | No | No | No | No | Future |
+| Gamifications | No | No | No | Yes | Partial | No | No | No | No | No | Future |
+| Life-style Tracking (hydration - sleep - diet) | Yes | No | Partial | Yes | Yes | No | No | No | Partial | No | No |
+| Allergy Alerts | No | No | No | Partial | No | Partial | No | No | No | No | Yes |
+| Offline/local sync (mobile) | Yes | Partial | Partial | Yes | Yes | Yes | Yes | Partial | Yes | Partial | Yes |
+| SOS Emergency | No | No | No | No | Partial | No | No | No | No | No | Yes |
+| Customer Support (Chat / Ticket) | No | No | No | No | No | Partial | No | Partial | Partial | Partial | Yes |
+| IoT Device Integration | No | No | No | No | Partial | No | No | No | Partial | No | Planned |
+
+### 2.4.3 Export, Accessibility, Communication, and Telemedicine Features
+
+| Feature / Competitor | MyTherapy | Medisafe | MedControl | Elfie | CareClinic | DoseCast | Pill Reminder | Pillo | Mr Pillster | MedHome | Proposed Product |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Health passport export (pdf/qr) | No | No | Partial | Partial | Yes | Yes | No | Partial | Partial | Partial | Yes |
+| Health measurements scale classification (low - normal - high) | No | No | No | No | Partial | Partial | No | Partial | Partial | Partial | Yes |
+| Accessibility Mode | No | No | No | No | Partial | Partial | No | Partial | Partial | Partial | Yes |
+| Doctor/patient communication (chat / voice / video) | No | No | No | No | Partial | No | No | No | Partial | Yes | Yes |
+| Telemedicine booking | No | No | No | No | Yes | No | No | No | No | Yes | Yes |
+| Drug Interactions tracker | No | No | No | Partial | Yes | Yes | No | No | No | No | Planned |
+
+The final MVP therefore excludes the following planned or future-planned capabilities: gamification, stop-smoking programs, chatbot, prescription OCR, barcode scanning, online drug search, IoT device integration, meal reminder, custom voice alerts, symptom-crisis escalation, and drug-interaction tracking.
 
 ## 2.5 Final Result: Proposed System Features
 
-- **F1: Role-based registration and login.** Patients, doctors, users, and admins authenticate through role-aware backend routes.
-- **F2: Email confirmation.** Signup generates confirmation flows for verified account activation.
-- **F3: OTP and two-factor authentication.** OTP request/check, signin OTP, forgot-password OTP, and twoFA settings are implemented.
-- **F4: Google authentication.** Mobile Google sign-in is supported by frontend dependency and backend Google auth route.
-- **F5: Refresh-token lifecycle.** Refresh token rotation and revoked-token persistence protect sessions.
-- **F6: User profile and settings.** Users can view profile, update profile, change password/e-mail, update settings, and delete account.
-- **F7: Patient profile completion.** Patients store demographics, chronic conditions, allergies, active ingredients, blood type, profile image, and emergency data.
-- **F8: Doctor profile completion.** Doctors store specialization, clinic, license, location, working days, working hours, appointment types, and capacity.
-- **F9: Doctor approval governance.** Admins review pending doctors and approve/reject professional access.
-- **F10: Medication CRUD.** Patients and authorized doctors create, list, edit, and delete medication records.
-- **F11: Medication scheduling.** Daily, weekly, and specific-date schedule modes are validated and persisted.
-- **F12: Dose taken tracking.** Medication dates contain time-level taken flags with stock updates.
-- **F13: Medication feedback logging.** Daily feedback records store text and severity level.
-- **F14: Stock and expiry awareness.** Medicine stock, left threshold, end date, and expiry date are modeled.
-- **F15: AI medicine enrichment.** Gemini utility can enrich active ingredient information asynchronously.
-- **F16: Local reminders and sounds.** Flutter alarm, notifications, timezone, audio assets, and sound-selection flows support reminders.
-- **F17: Health measurement logging.** Blood pressure, blood sugar, weight, and heart rate are recorded through dedicated model/service.
-- **F18: Symptom logging.** Patients log symptom lists, severity, date, and notes.
-- **F19: Health visualization.** Frontend health screens use chart and measurement UI widgets.
-- **F20: Caregiver mode.** Patients enable caregiver option and request caregiver support.
-- **F21: Caregiver request workflow.** Caregiver requests can be listed, accepted, rejected, and cancelled.
-- **F22: Doctor directory.** Verified users can browse doctor directory data.
-- **F23: Doctor-patient connections.** Patients and doctors can send, accept, reject, cancel, and list connection requests.
-- **F24: Doctor slot generation.** Availability is calculated from doctor schedule, duration, daily capacity, and existing bookings.
-- **F25: Appointment booking.** Patients create bookings with doctor, date, time, package, patient details, problem, and payment method.
-- **F26: Booking management.** Patients/doctors view details, cancel appointments, and patients reschedule.
-- **F27: Payment gateway integration.** Paymob payment intention, webhook, and callback endpoints support paid appointments.
-- **F28: QR consultation session.** Patients generate session tokens and doctors activate temporary access by scanning/providing tokens.
-- **F29: Live-session call gating.** Call token access requires an active, unexpired booking session.
-- **F30: Messaging.** Messages and chat verification support patient-doctor communication.
-- **F31: Medical export.** Health passport and patient record export endpoints generate portable summaries.
-- **F32: Shared-record QR token.** Patients generate QR tokens and public shared-record endpoints retrieve tokenized data.
-- **F33: Doctor wallet and withdrawal.** Doctors can view wallet balance and request withdrawal processing.
+- **F1: Pill reminders.** The final MVP supports medication reminder workflows through stored medication schedules and local alarm/notification services.
+- **F2: Health measurements.** Patients can record blood pressure, blood sugar, weight, and heart-rate measurements.
+- **F3: Daily feedback and symptoms.** Patients can log daily medication feedback, side effects, symptoms, severity, notes, and dates.
+- **F4: Export logs and medical summaries.** The export module supports portable health reports, patient records, QR tokens, and shared-record retrieval.
+- **F5: Doctor profiles.** Doctors can complete professional profiles with specialization, clinic data, location, working hours, appointment types, and license media.
+- **F6: Parenting/caregiver mode.** Patients can enable caregiver support and create caregiver request workflows.
+- **F7: Guest/general user mode.** The user model supports role-aware accounts beyond a single patient-only identity.
+- **F8: Appointment calendar reminders.** Booking and scheduling data support appointment visibility and reminder-oriented calendar flows.
+- **F9: Doctor-only information management.** Doctor-side profile, schedule, patient, wallet, and booking management are implemented for verified doctors.
+- **F10: Restock alerts.** Medication stock, remaining quantity, and threshold fields support refill/restock awareness.
+- **F11: Expiration alerts.** Medication expiry and end-date fields support expiration-warning logic.
+- **F12: Medication-type icons.** The Flutter asset set includes medication icons for pills, syrups, tablets, injections, inhalers, ointments, and related forms.
+- **F13: Critical-mode reminders.** Medication records include critical-mode/status behavior for high-priority reminders.
+- **F14: Early voice/audio alerts.** The frontend includes local audio assets and reminder sound selection for alarm-style alerts.
+- **F15: Patient records/history viewer.** Patient, medicine, health, symptom, booking, message, and export models support longitudinal record views.
+- **F16: QR export of records.** The export module creates tokenized QR access to shared medical data.
+- **F17: Doctor access.** Authentication, role restrictions, approved-doctor checks, connection rules, and session tokens govern doctor access.
+- **F18: Doctor sharing.** Patients and doctors can establish controlled connection workflows for sharing relevant records.
+- **F19: Weight tracking.** Weight is one of the supported health measurement types in the health module.
+- **F20: Allergy alerts.** Patient onboarding captures allergies and active ingredients, providing the data foundation for allergy-aware medication workflows.
+- **F21: Offline/local mobile sync.** The Flutter app uses local persistence and notification services to support mobile continuity.
+- **F22: SOS emergency information.** Patient profiles include emergency contact information for emergency-support workflows.
+- **F23: Customer support access.** The profile/support UI exposes support-oriented entry points for user assistance.
+- **F24: Health passport export.** Export routes generate portable health passport data for consultation and sharing scenarios.
+- **F25: Health measurement scale classification.** Health measurement values support low/normal/high interpretation in the measurement domain.
+- **F26: Accessibility mode.** The UI uses reusable widgets, clear flows, visual icons, and responsive sizing to support accessible mobile use.
+- **F27: Doctor-patient communication.** Message, chat, and connection modules support authenticated doctor-patient communication.
+- **F28: Telemedicine booking.** Booking flows support online/in-person appointments, session access, and call-token gating.
+- **F29: Secure multi-role authentication.** Patients, doctors, users, and admins authenticate through role-aware backend routes.
+- **F30: OTP, 2FA, and token security.** OTP, optional 2FA, refresh-token rotation, revoked tokens, and JWT verification protect sessions.
+- **F31: Patient profile completion.** Patients store demographics, chronic conditions, allergies, active ingredients, blood type, profile image, and emergency data.
+- **F32: Doctor slot generation and booking management.** The booking service calculates slots from doctor schedules, duration, daily capacity, and existing bookings.
+- **F33: Payment, wallet, and withdrawal support.** Paymob payment initiation/webhook handling and doctor wallet/withdrawal workflows support monetized appointments.
 
 ## 2.6 Tools Background: Frontend
 
@@ -359,7 +389,7 @@ Scrum is an Agile framework that organizes work into time-boxed sprints. The **P
 
 1. The codebase is feature-modular, so each sprint can deliver a vertical slice such as medicines, health logs, bookings, or exports.
 2. The healthcare domain requires frequent feedback from multiple stakeholders: patients, caregivers, doctors, and admins.
-3. The survey results reveal evolving feature priorities such as chatbot support, QR sharing, payment methods, and reminder design.
+3. The survey results reveal evolving feature priorities such as QR sharing, payment methods, reminder design, and post-MVP chatbot support.
 4. Third-party integrations such as Paymob, Cloudinary, Google authentication, e-mail, and AI utilities benefit from incremental risk reduction.
 5. Frontend and backend teams can work in parallel because API modules and Flutter feature folders are clearly separated.
 6. Security, usability, and clinical workflow improvements can be continuously added without rewriting the full system.
@@ -1216,61 +1246,55 @@ stateDiagram-v2
 
 ## 4.7 User Interface Design
 
-### Splash and onboarding
+The UI figures in this section are exported from the Figma file **Pill Reminder old one**, page **Final UI**. They replace the previous placeholder notes with concrete interface evidence for the final design.
 
-![Splash and onboarding](frontend/assets/images/welcom.png)
+### 4.7.1 Final UI Patient Flow Overview
 
-> **UI mapping:** This repository asset supports the splash and onboarding user flow. In a final academic submission, this figure should be replaced or supplemented with a full application screenshot captured from the running Flutter app.
+![Final UI patient flow overview](docs/figma-ui/final-ui-patient-flow.png)
 
-### Medication management
+> **UI mapping:** This overview captures the Figma **Final UI** patient-flow section, showing the connected mobile screens and design language used for the proposed product.
 
-![Medication management](frontend/assets/images/medication.svg)
+### 4.7.2 Splash and Onboarding
 
-> **UI mapping:** This repository asset supports the medication management user flow. In a final academic submission, this figure should be replaced or supplemented with a full application screenshot captured from the running Flutter app.
+![Final UI splash screen](docs/figma-ui/final-ui-splash-screen.png)
 
-### Doctor discovery
+> **UI mapping:** The splash screen establishes the brand entry point and visual identity before the user proceeds into authentication or onboarding.
 
-![Doctor discovery](frontend/assets/images/doctor.svg)
+### 4.7.3 Patient Dashboard
 
-> **UI mapping:** This repository asset supports the doctor discovery user flow. In a final academic submission, this figure should be replaced or supplemented with a full application screenshot captured from the running Flutter app.
+![Final UI patient dashboard](docs/figma-ui/final-ui-home-dashboard.png)
 
-### Chat and support
+> **UI mapping:** The dashboard presents the patient-facing home flow, including medication reminders, health summary context, and navigation to core modules.
 
-![Chat and support](frontend/assets/images/chats.svg)
+### 4.7.4 Patient Schedule and Reminder View
 
-> **UI mapping:** This repository asset supports the chat and support user flow. In a final academic submission, this figure should be replaced or supplemented with a full application screenshot captured from the running Flutter app.
+![Final UI patient schedule](docs/figma-ui/final-ui-home-schedule.png)
 
-### Health measurement - blood pressure
+> **UI mapping:** This screen supports reminder-oriented daily use by exposing the patient schedule and upcoming medication tasks.
 
-![Health measurement - blood pressure](frontend/assets/svg/blood_pressure.svg)
+### 4.7.5 Medication Feedback and Symptoms
 
-> **UI mapping:** This repository asset supports the health measurement - blood pressure user flow. In a final academic submission, this figure should be replaced or supplemented with a full application screenshot captured from the running Flutter app.
+![Final UI feedback and symptoms](docs/figma-ui/final-ui-feedback.png)
 
-### Health measurement - heart rate
+> **UI mapping:** The feedback screen maps to medication feedback, daily symptoms, side-effect reporting, and the symptom-log model used by the backend.
 
-![Health measurement - heart rate](frontend/assets/svg/heart_rate.svg)
+### 4.7.6 QR Medical Record Sharing
 
-> **UI mapping:** This repository asset supports the health measurement - heart rate user flow. In a final academic submission, this figure should be replaced or supplemented with a full application screenshot captured from the running Flutter app.
+![Final UI QR medical record](docs/figma-ui/final-ui-qr-record.png)
 
-### Profile
+> **UI mapping:** The QR screen maps directly to the export module, QR token generation, and controlled shared-record retrieval.
 
-![Profile](frontend/assets/images/profile.svg)
+### 4.7.7 Repository UI Asset Support
 
-> **UI mapping:** This repository asset supports the profile user flow. In a final academic submission, this figure should be replaced or supplemented with a full application screenshot captured from the running Flutter app.
+The repository also contains supporting UI assets used by the Flutter implementation, including medication, doctor, chat, health-measurement, profile, and notification assets:
 
-### Notifications
-
-![Notifications](frontend/assets/images/notification.svg)
-
-> **UI mapping:** This repository asset supports the notifications user flow. In a final academic submission, this figure should be replaced or supplemented with a full application screenshot captured from the running Flutter app.
-
-> **[PLACEHOLDER: Insert Screenshot of Patient Dashboard Here]**
-
-> **[PLACEHOLDER: Insert Screenshot of Add Medication Flow Here]**
-
-> **[PLACEHOLDER: Insert Screenshot of Doctor Profile and Booking Flow Here]**
-
-> **[PLACEHOLDER: Insert Screenshot of Health Measurements Chart Here]**
+- `frontend/assets/images/medication.svg`
+- `frontend/assets/images/doctor.svg`
+- `frontend/assets/images/chats.svg`
+- `frontend/assets/svg/blood_pressure.svg`
+- `frontend/assets/svg/heart_rate.svg`
+- `frontend/assets/images/profile.svg`
+- `frontend/assets/images/notification.svg`
 
 # Chapter 5: Conclusion and Future Work
 
@@ -1282,7 +1306,7 @@ This documentation analyzed MediApp as a complete senior-project healthcare syst
 
 ### Key Findings from User Research
 
-The extracted charts show strong need for reminders, caregiver mode, QR record sharing, multi-payment support, chatbot support, and structured reports. The most decisive values include 67.3% chronic-condition relevance, 70.4% memory-based medication tracking, 74.1% dose-forgetting challenges, 92.6% conditional/full QR sharing acceptance, 84% chatbot demand, and 54% beta interest.
+The extracted charts show strong need for reminders, caregiver mode, QR record sharing, multi-payment support, structured reports, and future chatbot support. The most decisive values include 67.3% chronic-condition relevance, 70.4% memory-based medication tracking, 74.1% dose-forgetting challenges, 92.6% conditional/full QR sharing acceptance, 84% chatbot demand as a post-MVP signal, and 54% beta interest.
 
 ### Review of Existing Research
 
@@ -1332,7 +1356,7 @@ The project can reduce missed doses, improve caregiver confidence, support docto
 
 1. Implement production-grade real-time chat, push notifications, and video consultation using WebSockets and a secure video SDK.
 2. Harden healthcare compliance by adding consent history, audit dashboards, webhook signature verification, secure mobile token storage, and expanded field-level encryption.
-3. Expand AI capabilities to include drug-interaction warnings, allergy conflict detection, abnormal vital-sign alerts, and explainable chatbot triage with clinician-reviewed safety boundaries.
+3. Expand the planned feature set after the MVP with chatbot support, prescription OCR, barcode scanning, online drug search, drug-interaction tracking, meal reminders, custom voice alerts, gamification, stop-smoking programs, symptom-crisis escalation, and IoT device integration.
 4. Introduce scalable background workers for reminders, e-mails, PDF generation, payment reconciliation, AI enrichment, and notification retries.
 
 # References
