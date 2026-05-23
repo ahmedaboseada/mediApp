@@ -9,7 +9,9 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:medi/core/widgets/alarm_notification.dart';
 import 'package:medi/core/services/alarm_service.dart';
 import 'package:medi/core/services/hive_service.dart';
+import 'package:medi/core/services/notification_inbox_service.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
+import 'package:medi/features/patient/features/notification/presentation/models/notification_item.dart';
 import 'package:medi/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
@@ -397,11 +399,17 @@ class LocalNotificationService {
     );
   }
 
-  Future<void> showNotification({
+  static Future<void> showNotification({
     required String title,
     required String body,
     int? id,
     String? payload,
+    NotificationCategory category = NotificationCategory.medication,
+   // NotificationSource source = NotificationSource.local,
+    String? entityId,
+    String? entityType,
+    String? eventType,
+    Map<String, dynamic> data = const <String, dynamic>{},
   }) async {
     await init();
 
@@ -411,6 +419,22 @@ class LocalNotificationService {
       body: body,
       notificationDetails: _notificationDetails,
       payload: payload,
+    );
+
+    await NotificationInboxService.recordNotification(
+      NotificationInboxItem(
+        id: '${DateTime.now().microsecondsSinceEpoch}',
+        title: title,
+        body: body,
+        category: category,
+       // source: source,
+        createdAt: DateTime.now(),
+        isRead: false,
+        entityId: entityId,
+        entityType: entityType,
+        eventType: eventType,
+        data: data,
+      ),
     );
   }
 

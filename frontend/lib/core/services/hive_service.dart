@@ -21,9 +21,15 @@ class HiveService {
   static const String _userBox = 'userBox';
   static const String _settingsBox = 'settingsBox';
   static const String _medicationsBox = 'medicationsBox';
+  static const String _notificationsBox = 'notificationInboxBox';
   static const String _medicationsKey = 'medications';
   static const String _earlyVoiceAlertsKey = 'earlyVoiceAlerts';
   static const String _notificationsEnabledKey = 'notificationsEnabled';
+  static const String _unreadNotificationsCountKey = 'unreadNotificationsCount';
+
+  static const String settingsBoxName = _settingsBox;
+  static const String unreadNotificationsCountKey =
+      _unreadNotificationsCountKey;
 
   // Keys
   static const String _accessTokenKey = 'accessToken';
@@ -101,7 +107,7 @@ class HiveService {
   static Future<void> _forceDeleteBoxFiles(String boxName) async {
     final directory = await getApplicationDocumentsDirectory();
     final candidates = <String>[
-      '$boxName',
+      boxName,
       '$boxName.hive',
       '$boxName.lock',
       '$boxName.hive.lock',
@@ -513,6 +519,37 @@ class HiveService {
         as bool;
   }
 
+  /// Increment the unread notification badge count.
+  static Future<void> incrementUnreadNotificationsCount() async {
+    if (!Hive.isBoxOpen(_settingsBox)) return;
+    final box = Hive.box(_settingsBox);
+    final current = box.get(_unreadNotificationsCountKey, defaultValue: 0) as int;
+    await box.put(_unreadNotificationsCountKey, current + 1);
+  }
+
+  /// Save the unread notification badge count.
+  static Future<void> setUnreadNotificationsCount(int count) async {
+    if (!Hive.isBoxOpen(_settingsBox)) return;
+    await Hive.box(_settingsBox).put(
+      _unreadNotificationsCountKey,
+      count < 0 ? 0 : count,
+    );
+  }
+
+  /// Return the unread notification badge count.
+  static int getUnreadNotificationsCount() {
+    if (!Hive.isBoxOpen(_settingsBox)) return 0;
+    return Hive.box(
+          _settingsBox,
+        ).get(_unreadNotificationsCountKey, defaultValue: 0)
+        as int;
+  }
+
+  /// Mark every notification as read.
+  static Future<void> markNotificationsAsRead() async {
+    await setUnreadNotificationsCount(0);
+  }
+
   // ========== MEDICATION MANAGEMENT ==========
 
   /// Get locally saved medications
@@ -653,6 +690,9 @@ class HiveService {
     final userBox = await _openUserBox();
     final settings = await _openSettingsBox();
     final meds = await _openMedicationsBox();
+    if (Hive.isBoxOpen(_notificationsBox)) {
+      await Hive.box(_notificationsBox).clear();
+    }
     await auth.clear();
     await userBox.clear();
     await settings.clear();
@@ -661,6 +701,7 @@ class HiveService {
     await Hive.deleteBoxFromDisk(_userBox);
     await Hive.deleteBoxFromDisk(_settingsBox);
     await Hive.deleteBoxFromDisk(_medicationsBox);
+    await Hive.deleteBoxFromDisk(_notificationsBox);
   }
 
   /// Close all boxes

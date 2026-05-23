@@ -7,12 +7,13 @@ import 'package:medi/features/patient/features/add_medication/data/repo/medicine
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_cubit.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/widgets/floating_actions_menu.dart';
 import 'package:medi/features/patient/features/home/presentation/widgets/health_summary.dart';
+import 'package:medi/features/patient/features/home/presentation/widgets/notification_button.dart';
 import 'package:medi/features/patient/features/home/presentation/widgets/upcoming_booking.dart';
 import 'package:medi/features/patient/features/home/presentation/widgets/user_widget.dart';
 import 'package:medi/features/patient/features/home/presentation/widgets/your_schedule.dart';
 
 class HomeScreen extends StatefulWidget {
-  HomeScreen({super.key});
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -59,61 +60,73 @@ class _HomeScreenState extends State<HomeScreen> {
                                 firstName: firstName,
                                 profileImagePath: profileImagePath,
                               ),
-                              GestureDetector(
-                                onTap: () {
-                                  final emergency =
-                                      HiveService.getEmergencyContact();
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      final emergency =
+                                          HiveService.getEmergencyContact();
 
-                                  if (emergency == null ||
-                                      (emergency['name'] as String?)?.isEmpty ==
-                                          true) {
-                                    context.push(
-                                      AppRouter.setEmergencyContactscreen,
-                                    );
-                                  } else {
-                                    final name =
-                                        emergency['name'] as String? ?? '';
-                                    final method =
-                                        emergency['contactMethod'] as String? ??
-                                        'whatsapp';
-                                    context.push(
-                                      AppRouter.confirmEmergencyAlertScreen,
-                                      extra: {
-                                        'contactName': name,
-                                        'contactMethod': method,
-                                      },
-                                    );
-                                  }
-                                },
-                                child: Semantics(
-                                  button: true,
-                                  label: 'Emergency SOS',
-                                  child: Tooltip(
-                                    message: 'Emergency SOS',
-                                    child: Container(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: AppSizes.w8,
-                                        vertical: AppSizes.h6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.error,
-                                        borderRadius: BorderRadius.circular(
-                                          AppSizes.r40,
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.error_outline,
-                                            color: AppColors.surfaceColor,
+                                      if (emergency == null ||
+                                          (emergency['name'] as String?)
+                                                  ?.isEmpty ==
+                                              true) {
+                                        context.push(
+                                          AppRouter.setEmergencyContactscreen,
+                                        );
+                                      } else {
+                                        final name =
+                                            emergency['name'] as String? ?? '';
+                                        final method =
+                                            emergency['contactMethod']
+                                                    as String? ??
+                                                'whatsapp';
+                                        context.push(
+                                          AppRouter.confirmEmergencyAlertScreen,
+                                          extra: {
+                                            'contactName': name,
+                                            'contactMethod': method,
+                                          },
+                                        );
+                                      }
+                                    },
+                                    child: Semantics(
+                                      button: true,
+                                      label: 'Emergency SOS',
+                                      child: Tooltip(
+                                        message: 'Emergency SOS',
+                                        child: Container(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: AppSizes.w8,
+                                            vertical: AppSizes.h6,
                                           ),
-                                          Text(' SOS', style: AppStyles.white14500),
-                                        ],
+                                          decoration: BoxDecoration(
+                                            color: AppColors.error,
+                                            borderRadius: BorderRadius.circular(
+                                              AppSizes.r40,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.error_outline,
+                                                color: AppColors.surfaceColor,
+                                              ),
+                                              Text(
+                                                ' SOS',
+                                                style: AppStyles.white14500,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
+                                  SizedBox(width: AppSizes.w12),
+                                  const NotificationButton(),
+                                ],
                               ),
                             ],
                           ),

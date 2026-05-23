@@ -77,7 +77,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen> {
 
       // Notifications
       LocalNotificationService().scheduleMedicationReminders(medication);
-      LocalNotificationService().showNotification(
+      LocalNotificationService.showNotification(
         title: 'Medication Added',
         body: '${medication.medicationName} has been added to your list.',
       );

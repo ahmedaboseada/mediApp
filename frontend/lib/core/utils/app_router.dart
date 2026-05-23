@@ -17,6 +17,7 @@ import 'package:medi/features/patient/features/doctors/presentation/screens/add_
 import 'package:medi/features/patient/features/health_measurements/presentation/screens/add_daily_log_screen.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/screens/health_measurements_screen.dart';
 import 'package:medi/features/patient/features/home/presentation/screens/confirm_emergency_alert_screen.dart';
+import 'package:medi/features/patient/features/notification/presentation/screens/notification_screen.dart';
 import 'package:medi/features/patient/features/home/presentation/screens/set_emergency_contact_dialog.dart';
 import 'package:medi/features/patient/features/profile/presentation/controller/profile/profile_cubit.dart';
 import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
@@ -171,6 +172,7 @@ class AppRouter {
   static const String allSetScreen = '/AllSetScreen';
   static const String patientAccountInfoScreen = '/patient/accountInfo';
   static const String patientCaregiverModeScreen = '/patient/caregiverMode';
+  static const String notificationsScreen = '/patient/notifications';
   static const String changeEmailScreen = '/patient/changeEmail';
   static const String changePasswordScreen = '/patient/changePassword';
   static const String chooseMethodScreen =
@@ -487,6 +489,11 @@ class AppRouter {
         builder: (context, state) => const PaymentFailureScreen(
           errorMessage: 'Payment was cancelled or failed. Please try again.',
         ),
+      ),
+
+      GoRoute(
+        path: notificationsScreen,
+        builder: (context, state) => const NotificationScreen(),
       ),
 
       /// ================= PATIENT SHELL =================

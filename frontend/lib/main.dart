@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/core/services/call_service.dart';
+import 'package:medi/core/services/push_notification_service.dart';
 import 'package:medi/core/utils/app_them.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -13,6 +14,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppStartupInitializer.initializeCoreServices();
   await Firebase.initializeApp();
+  PushNotificationService.initialize();
     try {
     final savedUser =
         HiveService.getUserData();
