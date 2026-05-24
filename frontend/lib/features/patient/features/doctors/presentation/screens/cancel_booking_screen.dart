@@ -91,7 +91,10 @@ class _CancelBookingScreenState extends State<CancelBookingScreen> {
                   text: 'Book Another',
                 ),
                 TextButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    _cancelAppointment();
+                      context.push('/home');
+                  },
                   child: Text('Go Home', style: AppStyles.secondary18500),
                 ),
               ],

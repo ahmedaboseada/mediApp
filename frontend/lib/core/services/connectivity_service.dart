@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:medi/core/data/sync/sync_service.dart';
+import 'package:medi/core/services/app_logger.dart';
 
 class ConnectivityService {
   static StreamSubscription<List<ConnectivityResult>>? _subscription;
@@ -15,7 +16,7 @@ class ConnectivityService {
       );
 
       if (isConnected) {
-        print('Internet connected, triggering sync...');
+        AppLogger.instance.i('Internet connected, triggering sync...');
         SyncService.processQueue();
       }
     });

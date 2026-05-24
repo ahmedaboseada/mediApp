@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/core/data/sync/sync_service.dart';
+import 'package:medi/core/services/hive_service.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 import 'package:medi/features/patient/features/add_medication/data/repo/medicine_repo.dart';
 
@@ -221,8 +223,14 @@ class MedicineRepoImpl implements MedicineRepo {
       log('Get Medication Schedule Response: ${response.toString()}');
 
       if (response is ServerFailure) {
+        final cached = HiveService.getMedicationSchedule('all');
+        if (cached != null) {
+          return Right(cached);
+        }
         return Left(response);
       }
+
+      await HiveService.saveMedicationSchedule('all', response);
 
       return Right(response);
     } on DioException catch (e) {
@@ -247,8 +255,14 @@ class MedicineRepoImpl implements MedicineRepo {
       );
 
       if (response is ServerFailure) {
+        final cached = HiveService.getMedicationSchedule(date);
+        if (cached != null) {
+          return Right(cached);
+        }
         return Left(response);
       }
+
+      await HiveService.saveMedicationSchedule(date, response);
 
       return Right(response);
     } on DioException catch (e) {
@@ -276,8 +290,37 @@ class MedicineRepoImpl implements MedicineRepo {
       log('Mark As Taken Response: ${response.toString()}');
 
       if (response is ServerFailure) {
+        if (_isOfflineFailure(response)) {
+          await HiveService.markMedicationScheduleTaken(
+            date: date,
+            medicationId: medicationId,
+            time: time,
+            taken: taken,
+          );
+
+          await SyncService.addToQueue(
+            type: 'mark_as_taken',
+            entity: 'medication',
+            data: {
+              'id': medicationId,
+              'date': date,
+              'time': time,
+              'taken': taken,
+            },
+          );
+
+          return Right('Saved locally. Will sync when online.');
+        }
+
         return Left(response);
       }
+
+      await HiveService.markMedicationScheduleTaken(
+        date: date,
+        medicationId: medicationId,
+        time: time,
+        taken: taken,
+      );
 
       final message =
           (response is Map<String, dynamic> ? response['message'] : null) ??
@@ -409,6 +452,16 @@ class MedicineRepoImpl implements MedicineRepo {
     }
 
     return null;
+  }
+
+  bool _isOfflineFailure(ApiError error) {
+    final message = error.message.toLowerCase();
+    return message.contains('no internet') ||
+        message.contains('internet connection') ||
+        message.contains('connection timeout') ||
+        message.contains('connection to server failed') ||
+        message.contains('socketexception') ||
+        message.contains('unexpected error occurred');
   }
 
   String _toApiFrequency(String value) {

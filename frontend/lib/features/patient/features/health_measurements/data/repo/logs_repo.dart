@@ -7,6 +7,7 @@ abstract class LogsRepo {
     required int systolic,
     required int diastolic,
     int? heartRate,
+    bool persistLocal = true,
   });
 
   Future<Either<ApiError, dynamic>> getBloodPressures();
@@ -14,6 +15,7 @@ abstract class LogsRepo {
   Future<Either<ApiError, String>> addHeartRate({
     required String type,
     required int value,
+    bool persistLocal = true,
   });
 
   Future<Either<ApiError, dynamic>> getHeartRates();
@@ -22,6 +24,7 @@ abstract class LogsRepo {
     required String type,
     required int value,
     String? notes,
+    bool persistLocal = true,
   });
 
   Future<Either<ApiError, dynamic>> getBloodSugars();
@@ -29,6 +32,7 @@ abstract class LogsRepo {
   Future<Either<ApiError, String>> addWeight({
     required String type,
     required double value,
+    bool persistLocal = true,
   });
 
   Future<Either<ApiError, dynamic>> getWeights();
@@ -37,6 +41,7 @@ abstract class LogsRepo {
     required List<String> symptoms,
     required String severity,
     required String notes,
+    bool persistLocal = true,
   });
 
   Future<Either<ApiError, dynamic>> getSymptomLogs();

@@ -62,6 +62,7 @@ dependencies:
   http: ^1.2.0
   image_picker: ^1.1.2
   intl: ^0.20.2
+  logger: ^1.2.2
   intl_phone_number_input: ^0.7.5
   just_audio: ^0.10.5
   latlong_to_place: ^0.0.9

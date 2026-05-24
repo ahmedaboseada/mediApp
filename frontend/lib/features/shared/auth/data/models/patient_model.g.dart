@@ -47,6 +47,7 @@ class PatientModelAdapter extends TypeAdapter<PatientModel> {
       allergyAlerts: fields[11] as bool? ?? false,
       reactionToMedication: fields[12] as bool? ?? false,
       caregiver: fields[13] as CaregiverModel?,
+      emergencyContact: fields[14] as EmergencyContactModel?,
     );
   }
 
@@ -81,7 +82,9 @@ class PatientModelAdapter extends TypeAdapter<PatientModel> {
       ..writeByte(12)
       ..write(obj.reactionToMedication)
       ..writeByte(13)
-      ..write(obj.caregiver);
+      ..write(obj.caregiver)
+      ..writeByte(14)
+      ..write(obj.emergencyContact);
   }
 
   @override

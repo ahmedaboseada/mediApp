@@ -1,31 +1,36 @@
 import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
+import 'models/sync_action_type.dart';
+import 'models/sync_entity.dart';
 
 class SyncAction extends HiveObject {
   final String id;
-  final String type; // "add" | "update" | "delete"
-  final String entity; // "medication" | "measurement" | "symptom"
+  final SyncActionType type;
+  final SyncEntity entity;
   final Map<String, dynamic> data;
   final DateTime createdAt;
   int retryCount;
 
   SyncAction({
     String? id,
-    required this.type,
-    required this.entity,
+    Object? type,
+    Object? entity,
     required this.data,
     DateTime? createdAt,
     this.retryCount = 0,
-  }) : id = id ?? const Uuid().v4(),
-       createdAt = createdAt ?? DateTime.now();
+  })  : id = id ?? const Uuid().v4(),
+        type = SyncActionTypeX.fromAny(type),
+        entity = SyncEntityX.fromAny(entity),
+        createdAt = createdAt ?? DateTime.now();
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'type': type,
-      'entity': entity,
+      'type': type.storageValue,
+      'entity': entity.storageValue,
       'data': data,
       'createdAt': createdAt.toIso8601String(),
+      'retryCount': retryCount,
     };
   }
 
@@ -35,7 +40,8 @@ class SyncAction extends HiveObject {
       type: json['type'],
       entity: json['entity'],
       data: Map<String, dynamic>.from(json['data']),
-      createdAt: DateTime.parse(json['createdAt']),
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      retryCount: json['retryCount'] as int? ?? 0,
     );
   }
 }
@@ -52,8 +58,8 @@ class SyncActionAdapter extends TypeAdapter<SyncAction> {
     };
     return SyncAction(
       id: fields[0] as String?,
-      type: fields[1] as String,
-      entity: fields[2] as String,
+      type: fields[1] as String?,
+      entity: fields[2] as String?,
       data: (fields[3] as Map).cast<String, dynamic>(),
       createdAt: fields[4] as DateTime?,
       retryCount: fields[5] as int? ?? 0,
@@ -67,9 +73,9 @@ class SyncActionAdapter extends TypeAdapter<SyncAction> {
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.type)
+      ..write(obj.type.storageValue)
       ..writeByte(2)
-      ..write(obj.entity)
+      ..write(obj.entity.storageValue)
       ..writeByte(3)
       ..write(obj.data)
       ..writeByte(4)
