@@ -13,6 +13,7 @@ const userSchema = new Schema(
         password: { type: String, required: true, select: false },
 
         phone: { type: String }, // encrypted
+        fcmToken: { type: String }, // encrypted
         DOB: { type: Date },
         age: { type: Number, min: 0, max: 130 },
         gender: { type: String, enum: ['male', 'female'] },

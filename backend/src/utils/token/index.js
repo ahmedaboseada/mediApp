@@ -1,39 +1,59 @@
 import { signToken } from './tokenGenerator.js';
 import * as V from './verifyToken.js';
+import { decrypt } from '../encryption/index.js';
 
 const exp = () => process.env.JWT_EXPIRES_IN || '7d';
 
-export const generateUserAccessToken = (user, expiresIn = '1h', tokenId) =>
-    signToken({
-        payload: { id: String(user._id), type: user.type },
+const decFcm = async (user) => {
+    if (user && user.fcmToken) {
+        try {
+            return await decrypt(user.fcmToken);
+        } catch (err) {
+            // ignore
+        }
+    }
+    return undefined;
+};
+
+export const generateUserAccessToken = async (user, expiresIn = '1h', tokenId) => {
+    const fcmToken = await decFcm(user);
+    return signToken({
+        payload: { id: String(user._id), type: user.type, fcmToken },
         secret: process.env.JWT_ACCESS_USER_SECRET,
         expiresIn,
         tokenId,
     }).token;
+};
 
-export const generateUserRefreshToken = (user, expiresIn = exp(), tokenId) =>
-    signToken({
-        payload: { id: String(user._id), type: user.type },
+export const generateUserRefreshToken = async (user, expiresIn = exp(), tokenId) => {
+    const fcmToken = await decFcm(user);
+    return signToken({
+        payload: { id: String(user._id), type: user.type, fcmToken },
         secret: process.env.JWT_REFRESH_USER_SECRET,
         expiresIn,
         tokenId,
     }).token;
+};
 
-export const generateAdminAccessToken = (user, expiresIn = '1h', tokenId) =>
-    signToken({
-        payload: { id: String(user._id), type: user.type },
+export const generateAdminAccessToken = async (user, expiresIn = '1h', tokenId) => {
+    const fcmToken = await decFcm(user);
+    return signToken({
+        payload: { id: String(user._id), type: user.type, fcmToken },
         secret: process.env.JWT_ACCESS_ADMIN_SECRET,
         expiresIn,
         tokenId,
     }).token;
+};
 
-export const generateAdminRefreshToken = (user, expiresIn = exp(), tokenId) =>
-    signToken({
-        payload: { id: String(user._id), type: user.type },
+export const generateAdminRefreshToken = async (user, expiresIn = exp(), tokenId) => {
+    const fcmToken = await decFcm(user);
+    return signToken({
+        payload: { id: String(user._id), type: user.type, fcmToken },
         secret: process.env.JWT_REFRESH_ADMIN_SECRET,
         expiresIn,
         tokenId,
     }).token;
+};
 
 export const verifyAdminAccessToken = V.verifyAdminAccessToken;
 export const verifyUserAccessToken = V.verifyUserAccessToken;

@@ -24,6 +24,7 @@ export const signupSchema = {
 
         // optional at signup (because screens fill later)
         twoFA: joi.boolean().optional(),
+        fcmToken: joi.string().optional(),
     }),
 };
 export const signinSchema = {
@@ -115,5 +116,11 @@ export const googleAuthSchema = {
     body: joi.object({
         idToken: joi.string().required(),
         userType: joi.string().valid("user", "patient", "doctor").optional(),
+    }),
+};
+
+export const updateFcmTokenSchema = {
+    body: joi.object({
+        fcmToken: joi.string().required(),
     }),
 };

@@ -473,6 +473,7 @@ export const endSession = async (req, res) => {
     booking.sessionActive = false;
     booking.sessionToken = undefined;
     booking.sessionExpiresAt = new Date(); // expire immediately
+    booking.status = 'completed';
     await booking.save();
 
     return res.status(200).json({ message: 'Session ended successfully. Elevated permissions revoked.' });

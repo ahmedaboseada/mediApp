@@ -20,7 +20,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"type\": \"patient\",\n  \"firstName\": \"Ahmed\",\n  \"lastName\": \"Abu Seada\",\n  \"email\": \"ahmedabuseada22@gmail.com\",\n  \"password\": \"116574Mm@@\",\n  \"confirmPassword\": \"116574Mm@@\",\n  \"phone\": \"01012345678\",\n  \"DOB\": \"2000-01-01\",\n  \"age\": 26,\n  \"gender\": \"male\",\n  \"twoFA\": false\n}"
+              "raw": "{\n  \"type\": \"patient\",\n  \"firstName\": \"Ahmed\",\n  \"lastName\": \"Abu Seada\",\n  \"email\": \"ahmedabuseada22@gmail.com\",\n  \"password\": \"116574Mm@@\",\n  \"confirmPassword\": \"116574Mm@@\",\n  \"phone\": \"01012345678\",\n  \"DOB\": \"2000-01-01\",\n  \"age\": 26,\n  \"gender\": \"male\",\n  \"twoFA\": false,\n  \"fcmToken\": \"test_registration_fcm_token_777\"\n}"
             },
             "url": "{{baseUrl}}/users/signup"
           },
@@ -1011,6 +1011,123 @@
             ],
             "url": "{{baseUrl}}/users/email/cancel"
           }
+        },
+        {
+          "name": "FCM Notifications",
+          "item": [
+            {
+              "name": "Update FCM Token (Success)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fcmToken\": \"fcm_token_123456_success\"\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/users/fcm-token",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "users",
+                    "fcm-token"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Update FCM Token (Fail - Caregiver Not Applicable)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{CAREGIVER_ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fcmToken\": \"fcm_token_should_fail\"\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/users/fcm-token",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "users",
+                    "fcm-token"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 403 or 400', function () { pm.expect(pm.response.code).to.be.oneOf([400, 403]); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get All FCM Tokens",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/users/fcm-tokens",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "users",
+                    "fcm-tokens"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -2740,6 +2857,289 @@
               }
             }
           ]
+        },
+        {
+          "name": "Doctor Reviews",
+          "item": [
+            {
+              "name": "Create Review (Success)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"doctorId\": \"{{doctorId}}\",\n  \"rating\": 5\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/reviews",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "reviews"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 201', function () { pm.response.to.have.status(201); });",
+                      "var jsonData = pm.response.json();",
+                      "if (jsonData.review && jsonData.review._id) {",
+                      "    pm.collectionVariables.set('reviewId', jsonData.review._id);",
+                      "}"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Create Review (Fail - No ended session)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"doctorId\": \"65b2d8f9c1e2f3a4b5c6d7e8\",\n  \"rating\": 4\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/reviews",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "reviews"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 400 or 404', function () { pm.expect(pm.response.code).to.be.oneOf([400, 404]); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Create Review (Fail - Already reviewed)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"doctorId\": \"{{doctorId}}\",\n  \"rating\": 3\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/reviews",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "reviews"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 400', function () { pm.response.to.have.status(400); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Doctor Reviews",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{BASE_URL}}/reviews/doctor/{{doctorId}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "reviews",
+                    "doctor",
+                    "{{doctorId}}"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get My Reviews",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/reviews/me",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "reviews",
+                    "me"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Get Review Details",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{BASE_URL}}/reviews/{{reviewId}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "reviews",
+                    "{{reviewId}}"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Update Review",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rating\": 4\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/reviews/{{reviewId}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "reviews",
+                    "{{reviewId}}"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Delete Review",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/reviews/{{reviewId}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "reviews",
+                    "{{reviewId}}"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -4283,6 +4683,14 @@
     },
     {
       "key": "withdrawalId",
+      "value": ""
+    },
+    {
+      "key": "reviewId",
+      "value": ""
+    },
+    {
+      "key": "CAREGIVER_ACCESS_TOKEN",
       "value": ""
     }
   ]

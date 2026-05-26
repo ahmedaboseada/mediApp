@@ -216,4 +216,8 @@ userRouter.patch('/settings', US.updateSettings);
 // DELETE ACCOUNT
 userRouter.delete('/me', US.deleteAccount);
 
+// FCM TOKENS
+userRouter.get('/fcm-tokens', US.getAllFcmTokens);
+userRouter.patch('/fcm-token', validation(UVS.updateFcmTokenSchema), US.updateFcmToken);
+
 export default userRouter;

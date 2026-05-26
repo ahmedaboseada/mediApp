@@ -523,6 +523,10 @@ const publicUser = async (u) => {
     if (u.phone) {
         try { decryptedPhone = await ET.decrypt(u.phone); } catch (err) { }
     }
+    let decryptedFcm = u.fcmToken;
+    if (u.fcmToken) {
+        try { decryptedFcm = await ET.decrypt(u.fcmToken); } catch (err) { }
+    }
     return {
         id: String(u._id),
         type: u.type,
@@ -539,6 +543,7 @@ const publicUser = async (u) => {
         pendingEmailRequestedAt: u.pendingEmailRequestedAt,
         emailChangeTokenId: u.emailChangeTokenId,
         phone: decryptedPhone,
+        fcmToken: decryptedFcm,
         yearOfBirth: u.yearOfBirth,
         chronicConditions: u.chronicConditions,
         longTermMedication: u.longTermMedication,
@@ -578,6 +583,7 @@ export const signup = async (req, res) => {
             // confirmPassword, // validated by Joi, ignored in service
             type,
             twoFA,
+            fcmToken,
         } = req.body;
 
         const emailNorm = email.toLowerCase().trim();
@@ -593,12 +599,15 @@ export const signup = async (req, res) => {
             SALT_ROUNDS: Number(process.env.SALT_ROUNDS || 12),
         });
 
+        const encryptedFcmToken = fcmToken ? await ET.encrypt(fcmToken) : undefined;
+
         const user = await userModel.create({
             type,
             firstName,
             lastName,
             email: emailNorm,
             password: hashedPassword,
+            fcmToken: encryptedFcmToken,
             // twoFA: !!twoFA,
             // profilePicture,
             // confirmed: false,
@@ -634,12 +643,12 @@ export const signup = async (req, res) => {
         // tokens
         const tokenId = nanoid();
         const accessToken = isAdminPrefix(user)
-            ? VT.generateAdminAccessToken(user, "1h", tokenId)
-            : VT.generateUserAccessToken(user, "1h", tokenId);
+            ? await VT.generateAdminAccessToken(user, "1h", tokenId)
+            : await VT.generateUserAccessToken(user, "1h", tokenId);
 
         const refreshToken = isAdminPrefix(user)
-            ? VT.generateAdminRefreshToken(user, process.env.JWT_EXPIRES_IN || "7d", tokenId)
-            : VT.generateUserRefreshToken(user, process.env.JWT_EXPIRES_IN || "7d", tokenId);
+            ? await VT.generateAdminRefreshToken(user, process.env.JWT_EXPIRES_IN || "7d", tokenId)
+            : await VT.generateUserRefreshToken(user, process.env.JWT_EXPIRES_IN || "7d", tokenId);
 
         // Return only correct type data
         const payload = {
@@ -683,8 +692,8 @@ export const signin = async (req, res) => {
     }
 
     const tokenId = nanoid();
-    const accessToken = isAdminPrefix(user) ? VT.generateAdminAccessToken(user, '1h', tokenId) : VT.generateUserAccessToken(user, '1h', tokenId);
-    const refreshToken = isAdminPrefix(user) ? VT.generateAdminRefreshToken(user, process.env.JWT_EXPIRES_IN || '7d', tokenId) : VT.generateUserRefreshToken(user, process.env.JWT_EXPIRES_IN || '7d', tokenId);
+    const accessToken = isAdminPrefix(user) ? await VT.generateAdminAccessToken(user, '1h', tokenId) : await VT.generateUserAccessToken(user, '1h', tokenId);
+    const refreshToken = isAdminPrefix(user) ? await VT.generateAdminRefreshToken(user, process.env.JWT_EXPIRES_IN || '7d', tokenId) : await VT.generateUserRefreshToken(user, process.env.JWT_EXPIRES_IN || '7d', tokenId);
 
     const typeDoc = await attachTypeDoc(user);
 
@@ -719,8 +728,8 @@ export const signinWithOtp = async (req, res) => {
     await userModel.updateOne({ _id: user._id }, { $unset: { otp: 1, otpExpires: 1 } });
 
     const tokenId = nanoid();
-    const accessToken = isAdminPrefix(user) ? VT.generateAdminAccessToken(user, '1h', tokenId) : VT.generateUserAccessToken(user, '1h', tokenId);
-    const refreshToken = isAdminPrefix(user) ? VT.generateAdminRefreshToken(user, process.env.JWT_EXPIRES_IN || '7d', tokenId) : VT.generateUserRefreshToken(user, process.env.JWT_EXPIRES_IN || '7d', tokenId);
+    const accessToken = isAdminPrefix(user) ? await VT.generateAdminAccessToken(user, '1h', tokenId) : await VT.generateUserAccessToken(user, '1h', tokenId);
+    const refreshToken = isAdminPrefix(user) ? await VT.generateAdminRefreshToken(user, process.env.JWT_EXPIRES_IN || '7d', tokenId) : await VT.generateUserRefreshToken(user, process.env.JWT_EXPIRES_IN || '7d', tokenId);
 
     const typeDoc = await attachTypeDoc(user);
 
@@ -876,8 +885,8 @@ export const refreshToken = async (req, res) => {
         const expiredAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
         await revokeTokenModel.create({ tokenId: decoded.jti, expiredAt });
 
-        const accessToken = isAdmin ? VT.generateAdminAccessToken(user, '1h', newTokenId) : VT.generateUserAccessToken(user, '1h', newTokenId);
-        const refreshToken = isAdmin ? VT.generateAdminRefreshToken(user, '14d', newTokenId) : VT.generateUserRefreshToken(user, '14d', newTokenId);
+        const accessToken = isAdmin ? await VT.generateAdminAccessToken(user, '1h', newTokenId) : await VT.generateUserAccessToken(user, '1h', newTokenId);
+        const refreshToken = isAdmin ? await VT.generateAdminRefreshToken(user, '14d', newTokenId) : await VT.generateUserRefreshToken(user, '14d', newTokenId);
 
         return res.status(200).json({ message: 'Token refreshed', accessToken, refreshToken });
     };
@@ -1133,12 +1142,12 @@ export const googleAuth = async (req, res) => {
 
         const tokenId = nanoid();
         const accessToken = isAdminPrefix(user)
-            ? VT.generateAdminAccessToken(user, '1h', tokenId)
-            : VT.generateUserAccessToken(user, '1h', tokenId);
+            ? await VT.generateAdminAccessToken(user, '1h', tokenId)
+            : await VT.generateUserAccessToken(user, '1h', tokenId);
 
         const refreshToken = isAdminPrefix(user)
-            ? VT.generateAdminRefreshToken(user, process.env.JWT_EXPIRES_IN || '7d', tokenId)
-            : VT.generateUserRefreshToken(user, process.env.JWT_EXPIRES_IN || '7d', tokenId);
+            ? await VT.generateAdminRefreshToken(user, process.env.JWT_EXPIRES_IN || '7d', tokenId)
+            : await VT.generateUserRefreshToken(user, process.env.JWT_EXPIRES_IN || '7d', tokenId);
 
         return res.status(200).json({
             message: 'Google Auth Successful',
@@ -1196,4 +1205,52 @@ export const deleteAccount = async (req, res) => {
     }
 
     return res.status(200).json({ message: 'Account permanently deleted successfully.' });
+};
+
+export const updateFcmToken = async (req, res) => {
+    try {
+        const { fcmToken } = req.body;
+        if (!fcmToken) return res.status(400).json({ message: 'fcmToken is required' });
+
+        // not caregiver applicable
+        const patient = await patientModel.findOne({ userId: req.user.id });
+        if (patient && patient.caregiver && patient.caregiver.giving && patient.caregiver.giving.length > 0) {
+            return res.status(403).json({ message: 'Not applicable for caregivers' });
+        }
+
+        const encryptedFcm = await ET.encrypt(fcmToken);
+        const user = await userModel.findByIdAndUpdate(req.user.id, { fcmToken: encryptedFcm }, { new: true });
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        return res.status(200).json({ message: 'fcmToken updated successfully', fcmToken });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+};
+
+export const getAllFcmTokens = async (req, res) => {
+    try {
+        const users = await userModel.find({ fcmToken: { $exists: true, $ne: null } }).select('fcmToken email firstName lastName');
+        const list = [];
+        for (const u of users) {
+            if (u.fcmToken) {
+                try {
+                    const decrypted = await ET.decrypt(u.fcmToken);
+                    if (decrypted) {
+                        list.push({
+                            userId: u._id,
+                            email: u.email,
+                            name: `${u.firstName} ${u.lastName}`,
+                            fcmToken: decrypted
+                        });
+                    }
+                } catch (err) {}
+            }
+        }
+        return res.status(200).json({ fcmTokens: list });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
 };

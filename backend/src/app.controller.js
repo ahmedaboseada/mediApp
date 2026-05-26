@@ -17,6 +17,7 @@ import medicineRouter from './modules/medicineModel/medicine.controller.js';
 import healthRouter from './modules/healthModel/health.controller.js';
 import bookingRouter from './modules/bookingModel/booking.routes.js';
 import exportRouter from './modules/exportModel/export.routes.js';
+import reviewRouter from './modules/reviewModel/review.routes.js';
 import { startWeeklyAvailabilityReset } from './utils/index.js';
 
 const app = express();
@@ -71,6 +72,7 @@ export const bootstrap = async () => {
     app.use('/health', healthRouter);
     app.use('/bookings', bookingRouter);
     app.use('/export', exportRouter);
+    app.use('/reviews', reviewRouter);
 
 
 
