@@ -25,6 +25,14 @@ class DoctorConstants {
     DropdownItem(value: '7:00 PM - 8:00 PM', label: '7:00 PM - 8:00 PM'),
     DropdownItem(label: '8:00 PM - 9:00 PM', value: '8:00 PM - 9:00 PM'),
   ];
+  final List<DropdownItem<String>> consultationDurations = [
+    DropdownItem(value: '15', label: '15 min'),
+
+    DropdownItem(value: '30', label: '30 min'),
+
+    DropdownItem(value: '45', label: '45 min'),
+    DropdownItem(value: '60', label: '60 min'),
+  ];
   final List<DropdownItem<String>> appointmentsTypes = [
     DropdownItem(value: 'in-person', label: 'In-Person Visit'),
     DropdownItem(value: 'online', label: 'Online Consultation'),

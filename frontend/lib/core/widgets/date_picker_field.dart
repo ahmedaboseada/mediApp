@@ -10,7 +10,7 @@ class DatePickerField extends StatefulWidget {
     this.onDateSelected,
     required this.dateController,
     this.enabled = true,
-    this.validator,
+    this.validator, 
   });
   final DateTime? initialDate;
   final Function(DateTime)? onDateSelected;
@@ -91,16 +91,24 @@ class _DatePickerFieldState extends State<DatePickerField> {
                 borderSide: BorderSide(color: AppColors.errorBorderColor),
               ),
 
-              suffixIcon: IconButton(
-                onPressed: widget.enabled ? selectDate : null,
-                icon: SvgPicture.asset(
-                  AppAssets.calendar,
-                  height: AppSizes.h24,
-                  width: AppSizes.w24,
-                  fit: BoxFit.scaleDown,
-                  colorFilter: const ColorFilter.mode(
-                    AppColors.primaryDark,
-                    BlendMode.srcIn,
+              suffixIcon: Semantics(
+                button: true,
+                enabled: widget.enabled,
+                label: 'Select year of birth',
+                child: Tooltip(
+                  message: 'Select year of birth',
+                  child: IconButton(
+                    onPressed: widget.enabled ? selectDate : null,
+                    icon: SvgPicture.asset(
+                      AppAssets.calendar,
+                      height: AppSizes.h24,
+                      width: AppSizes.w24,
+                      fit: BoxFit.scaleDown,
+                      colorFilter: const ColorFilter.mode(
+                        AppColors.primaryDark,
+                        BlendMode.srcIn,
+                      ),
+                    ),
                   ),
                 ),
               ),

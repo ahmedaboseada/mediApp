@@ -11,8 +11,10 @@ class LogOutCubit extends Cubit<LogOutState> {
     emit(LogOutLoading());
     try {
       await authRepo.signOut();
+      if (isClosed) return;
       emit(LogOutSuccess());
     } catch (e) {
+      if (isClosed) return;
       emit(LogOutFailure(e.toString()));
     }
   }

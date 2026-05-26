@@ -14,8 +14,59 @@ class SettingsSection extends StatefulWidget {
 }
 
 class _SettingsSectionState extends State<SettingsSection> {
-  bool notifications = false;
-  bool earlyVoiceAlerts = false;
+  late bool notifications;
+  late bool earlyVoiceAlerts;
+
+  @override
+  void initState() {
+    super.initState();
+    notifications = HiveService.getNotificationsEnabled();
+    earlyVoiceAlerts = HiveService.getEarlyVoiceAlerts();
+  }
+
+  Future<void> _onNotificationsChanged(bool value) async {
+    setState(() {
+      notifications = value;
+    });
+
+    // Persist the setting
+    await HiveService.setNotificationsEnabled(value);
+
+    final medications = HiveService.getMedications();
+    final notificationService = LocalNotificationService();
+
+    if (value) {
+      // Turned ON: reschedule all medication notifications
+      for (final medication in medications) {
+        await notificationService.scheduleMedicationReminders(medication);
+      }
+    } else {
+      // Turned OFF: cancel all medication notifications
+      for (final medication in medications) {
+        await notificationService.cancelMedicationReminders(medication);
+      }
+    }
+  }
+
+  Future<void> _onEarlyVoiceAlertsChanged(bool value) async {
+    setState(() {
+      earlyVoiceAlerts = value;
+    });
+
+    // Persist the setting
+    await HiveService.setEarlyVoiceAlerts(value);
+
+    // Reschedule all medication notifications with the new setting
+    final medications = HiveService.getMedications();
+    final notificationService = LocalNotificationService();
+    for (final medication in medications) {
+      await notificationService.rescheduleMedicationReminders(
+        previousMedication: medication,
+        updatedMedication: medication,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<LogOutCubit, LogOutState>(
@@ -59,42 +110,16 @@ class _SettingsSectionState extends State<SettingsSection> {
                     context.push(AppRouter.patientAccountInfoScreen);
                   },
                 ),
-                SectionItemTile(
-                  title: 'Logout',
-                  trailingIcon: isLoading
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(
-                          Icons.arrow_forward_ios,
-                          color: AppColors.primary,
-                          size: 16,
-                        ),
-                  onTap: isLoading
-                      ? null
-                      : () {
-                          context.read<LogOutCubit>().logOut();
-                        },
-                ),
+
                 ToggleTile(
                   title: 'Notifications',
                   value: notifications,
-                  onChanged: (value) {
-                    setState(() {
-                      notifications = value;
-                    });
-                  },
+                  onChanged: _onNotificationsChanged,
                 ),
                 ToggleTile(
                   title: 'Early Voice Alerts',
                   value: earlyVoiceAlerts,
-                  onChanged: (value) {
-                    setState(() {
-                      earlyVoiceAlerts = value;
-                    });
-                  },
+                  onChanged: _onEarlyVoiceAlertsChanged,
                 ),
               ],
             ),

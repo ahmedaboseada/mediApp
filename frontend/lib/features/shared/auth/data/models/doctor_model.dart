@@ -78,9 +78,14 @@ class DoctorModel {
             (item) => WorkingHoursModel.fromJson(item as Map<String, dynamic>),
           )
           .toList(),
-      connectedPatients: List<String>.from(
-        json['connectedPatients'] as List? ?? [],
-      ),
+      connectedPatients: (json['connectedPatients'] as List? ?? []).map((item) {
+        if (item is String) return item;
+        if (item is Map<String, dynamic>) {
+          final id = item['patientId'] ?? item['_id'] ?? item['id'];
+          if (id != null) return id.toString();
+        }
+        return item.toString();
+      }).toList(),
       createdAt: (json['createdAt'] ?? '').toString(),
       updatedAt: (json['updatedAt'] ?? '').toString(),
       clinicName: (json['clinicName'] ?? '').toString(),

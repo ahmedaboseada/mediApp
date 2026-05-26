@@ -45,11 +45,7 @@ class _HealthMeasurementsView extends StatelessWidget {
       firstName,
       lastName,
     ].where((String value) => value.isNotEmpty).join(' ');
-    final displayName = fullName.isNotEmpty
-        ? fullName
-        : (user?.email.isNotEmpty ?? false)
-        ? user!.email
-        : AppStrings.userAhmed;
+    final displayName = fullName.isNotEmpty ? fullName : '';
     final profileImagePath = user?.profilePicture ?? '';
 
     return GestureDetector(
@@ -159,6 +155,18 @@ class _HealthMeasurementsView extends StatelessWidget {
                                 ),
                                 child: Column(
                                   children: <Widget>[
+                                    GestureDetector(
+                                      onTap: () {
+                                        context.push(
+                                          AppRouter.dailyHealthLogScreen,
+                                        );
+                                      },
+                                      child: SvgPicture.asset(
+                                        AppAssets.addSymptom,
+                                        width: AppSizes.w24,
+                                        height: AppSizes.h24,
+                                      ),
+                                    ),
                                     Icon(
                                       Icons.health_and_safety_rounded,
                                       color: AppColors.primary,

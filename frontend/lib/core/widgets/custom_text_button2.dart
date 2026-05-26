@@ -8,6 +8,8 @@ class CustomTextButton2 extends StatelessWidget {
   final Color? textColor;
   final double? fontSize;
   final FontWeight? fontWeight;
+  final String? semanticLabel;
+  final String? tooltip;
 
   const CustomTextButton2({
     super.key,
@@ -16,20 +18,31 @@ class CustomTextButton2 extends StatelessWidget {
     this.textColor = AppColors.primary,
     this.fontSize,
     this.fontWeight = FontWeight.w600,
+    this.semanticLabel,
+    this.tooltip,
   });
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: () {
-        context.go(route);
-      },
-      child: Text(
-        label,
-        style: TextStyle(
-          color: textColor,
-          fontSize: fontSize ?? AppSizes.sp16,
-          fontWeight: fontWeight,
+    final a11yLabel = semanticLabel ?? label;
+
+    return Semantics(
+      button: true,
+      label: a11yLabel,
+      child: Tooltip(
+        message: tooltip ?? a11yLabel,
+        child: TextButton(
+          onPressed: () {
+            context.go(route);
+          },
+          child: Text(
+            label,
+            style: TextStyle(
+              color: textColor,
+              fontSize: fontSize ?? AppSizes.sp16,
+              fontWeight: fontWeight,
+            ),
+          ),
         ),
       ),
     );

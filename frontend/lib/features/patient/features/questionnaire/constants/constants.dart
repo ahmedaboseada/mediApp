@@ -107,6 +107,7 @@ class QuestionnaireConstants {
     DropdownItem(label: 'Formaldehyde', value: 'Formaldehyde'),
     DropdownItem(label: 'Fragrances', value: 'Fragrances'),
     DropdownItem(label: 'Cleaning Agents', value: 'Cleaning Agents'),
+    DropdownItem(label: 'Other (Specify)', value: 'Other'),
   ];
   final List<DropdownItem<String>> healthConditions = [
     // -------- Chronic Diseases --------
@@ -207,6 +208,7 @@ class QuestionnaireConstants {
       value: 'Chronic Fatigue Syndrome',
     ),
     DropdownItem(label: 'None', value: 'None'),
+    DropdownItem(label: 'Other (Specify)', value: 'Other'),
   ];
   final List<DropdownItem<String>> longTermMedications = [
     // -------- Diabetes --------

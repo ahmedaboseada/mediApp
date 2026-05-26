@@ -64,9 +64,33 @@ class QuestionnaireCubit extends Cubit<QuestionnaireState> {
     result.fold(
       (failure) =>
           emit(state.copyWith(isLoading: false, error: failure.message)),
+      (submissionResult) {
+        emit(
+          state.copyWith(
+            isLoading: false,
+            error: null,
+            caregiverRequestId: submissionResult.requestId,
+          ),
+        );
+      },
+    );
+  }
+
+  Future<bool> cancelCaregiverRequest({required String requestId}) async {
+    emit(state.copyWith(isLoading: true));
+
+    final result = await questionnaireRepo.cancelCaregiverRequest(
+      requestId: requestId,
+    );
+
+    return result.fold(
+      (failure) {
+        emit(state.copyWith(isLoading: false, error: failure.message));
+        return false;
+      },
       (message) {
         emit(state.copyWith(isLoading: false, error: null));
-        // Success handled in UI listener
+        return true;
       },
     );
   }

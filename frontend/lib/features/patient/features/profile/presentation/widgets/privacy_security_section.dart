@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/core/services/accessibility_service.dart';
 import 'package:medi/features/patient/features/profile/presentation/controller/profile/profile_cubit.dart';
 import 'package:medi/features/patient/features/profile/presentation/widgets/section_item_tile.dart';
 
@@ -32,6 +33,11 @@ class _PrivacySecuritySectionState extends State<PrivacySecuritySection> {
 
   void _showTwoFactorDialog(BuildContext context) {
     final profileCubit = context.read<ProfileCubit>();
+    AccessibilityService.announceDialog(
+      'Enable two-factor authentication',
+      'For added security, a verification link will be sent to your email.',
+    );
+
     showDialog(
       context: context,
       builder: (context) => BlocProvider.value(
@@ -44,91 +50,88 @@ class _PrivacySecuritySectionState extends State<PrivacySecuritySection> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSizes.r40),
           ),
-          child: Padding(
-            padding: EdgeInsets.all(AppSizes.w24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Title
-                Text(
-                  'Enable Two-Factor Authentication?',
-                  style: AppStyles.black24700,
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: AppSizes.h16),
-
-                // Message
-                Text(
-                  "For added security, we'll send a verification link to your email.",
-                  style: AppStyles.tertiary14400,
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: AppSizes.h32),
-
-                // Send Email Button
-                BlocListener<ProfileCubit, ProfileState>(
-                  listener: (context, state) {
-                    if (state is ToggleTwoFactorAuthSuccess) {
-                      Navigator.pop(context);
-                    } else if (state is ToggleTwoFactorAuthFailure) {
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: BlocBuilder<ProfileCubit, ProfileState>(
-                    builder: (context, state) {
-                      return Row(
-                        children: [
-                          Expanded(
-                            child: BlocBuilder<ProfileCubit, ProfileState>(
-                              builder: (context, state) {
-                                final isLoading =
-                                    state is ToggleTwoFactorAuthLoading;
-                                return PrimaryButton(
-                                  onPressed: isLoading
-                                      ? null
-                                      : () {
-                                          context
-                                              .read<ProfileCubit>()
-                                              .toggleTwoFactorAuth(true);
-                                        },
-                                  text: 'Enable',
-                                  child: isLoading
-                                      ? SizedBox(
-                                          height: AppSizes.h20,
-                                          width: AppSizes.h20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            valueColor:
-                                                AlwaysStoppedAnimation<Color>(
-                                                  AppColors.whiteText,
-                                                ),
-                                          ),
-                                        )
-                                      : null,
-                                );
-                              },
-                            ),
-                          ),
-                          SizedBox(width: AppSizes.h12),
-
-                          // Cancel Button
-                          Expanded(
-                            child: SecondryButton(
-                              onPressed: () {
-                                setState(() {
-                                  twoFactorAuth = false;
-                                });
-                                Navigator.pop(context);
-                              },
-                              text: 'Cancel',
-                            ),
-                          ),
-                        ],
-                      );
-                    },
+          child: Semantics(
+            namesRoute: true,
+            label: 'Enable two-factor authentication dialog',
+            child: Padding(
+              padding: EdgeInsets.all(AppSizes.w24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Enable Two-Factor Authentication?',
+                    style: AppStyles.black24700,
+                    textAlign: TextAlign.center,
                   ),
-                ),
-              ],
+                  SizedBox(height: AppSizes.h16),
+                  Text(
+                    "For added security, we'll send a verification link to your email.",
+                    style: AppStyles.tertiary14400,
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: AppSizes.h32),
+                  BlocListener<ProfileCubit, ProfileState>(
+                    listener: (context, state) {
+                      if (state is ToggleTwoFactorAuthSuccess) {
+                        Navigator.pop(context);
+                      } else if (state is ToggleTwoFactorAuthFailure) {
+                        Navigator.pop(context);
+                      }
+                    },
+                    child: BlocBuilder<ProfileCubit, ProfileState>(
+                      builder: (context, state) {
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: BlocBuilder<ProfileCubit, ProfileState>(
+                                builder: (context, state) {
+                                  final isLoading =
+                                      state is ToggleTwoFactorAuthLoading;
+                                  return PrimaryButton(
+                                    onPressed: isLoading
+                                        ? null
+                                        : () {
+                                            context
+                                                .read<ProfileCubit>()
+                                                .toggleTwoFactorAuth(true);
+                                          },
+                                    text: 'Enable',
+                                    child: isLoading
+                                        ? SizedBox(
+                                            height: AppSizes.h20,
+                                            width: AppSizes.h20,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              valueColor:
+                                                  AlwaysStoppedAnimation<Color>(
+                                                    AppColors.whiteText,
+                                                  ),
+                                            ),
+                                          )
+                                        : null,
+                                  );
+                                },
+                              ),
+                            ),
+                            SizedBox(width: AppSizes.h12),
+                            Expanded(
+                              child: SecondryButton(
+                                onPressed: () {
+                                  setState(() {
+                                    twoFactorAuth = false;
+                                  });
+                                  Navigator.pop(context);
+                                },
+                                text: 'Cancel',
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -139,17 +142,14 @@ class _PrivacySecuritySectionState extends State<PrivacySecuritySection> {
   void _handleToggleTwoFactor(BuildContext context, bool value) {
     final profileCubit = context.read<ProfileCubit>();
 
-    // Optimistic update - immediately update UI
     setState(() {
       twoFactorAuth = value;
     });
 
     if (value) {
-      // Enabling 2FA - show dialog
       pendingToggleAction = true;
       _showTwoFactorDialog(context);
     } else {
-      // Disabling 2FA - directly call toggle without dialog
       pendingToggleAction = false;
       profileCubit.toggleTwoFactorAuth(false);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -158,6 +158,7 @@ class _PrivacySecuritySectionState extends State<PrivacySecuritySection> {
           backgroundColor: Colors.blue,
         ),
       );
+      AccessibilityService.announceLoading('Disabling two-factor authentication');
     }
   }
 
@@ -166,16 +167,14 @@ class _PrivacySecuritySectionState extends State<PrivacySecuritySection> {
     return BlocListener<ProfileCubit, ProfileState>(
       listener: (context, state) {
         if (state is ToggleTwoFactorAuthSuccess) {
-          // Clear pending action on success
           pendingToggleAction = null;
-          // Update local 2FA status
           if (twoFactorAuth) {
             HiveService.setTwoFactorEnabled(true);
           } else {
             HiveService.setTwoFactorEnabled(false);
           }
+          AccessibilityService.announceSuccess('Two-factor authentication updated');
         } else if (state is ToggleTwoFactorAuthFailure) {
-          // Revert to original state on failure
           setState(() {
             twoFactorAuth = !twoFactorAuth;
             pendingToggleAction = null;
@@ -183,6 +182,7 @@ class _PrivacySecuritySectionState extends State<PrivacySecuritySection> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message), backgroundColor: Colors.red),
           );
+          AccessibilityService.announceError(state.message);
         }
       },
       child: Card(

@@ -8,6 +8,8 @@ class MedicineState extends Equatable {
     required this.selectedTab,
     required this.isFabExpanded,
     required this.medications,
+    this.isLoading = false,
+    this.error,
   });
 
   factory MedicineState.initial(List<Medication> medications) {
@@ -15,6 +17,7 @@ class MedicineState extends Equatable {
       selectedTab: MedicineTab.all,
       isFabExpanded: false,
       medications: medications,
+      isLoading: false,
     );
   }
 
@@ -22,18 +25,32 @@ class MedicineState extends Equatable {
   final bool isFabExpanded;
   final List<Medication> medications;
 
+  // 🔥 added
+  final bool isLoading;
+  final String? error;
+
   MedicineState copyWith({
     MedicineTab? selectedTab,
     bool? isFabExpanded,
     List<Medication>? medications,
+    bool? isLoading,
+    String? error,
   }) {
     return MedicineState(
       selectedTab: selectedTab ?? this.selectedTab,
       isFabExpanded: isFabExpanded ?? this.isFabExpanded,
       medications: medications ?? this.medications,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
     );
   }
 
   @override
-  List<Object?> get props => [selectedTab, isFabExpanded, medications];
+  List<Object?> get props => [
+    selectedTab,
+    isFabExpanded,
+    medications,
+    isLoading,
+    error,
+  ];
 }

@@ -9,59 +9,77 @@ class PhoneField extends StatelessWidget {
     this.onPhoneChanged,
     this.phonecontroller,
     this.validator,
+    this.semanticLabel,
   });
   final bool enabled;
   final Function(String)? onPhoneChanged;
   final TextEditingController? phonecontroller;
   final String? Function(String?)? validator;
+  final String? semanticLabel;
+
+  PhoneNumber _initialValue() {
+    final String phoneNumber = phonecontroller?.text.trim() ?? '';
+    if (phoneNumber.isNotEmpty) {
+      return PhoneNumber(isoCode: 'EG', phoneNumber: phoneNumber);
+    }
+
+    return PhoneNumber(isoCode: 'EG');
+  }
 
   @override
   Widget build(BuildContext context) {
+    final fieldLabel = semanticLabel ?? 'Phone Number';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Phone Number', style: AppStyles.black14500),
         const SizedBox(height: 8),
+        Semantics(
+          textField: true,
+          label: fieldLabel,
+          hint: 'Enter phone number',
+          enabled: enabled,
+          child: InternationalPhoneNumberInput(
+            validator: validator,
+            textFieldController: phonecontroller,
+            initialValue: _initialValue(),
 
-        InternationalPhoneNumberInput(
-          validator: validator,
-          textFieldController: phonecontroller,
-          initialValue: PhoneNumber(isoCode: 'EG'),
+            selectorConfig: SelectorConfig(
+              selectorType: PhoneInputSelectorType.DROPDOWN,
+              setSelectorButtonAsPrefixIcon: true,
 
-          selectorConfig: SelectorConfig(
-            selectorType: PhoneInputSelectorType.DROPDOWN,
-            setSelectorButtonAsPrefixIcon: true,
-
-            leadingPadding: 12,
-            showFlags: false,
-          ),
-          isEnabled: enabled,
-          onInputChanged: (number) {
-            onPhoneChanged?.call(number.phoneNumber ?? '');
-            // context.read<ProfileFormCubit>().onPhoneChanged(
-            //   number.phoneNumber ?? '',
-            // );
-            // print('Phone number changed: ${number.phoneNumber}');
-          },
-          cursorColor: Colors.black,
-          inputDecoration: InputDecoration(
-            hintText: 'Enter Phone Number',
-            enabled: enabled,
-
-            hintStyle: TextStyle(color: Colors.grey.shade500),
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+              leadingPadding: 12,
+              showFlags: false,
             ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.blue, width: 1.5),
+            isEnabled: enabled,
+            onInputChanged: (number) {
+              onPhoneChanged?.call(number.phoneNumber ?? '');
+              // context.read<ProfileFormCubit>().onPhoneChanged(
+              //   number.phoneNumber ?? '',
+              // );
+              // print('Phone number changed: ${number.phoneNumber}');
+            },
+            cursorColor: Colors.black,
+            inputDecoration: InputDecoration(
+              hintText: 'Enter Phone Number',
+              enabled: enabled,
+
+              hintStyle: TextStyle(color: Colors.grey.shade500),
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade300),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: Colors.blue, width: 1.5),
+              ),
             ),
           ),
         ),

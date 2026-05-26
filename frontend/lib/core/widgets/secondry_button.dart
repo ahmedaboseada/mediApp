@@ -10,6 +10,8 @@ class SecondryButton extends StatelessWidget {
     this.borderRadius = const BorderRadius.all(Radius.circular(80)),
     this.onPressed,
     this.child,
+    this.semanticLabel,
+    this.tooltip,
   });
   final Color backgroundColor;
   final Color textColor;
@@ -17,9 +19,13 @@ class SecondryButton extends StatelessWidget {
   final BorderRadius borderRadius;
   final Function()? onPressed;
   final Widget? child;
+  final String? semanticLabel;
+  final String? tooltip;
 
   @override
   Widget build(BuildContext context) {
+    final label = semanticLabel ?? text ?? '';
+
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
@@ -32,16 +38,25 @@ class SecondryButton extends StatelessWidget {
         ),
         elevation: 0,
       ),
-      child:
-          child ??
-          Text(
-            text ?? '',
-            style: TextStyle(
-              color: textColor,
-              fontSize: AppSizes.sp16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
+      child: Semantics(
+        button: true,
+        enabled: onPressed != null,
+        onTap: onPressed,
+        label: label,
+        child: Tooltip(
+          message: tooltip ?? label,
+          child:
+              child ??
+              Text(
+                text ?? '',
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: AppSizes.sp16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+        ),
+      ),
     );
   }
 }

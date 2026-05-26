@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:medi/core/core.dart';
 
 class CustomTextField extends StatefulWidget {
@@ -14,7 +15,12 @@ class CustomTextField extends StatefulWidget {
     required this.label,
     this.suffixIcon,
     this.onTap,
+    this.onChanged,
+    this.focusNode,
+    this.inputFormatters,
+    this.textInputAction,
     this.maxLines = 1,
+    this.semanticLabel,
   });
 
   final String label;
@@ -27,7 +33,12 @@ class CustomTextField extends StatefulWidget {
   final Iterable<String>? autofillHints;
   final Widget? suffixIcon;
   final VoidCallback? onTap;
+  final ValueChanged<String>? onChanged;
+  final FocusNode? focusNode;
+  final List<TextInputFormatter>? inputFormatters;
+  final TextInputAction? textInputAction;
   final int maxLines;
+  final String? semanticLabel;
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
@@ -44,67 +55,83 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   @override
   Widget build(BuildContext context) {
+    final fieldLabel = widget.semanticLabel ?? widget.label;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(widget.label, style: AppStyles.black14500),
-
-        TextFormField(
-          // onTapOutside: (_) {
-          //   FocusScope.of(context).unfocus();
-          // },
-          onTap: widget.onTap,
-          textInputAction: widget.maxLines > 1
-              ? TextInputAction.newline
-              : TextInputAction.next,
-          autofillHints: widget.autofillHints,
+        Semantics(
+          textField: true,
+          label: fieldLabel,
+          hint: widget.hintText,
+          enabled: true,
           readOnly: widget.readOnly,
-          controller: widget.controller,
-          validator: widget.validator,
-          keyboardType: widget.keyboardType,
-          maxLines: widget.maxLines,
-          obscuringCharacter: '*',
-          obscureText: widget.isPassword ? _obscure : false,
-          style: AppStyles.black14500.copyWith(color: AppColors.secondaryText),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: AppColors.surfaceColor,
-            hintText: widget.hintText,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppSizes.r10),
-              borderSide: BorderSide(color: AppColors.borderColor),
+          child: TextFormField(
+            // onTapOutside: (_) {
+            //   FocusScope.of(context).unfocus();
+            // },
+            onTap: widget.onTap,
+            onChanged: widget.onChanged,
+            focusNode: widget.focusNode,
+            inputFormatters: widget.inputFormatters,
+            textInputAction:
+                widget.textInputAction ??
+                (widget.maxLines > 1
+                    ? TextInputAction.newline
+                    : TextInputAction.next),
+            autofillHints: widget.autofillHints,
+            readOnly: widget.readOnly,
+            controller: widget.controller,
+            validator: widget.validator,
+            keyboardType: widget.keyboardType,
+            maxLines: widget.maxLines,
+            obscuringCharacter: '*',
+            obscureText: widget.isPassword ? _obscure : false,
+            style: AppStyles.black14500.copyWith(color: AppColors.secondaryText),
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: AppColors.surfaceColor,
+              hintText: widget.hintText,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSizes.r10),
+                borderSide: BorderSide(color: AppColors.borderColor),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSizes.r10),
+                borderSide: BorderSide(color: AppColors.borderColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSizes.r10),
+                borderSide: BorderSide(color: AppColors.focusedBorderColor),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSizes.r10),
+                borderSide: BorderSide(color: AppColors.errorBorderColor),
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSizes.r10),
+                borderSide: BorderSide(color: AppColors.errorBorderColor),
+              ),
+              suffixIcon: widget.isPassword
+                  ? Tooltip(
+                      message: _obscure ? 'Show password' : 'Hide password',
+                      child: IconButton(
+                        icon: Icon(
+                          _obscure
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: AppColors.primaryText,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscure = !_obscure;
+                          });
+                        },
+                      ),
+                    )
+                  : widget.suffixIcon,
             ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppSizes.r10),
-              borderSide: BorderSide(color: AppColors.borderColor),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppSizes.r10),
-              borderSide: BorderSide(color: AppColors.focusedBorderColor),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppSizes.r10),
-              borderSide: BorderSide(color: AppColors.errorBorderColor),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppSizes.r10),
-              borderSide: BorderSide(color: AppColors.errorBorderColor),
-            ),
-            suffixIcon: widget.isPassword
-                ? IconButton(
-                    icon: Icon(
-                      _obscure
-                          ? Icons.visibility_off_outlined
-                          : Icons.visibility_outlined,
-                      color: AppColors.primaryText,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscure = !_obscure;
-                      });
-                    },
-                  )
-                : widget.suffixIcon,
           ),
         ),
       ],

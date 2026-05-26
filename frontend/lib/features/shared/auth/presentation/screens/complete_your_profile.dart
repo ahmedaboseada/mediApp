@@ -75,11 +75,14 @@ class _CompleteYourProfileScreenState extends State<CompleteYourProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocConsumer<CompleteProfileCubit, CompleteProfileState>(
-        listener: (context, state) {
+        listener: (context, state) async {
           if (state is CompleteProfileSuccess) {
-            _saveUserProfile().then((_) {
-              context.go(AppRouter.patientProfileCompletedScreen);
-            });
+            await HiveService.markCompleteProfileAsCompleted();
+            await _saveUserProfile();
+            if (!mounted) {
+              return;
+            }
+            context.go(AppRouter.patientProfileCompletedScreen);
           } else if (state is CompleteProfileFailure) {
             ScaffoldMessenger.of(
               context,

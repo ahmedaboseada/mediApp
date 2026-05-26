@@ -1,6 +1,7 @@
 import 'package:hive/hive.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 import 'package:medi/features/shared/auth/data/models/caregiver_model.dart';
+import 'package:medi/features/shared/auth/data/models/emergency_contact_model.dart';
 
 part 'patient_model.g.dart';
 
@@ -34,6 +35,8 @@ class PatientModel {
   final bool reactionToMedication;
   @HiveField(13)
   final CaregiverModel? caregiver;
+  @HiveField(14)
+  final EmergencyContactModel? emergencyContact;
 
   PatientModel({
     required this.patientId,
@@ -50,6 +53,7 @@ class PatientModel {
     required this.allergyAlerts,
     required this.reactionToMedication,
     this.caregiver,
+    this.emergencyContact,
   });
 
   factory PatientModel.fromJson(Map<String, dynamic> json) {
@@ -103,6 +107,10 @@ class PatientModel {
       caregiver: json['caregiver'] != null
           ? CaregiverModel.fromJson(json['caregiver'] as Map<String, dynamic>)
           : null,
+        emergencyContact: json['emergencyContact'] != null
+          ? EmergencyContactModel.fromJson(
+            json['emergencyContact'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -122,6 +130,7 @@ class PatientModel {
       'allergyAlerts': allergyAlerts,
       'reactionToMedication': reactionToMedication,
       if (caregiver != null) 'caregiver': caregiver!.toJson(),
+      if (emergencyContact != null) 'emergencyContact': emergencyContact!.toJson(),
     };
   }
 }

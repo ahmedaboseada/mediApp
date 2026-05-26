@@ -19,6 +19,7 @@ class AuthResponseModel {
   final DoctorModel? doctor;
   @HiveField(5)
   final PatientModel? patient;
+  final Map<String, dynamic>? rawJson;
 
   const AuthResponseModel({
     required this.message,
@@ -27,6 +28,7 @@ class AuthResponseModel {
     required this.refreshToken,
     this.doctor,
     this.patient,
+    this.rawJson,
   });
 
   factory AuthResponseModel.fromJson(Map<String, dynamic> json) {
@@ -41,6 +43,41 @@ class AuthResponseModel {
       patient: json['patient'] != null
           ? PatientModel.fromJson(json['patient'] as Map<String, dynamic>)
           : null,
+      rawJson: json,
+    );
+  }
+
+  factory AuthResponseModel.fromManagedPatientAllData(
+    Map<String, dynamic> json,
+  ) {
+    Map<String, dynamic> asMap(dynamic value) {
+      if (value is Map<String, dynamic>) {
+        return value;
+      }
+
+      return const {};
+    }
+
+    final patientJson = asMap(json['patient'] ?? json['patientId']);
+    final nestedUserJson = asMap(patientJson['userId']);
+    final userJson = asMap(json['user'] ?? json['userId']);
+    final resolvedUserJson = userJson.isNotEmpty ? userJson : nestedUserJson;
+    final medicinesJson = json['medicines'] ?? json['medications'];
+
+    final mergedPatientJson = <String, dynamic>{
+      ...patientJson,
+      if (medicinesJson is List) 'medications': medicinesJson,
+    };
+
+    return AuthResponseModel(
+      message: (json['message'] ?? 'Managed patient data loaded').toString(),
+      user: UserModel.fromJson(resolvedUserJson),
+      accessToken: '',
+      refreshToken: '',
+      patient: mergedPatientJson.isNotEmpty
+          ? PatientModel.fromJson(mergedPatientJson)
+          : null,
+      rawJson: json,
     );
   }
 

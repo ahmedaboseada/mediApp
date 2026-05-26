@@ -77,51 +77,62 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final semanticsLabel = '${item.label}${isSelected ? ', selected' : ''}';
+
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeOutCubic,
-        padding: EdgeInsets.symmetric(
-          horizontal: isSelected ? 16 : 10,
-          vertical: 8,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? (selectedColor ?? const Color(0xFF2F80ED))
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          children: [
-            AnimatedScale(
-              duration: const Duration(milliseconds: 300),
-              scale: isSelected ? 1.1 : 1,
-              child: SvgPicture.asset(
-                item.icon,
-                height: 22,
-                colorFilter: isSelected
-                    ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
-                    : null,
-              ),
+      child: Semantics(
+        button: true,
+        selected: isSelected,
+        label: semanticsLabel,
+        onTap: onTap,
+        child: Tooltip(
+          message: item.label,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 350),
+            curve: Curves.easeOutCubic,
+            padding: EdgeInsets.symmetric(
+              horizontal: isSelected ? 16 : 10,
+              vertical: 8,
             ),
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 250),
-              child: isSelected
-                  ? Padding(
-                      padding: const EdgeInsets.only(left: 8),
-                      child: Text(
-                        item.label,
-                        key: ValueKey(item.label),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    )
-                  : const SizedBox.shrink(),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? (selectedColor ?? const Color(0xFF2F80ED))
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(16),
             ),
-          ],
+            child: Row(
+              children: [
+                AnimatedScale(
+                  duration: const Duration(milliseconds: 300),
+                  scale: isSelected ? 1.1 : 1,
+                  child: SvgPicture.asset(
+                    item.icon,
+                    height: 22,
+                    colorFilter: isSelected
+                        ? const ColorFilter.mode(Colors.white, BlendMode.srcIn)
+                        : null,
+                  ),
+                ),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  child: isSelected
+                      ? Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Text(
+                            item.label,
+                            key: ValueKey(item.label),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
