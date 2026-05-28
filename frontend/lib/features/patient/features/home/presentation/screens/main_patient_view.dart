@@ -32,13 +32,24 @@ class _MainPatientViewState extends State<MainPatientView> {
 
   @override
   Widget build(BuildContext context) {
-    final navItems = [
+    final isManagingPatient = context.watch<CaregiverModeCubit>().isManagingPatient;
+
+    final navItems = <NavItem>[
       NavItem(icon: AppAssets.home, label: 'Home', index: 0),
       NavItem(icon: AppAssets.pills, label: 'Medicine', index: 1),
       NavItem(icon: AppAssets.docs, label: 'Doctors', index: 2),
-      NavItem(icon: AppAssets.chats, label: 'Chat', index: 3),
+      if (!isManagingPatient) NavItem(icon: AppAssets.chats, label: 'Chat', index: 3),
       NavItem(icon: AppAssets.profile, label: 'Profile', index: 4),
     ];
+
+    final currentShellIndex = widget.shell.currentIndex;
+
+    if (isManagingPatient && currentShellIndex == 3) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        widget.shell.goBranch(0);
+      });
+    }
 
     return Scaffold(
       body: Stack(
@@ -115,9 +126,12 @@ class _MainPatientViewState extends State<MainPatientView> {
       extendBody: true,
       bottomNavigationBar: AdvancedBottomNavBar(
         items: navItems,
-        currentIndex: widget.shell.currentIndex,
+        currentIndex: currentShellIndex,
         onTap: (index) {
-          widget.shell.goBranch(index, initialLocation: index == widget.shell.currentIndex);
+          widget.shell.goBranch(
+            index,
+            initialLocation: index == widget.shell.currentIndex,
+          );
           if (index == 0) {
             HomeScheduleRefreshBus.notifyRefresh();
           }

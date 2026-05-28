@@ -1,17 +1,22 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:dartz/dartz.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/core/data/local/health_logs_local_data_source.dart';
 import 'package:medi/features/patient/features/health_measurements/data/models/measurement_model.dart';
 import 'package:medi/features/patient/features/health_measurements/data/models/symptom.dart';
 import 'package:medi/features/patient/features/health_measurements/data/repo/logs_repo.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/controller/health_measurements/health_measurements_state.dart';
 
 class HealthMeasurementsCubit extends Cubit<HealthMeasurementsState> {
-  HealthMeasurementsCubit(this._logsRepo)
-    : super(
+  HealthMeasurementsCubit(
+    this._logsRepo, {
+    HealthLogsLocalDataSource? localDataSource,
+  }) : _localDataSource = localDataSource ?? HealthLogsLocalDataSource(),
+       super(
         HealthMeasurementsState(
           selectedTab: HealthDashboardTab.measurements,
           selectedChartFilters: const <MeasurementMetric, ChartFilterRange>{
@@ -89,6 +94,7 @@ class HealthMeasurementsCubit extends Cubit<HealthMeasurementsState> {
   }
 
   final LogsRepo _logsRepo;
+  final HealthLogsLocalDataSource _localDataSource;
   Map<MeasurementMetric, List<Map<String, dynamic>>> _metricDataCache =
       const <MeasurementMetric, List<Map<String, dynamic>>>{};
 
@@ -136,6 +142,20 @@ class HealthMeasurementsCubit extends Cubit<HealthMeasurementsState> {
   }
 
   Future<void> loadMeasurements() async {
+    try {
+      final cachedMetricData = await _loadCachedMetricData();
+      if (isClosed) {
+        return;
+      }
+
+      _applyMeasurementData(cachedMetricData);
+      unawaited(_syncMeasurementsFromServer());
+    } catch (e) {
+      log('Error loading cached measurements: $e');
+    }
+  }
+
+  Future<void> _syncMeasurementsFromServer() async {
     final bp = await _logsRepo.getBloodPressures();
     final sugar = await _logsRepo.getBloodSugars();
     final weight = await _logsRepo.getWeights();
@@ -145,17 +165,41 @@ class HealthMeasurementsCubit extends Cubit<HealthMeasurementsState> {
       return;
     }
 
-    final bpRows = _extractMeasurements(bp);
-    final heartRows = _extractMeasurements(heart);
-    final metricData = <MeasurementMetric, List<Map<String, dynamic>>>{
-      MeasurementMetric.bloodPressure: bpRows,
-      MeasurementMetric.bloodSugar: _extractMeasurements(sugar),
-      MeasurementMetric.bodyWeight: _extractMeasurements(weight),
+    _applyMeasurementData(
+      <MeasurementMetric, List<Map<String, dynamic>>>{
+        MeasurementMetric.bloodPressure: _extractMeasurementsFromResponse(bp.fold((_) => null, (response) => response)),
+        MeasurementMetric.bloodSugar: _extractMeasurementsFromResponse(sugar.fold((_) => null, (response) => response)),
+        MeasurementMetric.bodyWeight: _extractMeasurementsFromResponse(weight.fold((_) => null, (response) => response)),
+        MeasurementMetric.heartRate: _mergeHeartRateRows(
+          _extractMeasurementsFromResponse(heart.fold((_) => null, (response) => response)),
+          _extractHeartRatesFromBloodPressure(
+            _extractMeasurementsFromResponse(bp.fold((_) => null, (response) => response)),
+          ),
+        ),
+      },
+    );
+  }
+
+  Future<Map<MeasurementMetric, List<Map<String, dynamic>>>> _loadCachedMetricData() async {
+    final bp = await _localDataSource.getMeasurementResponse('blood_pressure');
+    final sugar = await _localDataSource.getMeasurementResponse('blood_sugar');
+    final weight = await _localDataSource.getMeasurementResponse('weight');
+    final heart = await _localDataSource.getMeasurementResponse('heart_rate');
+
+    return <MeasurementMetric, List<Map<String, dynamic>>>{
+      MeasurementMetric.bloodPressure: _extractMeasurementsFromResponse(bp),
+      MeasurementMetric.bloodSugar: _extractMeasurementsFromResponse(sugar),
+      MeasurementMetric.bodyWeight: _extractMeasurementsFromResponse(weight),
       MeasurementMetric.heartRate: _mergeHeartRateRows(
-        heartRows,
-        _extractHeartRatesFromBloodPressure(bpRows),
+        _extractMeasurementsFromResponse(heart),
+        _extractHeartRatesFromBloodPressure(_extractMeasurementsFromResponse(bp)),
       ),
     };
+  }
+
+  void _applyMeasurementData(
+    Map<MeasurementMetric, List<Map<String, dynamic>>> metricData,
+  ) {
     _metricDataCache = metricData;
 
     final updatedChartData = <MeasurementMetric, MeasurementChartModel>{};
@@ -219,20 +263,15 @@ class HealthMeasurementsCubit extends Cubit<HealthMeasurementsState> {
     return result;
   }
 
-  List<Map<String, dynamic>> _extractMeasurements(
-    Either<ApiError, dynamic> result,
-  ) {
-    return result.fold((_) => const <Map<String, dynamic>>[], (response) {
-      final rows = response is Map<String, dynamic>
-          ? response['measurements']
-          : null;
-      if (rows is List) {
-        return _sortMeasurementsByDateDesc(
-          rows.whereType<Map>().map((e) => e.cast<String, dynamic>()).toList(),
-        );
-      }
-      return const <Map<String, dynamic>>[];
-    });
+  List<Map<String, dynamic>> _extractMeasurementsFromResponse(dynamic response) {
+    final map = _asStringKeyedMap(response);
+    final rows = map?['measurements'];
+    if (rows is List) {
+      return _sortMeasurementsByDateDesc(
+        rows.whereType<Map>().map((e) => e.cast<String, dynamic>()).toList(),
+      );
+    }
+    return const <Map<String, dynamic>>[];
   }
 
   List<Map<String, dynamic>> _extractHeartRatesFromBloodPressure(
@@ -513,32 +552,59 @@ class HealthMeasurementsCubit extends Cubit<HealthMeasurementsState> {
   }
 
   Future<void> loadSymptoms() async {
+    try {
+      final cached = await _localDataSource.getSymptomResponse();
+      if (cached != null && !isClosed) {
+        _applySymptomsFromResponse(cached);
+      }
+
+      unawaited(_syncSymptomsFromServer(hadCachedData: cached != null));
+    } catch (e) {
+      log('Error loading cached symptoms: $e');
+    }
+  }
+
+  Future<void> _syncSymptomsFromServer({required bool hadCachedData}) async {
     final result = await _logsRepo.getSymptomLogs();
 
     if (isClosed) {
       return;
     }
 
-    result.fold((error) => log('Error loading symptoms: ${error.message}'), (
-      response,
-    ) {
-      final rows = response is Map<String, dynamic>
-          ? response['symptoms']
-          : null;
-      if (rows is List) {
-        final symptoms = rows
-            .whereType<Map>()
-            .map((e) => e.cast<String, dynamic>())
-            .map((json) => SymptomModel.fromJson(json))
-            .toList();
-        if (isClosed) {
-          return;
-        }
-        emit(state.copyWith(symptoms: symptoms));
-      } else {
-        log('Unexpected response format for symptoms: $response');
+    result.fold((error) {
+      if (!hadCachedData) {
+        log('Error loading symptoms: ${error.message}');
       }
-    });
+    }, _applySymptomsFromResponse);
+  }
+
+  void _applySymptomsFromResponse(dynamic response) {
+    final map = _asStringKeyedMap(response);
+    final rows = map?['symptoms'];
+    if (rows is List) {
+      final symptoms = rows
+          .whereType<Map>()
+          .map((e) => e.cast<String, dynamic>())
+          .map((json) => SymptomModel.fromJson(json))
+          .toList();
+      if (isClosed) {
+        return;
+      }
+      emit(state.copyWith(symptoms: symptoms));
+      return;
+    }
+
+    log('Unexpected response format for symptoms: $response');
+  }
+
+  Map<String, dynamic>? _asStringKeyedMap(dynamic value) {
+    if (value is Map<String, dynamic>) {
+      return value;
+    }
+    if (value is Map) {
+      return value.cast<String, dynamic>();
+    }
+    return null;
   }
 
   static MeasurementChartModel _emptyChartModel(MeasurementMetric metric) {

@@ -32,7 +32,7 @@ class OtpCubit extends Cubit<OtpState> {
     emit(OtpLoading());
     try {
       // Get challengeToken from storage
-      final challengeToken = HiveService.getChallengeToken();
+      final challengeToken = await HiveService.getChallengeToken();
       if (challengeToken == null) {
         emit(OtpFailure('Challenge token not found'));
         return;

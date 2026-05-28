@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:medi/core/core.dart';
+import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
+import 'package:zego_uikit/zego_uikit.dart';
 import 'package:medi/features/patient/features/doctors/data/repo/doctors_repo.dart';
 import 'package:medi/features/patient/features/doctors/presentation/cubits/my_bookings_cubit.dart';
 import 'package:medi/features/patient/features/doctors/presentation/cubits/my_bookings_state.dart';
@@ -79,6 +82,7 @@ class UpcomingBooking extends StatelessWidget {
                           item: _UpcomingBookingItem(
                             doctorName:
                                 "${upcoming[index].doctor.user.firstName} ${upcoming[index].doctor.user.lastName}",
+                            doctorUserId: upcoming[index].doctor.user.id,
                             avatarAsset:
                                 upcoming[index].doctor.user.profilePicture,
 
@@ -121,18 +125,33 @@ class _UpcomingBookingTile extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(AppSizes.r10),
-            child: item.avatarAsset.isNotEmpty
-                ? Image.network(
-                    item.avatarAsset,
+            child: item.avatarAsset.isNotEmpty &&
+                    item.avatarAsset.toLowerCase().startsWith('http')
+                ? CachedNetworkImage(
+                    imageUrl: item.avatarAsset,
                     width: AppSizes.w40,
                     height: AppSizes.h40,
                     fit: BoxFit.cover,
+                    fadeInDuration: Duration.zero,
+                    placeholder: (_, _) => Image.asset(
+                      AppAssets.avatar1,
+                      width: AppSizes.w40,
+                      height: AppSizes.h40,
+                      fit: BoxFit.cover,
+                    ),
+                    errorWidget: (_, _, _) => Image.asset(
+                      AppAssets.avatar1,
+                      width: AppSizes.w40,
+                      height: AppSizes.h40,
+                      fit: BoxFit.cover,
+                    ),
                   )
                 : Image.asset(
                     AppAssets.avatar1,
                     width: AppSizes.w40,
                     height: AppSizes.h40,
                     fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
                   ),
           ),
           SizedBox(width: AppSizes.w10),
@@ -145,16 +164,20 @@ class _UpcomingBookingTile extends StatelessWidget {
             ),
           ),
           if (item.ctaText != null)
-            Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: AppSizes.w14,
-                vertical: AppSizes.h8,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(AppSizes.r24),
-              ),
-              child: Text(item.ctaText!, style: AppStyles.white14500),
+            ZegoSendCallInvitationButton(
+              text: item.ctaText!,
+              textStyle: AppStyles.white14500,
+              iconVisible: false,
+              isVideoCall: true,
+              buttonSize: const Size(60, 30),
+              clickableBackgroundColor: AppColors.primary,
+              resourceID: 'medi_call',
+              invitees: [
+                ZegoUIKitUser(
+                  id: item.doctorUserId,
+                  name: item.doctorName,
+                )
+              ],
             )
           else
             Text(item.scheduleText ?? '', style: AppStyles.secondary12400),
@@ -167,12 +190,14 @@ class _UpcomingBookingTile extends StatelessWidget {
 class _UpcomingBookingItem {
   const _UpcomingBookingItem({
     required this.doctorName,
+    required this.doctorUserId,
     required this.avatarAsset,
     this.ctaText,
     this.scheduleText,
   });
 
   final String doctorName;
+  final String doctorUserId;
   final String avatarAsset;
   final String? ctaText;
   final String? scheduleText;

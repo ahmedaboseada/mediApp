@@ -9,14 +9,26 @@ class ConnectedDoctorsCubit extends Cubit<ConnectedDoctorsState> {
     : super(ConnectedDoctorsInitial());
 
   Future<void> loadConnectedDoctors() async {
-    emit(ConnectedDoctorsLoading());
+    final cachedDoctors = await repository.getCachedConnectedDoctors();
+
+    if (isClosed) return;
+
+    if (cachedDoctors.isNotEmpty) {
+      emit(ConnectedDoctorsLoaded(cachedDoctors));
+    } else {
+      emit(ConnectedDoctorsLoading());
+    }
 
     final result = await repository.getConnectedDoctors();
 
     if (isClosed) return;
 
     result.fold(
-      (failure) => emit(ConnectedDoctorsError(failure.message)),
+      (failure) {
+        if (cachedDoctors.isEmpty) {
+          emit(ConnectedDoctorsError(failure.message));
+        }
+      },
       (doctors) => emit(ConnectedDoctorsLoaded(doctors)),
     );
   }

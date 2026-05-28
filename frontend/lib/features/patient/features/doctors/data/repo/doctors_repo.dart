@@ -7,6 +7,7 @@ import 'package:medi/features/patient/features/doctors/data/models/doctor_summar
 
 abstract class DoctorsRepository {
   Future<Either<ApiError, List<Doctordata>>> getGlobalDoctors();
+  Future<List<Doctordata>> getCachedGlobalDoctors();
   Future<Either<ApiError, List<String>>> getDoctorSlots(
     String doctorId,
     String date,
@@ -22,6 +23,7 @@ abstract class DoctorsRepository {
     String time,
   );
   Future<Either<ApiError, void>> sendConnectionRequest(String doctorId);
-    Future<Either<ApiError, void>> cancelConnectionRequest(String doctorId);
-    Future<Either<ApiError, List<Doctordata>>> getConnectedDoctors();
+  Future<Either<ApiError, void>> cancelConnectionRequest(String doctorId);
+  Future<Either<ApiError, List<Doctordata>>> getConnectedDoctors();
+  Future<List<Doctordata>> getCachedConnectedDoctors();
 }

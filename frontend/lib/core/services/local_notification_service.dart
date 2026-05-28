@@ -503,9 +503,9 @@ class LocalNotificationService {
     await cancelMedicationReminders(medication);
 
     // Skip scheduling if notifications are globally disabled
-    if (!HiveService.getNotificationsEnabled()) return;
+    if (!await HiveService.getNotificationsEnabled()) return;
 
-    final reminderTimes = _buildReminderDateTimes(
+    final reminderTimes = await _buildReminderDateTimes(
       medication,
       now: DateTime.now(),
     );
@@ -824,17 +824,17 @@ class LocalNotificationService {
     return '$_alarmStoragePrefix${fallbackIdentity.hashCode.abs()}';
   }
 
-  List<DateTime> _buildReminderDateTimes(
+  Future<List<DateTime>> _buildReminderDateTimes(
     Medication medication, {
     required DateTime now,
-  }) {
+  }) async {
     final frequency = medication.frequency.trim().toLowerCase();
     if (frequency == 'as needed') {
       return const <DateTime>[];
     }
 
     if (frequency == 'specific') {
-      return _buildSpecificReminderDateTimes(medication, now: now);
+      return await _buildSpecificReminderDateTimes(medication, now: now);
     }
 
     final reminderMinutes =
@@ -887,7 +887,7 @@ class LocalNotificationService {
     final limitedSchedule = scheduled.take(_maxScheduledNotifications).toList();
 
     // If early voice alerts are enabled, add 15-minute-early entries
-    if (HiveService.getEarlyVoiceAlerts()) {
+    if (await HiveService.getEarlyVoiceAlerts()) {
       final earlyAlerts = <DateTime>[];
       for (final time in List<DateTime>.from(limitedSchedule)) {
         final earlyTime = time.subtract(const Duration(minutes: 15));
@@ -902,10 +902,10 @@ class LocalNotificationService {
     return limitedSchedule;
   }
 
-  List<DateTime> _buildSpecificReminderDateTimes(
+  Future<List<DateTime>> _buildSpecificReminderDateTimes(
     Medication medication, {
     required DateTime now,
-  }) {
+  }) async {
     final reminderMinutes =
         medication.specificSchedule
             .expand((entry) {
@@ -957,7 +957,7 @@ class LocalNotificationService {
     final limitedSchedule = scheduled.take(_maxScheduledNotifications).toList();
 
     // If early voice alerts are enabled, add 15-minute-early entries
-    if (HiveService.getEarlyVoiceAlerts()) {
+    if (await HiveService.getEarlyVoiceAlerts()) {
       final earlyAlerts = <DateTime>[];
       for (final time in List<DateTime>.from(limitedSchedule)) {
         final earlyTime = time.subtract(const Duration(minutes: 15));

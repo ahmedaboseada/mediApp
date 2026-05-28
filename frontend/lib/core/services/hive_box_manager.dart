@@ -42,11 +42,16 @@ class HiveBoxManager {
   Future<void> _forceDeleteBoxFiles(String boxName) async {
     try {
       final directory = await getApplicationDocumentsDirectory();
+      final lowerBoxName = boxName.toLowerCase();
       final candidates = <String>[
         boxName,
-        '\$boxName.hive',
-        '\$boxName.lock',
-        '\$boxName.hive.lock',
+        '$boxName.hive',
+        '$boxName.lock',
+        '$boxName.hive.lock',
+        lowerBoxName,
+        '$lowerBoxName.hive',
+        '$lowerBoxName.lock',
+        '$lowerBoxName.hive.lock',
       ];
 
       for (final name in candidates) {

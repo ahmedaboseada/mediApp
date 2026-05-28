@@ -1,5 +1,6 @@
 // A compact facade that preserves the original `HiveService` static API
 // while delegating implementation to smaller, testable data sources.
+import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:medi/core/services/hive_box_manager.dart';
 import 'package:medi/core/services/hive_initializer.dart';
@@ -10,6 +11,7 @@ import 'package:medi/core/data/local/medication_local_data_source.dart';
 import 'package:medi/core/data/local/schedule_local_data_source.dart';
 import 'package:medi/core/data/local/notification_local_data_source.dart';
 import 'package:medi/core/data/local/health_logs_local_data_source.dart';
+import 'package:medi/core/data/local/booking_local_data_source.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 import 'package:medi/features/shared/auth/data/models/auth_response_model.dart';
 import 'package:medi/features/shared/auth/data/models/user_model.dart';
@@ -20,6 +22,7 @@ import 'package:medi/core/services/app_logger.dart';
 
 class HiveService {
   static const String settingsBoxName = 'settingsBox';
+  static const String notificationInboxBoxName = 'notificationInboxBox';
   static const String unreadNotificationsCountKey = 'unreadNotificationsCount';
 
   static final HiveBoxManager _boxManager = const HiveBoxManager();
@@ -32,6 +35,7 @@ class HiveService {
   static final ScheduleLocalDataSource _schedule = ScheduleLocalDataSource(boxManager: _boxManager, userLocal: _user, settingsLocal: _settings);
   static final NotificationLocalDataSource _notification = NotificationLocalDataSource(boxManager: _boxManager);
   static final HealthLogsLocalDataSource _healthLogs = HealthLogsLocalDataSource(boxManager: _boxManager);
+  static final BookingLocalDataSource _bookings = BookingLocalDataSource(boxManager: _boxManager);
 
   /// Initialize Hive and open common boxes.
   static Future<void> init() async {
@@ -40,22 +44,23 @@ class HiveService {
 
   // ========== Tokens & Auth ==========
   static Future<void> saveAccessToken(String token) => _auth.saveAccessToken(token);
-  static String? getAccessToken() => _auth.getAccessToken();
+  static Future<String?> getAccessToken() => _auth.getAccessToken();
   static Future<void> saveRefreshToken(String token) => _auth.saveRefreshToken(token);
-  static String? getRefreshToken() => _auth.getRefreshToken();
+  static Future<String?> getRefreshToken() => _auth.getRefreshToken();
   static Future<void> saveChallengeToken(String token) => _auth.saveChallengeToken(token);
-  static String? getChallengeToken() => _auth.getChallengeToken();
+  static Future<String?> getChallengeToken() => _auth.getChallengeToken();
   static Future<void> clearChallengeToken() => _auth.clearChallengeToken();
   static Future<void> clearTokens() => _auth.clearTokens();
 
   static Future<void> saveAuthResponse(AuthResponseModel response) => _auth.saveAuthResponse(response);
 
   // ========== User Data ==========
-  static UserModel? getUserData() => _user.getUserData();
+  static Future<UserModel?> getUserData() => _user.getUserData();
+  static Future<String?> getLastKnownUserId() => _user.getLastKnownUserId();
   static Future<void> saveUserData(UserModel user) => _user.saveUserData(user);
-  static PatientModel? getPatientData() => _user.getPatientData();
+  static Future<PatientModel?> getPatientData() => _user.getPatientData();
   static Future<void> savePatientData(PatientModel patient) => _user.savePatientData(patient);
-  static DoctorModel? getDoctorData() => _user.getDoctorData();
+  static Future<DoctorModel?> getDoctorData() => _user.getDoctorData();
   static Future<void> saveDoctorData(DoctorModel doctor) => _user.saveDoctorData(doctor);
   static Future<void> saveUserProfile({
     String? firstName,
@@ -77,48 +82,48 @@ class HiveService {
         gender: gender,
         profileImage: profileImage,
       );
-  static Map<String, String?> getUserProfile() => _user.getUserProfile();
-  static String? getEmail() => _user.getEmail();
-  static bool isTwoFactorEnabled() => _user.isTwoFactorEnabled();
+  static Future<Map<String, String?>> getUserProfile() => _user.getUserProfile();
+  static Future<String?> getEmail() => _user.getEmail();
+  static Future<bool> isTwoFactorEnabled() => _user.isTwoFactorEnabled();
   static Future<void> setTwoFactorEnabled(bool enabled) => _user.setTwoFactorEnabled(enabled);
 
   // ========== Settings ==========
   static Future<void> markOnboardingAsCompleted() => _settings.markOnboardingAsCompleted();
   static Future<void> markOnboardingAsNotCompleted() => _settings.markOnboardingAsNotCompleted();
-  static bool isOnboardingCompleted() => _settings.isOnboardingCompleted();
+  static Future<bool> isOnboardingCompleted() => _settings.isOnboardingCompleted();
   static Future<void> markCompleteProfileAsRequired() => _settings.markCompleteProfileAsRequired();
   static Future<void> markCompleteProfileAsCompleted() => _settings.markCompleteProfileAsCompleted();
-  static bool isCompleteProfileRequired() => _settings.isCompleteProfileRequired();
+  static Future<bool> isCompleteProfileRequired() => _settings.isCompleteProfileRequired();
   static Future<void> setEarlyVoiceAlerts(bool enabled) => _settings.setEarlyVoiceAlerts(enabled);
-  static bool getEarlyVoiceAlerts() => _settings.getEarlyVoiceAlerts();
+  static Future<bool> getEarlyVoiceAlerts() => _settings.getEarlyVoiceAlerts();
   static Future<void> setNotificationsEnabled(bool enabled) => _settings.setNotificationsEnabled(enabled);
-  static bool getNotificationsEnabled() => _settings.getNotificationsEnabled();
+  static Future<bool> getNotificationsEnabled() => _settings.getNotificationsEnabled();
   static Future<void> incrementUnreadNotificationsCount() => _settings.incrementUnreadNotificationsCount();
   static Future<void> setUnreadNotificationsCount(int count) => _settings.setUnreadNotificationsCount(count);
-  static int getUnreadNotificationsCount() => _settings.getUnreadNotificationsCount();
+  static Future<int> getUnreadNotificationsCount() => _settings.getUnreadNotificationsCount();
   static Future<void> markNotificationsAsRead() => _settings.markNotificationsAsRead();
   static Future<void> saveEmergencyContact(Map<String, dynamic> contact) => _settings.saveEmergencyContact(contact);
-  static Map<String, dynamic>? getEmergencyContact() => _settings.getEmergencyContact();
+  static Future<Map<String, dynamic>?> getEmergencyContact() => _settings.getEmergencyContact();
   static Future<void> clearEmergencyContact() => _settings.clearEmergencyContact();
   static Future<void> saveUserRole(UserRole role) => _settings.saveUserRole(role);
-  static UserRole? getUserRole() => _settings.getUserRole();
+  static Future<UserRole?> getUserRole() => _settings.getUserRole();
 
   // ========== Medications ==========
-  static List<Medication> getMedications() => _medication.getMedications(_currentMedicationsKey());
-  static Future<void> saveMedications(List<Medication> medications) => _medication.saveMedications(_currentMedicationsKey(), medications);
-  static Future<void> addMedication(Medication medication) => _medication.addMedication(_currentMedicationsKey(), medication);
-  static Future<void> updateMedication({required Medication original, required Medication updated}) => _medication.updateMedication(_currentMedicationsKey(), original: original, updated: updated);
-  static Future<void> deleteMedication(Medication medication) => _medication.deleteMedication(_currentMedicationsKey(), medication);
-  static Future<void> markMedicationSynced(String id) => _medication.markMedicationSynced(_currentMedicationsKey(), id);
-  static Future<void> updateMedicationServerId(String tempId, String serverId) => _medication.updateMedicationServerId(_currentMedicationsKey(), tempId, serverId);
+  static Future<List<Medication>> getMedications() async => _medication.getMedications(await _currentMedicationsKey());
+  static Future<void> saveMedications(List<Medication> medications) async => _medication.saveMedications(await _currentMedicationsKey(), medications);
+  static Future<void> addMedication(Medication medication) async => _medication.addMedication(await _currentMedicationsKey(), medication);
+  static Future<void> updateMedication({required Medication original, required Medication updated}) async => _medication.updateMedication(await _currentMedicationsKey(), original: original, updated: updated);
+  static Future<void> deleteMedication(Medication medication) async => _medication.deleteMedication(await _currentMedicationsKey(), medication);
+  static Future<void> markMedicationSynced(String id) async => _medication.markMedicationSynced(await _currentMedicationsKey(), id);
+  static Future<void> updateMedicationServerId(String tempId, String serverId) async => _medication.updateMedicationServerId(await _currentMedicationsKey(), tempId, serverId);
 
   // ========== Schedule ==========
   static Future<void> saveMedicationSchedule(String date, dynamic scheduleResponse) => _schedule.saveMedicationSchedule(date, scheduleResponse);
-  static dynamic getMedicationSchedule(String date) => _schedule.getMedicationSchedule(date);
+  static Future<dynamic> getMedicationSchedule(String date) => _schedule.getMedicationSchedule(date);
   static Future<void> markMedicationScheduleTaken({required String date, required String medicationId, required String time, required bool taken}) => _schedule.markMedicationScheduleTaken(date: date, medicationId: medicationId, time: time, taken: taken);
 
   // ========== Notifications ==========
-  static dynamic getNotificationInbox() => _notification.getInbox();
+  static Future<dynamic> getNotificationInbox() => _notification.getInbox();
   static Future<void> saveNotificationInbox(dynamic payload) => _notification.saveInbox(payload);
   static Future<void> clearNotificationInbox() => _notification.clearInbox();
 
@@ -135,9 +140,9 @@ class HiveService {
   }
 
   // ========== Helpers ==========
-  static String _currentMedicationsKey() {
-    final role = getUserRole();
-    final user = getUserData();
+  static Future<String> _currentMedicationsKey() async {
+    final role = await getUserRole();
+    final user = await getUserData();
     if (role != null && user != null && user.id.isNotEmpty) {
       final roleLabel = role == UserRole.doctor ? 'doctor' : 'patient';
       return 'medications/$roleLabel/${user.id}';
@@ -148,13 +153,16 @@ class HiveService {
   /// Clear all data (logout)
   static Future<void> clearAllData() async {
     try {
-      if (Hive.isBoxOpen('authBox')) await Hive.box('authBox').clear();
-      if (Hive.isBoxOpen('userBox')) await Hive.box('userBox').clear();
-      if (Hive.isBoxOpen('settingsBox')) await Hive.box('settingsBox').clear();
-      if (Hive.isBoxOpen('medicationsBox')) await Hive.box('medicationsBox').clear();
+      await Future.wait([
+        _boxManager.openBox('authBox').then((box) => box.clear()),
+        _boxManager.openBox('userBox').then((box) => box.clear()),
+        _boxManager.openBox('settingsBox').then((box) => box.clear()),
+        _boxManager.openBox('medicationsBox').then((box) => box.clear()),
+        _boxManager.openBox('patientSchedulesBox').then((box) => box.clear()),
+        _boxManager.openBox('notificationInboxBox').then((box) => box.clear()),
+      ]);
       await _healthLogs.clearAll();
-      if (Hive.isBoxOpen('patientSchedulesBox')) await Hive.box('patientSchedulesBox').clear();
-      if (Hive.isBoxOpen('notificationInboxBox')) await Hive.box('notificationInboxBox').clear();
+      await _bookings.clearAll();
     } catch (e, st) {
       AppLogger.instance.e('clearAllData failed', e, st);
     }
@@ -162,6 +170,14 @@ class HiveService {
 
   static Future<void> close() async {
     await Hive.close();
+  }
+
+  static ValueListenable<Box<dynamic>> listenableSettingsBox({List<dynamic>? keys}) {
+    return Hive.box(settingsBoxName).listenable(keys: keys);
+  }
+
+  static ValueListenable<Box<dynamic>> listenableNotificationInboxBox({List<dynamic>? keys}) {
+    return Hive.box(notificationInboxBoxName).listenable(keys: keys);
   }
 }
 

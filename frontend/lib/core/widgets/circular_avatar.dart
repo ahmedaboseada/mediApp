@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:medi/core/core.dart';
@@ -96,11 +97,12 @@ class _CircularAvatarState extends State<CircularAvatar> {
                   ? Image.file(File(imagePath), fit: BoxFit.cover)
                   : (widget.networkImageUrl != null &&
                         widget.networkImageUrl!.isNotEmpty)
-                  ? Image.network(
-                      widget.networkImageUrl!,
+                  ? CachedNetworkImage(
+                      imageUrl: widget.networkImageUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, err, builder) =>
-                          const Icon(Icons.person),
+                      fadeInDuration: Duration.zero,
+                      placeholder: (_, __) => const Icon(Icons.person),
+                      errorWidget: (_, __, ___) => const Icon(Icons.person),
                     )
                   : Image.asset(AppAssets.avatar1, fit: BoxFit.cover),
             ),

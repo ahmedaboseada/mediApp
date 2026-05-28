@@ -11,20 +11,44 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
 
   Future<void> loadAppointmentsForDate(DateTime selectedDate) async {
     final normalizedDate = DateUtils.dateOnly(selectedDate);
-
     if (state.status == AppointmentsStatus.loading &&
         DateUtils.isSameDay(state.selectedDate, normalizedDate)) {
       return;
     }
 
-    emit(
-      state.copyWith(
-        selectedDate: normalizedDate,
-        status: AppointmentsStatus.loading,
-        clearError: true,
-      ),
-    );
+    // Emit cached appointments immediately (local-first)
+    try {
+      final cached = await _repository.getCachedAppointmentsForDate(normalizedDate);
+      if (cached.isNotEmpty) {
+        if (isClosed) return;
+        emit(
+          state.copyWith(
+            selectedDate: normalizedDate,
+            status: AppointmentsStatus.success,
+            appointments: cached,
+            clearError: true,
+          ),
+        );
+      } else {
+        emit(
+          state.copyWith(
+            selectedDate: normalizedDate,
+            status: AppointmentsStatus.loading,
+            clearError: true,
+          ),
+        );
+      }
+    } catch (_) {
+      emit(
+        state.copyWith(
+          selectedDate: normalizedDate,
+          status: AppointmentsStatus.loading,
+          clearError: true,
+        ),
+      );
+    }
 
+    // Refresh from server and overwrite cache when available
     final result = await _repository.getAppointmentsForDate(normalizedDate);
 
     result.fold(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
@@ -171,13 +172,41 @@ class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
                             onTap: () => _enterManagedPatientMode(patient.userId),
                             leading: CircleAvatar(
                               backgroundColor: AppColors.secondary,
-                              foregroundImage: patient.profilePicture.isNotEmpty
-                                  ? NetworkImage(patient.profilePicture)
-                                  : null,
-                              child: Text(
-                                patient.name.isNotEmpty
-                                    ? patient.name[0].toUpperCase()
-                                    : 'P',
+                              child: ClipOval(
+                                child: SizedBox(
+                                  width: AppSizes.w40,
+                                  height: AppSizes.w40,
+                                  child: patient.profilePicture.isNotEmpty &&
+                                          patient.profilePicture
+                                              .toLowerCase()
+                                              .startsWith('http')
+                                      ? CachedNetworkImage(
+                                          imageUrl: patient.profilePicture,
+                                          fit: BoxFit.cover,
+                                          fadeInDuration: Duration.zero,
+                                          placeholder: (_, __) => Center(
+                                            child: Text(
+                                              patient.name.isNotEmpty
+                                                  ? patient.name[0].toUpperCase()
+                                                  : 'P',
+                                            ),
+                                          ),
+                                          errorWidget: (_, __, ___) => Center(
+                                            child: Text(
+                                              patient.name.isNotEmpty
+                                                  ? patient.name[0].toUpperCase()
+                                                  : 'P',
+                                            ),
+                                          ),
+                                        )
+                                      : Center(
+                                          child: Text(
+                                            patient.name.isNotEmpty
+                                                ? patient.name[0].toUpperCase()
+                                                : 'P',
+                                          ),
+                                        ),
+                                ),
                               ),
                             ),
                             title: Text(patient.name, style: AppStyles.black16400),

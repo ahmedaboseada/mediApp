@@ -1,4 +1,3 @@
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:medi/core/services/hive_box_manager.dart';
 import 'package:medi/core/services/app_logger.dart';
 
@@ -8,11 +7,11 @@ class NotificationLocalDataSource {
 
   NotificationLocalDataSource({HiveBoxManager? boxManager}) : boxManager = boxManager ?? const HiveBoxManager();
 
-  Future<Box> _openBox() => boxManager.openBox(_notificationsBox);
+  Future<dynamic> _openBox() => boxManager.openBox(_notificationsBox);
 
-  dynamic getInbox() {
-    if (!Hive.isBoxOpen(_notificationsBox)) return null;
-    return Hive.box(_notificationsBox).toMap();
+  Future<dynamic> getInbox() async {
+    final box = await _openBox();
+    return box.toMap();
   }
 
   Future<void> saveInbox(dynamic payload) async {

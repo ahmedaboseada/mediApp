@@ -38,23 +38,32 @@ class SyncProcessor {
 
     if (!await connectivityService.hasRealInternet()) return;
 
+    AppLogger.instance.i('Starting sync processor');
+
     _syncCompleter = Completer<void>();
 
     try {
       await migrateLegacyActions();
 
-      while (queueManager.length > 0) {
-        final key = queueManager.firstKey();
-        if (key == null) break;
+      while (await queueManager.length > 0) {
+        final len = await queueManager.length;
+        AppLogger.instance.i('Processing sync queue, remaining=$len');
+
+        final key = await queueManager.firstKey();
+        AppLogger.instance.i('Processing sync action key: $key');
 
         final success = await processSingleAction(key);
-        if (!success) break;
+        if (!success) {
+          AppLogger.instance.i('Halting sync processing due to failure, key: $key');
+          break;
+        }
       }
     } finally {
       if (!(_syncCompleter?.isCompleted ?? true)) {
         _syncCompleter?.complete();
       }
       _syncCompleter = null;
+      AppLogger.instance.i('Sync processor finished');
     }
   }
 
@@ -137,7 +146,7 @@ class SyncProcessor {
   }
 
   Future<SyncAction?> _readActionByKey(dynamic key) async {
-    if (!queueManager.isOpen()) {
+    if (!await queueManager.isOpen()) {
       await queueManager.openBox();
     }
 

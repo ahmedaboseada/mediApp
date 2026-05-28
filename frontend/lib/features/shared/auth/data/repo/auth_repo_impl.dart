@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:medi/core/constants/app_keys.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/core/data/sync/sync_service.dart';
 import 'package:medi/core/services/call_service.dart';
 import 'package:medi/features/shared/auth/data/models/auth_token_model.dart';
 import 'package:medi/features/shared/auth/data/models/auth_response_model.dart';
@@ -168,7 +169,7 @@ class AuthRepoImpl implements AuthRepo {
   @override
   Future<void> signOut() async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       log('Access Token for Logout: $token');
       final headers = {
         "Content-Type": "application/json",
@@ -301,20 +302,20 @@ class AuthRepoImpl implements AuthRepo {
     String? clinicName,
     String? medicalLicenseId,
   }) async {
+    final data = <String, dynamic>{};
+    if (firstName != null) data['firstName'] = firstName;
+    if (lastName != null) data['lastName'] = lastName;
+    if (email != null) data['email'] = email;
+    if (phone != null) data['phone'] = phone;
+    if (gender != null) data['gender'] = gender;
+    if (dob != null) data['DOB'] = dob;
+    if (profilePicture != null) data['profilePicture'] = profilePicture;
+    if (specialization != null) data['specialization'] = specialization;
+    if (clinicName != null) data['clinicName'] = clinicName;
+    if (medicalLicenseId != null) data['medicalLicenseId'] = medicalLicenseId;
+
     try {
       final caregiverMode = getIt<CaregiverModeCubit>();
-      final data = <String, dynamic>{};
-
-      if (firstName != null) data['firstName'] = firstName;
-      if (lastName != null) data['lastName'] = lastName;
-      if (email != null) data['email'] = email;
-      if (phone != null) data['phone'] = phone;
-      if (gender != null) data['gender'] = gender;
-      if (dob != null) data['DOB'] = dob;
-      if (profilePicture != null) data['profilePicture'] = profilePicture;
-      if (specialization != null) data['specialization'] = specialization;
-      if (clinicName != null) data['clinicName'] = clinicName;
-      if (medicalLicenseId != null) data['medicalLicenseId'] = medicalLicenseId;
 
       final dynamic response = await apiService.patch(
         '/users/updateProfile',
@@ -323,6 +324,21 @@ class AuthRepoImpl implements AuthRepo {
       );
 
       if (response is ServerFailure) {
+        if (_isOfflineFailure(response)) {
+          final localProfile = await _buildLocallyUpdatedProfile(data);
+          if (localProfile != null) {
+            final queueData = <String, dynamic>{
+              ...data,
+              'id': localProfile.user.id,
+            };
+            await SyncService.addToQueue(
+              type: 'update',
+              entity: 'profile',
+              data: queueData,
+            );
+            return Right(localProfile);
+          }
+        }
         return Left(response);
       }
       log('Update Profile Response: ${response.toString()}');
@@ -345,10 +361,115 @@ class AuthRepoImpl implements AuthRepo {
 
       return Right(profile);
     } on DioException catch (e) {
+      if (_isOfflineDioError(e)) {
+        final localProfile = await _buildLocallyUpdatedProfile(data);
+        if (localProfile != null) {
+          final queueData = <String, dynamic>{...data, 'id': localProfile.user.id};
+          await SyncService.addToQueue(
+            type: 'update',
+            entity: 'profile',
+            data: queueData,
+          );
+          return Right(localProfile);
+        }
+      }
       return Left(ServerFailure.fromDioError(e));
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }
+  }
+
+  bool _isOfflineDioError(DioException e) {
+    if (e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.sendTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      return true;
+    }
+    return (e.message ?? '').contains('SocketException');
+  }
+
+  bool _isOfflineFailure(ServerFailure failure) {
+    final msg = failure.message.toLowerCase();
+    return msg.contains('internet') ||
+        msg.contains('connection') ||
+        msg.contains('timeout') ||
+        msg.contains('socket');
+  }
+
+  Future<AuthResponseModel?> _buildLocallyUpdatedProfile(
+    Map<String, dynamic> changes,
+  ) async {
+    final currentUser = await HiveService.getUserData();
+    if (currentUser == null) return null;
+
+    final updatedUser = UserModel(
+      id: currentUser.id,
+      type: currentUser.type,
+      firstName: (changes['firstName'] ?? currentUser.firstName).toString(),
+      lastName: (changes['lastName'] ?? currentUser.lastName).toString(),
+      email: (changes['email'] ?? currentUser.email).toString(),
+      twoFA: currentUser.twoFA,
+      profilePicture: (changes['profilePicture'] ?? currentUser.profilePicture)
+          .toString(),
+      confirmed: currentUser.confirmed,
+      gender: (changes['gender'] ?? currentUser.gender)?.toString(),
+      dob: (changes['DOB'] ?? currentUser.dob)?.toString(),
+      age: currentUser.age,
+      phone: (changes['phone'] ?? currentUser.phone)?.toString(),
+    );
+
+    await HiveService.saveUserData(updatedUser);
+
+    DoctorModel? updatedDoctor;
+    if (currentUser.type == 'doctor') {
+      final doctor = await HiveService.getDoctorData();
+      if (doctor != null) {
+        updatedDoctor = DoctorModel(
+          doctorId: doctor.doctorId,
+          userId: doctor.userId,
+          workingDays: doctor.workingDays,
+          appointmentTypes: doctor.appointmentTypes,
+          reviews: doctor.reviews,
+          reviewsCount: doctor.reviewsCount,
+          workingHours: doctor.workingHours,
+          connectedPatients: doctor.connectedPatients,
+          createdAt: doctor.createdAt,
+          updatedAt: DateTime.now().toIso8601String(),
+          clinicName: (changes['clinicName'] ?? doctor.clinicName).toString(),
+          medicalLicenseId:
+              (changes['medicalLicenseId'] ?? doctor.medicalLicenseId)
+                  .toString(),
+          specialization:
+              (changes['specialization'] ?? doctor.specialization).toString(),
+          clinicAddress: doctor.clinicAddress,
+          clinicLocation: doctor.clinicLocation,
+          consultationDuration: doctor.consultationDuration,
+          maxDailyPatients: doctor.maxDailyPatients,
+        );
+        await HiveService.saveDoctorData(updatedDoctor);
+      }
+    }
+
+    final patient = currentUser.type == 'patient'
+        ? await HiveService.getPatientData()
+        : null;
+    final accessToken = await HiveService.getAccessToken() ?? '';
+    final refreshToken = await HiveService.getRefreshToken() ?? '';
+
+    return AuthResponseModel(
+      message: 'Profile updated locally. Pending sync.',
+      user: updatedUser,
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      doctor: updatedDoctor,
+      patient: patient,
+      rawJson: {
+        'user': updatedUser.toJson(),
+        if (updatedDoctor != null) 'doctor': updatedDoctor.toJson(),
+        if (patient != null) 'patient': patient.toJson(),
+      },
+    );
   }
 
   @override

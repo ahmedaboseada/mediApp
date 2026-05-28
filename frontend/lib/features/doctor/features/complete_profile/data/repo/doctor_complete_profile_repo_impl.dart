@@ -4,7 +4,10 @@ import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/core/data/sync/sync_service.dart';
 import 'package:medi/features/doctor/features/complete_profile/data/repo/doctor_complete_profile_repo.dart';
+import 'package:medi/features/shared/auth/data/models/doctor_model.dart';
+import 'package:medi/features/shared/auth/data/models/working_hours_model.dart';
 
 class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
   DoctorCompleteProfileRepoImpl(this.apiService);
@@ -21,7 +24,7 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
     File? profilePicture,
   }) async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       log(
         'Doctor Complete Step1 - Token: ${token != null ? "EXISTS" : "NULL"}',
       );
@@ -86,7 +89,7 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
     required String label,
   }) async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       log(
         'Doctor Complete Location - Token: ${token != null ? "EXISTS" : "NULL"}',
       );
@@ -134,7 +137,7 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
     required int consultationDuration,
   }) async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       log(
         'Doctor Complete Schedule - Token: ${token != null ? "EXISTS" : "NULL"}',
       );
@@ -183,7 +186,7 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
     required int maxDailyPatients,
   }) async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       log(
         'Doctor Complete Appointments - Token: ${token != null ? "EXISTS" : "NULL"}',
       );
@@ -233,8 +236,19 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
     required List<String> appointmentTypes,
     required int maxDailyPatients,
   }) async {
+    final formattedWorkingDays = _formatWorkingDays(workingDays);
+    final data = {
+      'workingDays': formattedWorkingDays,
+      'workingHours': [
+        {'startHour': startHour, 'endHour': endHour},
+      ],
+      'consultationDuration': consultationDuration,
+      'appointmentTypes': appointmentTypes,
+      'maxDailyPatients': maxDailyPatients,
+    };
+
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       if (token == null || token.isEmpty) {
         return Left(
           ServerFailure('Access token is missing. Please login again.'),
@@ -246,16 +260,6 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
         "Authorization": "Bearer $token",
       };
 
-      final data = {
-        'workingDays': _formatWorkingDays(workingDays),
-        'workingHours': [
-          {'startHour': startHour, 'endHour': endHour},
-        ],
-        'consultationDuration': consultationDuration,
-        'appointmentTypes': appointmentTypes,
-        'maxDailyPatients': maxDailyPatients,
-      };
-
       final dynamic response = await apiService.patch(
         '/doctors/schedule',
         data,
@@ -264,16 +268,123 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
       log('Doctor Update Schedule Response: ${response.toString()}');
 
       if (response is ServerFailure) {
+        if (_isOfflineFailure(response)) {
+          await _saveScheduleLocally(
+            workingDays: formattedWorkingDays,
+            startHour: startHour,
+            endHour: endHour,
+            consultationDuration: consultationDuration,
+            appointmentTypes: appointmentTypes,
+            maxDailyPatients: maxDailyPatients,
+          );
+
+          final doctor = await HiveService.getDoctorData();
+          await SyncService.addToQueue(
+            type: 'update',
+            entity: 'doctorSchedule',
+            data: {
+              ...data,
+              if (doctor != null) 'id': doctor.doctorId,
+            },
+          );
+
+          return const Right('Schedule saved offline. Will sync when online.');
+        }
         return Left(response);
       }
+
+      await _saveScheduleLocally(
+        workingDays: formattedWorkingDays,
+        startHour: startHour,
+        endHour: endHour,
+        consultationDuration: consultationDuration,
+        appointmentTypes: appointmentTypes,
+        maxDailyPatients: maxDailyPatients,
+      );
 
       final message = response['message'] ?? 'Schedule updated successfully';
       return Right(message.toString());
     } on DioException catch (e) {
+      if (_isOfflineDioError(e)) {
+        await _saveScheduleLocally(
+          workingDays: formattedWorkingDays,
+          startHour: startHour,
+          endHour: endHour,
+          consultationDuration: consultationDuration,
+          appointmentTypes: appointmentTypes,
+          maxDailyPatients: maxDailyPatients,
+        );
+
+        final doctor = await HiveService.getDoctorData();
+        await SyncService.addToQueue(
+          type: 'update',
+          entity: 'doctorSchedule',
+          data: {
+            ...data,
+            if (doctor != null) 'id': doctor.doctorId,
+          },
+        );
+
+        return const Right('Schedule saved offline. Will sync when online.');
+      }
       return Left(ServerFailure.fromDioError(e));
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }
+  }
+
+  bool _isOfflineDioError(DioException e) {
+    if (e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.sendTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      return true;
+    }
+    return (e.message ?? '').contains('SocketException');
+  }
+
+  bool _isOfflineFailure(ServerFailure failure) {
+    final msg = failure.message.toLowerCase();
+    return msg.contains('internet') ||
+        msg.contains('connection') ||
+        msg.contains('timeout') ||
+        msg.contains('socket');
+  }
+
+  Future<void> _saveScheduleLocally({
+    required List<String> workingDays,
+    required String startHour,
+    required String endHour,
+    required int consultationDuration,
+    required List<String> appointmentTypes,
+    required int maxDailyPatients,
+  }) async {
+    final doctor = await HiveService.getDoctorData();
+    if (doctor == null) return;
+
+    final updatedDoctor = DoctorModel(
+      doctorId: doctor.doctorId,
+      userId: doctor.userId,
+      workingDays: workingDays,
+      appointmentTypes: appointmentTypes,
+      reviews: doctor.reviews,
+      reviewsCount: doctor.reviewsCount,
+      workingHours: [
+        WorkingHoursModel(startHour: startHour, endHour: endHour),
+      ],
+      connectedPatients: doctor.connectedPatients,
+      createdAt: doctor.createdAt,
+      updatedAt: DateTime.now().toIso8601String(),
+      clinicName: doctor.clinicName,
+      medicalLicenseId: doctor.medicalLicenseId,
+      specialization: doctor.specialization,
+      clinicAddress: doctor.clinicAddress,
+      clinicLocation: doctor.clinicLocation,
+      consultationDuration: consultationDuration,
+      maxDailyPatients: maxDailyPatients,
+    );
+
+    await HiveService.saveDoctorData(updatedDoctor);
   }
 
   List<String> _formatWorkingDays(List<String> days) {
@@ -295,7 +406,7 @@ class DoctorCompleteProfileRepoImpl implements DoctorCompleteProfileRepo {
     required String filePath,
   }) async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       log(
         'Doctor Complete License - Token: ${token != null ? "EXISTS" : "NULL"}',
       );

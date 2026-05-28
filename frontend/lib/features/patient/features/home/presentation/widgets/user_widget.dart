@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:medi/core/core.dart';
 
 class UserWidget extends StatelessWidget {
@@ -32,20 +33,10 @@ class UserWidget extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircleAvatar(
-              radius: AppSizes.r20,
-              backgroundColor: AppColors.secondary,
-              foregroundImage: _resolveImageProvider(profileImagePath),
-              child: Text(
-                _initials(displayName),
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontSize: AppSizes.sp14,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+            _UserAvatar(
+              initials: _initials(displayName),
+              profileImagePath: profileImagePath,
             ),
-
             SizedBox(width: AppSizes.w12),
             Text('Hi, $displayName!', style: AppStyles.black18500),
           ],
@@ -67,17 +58,64 @@ class UserWidget extends StatelessWidget {
 
     return parts.first.substring(0, 1).toUpperCase();
   }
+}
 
-  ImageProvider? _resolveImageProvider(String imageSource) {
-    if (imageSource.isEmpty) {
-      return null;
-    }
+class _UserAvatar extends StatelessWidget {
+  const _UserAvatar({
+    required this.initials,
+    required this.profileImagePath,
+  });
 
-    final lower = imageSource.toLowerCase();
-    if (lower.startsWith('http://') || lower.startsWith('https://')) {
-      return NetworkImage(imageSource);
-    }
+  final String initials;
+  final String profileImagePath;
 
-    return AssetImage(imageSource);
+  @override
+  Widget build(BuildContext context) {
+    final isNetworkImage = profileImagePath.toLowerCase().startsWith('http');
+
+    return ClipOval(
+      child: SizedBox(
+        width: AppSizes.w40,
+        height: AppSizes.w40,
+        child: ColoredBox(
+          color: AppColors.secondary,
+          child: isNetworkImage
+              ? CachedNetworkImage(
+                  imageUrl: profileImagePath,
+                  fit: BoxFit.cover,
+                  fadeInDuration: Duration.zero,
+                  placeholder: (_, _) => _AvatarInitials(initials: initials),
+                  errorWidget: (_, _, _) => _AvatarInitials(initials: initials),
+                )
+              : profileImagePath.isNotEmpty
+                  ? Image.asset(
+                      profileImagePath,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => _AvatarInitials(initials: initials),
+                    )
+                  : _AvatarInitials(initials: initials),
+        ),
+      ),
+    );
+  }
+}
+
+class _AvatarInitials extends StatelessWidget {
+  const _AvatarInitials({required this.initials});
+
+  final String initials;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        initials,
+        style: TextStyle(
+          color: AppColors.primary,
+          fontSize: AppSizes.sp14,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
   }
 }

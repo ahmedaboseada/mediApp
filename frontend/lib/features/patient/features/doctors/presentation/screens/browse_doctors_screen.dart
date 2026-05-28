@@ -14,83 +14,98 @@ class BrowseDoctorsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => getIt<DoctorsCubit>()..loadDoctors(),
-      child: Scaffold(
-        body: SafeArea(
-          bottom: false,
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSizes.w16,
-              vertical: AppSizes.h12,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                BlocBuilder<DoctorsCubit, DoctorsState>(
-                  builder: (context, state) {
-                    return MedicineSearchBar(
-                      hintText: 'Search doctors by name or specialty',
-                      enableInput: true,
-                      showAction: false,
-                      onChanged: (query) {
-                        context.read<DoctorsCubit>().searchDoctors(query);
-                      },
-                      onClear: () {
-                        context.read<DoctorsCubit>().clearSearch();
-                      },
-                    );
-                  },
+      child: Builder(
+        builder: (context) {
+          return Scaffold(
+            body: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSizes.w16,
+                  vertical: AppSizes.h12,
                 ),
-                // const DoctorsSearchBar(),
-                SizedBox(height: AppSizes.h32),
-                Expanded(
-                  child: BlocBuilder<DoctorsCubit, DoctorsState>(
-                    builder: (context, state) {
-                      if (state is DoctorsLoading || state is DoctorsInitial) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (state is DoctorsError) {
-                        return Center(child: Text(state.message));
-                      } else if (state is DoctorsLoaded) {
-                        final doctors = state.doctors;
-                        if (doctors.isEmpty) {
-                          return const Center(child: Text('No doctors found.'));
-                        }
-                        return GridView.builder(
-                          padding: EdgeInsets.only(bottom: AppSizes.h12),
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                crossAxisSpacing: AppSizes.w12,
-                                mainAxisSpacing: AppSizes.h12,
-                                childAspectRatio: 0.9,
-                              ),
-                          itemCount: doctors.length,
-                          itemBuilder: (context, index) {
-                            final doctor = doctors[index];
-                            return DoctorHoverCard(
-                              name:
-                                  'Dr. ${doctor.user.firstName}\n${doctor.user.lastName}',
-                              specialty: doctor.specialization,
-                              rating: 0,
-                              reviewsCount: doctor.reviewsCount,
-                              imageAsset: doctor.user.profilePicture.isNotEmpty
-                                  ? doctor.user.profilePicture
-                                  : AppAssets.avatar1,
-                              onTap: () => context.push(
-                                '/doctors/profile',
-                                extra: doctor,
-                              ),
+                child: RefreshIndicator(
+                  onRefresh: () => context.read<DoctorsCubit>().loadDoctors(),
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      BlocBuilder<DoctorsCubit, DoctorsState>(
+                        builder: (context, state) {
+                          return MedicineSearchBar(
+                            hintText: 'Search doctors by name or specialty',
+                            enableInput: true,
+                            showAction: false,
+                            onChanged: (query) {
+                              context.read<DoctorsCubit>().searchDoctors(query);
+                            },
+                            onClear: () {
+                              context.read<DoctorsCubit>().clearSearch();
+                            },
+                          );
+                        },
+                      ),
+                      SizedBox(height: AppSizes.h32),
+                      BlocBuilder<DoctorsCubit, DoctorsState>(
+                        builder: (context, state) {
+                          if (state is DoctorsLoading || state is DoctorsInitial) {
+                            return const Padding(
+                              padding: EdgeInsets.only(top: 120),
+                              child: Center(child: CircularProgressIndicator()),
                             );
-                          },
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    },
+                          } else if (state is DoctorsError) {
+                            return Padding(
+                              padding: EdgeInsets.only(top: 120),
+                              child: Center(child: Text(state.message)),
+                            );
+                          } else if (state is DoctorsLoaded) {
+                            final doctors = state.doctors;
+                            if (doctors.isEmpty) {
+                              return const Padding(
+                                padding: EdgeInsets.only(top: 120),
+                                child: Center(child: Text('No doctors found.')),
+                              );
+                            }
+                            return GridView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              padding: EdgeInsets.only(bottom: AppSizes.h12),
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    crossAxisSpacing: AppSizes.w12,
+                                    mainAxisSpacing: AppSizes.h12,
+                                    childAspectRatio: 0.9,
+                                  ),
+                              itemCount: doctors.length,
+                              itemBuilder: (context, index) {
+                                final doctor = doctors[index];
+                                return DoctorHoverCard(
+                                  name:
+                                      'Dr. ${doctor.user.firstName}\n${doctor.user.lastName}',
+                                  specialty: doctor.specialization,
+                                  rating: 0,
+                                  reviewsCount: doctor.reviewsCount,
+                                  imageAsset: doctor.user.profilePicture.isNotEmpty
+                                      ? doctor.user.profilePicture
+                                      : AppAssets.avatar1,
+                                  onTap: () => context.push(
+                                    '/doctors/profile',
+                                    extra: doctor,
+                                  ),
+                                );
+                              },
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

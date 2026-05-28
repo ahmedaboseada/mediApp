@@ -1,6 +1,8 @@
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:medi/core/services/hive_box_manager.dart';
 import 'package:medi/features/shared/auth/data/models/auth_response_model.dart';
+import 'package:medi/features/shared/auth/data/models/user_model.dart';
+import 'package:medi/features/shared/auth/data/models/patient_model.dart';
+import 'package:medi/features/shared/auth/data/models/doctor_model.dart';
 import 'package:medi/core/services/app_logger.dart';
 
 class AuthLocalDataSource {
@@ -21,9 +23,14 @@ class AuthLocalDataSource {
     }
   }
 
-  String? getAccessToken() {
-    if (!Hive.isBoxOpen(_authBox)) return null;
-    return Hive.box(_authBox).get(_accessTokenKey) as String?;
+  Future<String?> getAccessToken() async {
+    try {
+      final box = await boxManager.openBox(_authBox);
+      return box.get(_accessTokenKey) as String?;
+    } catch (e, st) {
+      AppLogger.instance.e('getAccessToken failed', e, st);
+      return null;
+    }
   }
 
   Future<void> saveRefreshToken(String token) async {
@@ -31,9 +38,14 @@ class AuthLocalDataSource {
     await box.put(_refreshTokenKey, token);
   }
 
-  String? getRefreshToken() {
-    if (!Hive.isBoxOpen(_authBox)) return null;
-    return Hive.box(_authBox).get(_refreshTokenKey) as String?;
+  Future<String?> getRefreshToken() async {
+    try {
+      final box = await boxManager.openBox(_authBox);
+      return box.get(_refreshTokenKey) as String?;
+    } catch (e, st) {
+      AppLogger.instance.e('getRefreshToken failed', e, st);
+      return null;
+    }
   }
 
   Future<void> saveChallengeToken(String token) async {
@@ -41,9 +53,14 @@ class AuthLocalDataSource {
     await box.put(_challengeTokenKey, token);
   }
 
-  String? getChallengeToken() {
-    if (!Hive.isBoxOpen(_authBox)) return null;
-    return Hive.box(_authBox).get(_challengeTokenKey) as String?;
+  Future<String?> getChallengeToken() async {
+    try {
+      final box = await boxManager.openBox(_authBox);
+      return box.get(_challengeTokenKey) as String?;
+    } catch (e, st) {
+      AppLogger.instance.e('getChallengeToken failed', e, st);
+      return null;
+    }
   }
 
   Future<void> clearChallengeToken() async {
@@ -60,12 +77,62 @@ class AuthLocalDataSource {
 
   Future<void> saveAuthResponse(AuthResponseModel response) async {
     try {
-      final box = await boxManager.openBox(_authBox);
-      await box.put('userData', response.user);
+      await boxManager.openBox(_authBox);
+      await saveUserData(response.user);
+      if (response.patient != null) {
+        await savePatientData(response.patient!);
+      }
+      if (response.doctor != null) {
+        await saveDoctorData(response.doctor!);
+      }
       await saveAccessToken(response.accessToken);
       await saveRefreshToken(response.refreshToken);
+      await _logAuthSnapshot(
+        hasPatient: response.patient != null,
+        hasDoctor: response.doctor != null,
+      );
     } catch (e, st) {
       AppLogger.instance.e('saveAuthResponse failed', e, st);
+    }
+  }
+
+  Future<void> saveUserData(UserModel user) async {
+    final box = await boxManager.openBox('userBox');
+    await box.put('userData', user.toJson());
+    if (user.id.isNotEmpty) {
+      final settingsBox = await boxManager.openBox('settingsBox');
+      await settingsBox.put('lastKnownUserId', user.id);
+    }
+  }
+
+  Future<void> savePatientData(PatientModel patient) async {
+    final box = await boxManager.openBox('userBox');
+    await box.put('patientData', patient.toJson());
+    await box.delete('doctorData');
+  }
+
+  Future<void> saveDoctorData(DoctorModel doctor) async {
+    final box = await boxManager.openBox('userBox');
+    await box.put('doctorData', doctor.toJson());
+    await box.delete('patientData');
+  }
+
+  Future<void> _logAuthSnapshot({
+    required bool hasPatient,
+    required bool hasDoctor,
+  }) async {
+    try {
+      final authBox = await boxManager.openBox(_authBox);
+      final userBox = await boxManager.openBox('userBox');
+      AppLogger.instance.i('Auth box keys: ${authBox.keys.toList()}');
+      AppLogger.instance.i('Auth box values: ${authBox.toMap()}');
+      AppLogger.instance.i('User box keys: ${userBox.keys.toList()}');
+      AppLogger.instance.i('User box values: ${userBox.toMap()}');
+      AppLogger.instance.i('Saved user exists after auth save: ${userBox.get('userData') != null}');
+      AppLogger.instance.i('Saved patient exists after auth save: $hasPatient');
+      AppLogger.instance.i('Saved doctor exists after auth save: $hasDoctor');
+    } catch (e, st) {
+      AppLogger.instance.w('Auth snapshot logging failed', e, st);
     }
   }
 }

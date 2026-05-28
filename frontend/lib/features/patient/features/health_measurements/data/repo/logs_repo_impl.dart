@@ -79,7 +79,7 @@ class LogsRepoImpl implements LogsRepo {
       log('Get Blood Pressures Response: ${response.toString()}');
 
       if (response is ServerFailure) {
-        final cached = localDataSource.getMeasurementResponse('blood_pressure');
+        final cached = await localDataSource.getMeasurementResponse('blood_pressure');
         if (cached != null) {
           return Right(cached);
         }
@@ -91,7 +91,7 @@ class LogsRepoImpl implements LogsRepo {
       return Right(response);
     } on DioException catch (e) {
       if (_isOfflineException(e)) {
-        final cached = localDataSource.getMeasurementResponse('blood_pressure');
+        final cached = await localDataSource.getMeasurementResponse('blood_pressure');
         if (cached != null) {
           return Right(cached);
         }
@@ -160,7 +160,7 @@ class LogsRepoImpl implements LogsRepo {
       log('Get Heart Rates Response: ${response.toString()}');
 
       if (response is ServerFailure) {
-        final cached = localDataSource.getMeasurementResponse('heart_rate');
+        final cached = await localDataSource.getMeasurementResponse('heart_rate');
         if (cached != null) {
           return Right(cached);
         }
@@ -172,7 +172,7 @@ class LogsRepoImpl implements LogsRepo {
       return Right(response);
     } on DioException catch (e) {
       if (_isOfflineException(e)) {
-        final cached = localDataSource.getMeasurementResponse('heart_rate');
+        final cached = await localDataSource.getMeasurementResponse('heart_rate');
         if (cached != null) {
           return Right(cached);
         }
@@ -257,19 +257,20 @@ class LogsRepoImpl implements LogsRepo {
       log('Get Blood Sugars Response: ${response.toString()}');
 
       if (response is ServerFailure) {
-        final cached = localDataSource.getMeasurementResponse('blood_sugar');
+        final cached = await localDataSource.getMeasurementResponse('blood_sugar');
+        log('Cached blood sugar: $cached');
         if (cached != null) {
           return Right(cached);
         }
         return Left(response);
       }
-
+      log('Saving blood sugar response locally...');
       await localDataSource.saveMeasurementResponse('blood_sugar', response);
-
+      log('Blood sugar response saved.');
       return Right(response);
     } on DioException catch (e) {
       if (_isOfflineException(e)) {
-        final cached = localDataSource.getMeasurementResponse('blood_sugar');
+        final cached = await localDataSource.getMeasurementResponse('blood_sugar');
         if (cached != null) {
           return Right(cached);
         }
@@ -338,7 +339,7 @@ class LogsRepoImpl implements LogsRepo {
       log('Get Weights Response: ${response.toString()}');
 
       if (response is ServerFailure) {
-        final cached = localDataSource.getMeasurementResponse('weight');
+        final cached = await localDataSource.getMeasurementResponse('weight');
         if (cached != null) {
           return Right(cached);
         }
@@ -350,7 +351,7 @@ class LogsRepoImpl implements LogsRepo {
       return Right(response);
     } on DioException catch (e) {
       if (_isOfflineException(e)) {
-        final cached = localDataSource.getMeasurementResponse('weight');
+        final cached = await localDataSource.getMeasurementResponse('weight');
         if (cached != null) {
           return Right(cached);
         }
@@ -412,7 +413,7 @@ class LogsRepoImpl implements LogsRepo {
       log('Get Symptom Logs Response: ${response.toString()}');
 
       if (response is ServerFailure) {
-        final cached = localDataSource.getSymptomResponse();
+        final cached = await localDataSource.getSymptomResponse();
         if (cached != null) {
           return Right(cached);
         }
@@ -424,7 +425,7 @@ class LogsRepoImpl implements LogsRepo {
       return Right(response);
     } on DioException catch (e) {
       if (_isOfflineException(e)) {
-        final cached = localDataSource.getSymptomResponse();
+        final cached = await localDataSource.getSymptomResponse();
         if (cached != null) {
           return Right(cached);
         }

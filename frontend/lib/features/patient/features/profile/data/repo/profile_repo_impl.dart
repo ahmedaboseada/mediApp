@@ -4,10 +4,12 @@ import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/core/data/sync/sync_service.dart';
 import 'package:medi/features/patient/features/profile/data/models/caregiver_request_model.dart';
 import 'package:medi/features/patient/features/profile/data/models/doctor_request_model.dart';
 import 'package:medi/features/patient/features/profile/data/models/managed_patient_summary.dart';
 import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
+import 'package:medi/features/shared/auth/data/models/user_model.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -28,7 +30,7 @@ class ProfileRepoImpl implements ProfileRepo {
         'newPassword': newPassword,
         'confirmPassword': confirmPassword,
       };
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       log('Access Token: $token');
       final headers = {
         "Content-Type": "application/json",
@@ -70,7 +72,7 @@ class ProfileRepoImpl implements ProfileRepo {
     try {
       final data = {'newEmail': newEmail};
 
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
 
       final response = await apiService.patch(
         '/users/email/change',
@@ -99,7 +101,7 @@ class ProfileRepoImpl implements ProfileRepo {
   @override
   Future<Either<ApiError, String>> cancelEmailChange() async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       final headers = {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token",
@@ -160,7 +162,7 @@ class ProfileRepoImpl implements ProfileRepo {
   @override
   Future<Either<ApiError, String>> toggleTwoFactorAuth(bool enabled) async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       log('Access Token: $token');
       final headers = {
         "Content-Type": "application/json",
@@ -175,8 +177,25 @@ class ProfileRepoImpl implements ProfileRepo {
 
       // Check if response is an error
       if (response is ServerFailure) {
+        if (_isOfflineFailure(response)) {
+          await _saveTwoFactorLocally(enabled);
+          final user = await HiveService.getUserData();
+          await SyncService.addToQueue(
+            type: 'update',
+            entity: 'twoFactor',
+            data: {
+              'enabled': enabled,
+              if (user != null) 'id': user.id,
+            },
+          );
+          return const Right(
+            'Two-Factor Authentication updated offline. Will sync when online.',
+          );
+        }
         return Left(response);
       }
+
+      await _saveTwoFactorLocally(enabled);
 
       final message =
           response['message'] ??
@@ -184,6 +203,21 @@ class ProfileRepoImpl implements ProfileRepo {
 
       return Right(message);
     } on DioException catch (e) {
+      if (_isOfflineDioError(e)) {
+        await _saveTwoFactorLocally(enabled);
+        final user = await HiveService.getUserData();
+        await SyncService.addToQueue(
+          type: 'update',
+          entity: 'twoFactor',
+          data: {
+            'enabled': enabled,
+            if (user != null) 'id': user.id,
+          },
+        );
+        return const Right(
+          'Two-Factor Authentication updated offline. Will sync when online.',
+        );
+      }
       final serverFailure = ServerFailure.fromDioError(e);
       return Left(serverFailure);
     } catch (e) {
@@ -191,11 +225,53 @@ class ProfileRepoImpl implements ProfileRepo {
     }
   }
 
+  bool _isOfflineDioError(DioException e) {
+    if (e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.sendTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      return true;
+    }
+    return (e.message ?? '').contains('SocketException');
+  }
+
+  bool _isOfflineFailure(ServerFailure failure) {
+    final msg = failure.message.toLowerCase();
+    return msg.contains('internet') ||
+        msg.contains('connection') ||
+        msg.contains('timeout') ||
+        msg.contains('socket');
+  }
+
+  Future<void> _saveTwoFactorLocally(bool enabled) async {
+    await HiveService.setTwoFactorEnabled(enabled);
+
+    final currentUser = await HiveService.getUserData();
+    if (currentUser == null) return;
+
+    final updatedUser = UserModel(
+      id: currentUser.id,
+      type: currentUser.type,
+      firstName: currentUser.firstName,
+      lastName: currentUser.lastName,
+      email: currentUser.email,
+      twoFA: enabled,
+      profilePicture: currentUser.profilePicture,
+      confirmed: currentUser.confirmed,
+      gender: currentUser.gender,
+      dob: currentUser.dob,
+      age: currentUser.age,
+      phone: currentUser.phone,
+    );
+
+    await HiveService.saveUserData(updatedUser);
+  }
+
   @override
   Future<Either<ApiError, List<CaregiverRequestModel>>>
   listCaregiverRequests() async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       final headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -230,7 +306,7 @@ class ProfileRepoImpl implements ProfileRepo {
     required String requestId,
   }) async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       final headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -260,7 +336,7 @@ class ProfileRepoImpl implements ProfileRepo {
     required String requestId,
   }) async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       final headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -288,7 +364,7 @@ class ProfileRepoImpl implements ProfileRepo {
   @override
   Future<Either<ApiError, List<ManagedPatientSummary>>> listManagedPatients() async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       final headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -328,7 +404,7 @@ class ProfileRepoImpl implements ProfileRepo {
   Future<Either<ApiError, List<DoctorRequestModel>>>
   listDoctorRequests() async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       final headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -363,7 +439,7 @@ class ProfileRepoImpl implements ProfileRepo {
     required String doctorId,
   }) async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       final headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -393,7 +469,7 @@ class ProfileRepoImpl implements ProfileRepo {
     required String doctorId,
   }) async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       final headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
@@ -424,7 +500,7 @@ class ProfileRepoImpl implements ProfileRepo {
     required String apiEndpoint,
   }) async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
 
       final response = await apiService.downloadFile(
         apiEndpoint,
@@ -459,7 +535,7 @@ class ProfileRepoImpl implements ProfileRepo {
   @override
   Future<Either<ApiError, String>> generateQRToken() async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
 
       final response = await apiService.post(
         '/export/qr-token',

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:medi/core/core.dart';
@@ -29,12 +31,41 @@ class ScheduleCubit extends Cubit<ScheduleState> {
       ),
     );
 
+    final cachedSchedule = await HiveService.getMedicationSchedule(_isoDate(date));
+    if (cachedSchedule != null && !isClosed) {
+      final medications = _extractMedicationSchedule(cachedSchedule, date);
+      emit(
+        ScheduleSuccess(
+          selectedDate: date,
+          mutedReminderKeys: state.mutedReminderKeys,
+          medications: medications,
+        ),
+      );
+    }
+
+    unawaited(_syncFromServerSilently(date, hadCachedData: cachedSchedule != null));
+  }
+
+  Future<void> _syncFromServerSilently(
+    DateTime selectedDate, {
+    required bool hadCachedData,
+  }) async {
+    final date = _dateOnly(selectedDate);
+
     final result = await _medicineRepo.getMedicationScheduleForDate(
       date: _isoDate(date),
     );
 
+    if (isClosed) {
+      return;
+    }
+
     result.fold(
       (error) {
+        if (hadCachedData) {
+          return;
+        }
+
         emit(
           ScheduleFailure(
             selectedDate: date,
@@ -223,8 +254,9 @@ class ScheduleCubit extends Cubit<ScheduleState> {
   }
 
   List<Map<String, dynamic>> _scheduleRows(dynamic response) {
-    final scheduleRows = response is Map<String, dynamic>
-        ? response['schedule'] ?? response['medications'] ?? response['data']
+    final root = _asStringKeyedMap(response);
+    final scheduleRows = root != null
+        ? root['schedule'] ?? root['medications'] ?? root['data']
         : response;
 
     if (scheduleRows is! List) {
@@ -314,6 +346,21 @@ class ScheduleCubit extends Cubit<ScheduleState> {
     final daily = row['daily'];
     if (daily is List) {
       addEntriesFromList(daily);
+    }
+
+    final dailySchedule = row['dailySchedule'];
+    if (dailySchedule is List) {
+      addEntriesFromList(dailySchedule);
+    }
+
+    final weeklySchedule = row['weeklySchedule'];
+    if (weeklySchedule is List) {
+      addEntriesFromList(weeklySchedule, filterByDate: true);
+    }
+
+    final specificSchedule = row['specificSchedule'];
+    if (specificSchedule is List) {
+      addEntriesFromList(specificSchedule, filterByDate: true);
     }
 
     final reminders = row['reminders'];
@@ -450,5 +497,15 @@ class ScheduleCubit extends Cubit<ScheduleState> {
     emit(
       ScheduleInitial(selectedDate: selectedDate, mutedReminderKeys: mutedKeys),
     );
+  }
+
+  Map<String, dynamic>? _asStringKeyedMap(dynamic value) {
+    if (value is Map<String, dynamic>) {
+      return value;
+    }
+    if (value is Map) {
+      return value.cast<String, dynamic>();
+    }
+    return null;
   }
 }

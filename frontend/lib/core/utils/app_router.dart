@@ -499,7 +499,13 @@ class AppRouter {
       /// ================= PATIENT SHELL =================
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
-          return MainPatientView(shell: navigationShell);
+          return BlocProvider(
+            create: (_) => getIt<MedicineCubit>()..loadMedications(),
+            child: BlocProvider(
+              create: (_) => MedicationDataCubit(),
+              child: MainPatientView(shell: navigationShell),
+            ),
+          );
         },
         branches: [
           /// ========= HOME TAB =========
@@ -513,15 +519,7 @@ class AppRouter {
           StatefulShellBranch(
             routes: [
               ShellRoute(
-                builder: (context, state, child) {
-                  return BlocProvider(
-                    create: (_) => MedicationDataCubit(),
-                    child: BlocProvider(
-                      create: (_) => getIt<MedicineCubit>()..loadMedications(),
-                      child: child,
-                    ),
-                  );
-                },
+                builder: (context, state, child) => child,
                 routes: [
                   GoRoute(
                     path: '/medicine',

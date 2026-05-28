@@ -25,7 +25,7 @@ class _PrivacySecuritySectionState extends State<PrivacySecuritySection> {
   }
 
   void _loadTwoFactorStatus() async {
-    final enabled = HiveService.isTwoFactorEnabled();
+    final enabled = await HiveService.isTwoFactorEnabled();
     setState(() {
       twoFactorAuth = enabled;
     });

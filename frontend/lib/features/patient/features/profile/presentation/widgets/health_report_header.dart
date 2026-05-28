@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:medi/core/core.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 
@@ -71,12 +72,12 @@ class HealthReportHeader extends StatelessWidget {
     }
 
     if (resolvedNetworkImageUrl != null && resolvedNetworkImageUrl.isNotEmpty) {
-      return Image.network(
-        resolvedNetworkImageUrl,
+      return CachedNetworkImage(
+        imageUrl: resolvedNetworkImageUrl,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Image.asset(AppAssets.avatar1, fit: BoxFit.cover);
-        },
+        fadeInDuration: Duration.zero,
+        placeholder: (_, __) => Image.asset(AppAssets.avatar1, fit: BoxFit.cover),
+        errorWidget: (_, __, ___) => Image.asset(AppAssets.avatar1, fit: BoxFit.cover),
       );
     }
 

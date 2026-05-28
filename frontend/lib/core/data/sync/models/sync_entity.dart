@@ -2,6 +2,10 @@ enum SyncEntity {
   medication,
   measurement,
   symptom,
+  booking,
+  profile,
+  doctorSchedule,
+  twoFactor,
 }
 
 extension SyncEntityX on SyncEntity {
@@ -14,6 +18,12 @@ extension SyncEntityX on SyncEntity {
       'medication' => SyncEntity.medication,
       'measurement' => SyncEntity.measurement,
       'symptom' => SyncEntity.symptom,
+      'booking' => SyncEntity.booking,
+      'profile' => SyncEntity.profile,
+      'doctorschedule' => SyncEntity.doctorSchedule,
+      'doctor_schedule' => SyncEntity.doctorSchedule,
+      'twofactor' => SyncEntity.twoFactor,
+      'two_factor' => SyncEntity.twoFactor,
       _ => SyncEntity.medication,
     };
   }

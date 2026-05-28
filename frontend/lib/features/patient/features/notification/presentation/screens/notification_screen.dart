@@ -38,8 +38,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: AppSizes.h8),
-                  ValueListenableBuilder<Box>(
-                    valueListenable: Hive.box(HiveService.settingsBoxName).listenable(
+                  ValueListenableBuilder<Box<dynamic>>(
+                    valueListenable: HiveService.listenableSettingsBox(
                       keys: [HiveService.unreadNotificationsCountKey],
                     ),
                     builder: (context, box, child) {
@@ -79,9 +79,10 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   ),
                   SizedBox(height: AppSizes.h4),
                   Expanded(
-                    child: ValueListenableBuilder<Box>(
-                      valueListenable: Hive.box(NotificationInboxService.boxName)
-                          .listenable(keys: [NotificationInboxService.notificationsKey]),
+                    child: ValueListenableBuilder<Box<dynamic>>(
+                      valueListenable: HiveService.listenableNotificationInboxBox(
+                        keys: [NotificationInboxService.notificationsKey],
+                      ),
                       builder: (context, box, child) {
                         final raw = box.get(
                           NotificationInboxService.notificationsKey,

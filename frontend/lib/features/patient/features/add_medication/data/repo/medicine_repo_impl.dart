@@ -223,7 +223,7 @@ class MedicineRepoImpl implements MedicineRepo {
       log('Get Medication Schedule Response: ${response.toString()}');
 
       if (response is ServerFailure) {
-        final cached = HiveService.getMedicationSchedule('all');
+        final cached = await HiveService.getMedicationSchedule('all');
         if (cached != null) {
           return Right(cached);
         }
@@ -255,7 +255,7 @@ class MedicineRepoImpl implements MedicineRepo {
       );
 
       if (response is ServerFailure) {
-        final cached = HiveService.getMedicationSchedule(date);
+        final cached = await HiveService.getMedicationSchedule(date);
         if (cached != null) {
           return Right(cached);
         }

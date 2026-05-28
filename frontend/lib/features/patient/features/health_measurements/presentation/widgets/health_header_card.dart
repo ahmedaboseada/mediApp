@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/health_measurements/data/models/measurement_model.dart';
 import 'package:medi/features/patient/features/health_measurements/presentation/widgets/measurement_grid_item.dart';
@@ -29,17 +30,11 @@ class HealthHeaderCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              CircleAvatar(
-                radius: AppSizes.r20,
-                backgroundColor: AppColors.secondary,
-                foregroundImage: _resolveImageProvider(profileImagePath),
-                child: Text(
-                  _initials(userName),
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontSize: AppSizes.sp14,
-                    fontWeight: FontWeight.w700,
-                  ),
+              ClipOval(
+                child: SizedBox(
+                  width: AppSizes.w40,
+                  height: AppSizes.w40,
+                  child: _buildAvatar(profileImagePath, _initials(userName)),
                 ),
               ),
               SizedBox(width: AppSizes.w12),
@@ -112,16 +107,52 @@ class HealthHeaderCard extends StatelessWidget {
         .toUpperCase();
   }
 
-  ImageProvider? _resolveImageProvider(String imageSource) {
+  Widget _buildAvatar(String imageSource, String initials) {
     if (imageSource.isEmpty) {
-      return null;
+      return _AvatarInitials(initials: initials);
     }
 
     final lower = imageSource.toLowerCase();
     if (lower.startsWith('http://') || lower.startsWith('https://')) {
-      return NetworkImage(imageSource);
+      return ColoredBox(
+        color: AppColors.secondary,
+        child: CachedNetworkImage(
+          imageUrl: imageSource,
+          fit: BoxFit.cover,
+          fadeInDuration: Duration.zero,
+          placeholder: (_, __) => _AvatarInitials(initials: initials),
+          errorWidget: (_, __, ___) => _AvatarInitials(initials: initials),
+        ),
+      );
     }
 
-    return AssetImage(imageSource);
+    return Image.asset(
+      imageSource,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => _AvatarInitials(initials: initials),
+    );
+  }
+}
+
+class _AvatarInitials extends StatelessWidget {
+  const _AvatarInitials({required this.initials});
+
+  final String initials;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: AppColors.secondary,
+      child: Center(
+        child: Text(
+          initials,
+          style: TextStyle(
+            color: AppColors.primary,
+            fontSize: AppSizes.sp14,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
   }
 }

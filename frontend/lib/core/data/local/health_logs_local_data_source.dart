@@ -1,4 +1,3 @@
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:medi/core/enums/user_role.dart';
 import 'package:medi/core/services/hive_box_manager.dart';
 import 'package:medi/core/services/hive_service.dart';
@@ -12,37 +11,60 @@ class HealthLogsLocalDataSource {
   HealthLogsLocalDataSource({HiveBoxManager? boxManager})
       : boxManager = boxManager ?? const HiveBoxManager();
 
-  Future<Box<Map>> _openBox() => boxManager.openBox<Map>(_boxName);
+  Future<dynamic> _openBox() => boxManager.openBox<Map>(_boxName);
 
-  String _currentPrefix() {
-    final role = HiveService.getUserRole();
-    final user = HiveService.getUserData();
-    if (role == null || user == null || user.id.isEmpty) {
+  Future<String> _currentPrefix() async {
+    final role = await HiveService.getUserRole();
+    final user = await HiveService.getUserData();
+    final userId = (user?.id.trim().isNotEmpty ?? false)
+        ? user!.id.trim()
+        : await HiveService.getLastKnownUserId();
+    if (role == null || userId == null || userId.isEmpty) {
       return 'anonymous';
     }
     final roleLabel = role == UserRole.doctor ? 'doctor' : 'patient';
-    return '$roleLabel/${user.id}';
+    return '$roleLabel/$userId';
   }
 
-  String _measurementKey(String type) => 'measurements/${_currentPrefix()}/$type';
+  Future<String> _measurementKey(String type) async => 'measurements/${await _currentPrefix()}/$type';
 
-  String _symptomKey() => 'symptoms/${_currentPrefix()}';
+  Future<String> _symptomKey() async => 'symptoms/${await _currentPrefix()}';
 
   Future<void> saveMeasurementResponse(String type, dynamic response) async {
     final box = await _openBox();
-    await box.put(_measurementKey(type), _normalizeResponse(response));
+    await box.put(await _measurementKey(type), _normalizeResponse(response));
   }
 
-  dynamic getMeasurementResponse(String type) {
-    if (!Hive.isBoxOpen(_boxName)) return null;
-    return Hive.box<Map>(_boxName).get(_measurementKey(type));
+  Future<dynamic> getMeasurementResponse(String type) async {
+    final box = await _openBox();
+    final currentKey = await _measurementKey(type);
+    final currentValue = box.get(currentKey);
+    if (currentValue != null) {
+      return currentValue;
+    }
+
+    final legacyValue = box.get('measurements/$type');
+    if (legacyValue != null) {
+      return legacyValue;
+    }
+
+    for (final key in box.keys.whereType<String>()) {
+      if (key.startsWith('measurements/') && key.endsWith('/$type')) {
+        final value = box.get(key);
+        if (value != null) {
+          return value;
+        }
+      }
+    }
+
+    return null;
   }
 
   Future<void> appendMeasurement({
     required String type,
     required Map<String, dynamic> payload,
   }) async {
-    final cached = _cachedMeasurementResponse(type);
+    final cached = await _cachedMeasurementResponse(type);
     final measurements = _extractList(cached, 'measurements');
     final entry = <String, dynamic>{
       ...payload,
@@ -58,16 +80,36 @@ class HealthLogsLocalDataSource {
 
   Future<void> saveSymptomResponse(dynamic response) async {
     final box = await _openBox();
-    await box.put(_symptomKey(), _normalizeResponse(response));
+    await box.put(await _symptomKey(), _normalizeResponse(response));
   }
 
-  dynamic getSymptomResponse() {
-    if (!Hive.isBoxOpen(_boxName)) return null;
-    return Hive.box<Map>(_boxName).get(_symptomKey());
+  Future<dynamic> getSymptomResponse() async {
+    final box = await _openBox();
+    final currentKey = await _symptomKey();
+    final currentValue = box.get(currentKey);
+    if (currentValue != null) {
+      return currentValue;
+    }
+
+    final legacyValue = box.get('symptoms');
+    if (legacyValue != null) {
+      return legacyValue;
+    }
+
+    for (final key in box.keys.whereType<String>()) {
+      if (key.startsWith('symptoms/')) {
+        final value = box.get(key);
+        if (value != null) {
+          return value;
+        }
+      }
+    }
+
+    return null;
   }
 
   Future<void> appendSymptom({required Map<String, dynamic> payload}) async {
-    final cached = _cachedSymptomResponse();
+    final cached = await _cachedSymptomResponse();
     final symptoms = _extractList(cached, 'symptoms');
     final entry = <String, dynamic>{
       ...payload,
@@ -101,11 +143,11 @@ class HealthLogsLocalDataSource {
     return <Map<String, dynamic>>[];
   }
 
-  dynamic _cachedMeasurementResponse(String type) {
+  Future<dynamic> _cachedMeasurementResponse(String type) async {
     return getMeasurementResponse(type);
   }
 
-  dynamic _cachedSymptomResponse() {
+  Future<dynamic> _cachedSymptomResponse() async {
     return getSymptomResponse();
   }
 }

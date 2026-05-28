@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/core/core.dart';
@@ -14,7 +15,7 @@ class DoctorAppointmentsSection extends StatelessWidget {
     return BlocBuilder<AppointmentsCubit, AppointmentsState>(
       buildWhen: (previous, current) =>
           previous.status != current.status ||
-          previous.appointments != current.appointments ||
+          !listEquals(previous.appointments, current.appointments) ||
           previous.errorMessage != current.errorMessage,
       builder: (context, state) {
         return Column(
@@ -34,17 +35,18 @@ class DoctorAppointmentsSection extends StatelessWidget {
               ],
             ),
             SizedBox(height: AppSizes.h12),
-            if (state.status == AppointmentsStatus.failure)
+            // If we have cached appointments, always show them (even while loading/refreshing or when remote fails).
+            if (state.appointments.isNotEmpty)
+              DoctorAppointmentsTable(appointments: state.appointments)
+            else if (state.status == AppointmentsStatus.failure)
               DoctorAppointmentsErrorState(
                 message: state.errorMessage ?? 'Something went wrong',
                 onRetry: () => context.read<AppointmentsCubit>().retry(),
               )
-            else if (state.status == AppointmentsStatus.empty)
-              const DoctorAppointmentsEmptyState()
             else if (state.status == AppointmentsStatus.loading)
               const DoctorAppointmentsLoadingState()
             else
-              DoctorAppointmentsTable(appointments: state.appointments),
+              const DoctorAppointmentsEmptyState(),
           ],
         );
       },

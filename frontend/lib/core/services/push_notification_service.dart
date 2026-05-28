@@ -5,7 +5,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:medi/core/services/local_notification_service.dart';
 import 'package:medi/core/services/notification_inbox_service.dart';
-import 'package:medi/features/patient/features/notification/presentation/models/notification_item.dart';
 
 class PushNotificationService {
   static FirebaseMessaging messaging = FirebaseMessaging.instance;
@@ -14,6 +13,11 @@ class PushNotificationService {
     await messaging.requestPermission();
     messaging.getToken().then((token) {
       log('Firebase Messaging Token: $token');
+      sendTokenToServer(token !);
+    });
+    messaging.onTokenRefresh.listen((newToken) {
+      log('Firebase Messaging Token refreshed: $newToken');
+      sendTokenToServer(newToken);
     });
     FirebaseMessaging.onBackgroundMessage(handleUncaughtErrorHandler);
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -62,4 +66,5 @@ class PushNotificationService {
       data: data,
     );
   }
+  static void sendTokenToServer(String token) {}
 }

@@ -6,4 +6,6 @@ abstract class AppointmentsRepository {
   Future<Either<ApiError, List<DoctorAppointmentModel>>> getAppointmentsForDate(
     DateTime date,
   );
+
+  Future<List<DoctorAppointmentModel>> getCachedAppointmentsForDate(DateTime date);
 }

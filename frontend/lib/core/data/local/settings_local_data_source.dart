@@ -1,6 +1,6 @@
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:medi/core/enums/user_role.dart';
 import 'package:medi/core/services/hive_box_manager.dart';
+import 'package:medi/core/services/app_logger.dart';
 
 class SettingsLocalDataSource {
   final HiveBoxManager boxManager;
@@ -24,9 +24,14 @@ class SettingsLocalDataSource {
     await box.put(_onboardingCompletedKey, false);
   }
 
-  bool isOnboardingCompleted() {
-    if (!Hive.isBoxOpen(_settingsBox)) return false;
-    return Hive.box(_settingsBox).get(_onboardingCompletedKey, defaultValue: false) as bool;
+  Future<bool> isOnboardingCompleted() async {
+    try {
+      final box = await boxManager.openBox(_settingsBox);
+      return box.get(_onboardingCompletedKey, defaultValue: false) as bool;
+    } catch (e, st) {
+      AppLogger.instance.e('isOnboardingCompleted failed', e, st);
+      return false;
+    }
   }
 
   Future<void> markCompleteProfileAsRequired() async {
@@ -39,29 +44,44 @@ class SettingsLocalDataSource {
     await box.put(_completeProfileRequiredKey, false);
   }
 
-  bool isCompleteProfileRequired() {
-    if (!Hive.isBoxOpen(_settingsBox)) return false;
-    return Hive.box(_settingsBox).get(_completeProfileRequiredKey, defaultValue: false) as bool;
+  Future<bool> isCompleteProfileRequired() async {
+    try {
+      final box = await boxManager.openBox(_settingsBox);
+      return box.get(_completeProfileRequiredKey, defaultValue: false) as bool;
+    } catch (e, st) {
+      AppLogger.instance.e('isCompleteProfileRequired failed', e, st);
+      return false;
+    }
   }
 
   Future<void> setEarlyVoiceAlerts(bool enabled) async {
-    if (!Hive.isBoxOpen(_settingsBox)) return;
-    await Hive.box(_settingsBox).put(_earlyVoiceAlertsKey, enabled);
+    final box = await boxManager.openBox(_settingsBox);
+    await box.put(_earlyVoiceAlertsKey, enabled);
   }
 
-  bool getEarlyVoiceAlerts() {
-    if (!Hive.isBoxOpen(_settingsBox)) return false;
-    return Hive.box(_settingsBox).get(_earlyVoiceAlertsKey, defaultValue: false) as bool;
+  Future<bool> getEarlyVoiceAlerts() async {
+    try {
+      final box = await boxManager.openBox(_settingsBox);
+      return box.get(_earlyVoiceAlertsKey, defaultValue: false) as bool;
+    } catch (e, st) {
+      AppLogger.instance.e('getEarlyVoiceAlerts failed', e, st);
+      return false;
+    }
   }
 
   Future<void> setNotificationsEnabled(bool enabled) async {
-    if (!Hive.isBoxOpen(_settingsBox)) return;
-    await Hive.box(_settingsBox).put(_notificationsEnabledKey, enabled);
+    final box = await boxManager.openBox(_settingsBox);
+    await box.put(_notificationsEnabledKey, enabled);
   }
 
-  bool getNotificationsEnabled() {
-    if (!Hive.isBoxOpen(_settingsBox)) return true;
-    return Hive.box(_settingsBox).get(_notificationsEnabledKey, defaultValue: true) as bool;
+  Future<bool> getNotificationsEnabled() async {
+    try {
+      final box = await boxManager.openBox(_settingsBox);
+      return box.get(_notificationsEnabledKey, defaultValue: true) as bool;
+    } catch (e, st) {
+      AppLogger.instance.e('getNotificationsEnabled failed', e, st);
+      return true;
+    }
   }
 
   Future<void> saveEmergencyContact(Map<String, dynamic> contact) async {
@@ -69,11 +89,16 @@ class SettingsLocalDataSource {
     await box.put(_emergencyContactKey, contact);
   }
 
-  Map<String, dynamic>? getEmergencyContact() {
-    if (!Hive.isBoxOpen(_settingsBox)) return null;
-    final raw = Hive.box(_settingsBox).get(_emergencyContactKey);
-    if (raw == null) return null;
-    return Map<String, dynamic>.from(raw as Map);
+  Future<Map<String, dynamic>?> getEmergencyContact() async {
+    try {
+      final box = await boxManager.openBox(_settingsBox);
+      final raw = box.get(_emergencyContactKey);
+      if (raw == null) return null;
+      return Map<String, dynamic>.from(raw as Map);
+    } catch (e, st) {
+      AppLogger.instance.e('getEmergencyContact failed', e, st);
+      return null;
+    }
   }
 
   Future<void> clearEmergencyContact() async {
@@ -82,20 +107,24 @@ class SettingsLocalDataSource {
   }
 
   Future<void> incrementUnreadNotificationsCount() async {
-    if (!Hive.isBoxOpen(_settingsBox)) return;
-    final box = Hive.box(_settingsBox);
+    final box = await boxManager.openBox(_settingsBox);
     final current = box.get(_unreadNotificationsCountKey, defaultValue: 0) as int;
     await box.put(_unreadNotificationsCountKey, current + 1);
   }
 
   Future<void> setUnreadNotificationsCount(int count) async {
-    if (!Hive.isBoxOpen(_settingsBox)) return;
-    await Hive.box(_settingsBox).put(_unreadNotificationsCountKey, count < 0 ? 0 : count);
+    final box = await boxManager.openBox(_settingsBox);
+    await box.put(_unreadNotificationsCountKey, count < 0 ? 0 : count);
   }
 
-  int getUnreadNotificationsCount() {
-    if (!Hive.isBoxOpen(_settingsBox)) return 0;
-    return Hive.box(_settingsBox).get(_unreadNotificationsCountKey, defaultValue: 0) as int;
+  Future<int> getUnreadNotificationsCount() async {
+    try {
+      final box = await boxManager.openBox(_settingsBox);
+      return box.get(_unreadNotificationsCountKey, defaultValue: 0) as int;
+    } catch (e, st) {
+      AppLogger.instance.e('getUnreadNotificationsCount failed', e, st);
+      return 0;
+    }
   }
 
   Future<void> markNotificationsAsRead() async {
@@ -107,10 +136,15 @@ class SettingsLocalDataSource {
     await box.put('userRole', role.toString());
   }
 
-  UserRole? getUserRole() {
-    if (!Hive.isBoxOpen(_settingsBox)) return null;
-    final roleString = Hive.box(_settingsBox).get('userRole') as String?;
-    if (roleString == null) return null;
-    return roleString == 'UserRole.doctor' ? UserRole.doctor : UserRole.patient;
+  Future<UserRole?> getUserRole() async {
+    try {
+      final box = await boxManager.openBox(_settingsBox);
+      final roleString = box.get('userRole') as String?;
+      if (roleString == null) return null;
+      return roleString == 'UserRole.doctor' ? UserRole.doctor : UserRole.patient;
+    } catch (e, st) {
+      AppLogger.instance.e('getUserRole failed', e, st);
+      return null;
+    }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:medi/core/core.dart';
 
 class DoctorRequestCard extends StatelessWidget {
@@ -35,7 +36,25 @@ class DoctorRequestCard extends StatelessWidget {
                   height: AppSizes.h48,
                   child: ClipOval(
                     child: profilePicture != null && profilePicture!.isNotEmpty
-                        ? Image.network(profilePicture!, fit: BoxFit.cover)
+                        ? CachedNetworkImage(
+                            imageUrl: profilePicture!,
+                            fit: BoxFit.cover,
+                            fadeInDuration: Duration.zero,
+                            placeholder: (_, _) => Container(
+                              color: AppColors.surfaceColor,
+                              child: Icon(
+                                Icons.person,
+                                color: AppColors.secondary,
+                              ),
+                            ),
+                            errorWidget: (_, _, _) => Container(
+                              color: AppColors.surfaceColor,
+                              child: Icon(
+                                Icons.person,
+                                color: AppColors.secondary,
+                              ),
+                            ),
+                          )
                         : Container(
                             color: AppColors.surfaceColor,
                             child: Icon(

@@ -41,9 +41,19 @@ class Doctordata extends Equatable {
   });
 
   factory Doctordata.fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic> asMap(dynamic value) {
+      if (value is Map<String, dynamic>) {
+        return value;
+      }
+      if (value is Map) {
+        return value.cast<String, dynamic>();
+      }
+      return <String, dynamic>{};
+    }
+
     return Doctordata(
       id: (json['_id'] ?? json['id'] ?? '').toString(),
-      user: UserModel.fromJson(json['userId'] is Map ? json['userId'] : {}),
+      user: UserModel.fromJson(asMap(json['userId'])),
       status: (json['status'] ?? '').toString(),
       workingDays: (json['workingDays'] as List? ?? [])
           .map((e) => e.toString())
@@ -53,25 +63,19 @@ class Doctordata extends Equatable {
           .toList(),
       workingHours: (json['workingHours'] as List? ?? [])
           .map(
-            (e) => WorkingHour.fromJson(
-              e is Map ? Map<String, dynamic>.from(e) : {},
-            ),
+            (e) => WorkingHour.fromJson(asMap(e)),
           )
           .toList(),
       connectedPatients: (json['connectedPatients'] as List? ?? [])
           .map(
-            (e) => ConnectedPatient.fromJson(
-              e is Map ? Map<String, dynamic>.from(e) : {},
-            ),
+            (e) => ConnectedPatient.fromJson(asMap(e)),
           )
           .toList(),
       clinicName: (json['clinicName'] ?? '').toString(),
       medicalLicenseId: (json['medicalLicenseId'] ?? '').toString(),
       specialization: (json['specialization'] ?? '').toString(),
       clinicAddress: (json['clinicAddress'] ?? '').toString(),
-      clinicLocation: ClinicLocation.fromJson(
-        json['clinicLocation'] is Map ? json['clinicLocation'] : {},
-      ),
+      clinicLocation: ClinicLocation.fromJson(asMap(json['clinicLocation'])),
       consultationDuration:
           int.tryParse(json['consultationDuration']?.toString() ?? '0') ?? 0,
       maxDailyPatients:

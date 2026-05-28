@@ -22,6 +22,8 @@ import 'package:medi/features/shared/auth/data/repo/auth_repo.dart';
 import 'package:medi/features/shared/auth/data/repo/auth_repo_impl.dart';
 import 'package:medi/features/doctor/features/patients/data/repo/patients_repository.dart';
 import 'package:medi/features/doctor/features/patients/data/repo/patients_repository_impl.dart';
+import 'package:medi/features/doctor/features/patients/data/local/patients_local_data_source.dart';
+import 'package:medi/features/doctor/features/patients/data/local/pending_patient_requests_local_data_source.dart';
 import 'package:medi/features/doctor/features/patients/presentation/cubit/patients/patients_cubit.dart';
 import 'package:medi/features/doctor/features/patients/presentation/cubit/add_patient/add_patient_cubit.dart';
 import 'package:medi/features/doctor/features/patients/data/repo/booking_session_repository.dart';
@@ -149,8 +151,18 @@ Future<void> setupServiceLocator() async {
     );
   }
   if (!getIt.isRegistered<PatientsRepository>()) {
+    getIt.registerLazySingleton<PatientsLocalDataSource>(
+      () => PatientsLocalDataSource(),
+    );
+    getIt.registerLazySingleton<PendingPatientRequestsLocalDataSource>(
+      () => PendingPatientRequestsLocalDataSource(),
+    );
     getIt.registerLazySingleton<PatientsRepository>(
-      () => PatientsRepositoryImpl(getIt<ApiService>()),
+      () => PatientsRepositoryImpl(
+        getIt<ApiService>(),
+        localDataSource: getIt<PatientsLocalDataSource>(),
+        pendingRequests: getIt<PendingPatientRequestsLocalDataSource>(),
+      ),
     );
   }
   if (!getIt.isRegistered<PatientsCubit>()) {

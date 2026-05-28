@@ -58,13 +58,13 @@ class _SplashScreenState extends State<SplashScreen>
   //   _navigateToNextScreen();
   // }
 
-  void _navigateToNextScreen() {
+  Future<void> _navigateToNextScreen() async {
     if (!mounted) return;
 
-    final accessToken = HiveService.getAccessToken();
-    final userRole = HiveService.getUserRole();
-    final isOnboardingCompleted = HiveService.isOnboardingCompleted();
-    final isCompleteProfileRequired = HiveService.isCompleteProfileRequired();
+    final accessToken = await HiveService.getAccessToken();
+    final userRole = await HiveService.getUserRole();
+    final isOnboardingCompleted = await HiveService.isOnboardingCompleted();
+    final isCompleteProfileRequired = await HiveService.isCompleteProfileRequired();
 
     if (accessToken != null && accessToken.isNotEmpty) {
       if (isCompleteProfileRequired) {

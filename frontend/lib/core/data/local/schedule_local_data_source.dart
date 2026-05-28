@@ -1,4 +1,3 @@
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:medi/core/services/hive_box_manager.dart';
 import 'package:medi/core/services/schedule_utils.dart';
 import 'package:medi/core/data/local/user_local_data_source.dart';
@@ -19,25 +18,49 @@ class ScheduleLocalDataSource {
     required this.settingsLocal,
   }) : boxManager = boxManager ?? const HiveBoxManager();
 
-  String _currentScheduleKey(String date) {
-    final role = settingsLocal.getUserRole();
-    final user = userLocal.getUserData();
+  Future<String> _currentScheduleKey(String date) async {
+    final role = await settingsLocal.getUserRole();
+    final user = await userLocal.getUserData();
+    final userId = (user?.id.trim().isNotEmpty ?? false)
+        ? user!.id.trim()
+        : await userLocal.getLastKnownUserId();
     final normalizedDate = date.trim().isEmpty ? 'all' : date.trim();
-    if (role != null && user != null && user.id.isNotEmpty) {
+    if (role != null && userId != null && userId.isNotEmpty) {
       final roleLabel = role == UserRole.doctor ? 'doctor' : 'patient';
-      return 'schedule/$roleLabel/${user.id}/$normalizedDate';
+      return 'schedule/$roleLabel/$userId/$normalizedDate';
     }
     return 'schedule/$normalizedDate';
   }
 
   Future<void> saveMedicationSchedule(String date, dynamic scheduleResponse) async {
     final box = await boxManager.openBox(_schedulesBox);
-    await box.put(_currentScheduleKey(date), scheduleResponse);
+    await box.put(await _currentScheduleKey(date), scheduleResponse);
   }
 
-  dynamic getMedicationSchedule(String date) {
-    if (!Hive.isBoxOpen(_schedulesBox)) return null;
-    return Hive.box(_schedulesBox).get(_currentScheduleKey(date));
+  Future<dynamic> getMedicationSchedule(String date) async {
+    final box = await boxManager.openBox(_schedulesBox);
+    final normalizedDate = date.trim().isEmpty ? 'all' : date.trim();
+    final currentKey = await _currentScheduleKey(normalizedDate);
+    final currentValue = box.get(currentKey);
+    if (currentValue != null) {
+      return currentValue;
+    }
+
+    final legacyValue = box.get('schedule/$normalizedDate');
+    if (legacyValue != null) {
+      return legacyValue;
+    }
+
+    for (final key in box.keys.whereType<String>()) {
+      if (key.startsWith('schedule/') && key.endsWith('/$normalizedDate')) {
+        final value = box.get(key);
+        if (value != null) {
+          return value;
+        }
+      }
+    }
+
+    return null;
   }
 
   Future<void> markMedicationScheduleTaken({
@@ -46,7 +69,7 @@ class ScheduleLocalDataSource {
     required String time,
     required bool taken,
   }) async {
-    final cached = getMedicationSchedule(date);
+    final cached = await getMedicationSchedule(date);
     if (cached == null) return;
 
     try {

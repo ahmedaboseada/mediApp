@@ -62,26 +62,27 @@ class DoctorModel {
   });
 
   factory DoctorModel.fromJson(Map<String, dynamic> json) {
+    Map<String, dynamic> asMap(dynamic v) {
+      if (v is Map<String, dynamic>) return v;
+      if (v is Map) return v.cast<String, dynamic>();
+      return <String, dynamic>{};
+    }
+
     return DoctorModel(
       doctorId: (json['_id'] ?? '').toString(),
       userId: (json['userId'] ?? '').toString(),
-      workingDays: List<String>.from(json['workingDays'] as List? ?? []),
-      appointmentTypes: List<String>.from(
-        json['appointmentTypes'] as List? ?? [],
-      ),
-      reviews: (json['reviews'] as List? ?? [])
-          .map((item) => item.toString())
-          .toList(),
+      workingDays: (json['workingDays'] as List? ?? []).map((e) => e.toString()).toList(),
+      appointmentTypes: (json['appointmentTypes'] as List? ?? []).map((e) => e.toString()).toList(),
+      reviews: (json['reviews'] as List? ?? []).map((item) => item.toString()).toList(),
       reviewsCount: json['reviewsCount'] as int? ?? 0,
       workingHours: (json['workingHours'] as List? ?? [])
-          .map(
-            (item) => WorkingHoursModel.fromJson(item as Map<String, dynamic>),
-          )
+          .map((item) => WorkingHoursModel.fromJson(asMap(item)))
           .toList(),
       connectedPatients: (json['connectedPatients'] as List? ?? []).map((item) {
         if (item is String) return item;
-        if (item is Map<String, dynamic>) {
-          final id = item['patientId'] ?? item['_id'] ?? item['id'];
+        if (item is Map) {
+          final m = asMap(item);
+          final id = m['patientId'] ?? m['_id'] ?? m['id'];
           if (id != null) return id.toString();
         }
         return item.toString();
@@ -93,9 +94,7 @@ class DoctorModel {
       specialization: (json['specialization'] ?? '').toString(),
       clinicAddress: (json['clinicAddress'] ?? '').toString(),
       clinicLocation: json['clinicLocation'] != null
-          ? ClinicLocationModel.fromJson(
-              json['clinicLocation'] as Map<String, dynamic>,
-            )
+          ? ClinicLocationModel.fromJson(asMap(json['clinicLocation']))
           : null,
       consultationDuration: json['consultationDuration'] as int? ?? 0,
       maxDailyPatients: json['maxDailyPatients'] as int? ?? 0,

@@ -8,8 +8,10 @@ import 'package:medi/core/services/local_notification_service.dart';
 import 'package:medi/core/services/connectivity_service.dart';
 import 'package:medi/core/utils/service_locator.dart';
 import 'package:medi/core/data/sync/sync_service.dart';
+import 'package:medi/core/network/api_service.dart';
 import 'package:medi/features/patient/features/add_medication/data/repo/medicine_repo.dart';
 import 'package:medi/features/patient/features/health_measurements/data/repo/logs_repo.dart';
+import 'package:medi/features/patient/features/doctors/data/repo/doctors_repo.dart';
 import 'package:medi/core/services/hive_service.dart';
 
 class StartupInitResult {
@@ -23,7 +25,11 @@ class StartupInitResult {
 class AppStartupInitializer {
   static const AlarmService _alarmService = AlarmService();
 
-  static Future<StartupInitResult> initializeCoreServices() async {
+  static Future<StartupInitResult> initializeCoreServices() {
+    return initializeCriticalServices();
+  }
+
+  static Future<StartupInitResult> initializeCriticalServices() async {
     final errors = <String>[];
 
     await _runSafe(
@@ -37,8 +43,10 @@ class AppStartupInitializer {
       action: () async {
         await setupServiceLocator();
         await SyncService.init(
+          apiService: getIt<ApiService>(),
           medicineRepo: getIt<MedicineRepo>(),
           logsRepo: getIt<LogsRepo>(),
+          doctorsRepo: getIt<DoctorsRepository>(),
         );
         // Trigger sync on app start
         SyncService.processQueue();
@@ -46,16 +54,20 @@ class AppStartupInitializer {
       errors: errors,
     );
 
+    return StartupInitResult(errors: errors);
+  }
+
+  static Future<void> initializeDeferredServices() async {
     await _runSafe(
       stepName: 'Local notifications init',
       action: LocalNotificationService.init,
-      errors: errors,
+      errors: <String>[],
     );
 
     await _runSafe(
       stepName: 'Connectivity listener',
       action: () async => ConnectivityService.init(),
-      errors: errors,
+      errors: <String>[],
     );
 
     await _runSafe(
@@ -68,19 +80,14 @@ class AppStartupInitializer {
           stopAllIfTooManyInvalid: true,
         );
       },
-      errors: errors,
+      errors: <String>[],
     );
 
-    return StartupInitResult(errors: errors);
-  }
-
-  static void initializeDeferredServices() {
-    unawaited(_runDeferredServices());
-  }
-
-  static Future<void> _runDeferredServices() async {
-    // Keep this method for non-critical startup work that can run later.
-    await Future<void>.delayed(const Duration(milliseconds: 500));
+    await _runSafe(
+      stepName: 'Sync queue processing',
+      action: SyncService.processQueue,
+      errors: <String>[],
+    );
   }
 
   static Future<void> _runSafe({

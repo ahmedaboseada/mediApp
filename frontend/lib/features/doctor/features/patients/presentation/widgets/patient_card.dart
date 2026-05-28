@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/patients/data/models/patient_data.dart';
 
@@ -24,7 +25,28 @@ class PatientCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: AppSizes.r20,
-                backgroundImage: NetworkImage(patient.avatarAsset),
+                child: ClipOval(
+                  child: SizedBox(
+                    width: AppSizes.r40,
+                    height: AppSizes.r40,
+                    child: patient.avatarAsset.isNotEmpty &&
+                            patient.avatarAsset.toLowerCase().startsWith('http')
+                        ? CachedNetworkImage(
+                            imageUrl: patient.avatarAsset,
+                            fit: BoxFit.cover,
+                            fadeInDuration: Duration.zero,
+                            placeholder: (_, __) => Image.asset(
+                              AppAssets.avatar1,
+                              fit: BoxFit.cover,
+                            ),
+                            errorWidget: (_, __, ___) => Image.asset(
+                              AppAssets.avatar1,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        : Image.asset(AppAssets.avatar1, fit: BoxFit.cover),
+                  ),
+                ),
               ),
               SizedBox(width: AppSizes.w12),
               Expanded(

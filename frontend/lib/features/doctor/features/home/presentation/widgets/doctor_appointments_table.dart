@@ -114,13 +114,13 @@ class DoctorAppointmentsDataRow extends StatelessWidget {
                  
                     ZegoSendCallInvitationButton(
                       isVideoCall: true,
-                      buttonSize: const Size(50, 50),
+                      buttonSize: const Size(40, 40),
                         //buttonSize: Size(AppSizes.w24, AppSizes.h24),
-                          iconSize: const Size(20, 20),
+                          iconSize: const Size(24, 24),
                           clickableBackgroundColor: const Color(0xFFD7E8FF),
                           
 
-                        icon:ButtonIcon(icon: Icon(Icons.play_arrow_outlined),backgroundColor: Color(0xFFD7E8FF)),
+                        icon:ButtonIcon(icon: Icon(Icons.play_arrow_outlined),),
                       //You need to use the resourceID that you created in the subsequent steps.
                       //Please continue reading this document.
                       resourceID: "medi_call",

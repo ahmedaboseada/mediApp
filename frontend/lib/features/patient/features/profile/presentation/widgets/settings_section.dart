@@ -14,14 +14,25 @@ class SettingsSection extends StatefulWidget {
 }
 
 class _SettingsSectionState extends State<SettingsSection> {
-  late bool notifications;
-  late bool earlyVoiceAlerts;
+  bool notifications = false;
+  bool earlyVoiceAlerts = false;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    notifications = HiveService.getNotificationsEnabled();
-    earlyVoiceAlerts = HiveService.getEarlyVoiceAlerts();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final loadedNotifications = await HiveService.getNotificationsEnabled();
+    final loadedEarlyVoiceAlerts = await HiveService.getEarlyVoiceAlerts();
+    if (!mounted) return;
+    setState(() {
+      notifications = loadedNotifications;
+      earlyVoiceAlerts = loadedEarlyVoiceAlerts;
+      _isLoading = false;
+    });
   }
 
   Future<void> _onNotificationsChanged(bool value) async {
@@ -32,7 +43,7 @@ class _SettingsSectionState extends State<SettingsSection> {
     // Persist the setting
     await HiveService.setNotificationsEnabled(value);
 
-    final medications = HiveService.getMedications();
+    final medications = await HiveService.getMedications();
     final notificationService = LocalNotificationService();
 
     if (value) {
@@ -57,7 +68,7 @@ class _SettingsSectionState extends State<SettingsSection> {
     await HiveService.setEarlyVoiceAlerts(value);
 
     // Reschedule all medication notifications with the new setting
-    final medications = HiveService.getMedications();
+    final medications = await HiveService.getMedications();
     final notificationService = LocalNotificationService();
     for (final medication in medications) {
       await notificationService.rescheduleMedicationReminders(
@@ -80,7 +91,14 @@ class _SettingsSectionState extends State<SettingsSection> {
         }
       },
       builder: (context, state) {
-        final isLoading = state is LogOutLoading;
+        if (_isLoading) {
+          return Card(
+            child: Padding(
+              padding: EdgeInsets.all(AppSizes.w16),
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+          );
+        }
 
         return Card(
           child: Padding(

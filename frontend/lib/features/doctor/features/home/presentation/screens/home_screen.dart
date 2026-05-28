@@ -129,7 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ? "${user.firstName} ${user.lastName}"
                   : "Doctor Name Placeholder";
               final specialization =
-                  doctorData?.specialization ?? "Specialization Placeholder";
+                  doctorData?.specialization ?? "";
               final id = doctorData?.doctorId ?? "ID-12345";
               final imageUrl = user?.profilePicture ?? "";
 

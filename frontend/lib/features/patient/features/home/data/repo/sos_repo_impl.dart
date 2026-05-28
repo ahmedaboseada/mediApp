@@ -18,7 +18,7 @@ class SosRepoImpl implements SosRepo {
     required String contactMethod,
   }) async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       log(
         'Setting Emergency Contact - Token: ${token != null ? "EXISTS" : "NULL"}',
       );
@@ -82,7 +82,7 @@ class SosRepoImpl implements SosRepo {
     required double lng,
   }) async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       log('Triggering SOS - Token: ${token != null ? "EXISTS" : "NULL"}');
 
       if (token == null || token.isEmpty) {

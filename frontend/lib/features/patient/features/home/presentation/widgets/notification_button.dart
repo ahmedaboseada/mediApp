@@ -11,15 +11,8 @@ class NotificationButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!Hive.isBoxOpen(HiveService.settingsBoxName)) {
-      return _ButtonShell(
-        unreadCount: 0,
-        onTap: () => context.push(AppRouter.notificationsScreen),
-      );
-    }
-
-    return ValueListenableBuilder<Box>(
-      valueListenable: Hive.box(HiveService.settingsBoxName).listenable(
+    return ValueListenableBuilder<Box<dynamic>>(
+      valueListenable: HiveService.listenableSettingsBox(
         keys: [HiveService.unreadNotificationsCountKey],
       ),
       builder: (context, box, child) {

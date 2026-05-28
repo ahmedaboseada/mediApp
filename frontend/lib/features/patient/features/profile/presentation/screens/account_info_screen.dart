@@ -33,9 +33,9 @@ class _AccountInfoScreenState extends State<AccountInfoScreen> {
     _populateLocalUserData();
   }
 
-  void _populateLocalUserData() {
-    final profileData = HiveService.getUserProfile();
-    final user = HiveService.getUserData();
+  Future<void> _populateLocalUserData() async {
+    final profileData = await HiveService.getUserProfile();
+    final user = await HiveService.getUserData();
     if (user != null) {
       _populateFields(user);
     }

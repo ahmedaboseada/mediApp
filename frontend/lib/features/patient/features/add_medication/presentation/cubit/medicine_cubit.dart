@@ -40,7 +40,7 @@ class MedicineCubit extends Cubit<MedicineState> {
       }
 
       // 1) ALWAYS load local first (instant UI)
-      final localData = HiveService.getMedications();
+      final localData = await HiveService.getMedications();
       _allMedications = localData;
 
       emit(

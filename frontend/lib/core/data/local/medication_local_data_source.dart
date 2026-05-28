@@ -1,4 +1,3 @@
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'package:medi/core/services/hive_box_manager.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
@@ -10,11 +9,15 @@ class MedicationLocalDataSource {
 
   MedicationLocalDataSource({HiveBoxManager? boxManager}) : boxManager = boxManager ?? const HiveBoxManager();
 
-  List<Medication> getMedications(String currentMedicationsKey) {
-    if (!Hive.isBoxOpen(_medicationsBox)) return [];
-    final raw = Hive.box(_medicationsBox).get(currentMedicationsKey);
-    if (raw == null) return [];
-    return (raw as List).map((e) => Medication.fromJson(e as Map)).toList();
+  Future<List<Medication>> getMedications(String currentMedicationsKey) async {
+    try {
+      final box = await boxManager.openBox(_medicationsBox);
+      final raw = box.get(currentMedicationsKey);
+      if (raw == null) return [];
+      return (raw as List).map((e) => Medication.fromJson(e as Map)).toList();
+    } catch (_) {
+      return [];
+    }
   }
 
   Future<void> saveMedications(String currentMedicationsKey, List<Medication> medications) async {
@@ -27,7 +30,7 @@ class MedicationLocalDataSource {
     if (med.id.isEmpty) med = med.copyWith(id: const Uuid().v4());
     med = med.copyWith(isSynced: false);
 
-    final current = getMedications(currentMedicationsKey);
+    final current = await getMedications(currentMedicationsKey);
     current.add(med);
     await saveMedications(currentMedicationsKey, current);
 
@@ -35,7 +38,7 @@ class MedicationLocalDataSource {
   }
 
   Future<void> updateMedication(String currentMedicationsKey, {required Medication original, required Medication updated}) async {
-    final current = getMedications(currentMedicationsKey);
+    final current = await getMedications(currentMedicationsKey);
     var index = current.indexWhere((m) => m == original);
     if (index == -1) {
       index = current.indexWhere(
@@ -62,7 +65,7 @@ class MedicationLocalDataSource {
   }
 
   Future<void> deleteMedication(String currentMedicationsKey, Medication medication) async {
-    final current = getMedications(currentMedicationsKey);
+    final current = await getMedications(currentMedicationsKey);
     var index = current.indexWhere((m) => m == medication);
 
     if (index == -1) {
@@ -84,7 +87,7 @@ class MedicationLocalDataSource {
   }
 
   Future<void> markMedicationSynced(String currentMedicationsKey, String id) async {
-    final current = getMedications(currentMedicationsKey);
+    final current = await getMedications(currentMedicationsKey);
     final index = current.indexWhere((m) => m.id == id);
     if (index != -1) {
       current[index] = current[index].copyWith(isSynced: true);
@@ -93,7 +96,7 @@ class MedicationLocalDataSource {
   }
 
   Future<void> updateMedicationServerId(String currentMedicationsKey, String tempId, String serverId) async {
-    final current = getMedications(currentMedicationsKey);
+    final current = await getMedications(currentMedicationsKey);
     final index = current.indexWhere((m) => m.id == tempId);
     if (index != -1) {
       current[index] = current[index].copyWith(id: serverId, isSynced: true);

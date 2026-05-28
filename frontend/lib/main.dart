@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -12,78 +13,77 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await AppStartupInitializer.initializeCoreServices();
-  await Firebase.initializeApp();
-  PushNotificationService.initialize();
+  await AppStartupInitializer.initializeCriticalServices();
+  final dioClient = getIt<ApiService>().dioClient;
+  dioClient.setOnAuthFailureCallback(() async {
     try {
-    final savedUser =
-        HiveService.getUserData();
+      final context = navigatorKey.currentContext;
+      if (context != null && context.mounted) {
+        GoRouter.of(context).go(AppRouter.selectScreen);
+      }
+    } catch (e) {
+      print('[Auth] Error navigating to role selection: $e');
+    }
+  });
 
-    if (savedUser != null) {
+  runApp(const medi());
+  unawaited(_bootstrapDeferredServices());
+}
+
+Future<void> _bootstrapDeferredServices() async {
+  await _runStartupTask(
+    label: 'Deferred core services',
+    action: AppStartupInitializer.initializeDeferredServices,
+    timeout: const Duration(seconds: 20),
+  );
+
+  await _runStartupTask(
+    label: 'Firebase initialization',
+    action: () async {
+      await Firebase.initializeApp();
+    },
+    timeout: const Duration(seconds: 10),
+  );
+
+  await _runStartupTask(
+    label: 'Push notifications',
+    action: PushNotificationService.initialize,
+    timeout: const Duration(seconds: 10),
+  );
+
+  final savedUser = await HiveService.getUserData().timeout(
+    const Duration(seconds: 2),
+    onTimeout: () => null,
+  );
+
+  if (savedUser == null) {
+    return;
+  }
+
+  await _runStartupTask(
+    label: 'Call service',
+    action: () async {
       await CallService.instance.init(
         userID: savedUser.id,
-        userName:
-            '${savedUser.firstName} ${savedUser.lastName}',
+        userName: '${savedUser.firstName} ${savedUser.lastName}',
       );
-    }
-  } catch (e) {
-    print('[CallService] Init Error: $e');
+      CallService.instance.enterAcceptedOfflineCall();
+    },
+    timeout: const Duration(seconds: 15),
+  );
+}
+
+Future<void> _runStartupTask({
+  required String label,
+  required Future<void> Function() action,
+  required Duration timeout,
+}) async {
+  try {
+    await action().timeout(timeout);
+  } catch (e, st) {
+    debugPrint('[$label] startup skipped or failed: $e');
+    debugPrintStack(stackTrace: st);
   }
-  // /// 1.1.2: set navigator key to ZegoUIKitPrebuiltCallInvitationService
-  // ZegoUIKitPrebuiltCallInvitationService().setNavigatorKey(navigatorKey);
-  // await ZIMKit().init(
-  //   appID: AppKeys.chatAppId, // your appid
-  //   appSign: AppKeys.chatAppSign, // your appSign
-  // );
-
-  // /// call the useSystemCallingUI
-  // await ZegoUIKit().initLog().then((value) async {
-  //   await ZegoUIKitPrebuiltCallInvitationService().useSystemCallingUI([
-  //     ZegoUIKitSignalingPlugin(),
-  //   ]);
-
-      // If we have a saved user from previous session, initialize the
-      // invitation service now so that incoming/outgoing invitations work
-      // immediately on app start.
-  //     try {
-  //       final savedUser = HiveService.getUserData();
-  //       if (savedUser != null) {
-  //         await ZIMKit().connectUser(
-  //           id: savedUser.id,
-  //           name: '${savedUser.firstName} ${savedUser.lastName}',
-  //         );
-  //         await ZegoUIKitPrebuiltCallInvitationService().init(
-  //           appID: AppKeys.appId,
-  //           appSign: AppKeys.appSign,
-  //           userID: savedUser.id,
-  //           userName: '${savedUser.firstName} ${savedUser.lastName}',
-  //           plugins: [ZegoUIKitSignalingPlugin()],
-  //           requireConfig: (ZegoCallInvitationData data) {
-  //   return ZegoUIKitPrebuiltCallConfig.oneOnOneVideoCall();
-  // },
-  //         );
-  //       }
-  //     } catch (e) {
-  //       // Don't block startup if Zego init fails; log for debugging.
-  //       // ignore: avoid_print
-  //       print('[Zego] PrebuiltCallInvitationService init failed: $e');
-  //     }
-    // Setup authentication failure callback for DioClient
-    final dioClient = getIt<ApiService>().dioClient;
-    dioClient.setOnAuthFailureCallback(() async {
-      // Navigate to role selection screen when authentication fails
-      try {
-        final context = navigatorKey.currentContext;
-        if (context != null && context.mounted) {
-          GoRouter.of(context).go(AppRouter.selectScreen);
-        }
-      } catch (e) {
-        print('[Auth] Error navigating to role selection: $e');
-      }
-    });
-
-    runApp(const medi());
-  
 }
 
 class medi extends StatefulWidget {
@@ -97,11 +97,6 @@ class _MediState extends State<medi> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      //ZegoUIKitPrebuiltCallInvitationService().enterAcceptedOfflineCall();
-       CallService.instance
-        .enterAcceptedOfflineCall();
-    });
   }
 
   @override

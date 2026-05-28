@@ -18,7 +18,7 @@ class QuestionnaireRepoImpl implements QuestionnaireRepo {
     required List<String> activeIngredients,
   }) async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       final data = {
         'chronicConditions': chronicConditions,
         'longTermMedication': longTermMedication,
@@ -60,7 +60,7 @@ class QuestionnaireRepoImpl implements QuestionnaireRepo {
     required bool allergyAlerts,
   }) async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       final data = {
         'allergies': allergies,
         'reactionToMedication': reactionToMedication,
@@ -101,7 +101,7 @@ class QuestionnaireRepoImpl implements QuestionnaireRepo {
     required String relationship,
   }) async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       final data = {
         'caregiverEmail': caregiverEmail,
         'relationship': relationship,
@@ -140,7 +140,7 @@ class QuestionnaireRepoImpl implements QuestionnaireRepo {
     required String requestId,
   }) async {
     try {
-      final token = HiveService.getAccessToken();
+      final token = await HiveService.getAccessToken();
       final headers = {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',

@@ -7,6 +7,9 @@ abstract class PatientsRepository {
     String? searchQuery,
   });
 
+  /// Return cached patients stored locally (may be empty).
+  Future<List<PatientData>> getCachedPatients();
+
   // Future<Either<ApiError, PatientModel>> getPatientById(String id);
 
   Future<Either<ApiError, void>> sendAddRequest(String patientId);

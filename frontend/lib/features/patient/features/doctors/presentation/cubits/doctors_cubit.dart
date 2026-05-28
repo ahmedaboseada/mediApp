@@ -9,16 +9,32 @@ class DoctorsCubit extends Cubit<DoctorsState> {
   DoctorsCubit({required this.repository}) : super(DoctorsInitial());
   List<Doctordata> _allDoctors = [];
   Future<void> loadDoctors() async {
-    emit(DoctorsLoading());
+    final cachedDoctors = await repository.getCachedGlobalDoctors();
+
+    if (isClosed) return;
+
+    if (cachedDoctors.isNotEmpty) {
+      _allDoctors = cachedDoctors;
+      emit(DoctorsLoaded(cachedDoctors));
+    } else {
+      emit(DoctorsLoading());
+    }
 
     final result = await repository.getGlobalDoctors();
 
     if (isClosed) return;
 
-    result.fold((failure) => emit(DoctorsError(failure.message)), (doctors) {
-      _allDoctors = doctors;
-      emit(DoctorsLoaded(doctors));
-    });
+    result.fold(
+      (failure) {
+        if (cachedDoctors.isEmpty) {
+          emit(DoctorsError(failure.message));
+        }
+      },
+      (doctors) {
+        _allDoctors = doctors;
+        emit(DoctorsLoaded(doctors));
+      },
+    );
   }
 
   void searchDoctors(String query) {

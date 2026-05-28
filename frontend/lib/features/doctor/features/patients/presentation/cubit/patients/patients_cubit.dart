@@ -8,7 +8,25 @@ class PatientsCubit extends Cubit<PatientsState> {
   final PatientsRepository _repository;
 
   Future<void> loadPatients() async {
+    // Emit cached patients immediately if available, then refresh from remote
     emit(state.copyWith(status: PatientsStatus.loading, clearError: true));
+
+    try {
+      final cached = await _repository.getCachedPatients();
+      if (isClosed) return;
+      if (cached.isNotEmpty) {
+        emit(
+          state.copyWith(
+            status: PatientsStatus.success,
+            patients: cached,
+            filteredPatients: cached,
+            clearError: true,
+          ),
+        );
+      }
+    } catch (_) {
+      // ignore cache errors
+    }
 
     final result = await _repository.getPatients();
 
@@ -19,6 +37,11 @@ class PatientsCubit extends Cubit<PatientsState> {
     result.fold(
       (error) {
         if (isClosed) {
+          return;
+        }
+        // if we already had cached data, keep it visible and surface the error as a message
+        if (state.patients.isNotEmpty) {
+          emit(state.copyWith(status: PatientsStatus.success, errorMessage: error.message));
           return;
         }
         emit(

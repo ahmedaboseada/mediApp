@@ -35,73 +35,83 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
     }
 
-    return BlocProvider(
-      create: (_) => UserProfileCubit(getIt<AuthRepoImpl>())..getMe(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => UserProfileCubit(getIt<AuthRepoImpl>())..getMe()),
+        BlocProvider(create: (_) => getIt<ConnectedDoctorsCubit>()..loadConnectedDoctors()),
+      ],
       child: Scaffold(
         extendBody: true,
         body: SafeArea(
           bottom: false,
           child: Padding(
             padding: EdgeInsets.all(AppSizes.w16),
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  BlocBuilder<UserProfileCubit, UserProfileState>(
-                    builder: (context, state) {
-                      final isLoading = state is UserProfileLoading;
-                      final profile = state.profile;
-                      final user = profile?.user;
+            child: RefreshIndicator(
+              onRefresh: _refreshProfile,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  children: [
+                    BlocBuilder<UserProfileCubit, UserProfileState>(
+                      builder: (context, state) {
+                        final isLoading = state is UserProfileLoading;
+                        final profile = state.profile;
+                        final user = profile?.user;
 
-                      final name = user != null
-                          ? '${user.firstName} ${user.lastName}'.trim()
-                          : 'Guest User';
-                      final subtitle = (user?.email ?? 'Patient');
-                      final image = user?.profilePicture.isNotEmpty == true
-                          ? user!.profilePicture
-                          : null;
+                        final name = user != null
+                            ? '${user.firstName} ${user.lastName}'.trim()
+                            : 'Guest User';
+                        final subtitle = (user?.email ?? 'Patient');
+                        final image = user?.profilePicture.isNotEmpty == true
+                            ? user!.profilePicture
+                            : null;
 
-                      return UserInfoScetion(
-                        name: name,
-                        specialty: subtitle,
-                        networkImageUrl: image,
-                        isLoading: isLoading,
-                        userId: profile?.patient?.patientId ?? '',
-                      );
-                    },
-                  ),
-                  SizedBox(height: AppSizes.h16),
+                        return UserInfoScetion(
+                          name: name,
+                          specialty: subtitle,
+                          networkImageUrl: image,
+                          isLoading: isLoading,
+                          userId: profile?.patient?.patientId ?? '',
+                        );
+                      },
+                    ),
+                    SizedBox(height: AppSizes.h16),
 
-                  AccountSection(),
-                  SizedBox(height: AppSizes.h16),
-                  SettingsSection(),
-                  SizedBox(height: AppSizes.h16),
-                  BlocBuilder<UserProfileCubit, UserProfileState>(
-                    builder: (context, state) {
-                      return MedicalRecordsSection(
-                        patientData: state.profile?.toPatientData(),
-                      );
-                    },
-                  ),
-                  SizedBox(height: AppSizes.h16),
-                  BlocProvider(
-                    create: (context) =>
-                        getIt<ConnectedDoctorsCubit>()..loadConnectedDoctors(),
-                    child: const ConnectedDoctorsSection(),
-                  ),
-                  SizedBox(height: AppSizes.h16),
-                  PrivacySecuritySection(),
-                  SizedBox(height: AppSizes.h16),
+                    AccountSection(),
+                    SizedBox(height: AppSizes.h16),
+                    SettingsSection(),
+                    SizedBox(height: AppSizes.h16),
+                    BlocBuilder<UserProfileCubit, UserProfileState>(
+                      builder: (context, state) {
+                        return MedicalRecordsSection(
+                          patientData: state.profile?.toPatientData(),
+                        );
+                      },
+                    ),
+                    SizedBox(height: AppSizes.h16),
+                    const ConnectedDoctorsSection(),
+                    SizedBox(height: AppSizes.h16),
+                    PrivacySecuritySection(),
+                    SizedBox(height: AppSizes.h16),
 
-                  SupportSection(),
-                  SizedBox(height: AppSizes.h16),
-                  LogOutTile(),
-                  SizedBox(height: AppSizes.h120),
-                ],
+                    SupportSection(),
+                    SizedBox(height: AppSizes.h16),
+                    LogOutTile(),
+                    SizedBox(height: AppSizes.h120),
+                  ],
+                ),
               ),
             ),
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _refreshProfile() async {
+    await Future.wait([
+      context.read<UserProfileCubit>().getMe(),
+      context.read<ConnectedDoctorsCubit>().loadConnectedDoctors(),
+    ]);
   }
 }

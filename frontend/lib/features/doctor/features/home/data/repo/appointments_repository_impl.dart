@@ -6,11 +6,13 @@ import 'package:intl/intl.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/home/data/models/doctor_appointment_model.dart';
 import 'package:medi/features/doctor/features/home/data/repo/appointments_repository.dart';
+import 'package:medi/features/doctor/features/home/data/local/appointments_local_data_source.dart';
 
 class AppointmentsRepositoryImpl implements AppointmentsRepository {
-  AppointmentsRepositoryImpl(this.apiService);
+  AppointmentsRepositoryImpl(this.apiService, {AppointmentsLocalDataSource? local}) : _local = local ?? AppointmentsLocalDataSource();
 
   final ApiService apiService;
+  final AppointmentsLocalDataSource _local;
 
   @override
   Future<Either<ApiError, List<DoctorAppointmentModel>>> getAppointmentsForDate(
@@ -38,6 +40,15 @@ class AppointmentsRepositoryImpl implements AppointmentsRepository {
           )
           .toList();
 
+      // persist raw list to local cache for offline usage
+      try {
+        final rawMaps = rawList.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+        await _local.saveAppointmentsForDate(date, rawMaps);
+        log('AppointmentsRepositoryImpl: persisted ${rawMaps.length} items for $formattedDate');
+      } catch (e, st) {
+        log('AppointmentsRepositoryImpl: failed to persist appointments for $formattedDate - $e\n$st');
+      }
+
       return Right(appointments);
     } on DioException catch (e) {
       return Left(ServerFailure.fromDioError(e));
@@ -54,5 +65,15 @@ class AppointmentsRepositoryImpl implements AppointmentsRepository {
       if (response.containsKey('data')) return _extractItems(response['data']);
     }
     return [];
+  }
+
+  @override
+  Future<List<DoctorAppointmentModel>> getCachedAppointmentsForDate(DateTime date) async {
+    try {
+      final raw = await _local.getAppointmentsForDate(date);
+      return raw.map((e) => DoctorAppointmentModel.fromJson(e)).toList();
+    } catch (_) {
+      return [];
+    }
   }
 }

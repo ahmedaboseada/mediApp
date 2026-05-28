@@ -34,13 +34,15 @@ class HiveInitializer {
     if (!Hive.isAdapterRegistered(7)) Hive.registerAdapter(MedicationAdapter());
     if (!Hive.isAdapterRegistered(10)) Hive.registerAdapter(SyncActionAdapter());
 
-    // Open boxes used across the app. Individual data sources can open more as needed.
     try {
-      await boxManager.openBox('authBox');
-      await boxManager.openBox('userBox');
-      await boxManager.openBox('settingsBox');
-      await boxManager.openBox('medicationsBox');
-      await boxManager.openBox('patientSchedulesBox');
+      await Future.wait([
+        boxManager.openBox('authBox'),
+        boxManager.openBox('userBox'),
+        boxManager.openBox('settingsBox'),
+        boxManager.openBox('medicationsBox'),
+        boxManager.openBox('patientSchedulesBox'),
+      ]);
+      await _logStartupSnapshot();
     } catch (e, st) {
       AppLogger.instance.e('Error opening initial boxes', e, st);
     }
@@ -50,6 +52,27 @@ class HiveInitializer {
       SyncService.processQueue();
     } catch (e, st) {
       AppLogger.instance.w('Failed to start SyncService.processQueue', e, st);
+    }
+  }
+
+  Future<void> _logStartupSnapshot() async {
+    try {
+      final authBox = await boxManager.openBox('authBox');
+      final userBox = await boxManager.openBox('userBox');
+      final settingsBox = await boxManager.openBox('settingsBox');
+      final medicationsBox = await boxManager.openBox('medicationsBox');
+      final schedulesBox = await boxManager.openBox('patientSchedulesBox');
+
+      AppLogger.instance.i('Startup auth keys: ${authBox.keys.toList()}');
+      AppLogger.instance.i('Startup auth values: ${authBox.toMap()}');
+      AppLogger.instance.i('Startup user keys: ${userBox.keys.toList()}');
+      AppLogger.instance.i('Startup user values: ${userBox.toMap()}');
+      AppLogger.instance.i('Startup settings keys: ${settingsBox.keys.toList()}');
+      AppLogger.instance.i('Startup medications keys: ${medicationsBox.keys.toList()}');
+      AppLogger.instance.i('Startup schedules keys: ${schedulesBox.keys.toList()}');
+      AppLogger.instance.i('Startup user exists: ${userBox.get('userData') != null}');
+    } catch (e, st) {
+      AppLogger.instance.w('Startup verification logging failed', e, st);
     }
   }
 }

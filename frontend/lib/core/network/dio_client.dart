@@ -285,8 +285,8 @@ class DioClient {
   DioClient() {
     _dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, handler) {
-          final token = HiveService.getAccessToken();
+        onRequest: (options, handler) async {
+          final token = await HiveService.getAccessToken();
 
           if (token != null) {
             options.headers["Authorization"] = "Bearer $token";
@@ -302,11 +302,12 @@ class DioClient {
         },
 
         onError: (DioException error, handler) async {
-          // Handle 401 Unauthorized
-          if (error.response?.statusCode == 401 &&
+          final statusCode = error.response?.statusCode;
+
+          // Treat 401 and 403 similarly: attempt a refresh and retry once.
+          if ((statusCode == 401 || statusCode == 403) &&
               error.requestOptions.path != "/users/refreshToken") {
-                log(error.response.toString());
-            log('[DioClient] 401 Unauthorized - Attempting token refresh');
+            log('[DioClient] $statusCode Unauthorized/Forbidden - Attempting token refresh');
             final requestOptions = error.requestOptions;
 
             if (_isRefreshing) {
@@ -316,7 +317,7 @@ class DioClient {
 
               await completer.future;
 
-              final token = HiveService.getAccessToken();
+              final token = await HiveService.getAccessToken();
               if (token != null) {
                 requestOptions.headers["Authorization"] = "Bearer $token";
                 try {
@@ -344,7 +345,7 @@ class DioClient {
             _refreshCompleters.clear();
 
             if (refreshed) {
-              final token = HiveService.getAccessToken();
+              final token = await HiveService.getAccessToken();
 
               if (token != null) {
                 requestOptions.headers["Authorization"] = "Bearer $token";
@@ -353,9 +354,7 @@ class DioClient {
                   log('[DioClient] Retry after token refresh successful');
                   return handler.resolve(response);
                 } catch (retryError) {
-                  log(
-                    '[DioClient] Retry after token refresh failed: $retryError',
-                  );
+                  log('[DioClient] Retry after token refresh failed: $retryError');
                   return handler.next(error);
                 }
               } else {
@@ -366,13 +365,8 @@ class DioClient {
             } else {
               log('[DioClient] Token refresh failed, triggering logout');
               await _handleAuthenticationFailure();
+              return handler.next(error);
             }
-          }
-
-          // Handle 403 Forbidden (usually means tokens are invalid)
-          if (error.response?.statusCode == 403) {
-            log('[DioClient] 403 Forbidden - Tokens may be invalid');
-            await _handleAuthenticationFailure();
           }
 
           return handler.next(error);
@@ -408,7 +402,7 @@ class DioClient {
   /// Refresh token logic with improved error handling
   Future<bool> _refreshToken() async {
     try {
-      final refreshToken = HiveService.getRefreshToken();
+      final refreshToken = await HiveService.getRefreshToken();
       log(
         '[DioClient] Attempting token refresh, refresh token available: ${refreshToken != null}',
       );
@@ -420,7 +414,7 @@ class DioClient {
 
       final dio = Dio(
         BaseOptions(
-          baseUrl: "http://35.246.202.219:8000/",
+          baseUrl: "http://35.246.202.219:8000",
           headers: {"Authorization": "Bearer $refreshToken"},
         ),
       );

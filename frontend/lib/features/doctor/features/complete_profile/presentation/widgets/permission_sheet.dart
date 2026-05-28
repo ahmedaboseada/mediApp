@@ -39,7 +39,7 @@ class _PermissionSheetState extends State<PermissionSheet>
   }
 
   Future<void> _loadUserRole() async {
-    final role = HiveService.getUserRole() ?? UserRole.patient;
+    final role = await HiveService.getUserRole() ?? UserRole.patient;
     setState(() {
       userRole = role;
       _isLoading = false;

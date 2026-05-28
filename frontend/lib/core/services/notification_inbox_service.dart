@@ -1,4 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:medi/core/services/hive_box_manager.dart';
 import 'package:medi/core/services/hive_service.dart';
 import 'package:medi/features/patient/features/notification/presentation/models/notification_item.dart';
 
@@ -7,12 +8,10 @@ class NotificationInboxService {
 
   static const String boxName = 'notificationInboxBox';
   static const String notificationsKey = 'notifications';
+  static const HiveBoxManager _boxManager = HiveBoxManager();
 
   static Future<Box> openBox() async {
-    if (!Hive.isBoxOpen(boxName)) {
-      await Hive.openBox(boxName);
-    }
-    return Hive.box(boxName);
+    return _boxManager.openBox(boxName);
   }
 
   static Future<void> ensureReady() async {
