@@ -1212,12 +1212,6 @@ export const updateFcmToken = async (req, res) => {
         const { fcmToken } = req.body;
         if (!fcmToken) return res.status(400).json({ message: 'fcmToken is required' });
 
-        // not caregiver applicable
-        const patient = await patientModel.findOne({ userId: req.user.id });
-        if (patient && patient.caregiver && patient.caregiver.giving && patient.caregiver.giving.length > 0) {
-            return res.status(403).json({ message: 'Not applicable for caregivers' });
-        }
-
         const encryptedFcm = await ET.encrypt(fcmToken);
         const user = await userModel.findByIdAndUpdate(req.user.id, { fcmToken: encryptedFcm }, { new: true });
         if (!user) return res.status(404).json({ message: 'User not found' });

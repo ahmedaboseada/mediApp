@@ -421,7 +421,7 @@ export const listConnectedPatients = async (req, res) => {
 
     // Populate patient info deeply
     const patients = await patientModel.find({ _id: { $in: approvedPatientIds } })
-        .populate({ path: 'userId', select: 'firstName lastName profilePicture email phone age gender' })
+        .populate({ path: 'userId', select: 'firstName lastName profilePicture email phone age gender fcmToken' })
         .populate({ path: 'medications', select: 'status isChronic dosage frequency startDate endDate name isCritical type stock' })
         .lean();
 
@@ -446,6 +446,10 @@ export const listConnectedPatients = async (req, res) => {
 
         if (p.userId && p.userId.phone) {
             try { p.userId.phone = await ET.decrypt(p.userId.phone); } catch (err) { }
+        }
+
+        if (p.userId && p.userId.fcmToken) {
+            try { p.userId.fcmToken = await ET.decrypt(p.userId.fcmToken); } catch (err) { }
         }
 
         enrichedPatients.push({

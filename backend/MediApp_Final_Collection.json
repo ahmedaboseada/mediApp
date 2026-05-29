@@ -1056,7 +1056,7 @@
               ]
             },
             {
-              "name": "Update FCM Token (Fail - Caregiver Not Applicable)",
+              "name": "Update FCM Token (Caregiver - Success)",
               "request": {
                 "method": "PATCH",
                 "header": [
@@ -1071,7 +1071,7 @@
                 ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"fcmToken\": \"fcm_token_should_fail\"\n}"
+                  "raw": "{\n  \"fcmToken\": \"fcm_token_caregiver_success\"\n}"
                 },
                 "url": {
                   "raw": "{{BASE_URL}}/users/fcm-token",
@@ -1089,7 +1089,7 @@
                   "listen": "test",
                   "script": {
                     "exec": [
-                      "pm.test('Status code is 403 or 400', function () { pm.expect(pm.response.code).to.be.oneOf([400, 403]); });"
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
                     ]
                   }
                 }

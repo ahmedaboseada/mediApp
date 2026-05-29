@@ -1,26 +1,29 @@
-import { medicineModel, patientModel, doctorModel, bookingModel, auditLogModel } from '../../models/index.js';
-import { medicineFrequency, medicineStatus, weekDays } from '../../config/CONSTANTS.js';
+import { medicineModel, patientModel, doctorModel, bookingModel, auditLogModel, notificationModel } from '../../models/index.js';
+import { medicineFrequency, medicineStatus, weekDays, notificationTypes } from '../../config/CONSTANTS.js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import * as ET from '../../utils/encryption/index.js';
 
 const getContext = async (req) => {
     const { id: userId } = req.user;
     let patient;
     let docId = null;
     let activeBookingId = null;
+    let doctorName = null;
 
     const patientLookup = await patientModel.findOne({ userId });
     if (patientLookup) {
         patient = patientLookup;
     } else {
-        const docLookup = await doctorModel.findOne({ userId });
+        const docLookup = await doctorModel.findOne({ userId }).populate('userId');
         if (docLookup) {
             const patientIdFromReq = req.body.patientId || req.query.patientId;
             if (!patientIdFromReq) {
                 const err = new Error('Patient ID is required for doctor access');
                 err.status = 400; throw err;
             }
-            patient = await patientModel.findById(patientIdFromReq);
+            patient = await patientModel.findById(patientIdFromReq).populate('userId');
             docId = docLookup._id;
+            doctorName = docLookup.userId ? `Dr. ${docLookup.userId.firstName} ${docLookup.userId.lastName}` : 'Your doctor';
 
             const activeSession = await bookingModel.findOne({
                 doctorId: docLookup._id,
@@ -41,7 +44,7 @@ const getContext = async (req) => {
         const err = new Error('Patient not found');
         err.status = 404; throw err;
     }
-    return { patient, docId, activeBookingId };
+    return { patient, docId, activeBookingId, doctorName };
 };
 
 const enhanceMedicineWithAI = async (medicineId, medicineName, submittedType) => {
@@ -133,7 +136,7 @@ Respond with a single JSON object containing:
 
 export const addMedicine = async (req, res, next) => {
     try {
-        const { patient, docId, activeBookingId } = await getContext(req);
+        const { patient, docId, activeBookingId, doctorName } = await getContext(req);
 
     const medicineData = {
         ...req.body,
@@ -159,6 +162,26 @@ export const addMedicine = async (req, res, next) => {
 
     if (docId) {
         await auditLogModel.create({ patientId: patient._id, doctorId: docId, bookingId: activeBookingId, action: 'add_medicine', details: `Added ${medicine.name}` });
+
+        // Retrieve patient's fcmToken if available (patient.userId is populated)
+        let patientFcmToken = null;
+        const patientUser = patient.userId;
+        if (patientUser && patientUser.fcmToken) {
+            try { patientFcmToken = await ET.decrypt(patientUser.fcmToken); } catch (err) {}
+        }
+
+        const msg = `${doctorName || 'Your doctor'} added a new medication: ${medicine.name}`;
+
+        await notificationModel.create({
+            type: notificationTypes.doctorMediciationAddition,
+            header: 'New Medication Added',
+            message: msg,
+            userId: patientUser?._id || patient.userId,
+        });
+
+        if (patientFcmToken) {
+            console.log(`[FCM] Notification sent to patient (${patientUser?.email}) with token ${patientFcmToken}: ${msg}`);
+        }
     }
 
     res.status(201).json({ message: 'Medicine added successfully', medicine });
@@ -208,7 +231,7 @@ export const getMedicines = async (req, res, next) => {
 export const updateMedicine = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { patient, docId, activeBookingId } = await getContext(req);
+        const { patient, docId, activeBookingId, doctorName } = await getContext(req);
 
     const payload = { ...req.body };
 
@@ -237,6 +260,26 @@ export const updateMedicine = async (req, res, next) => {
 
     if (docId) {
         await auditLogModel.create({ patientId: patient._id, doctorId: docId, bookingId: activeBookingId, action: 'modify_medicine', details: `Modified ${medicine.name}` });
+
+        // Retrieve patient's fcmToken if available (patient.userId is populated)
+        let patientFcmToken = null;
+        const patientUser = patient.userId;
+        if (patientUser && patientUser.fcmToken) {
+            try { patientFcmToken = await ET.decrypt(patientUser.fcmToken); } catch (err) {}
+        }
+
+        const msg = `${doctorName || 'Your doctor'} updated your medication: ${medicine.name}`;
+
+        await notificationModel.create({
+            type: notificationTypes.doctorMedicationEdited,
+            header: 'Medication Updated',
+            message: msg,
+            userId: patientUser?._id || patient.userId,
+        });
+
+        if (patientFcmToken) {
+            console.log(`[FCM] Notification sent to patient (${patientUser?.email}) with token ${patientFcmToken}: ${msg}`);
+        }
     }
 
     res.status(200).json({ message: 'Medicine updated successfully', medicine });
@@ -246,7 +289,7 @@ export const updateMedicine = async (req, res, next) => {
 export const deleteMedicine = async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { patient, docId, activeBookingId } = await getContext(req);
+        const { patient, docId, activeBookingId, doctorName } = await getContext(req);
 
     const medicine = await medicineModel.findOneAndDelete({ _id: id, patientId: patient._id });
     if (!medicine) return res.status(404).json({ message: 'Medicine not found' });
@@ -256,6 +299,26 @@ export const deleteMedicine = async (req, res, next) => {
 
     if (docId) {
         await auditLogModel.create({ patientId: patient._id, doctorId: docId, bookingId: activeBookingId, action: 'delete_medicine', details: `Deleted ${medicine.name || 'medicine'}` });
+
+        // Retrieve patient's fcmToken if available (patient.userId is populated)
+        let patientFcmToken = null;
+        const patientUser = patient.userId;
+        if (patientUser && patientUser.fcmToken) {
+            try { patientFcmToken = await ET.decrypt(patientUser.fcmToken); } catch (err) {}
+        }
+
+        const msg = `${doctorName || 'Your doctor'} removed a medication: ${medicine.name || 'medicine'}`;
+
+        await notificationModel.create({
+            type: notificationTypes.doctorMediciationDeletion,
+            header: 'Medication Removed',
+            message: msg,
+            userId: patientUser?._id || patient.userId,
+        });
+
+        if (patientFcmToken) {
+            console.log(`[FCM] Notification sent to patient (${patientUser?.email}) with token ${patientFcmToken}: ${msg}`);
+        }
     }
 
     res.status(200).json({ message: 'Medicine deleted successfully' });

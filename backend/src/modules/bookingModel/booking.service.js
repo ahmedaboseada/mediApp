@@ -422,7 +422,7 @@ export const startSession = async (req, res) => {
     if (!booking.patientId) return res.status(400).json({ message: 'Invalid or expired session token' });
     
     const patient = await patientModel.findById(booking.patientId)
-        .populate('userId', 'firstName lastName email type DOB age gender phone profilePicture confirmed')
+        .populate('userId', 'firstName lastName email type DOB age gender phone profilePicture confirmed fcmToken')
         .populate('medications', 'name type dosage frequency activeIngredient status isChronic endDate')
         .populate('longTermMedication', 'name type dosage frequency activeIngredient status isChronic endDate')
         .lean();
@@ -435,6 +435,11 @@ export const startSession = async (req, res) => {
     // Decrypt phone if possible
     if (patient.userId && patient.userId.phone) {
         try { patient.userId.phone = await ET.decrypt(patient.userId.phone); } catch (e) {}
+    }
+
+    // Decrypt fcmToken if possible
+    if (patient.userId && patient.userId.fcmToken) {
+        try { patient.userId.fcmToken = await ET.decrypt(patient.userId.fcmToken); } catch (e) {}
     }
 
     if (['online', 'card', 'paymob'].includes(booking.paymentMethod) && booking.paymentStatus !== 'paid') {
