@@ -71,7 +71,7 @@ patientRouter.patch('/caregiver/requests/:requestId/cancel', validation(PVS.requ
 // doctor connections
 patientRouter.post('/connect-doctor', validation(PVS.connectDoctorSchema), PS.connectDoctor);
 patientRouter.get('/connected-doctors', PS.listConnectedDoctors);
-patientRouter.get('/doctor-requests', PS.listDoctorRequests);
+patientRouter.get('/doctor-requests', restrictTo(['patient','doctor']),PS.listDoctorRequests);
 patientRouter.patch('/connected-doctors/accept/:doctorId', validation(PVS.doctorIdSchema), PS.acceptDoctor);
 patientRouter.patch('/connected-doctors/reject/:doctorId', validation(PVS.doctorIdSchema), PS.rejectDoctor);
 patientRouter.patch('/connected-doctors/cancel/:doctorId', validation(PVS.doctorIdSchema), PS.cancelDoctorRequest);
