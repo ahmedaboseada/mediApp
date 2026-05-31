@@ -507,7 +507,7 @@ export const listPatientRequests = async (req, res) => {
             populate: { path: 'userId', select: 'firstName lastName profilePicture phone' }
         }).lean();
 
-    if (!patient) return res.status(404).json({ message: 'Doctor profile not found' });
+    if (!doctor) return res.status(404).json({ message: 'Doctor profile not found' });
 
     // Only return those pending
     const pendingRequests = doctor.connectedPatients
