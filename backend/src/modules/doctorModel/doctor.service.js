@@ -499,6 +499,30 @@ export const requestWithdrawal = async (req, res) => {
     return res.status(201).json({ message: 'Withdrawal request submitted successfully', request });
 };
 
+export const listPatientRequests = async (req, res) => {
+    const doctorUserId = req.user.id;
+    const doctor = await doctorModel.findOne({ userId: doctorUserId })
+        .populate({
+            path: 'connectedPatients.patientId',
+            populate: { path: 'userId', select: 'firstName lastName profilePicture phone' }
+        }).lean();
+
+    if (!patient) return res.status(404).json({ message: 'Doctor profile not found' });
+
+    // Only return those pending
+    const pendingRequests = doctor.connectedPatients
+        .filter(c => c.status === 'pending')
+        .map(c => c.patientId);
+
+    for (const doc of pendingRequests) {
+        if (doc && doc.userId && doc.userId.phone) {
+            try { doc.userId.phone = await ET.decrypt(doc.userId.phone); } catch (err) { }
+        }
+    }
+
+    return res.status(200).json({ requests: pendingRequests });
+};
+
 export const processWithdrawal = async (req, res) => {
     const { id } = req.params;
     const { status, adminNotes } = req.body;
