@@ -3,6 +3,22 @@ import patientModel from '../../models/patient.model.js';
 import doctorModel from '../../models/doctor.model.js';
 import bookingModel from '../../models/booking.model.js';
 
+const updateDoctorReviewStats = async (doctorId) => {
+    const reviews = await reviewModel.find({ doctorId });
+    const count = reviews.length;
+    let avg = 0;
+    if (count > 0) {
+        const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
+        avg = Math.round((sum / count) * 10) / 10; // Round to 1 decimal place, e.g., 4.5
+    }
+
+    await doctorModel.findByIdAndUpdate(doctorId, {
+        reviews: reviews.map(r => r._id),
+        reviewsCount: count,
+        averageRating: avg
+    });
+};
+
 export const createReview = async (req, res) => {
     try {
         const { doctorId, rating } = req.body;
@@ -38,6 +54,8 @@ export const createReview = async (req, res) => {
             PatientId: patient._id,
             rating,
         });
+
+        await updateDoctorReviewStats(doctorId);
 
         return res.status(201).json({ message: 'Review submitted successfully', review });
     } catch (err) {
@@ -116,6 +134,8 @@ export const updateReview = async (req, res) => {
         review.rating = rating;
         await review.save();
 
+        await updateDoctorReviewStats(review.doctorId);
+
         return res.status(200).json({ message: 'Review updated successfully', review });
     } catch (err) {
         console.error(err);
@@ -140,7 +160,11 @@ export const deleteReview = async (req, res) => {
             }
         }
 
+        const doctorId = review.doctorId;
         await review.deleteOne();
+
+        await updateDoctorReviewStats(doctorId);
+
         return res.status(200).json({ message: 'Review deleted successfully' });
     } catch (err) {
         console.error(err);
