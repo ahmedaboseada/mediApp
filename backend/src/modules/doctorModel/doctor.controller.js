@@ -50,6 +50,7 @@ doctorRouter.patch('/patients/accept/:patientId', validation(DVS.patientIdSchema
 doctorRouter.patch('/patients/reject/:patientId', validation(DVS.patientIdSchema), DS.rejectPatient);
 doctorRouter.patch('/patients/cancel/:patientId', validation(DVS.patientIdSchema), DS.cancelPatientRequest);
 doctorRouter.get('/patients', DS.listConnectedPatients);
+doctorRouter.get('/patients/patients-request-list', DS.listPatientRequests);
 
 // Doctor Wallet
 doctorRouter.get('/wallet', DS.getWallet);
