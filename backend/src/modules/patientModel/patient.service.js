@@ -548,7 +548,16 @@ export const listConnectedDoctors = async (req, res) => {
     const patient = await patientModel.findOne({ userId: patientUserId })
         .populate({
             path: 'connectedDoctors.doctorId',
-            populate: { path: 'userId', select: 'firstName lastName profilePicture phone' }
+            populate: [
+                { path: 'userId', select: 'firstName lastName profilePicture phone' },
+                {
+                    path: 'reviews',
+                    populate: {
+                        path: 'PatientId',
+                        populate: { path: 'userId', select: 'firstName lastName profilePicture' }
+                    }
+                }
+            ]
         }).lean();
 
     if (!patient) return res.status(404).json({ message: 'Patient profile not found' });
@@ -570,7 +579,16 @@ export const listDoctorRequests = async (req, res) => {
     const patient = await patientModel.findOne({ userId: patientUserId })
         .populate({
             path: 'connectedDoctors.doctorId',
-            populate: { path: 'userId', select: 'firstName lastName profilePicture phone' }
+            populate: [
+                { path: 'userId', select: 'firstName lastName profilePicture phone' },
+                {
+                    path: 'reviews',
+                    populate: {
+                        path: 'PatientId',
+                        populate: { path: 'userId', select: 'firstName lastName profilePicture' }
+                    }
+                }
+            ]
         }).lean();
 
     if (!patient) return res.status(404).json({ message: 'Patient profile not found' });

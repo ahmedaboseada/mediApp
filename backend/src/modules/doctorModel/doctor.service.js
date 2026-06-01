@@ -273,6 +273,13 @@ export const getDoctorDirectory = async (req, res) => {
     // patient accesses this to browse all doctors
     const doctors = await doctorModel.find({ status: 'approved' })
         .populate({ path: 'userId', select: 'firstName lastName profilePicture phone gender' })
+        .populate({
+            path: 'reviews',
+            populate: {
+                path: 'PatientId',
+                populate: { path: 'userId', select: 'firstName lastName profilePicture' }
+            }
+        })
         .lean();
 
     for (const doc of doctors) {
