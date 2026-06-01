@@ -63,3 +63,6 @@ frontend/android/app/release
 # AI / Tooling Caches
 .gemini/
 .metadata
+
+# Backend test and scratch files
+backend/scratch/
