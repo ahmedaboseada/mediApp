@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/profile/presentation/cubit/caregiver_hub_cubit.dart';
+import 'package:medi/features/patient/features/profile/presentation/widgets/doctor_request_card.dart';
 
 class CaregiverModeScreen extends StatefulWidget {
   const CaregiverModeScreen({super.key});
@@ -34,6 +35,11 @@ class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
   String _formatRequestedOn(DateTime? date) {
     if (date == null) return 'Requested recently';
     return 'Requested on ${date.month}/${date.day}/${date.year}';
+  }
+
+  String _doctorDisplayName(String firstName, String lastName) {
+    final name = '$firstName $lastName'.trim();
+    return name.isEmpty ? 'Unknown Doctor' : name;
   }
 
   @override
@@ -151,6 +157,46 @@ class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
                               ],
                             ),
                           ),
+                        ),
+                      ),
+                    SizedBox(height: AppSizes.h24),
+                    Text('Doctor requests', style: AppStyles.black18500),
+                    SizedBox(height: AppSizes.h16),
+                    if (state.isLoading)
+                      const Center(child: CircularProgressIndicator())
+                    else if (state.doctorRequests.isEmpty)
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: AppSizes.h20),
+                        child: Text(
+                          'No pending doctor requests',
+                          style: AppStyles.secondary12400,
+                        ),
+                      )
+                    else
+                      ...state.doctorRequests.map(
+                        (request) => DoctorRequestCard(
+                          name: _doctorDisplayName(
+                            request.firstName,
+                            request.lastName,
+                          ),
+                          specialty: request.specialization,
+                          clinicName: request.clinicName,
+                          profilePicture: request.profilePicture,
+                          onAccept: state.isActionLoading
+                              ? () {}
+                              : () => context
+                                  .read<CaregiverHubCubit>()
+                                  .acceptDoctorRequest(
+                                    doctorId: request.userId,
+                                    doctorFcmToken: request.fcmToken,
+                                  ),
+                          onReject: state.isActionLoading
+                              ? () {}
+                              : () => context
+                                  .read<CaregiverHubCubit>()
+                                  .rejectDoctorRequest(
+                                    doctorId: request.userId,
+                                  ),
                         ),
                       ),
                     SizedBox(height: AppSizes.h24),

@@ -8,6 +8,8 @@ import 'manage_meds_repo.dart';
 
 class ManageMedsRepoImpl implements ManageMedsRepo {
   final ApiService apiService;
+  final NotificationDispatchService _notificationDispatchService =
+      NotificationDispatchService();
 
   ManageMedsRepoImpl(this.apiService);
 
@@ -18,6 +20,7 @@ class ManageMedsRepoImpl implements ManageMedsRepo {
     required String type,
     required String dosage,
     required String frequency,
+    String? recipientFcmToken,
     List<String>? daily,
     List<Map<String, dynamic>>? weekly,
     List<Map<String, dynamic>>? specific,
@@ -61,6 +64,13 @@ class ManageMedsRepoImpl implements ManageMedsRepo {
       final message =
           (response is Map<String, dynamic> ? response['message'] : null) ??
           'Medication added successfully';
+
+      await _sendMedicationNotification(
+        recipientFcmToken: recipientFcmToken,
+        patientId: patientId,
+        medicationName: name,
+        kind: _MedicationNotificationKind.added,
+      );
 
       return Right(message.toString());
     } on DioException catch (e) {
@@ -125,6 +135,7 @@ class ManageMedsRepoImpl implements ManageMedsRepo {
     String? type,
     String? dosage,
     String? frequency,
+    String? recipientFcmToken,
     List<String>? daily,
     List<Map<String, dynamic>>? weekly,
     List<Map<String, dynamic>>? specific,
@@ -182,6 +193,13 @@ class ManageMedsRepoImpl implements ManageMedsRepo {
           (response is Map<String, dynamic> ? response['message'] : null) ??
           'Medication updated successfully';
 
+      await _sendMedicationNotification(
+        recipientFcmToken: recipientFcmToken,
+        patientId: patientId,
+        medicationName: name ?? medicationId,
+        kind: _MedicationNotificationKind.updated,
+      );
+
       return Right(message.toString());
     } on DioException catch (e) {
       return Left(ServerFailure.fromDioError(e));
@@ -194,6 +212,8 @@ class ManageMedsRepoImpl implements ManageMedsRepo {
   Future<Either<ApiError, String>> deleteMedication({
     required String medicationId,
     required String patientId,
+    required String deletedMedicationName,
+    String? recipientFcmToken,
   }) async {
     try {
       final dynamic response = await apiService.delete(
@@ -211,6 +231,13 @@ class ManageMedsRepoImpl implements ManageMedsRepo {
           (response is Map<String, dynamic> ? response['message'] : null) ??
           'Medication deleted successfully';
 
+      await _sendMedicationNotification(
+        recipientFcmToken: recipientFcmToken,
+        patientId: patientId,
+        medicationName: deletedMedicationName,
+        kind: _MedicationNotificationKind.deleted,
+      );
+
       return Right(message.toString());
     } on DioException catch (e) {
       return Left(ServerFailure.fromDioError(e));
@@ -218,4 +245,42 @@ class ManageMedsRepoImpl implements ManageMedsRepo {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  Future<void> _sendMedicationNotification({
+    required String? recipientFcmToken,
+    required String patientId,
+    required String medicationName,
+    required _MedicationNotificationKind kind,
+  }) async {
+    final token = recipientFcmToken?.trim() ?? '';
+    if (token.isEmpty) {
+      log('Medication notification skipped: missing recipientFcmToken for $patientId');
+      return;
+    }
+
+    final result = kind == _MedicationNotificationKind.added
+        ? await _notificationDispatchService.sendMedicationAdded(
+            recipientFcmToken: token,
+            medicationName: medicationName,
+            recipientUserId: patientId,
+          )
+        : kind == _MedicationNotificationKind.updated
+            ? await _notificationDispatchService.sendMedicationUpdated(
+                recipientFcmToken: token,
+                medicationName: medicationName,
+                recipientUserId: patientId,
+              )
+            : await _notificationDispatchService.sendMedicationDeleted(
+                recipientFcmToken: token,
+                medicationName: medicationName,
+                recipientUserId: patientId,
+              );
+
+    result.fold(
+      (error) => log('Medication notification failed: ${error.message}'),
+      (message) => log('Medication notification sent: $message'),
+    );
+  }
 }
+
+enum _MedicationNotificationKind { added, updated, deleted }

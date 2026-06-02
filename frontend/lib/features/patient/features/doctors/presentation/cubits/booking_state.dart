@@ -16,6 +16,7 @@ class BookingState {
   final bool isLoadingSlots;
   final bool isBooking;
   final bool bookingSuccess;
+  final String? bookingErrorMessage;
   final String? paymentUrl;
   final bool isProcessingPayment;
 
@@ -35,6 +36,7 @@ class BookingState {
     this.isLoadingSlots = false,
     this.isBooking = false,
     this.bookingSuccess = false,
+    this.bookingErrorMessage,
     this.paymentUrl,
     this.isProcessingPayment = false,
   });
@@ -55,6 +57,7 @@ class BookingState {
     bool? isLoadingSlots,
     bool? isBooking,
     bool? bookingSuccess,
+    String? bookingErrorMessage,
     String? paymentUrl,
     bool? isProcessingPayment,
   }) {
@@ -76,6 +79,7 @@ class BookingState {
       isLoadingSlots: isLoadingSlots ?? this.isLoadingSlots,
       isBooking: isBooking ?? this.isBooking,
       bookingSuccess: bookingSuccess ?? this.bookingSuccess,
+      bookingErrorMessage: bookingErrorMessage ?? this.bookingErrorMessage,
       paymentUrl: paymentUrl ?? this.paymentUrl,
       isProcessingPayment: isProcessingPayment ?? this.isProcessingPayment,
     );

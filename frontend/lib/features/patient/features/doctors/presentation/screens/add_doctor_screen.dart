@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -36,6 +38,23 @@ class _AddDoctorViewState extends State<AddDoctorView> {
   final Set<_AddDoctorOption> _expandedOptions = <_AddDoctorOption>{};
   _AddDoctorFlowState _flowState = _AddDoctorFlowState.form;
   String _submittedDoctorId = '';
+
+  ({String userId, String? fcmToken}) _parseQrPayload(String rawValue) {
+    try {
+      final decoded = jsonDecode(rawValue);
+      if (decoded is Map<String, dynamic>) {
+        final userId = (decoded['userId'] ?? decoded['id'] ?? '').toString().trim();
+        final fcmToken = (decoded['fcmToken'] ?? '').toString().trim();
+        if (userId.isNotEmpty) {
+          return (userId: userId, fcmToken: fcmToken.isEmpty ? null : fcmToken);
+        }
+      }
+    } catch (_) {
+      // Raw string fallback.
+    }
+
+    return (userId: rawValue.trim(), fcmToken: null);
+  }
 
   @override
   void dispose() {
@@ -93,11 +112,15 @@ class _AddDoctorViewState extends State<AddDoctorView> {
     );
 
     if (result != null && result is String) {
+      final payload = _parseQrPayload(result);
       setState(() {
-        _submittedDoctorId = result;
+        _submittedDoctorId = payload.userId;
       });
 
-      context.read<AddDoctorCubit>().sendAddRequest(result);
+      context.read<AddDoctorCubit>().sendAddRequest(
+        payload.userId,
+        recipientFcmToken: payload.fcmToken,
+      );
     }
   }
 

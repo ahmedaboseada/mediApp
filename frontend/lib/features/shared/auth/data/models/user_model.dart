@@ -17,6 +17,7 @@ class UserModel {
     this.dob,
     this.age,
     this.phone,
+    this.fcmToken,
   });
 
   @HiveField(0)
@@ -43,6 +44,8 @@ class UserModel {
   final int? age;
   @HiveField(11)
   final String? phone;
+  @HiveField(12)
+  final String? fcmToken;
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
@@ -58,6 +61,7 @@ class UserModel {
       dob: json['DOB']?.toString(),
       age: json['age'] as int?,
       phone: json['phone']?.toString(),
+      fcmToken: json['fcmToken']?.toString(),
     );
   }
 
@@ -75,6 +79,7 @@ class UserModel {
       if (dob != null) 'DOB': dob,
       if (age != null) 'age': age,
       if (phone != null) 'phone': phone,
+      if (fcmToken != null) 'fcmToken': fcmToken,
     };
   }
 }

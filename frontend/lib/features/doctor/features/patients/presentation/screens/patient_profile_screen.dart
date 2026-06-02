@@ -33,6 +33,7 @@ class PatientProfileScreen extends StatefulWidget {
 }
 
 class _PatientProfileScreenState extends State<PatientProfileScreen> {
+  late PatientData _patient;
   int _selectedTabIndex = 0;
   Timer? _sessionTimer;
   Duration _remainingSessionTime = Duration.zero;
@@ -41,6 +42,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
   @override
   void initState() {
     super.initState();
+    _patient = widget.patient;
     _startSessionTimer();
   }
 
@@ -238,19 +240,42 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
   }
 
   Future<void> _openMedicationDialog({MedicationModel? medication}) async {
-    await showDialog<void>(
+    final result = await showDialog<PatientMedicationDialogResult>(
       context: context,
       barrierDismissible: false,
       builder: (_) => BlocProvider<ManageMedsCubit>(
         create: (_) => getIt<ManageMedsCubit>(),
         child: AddPatientMedicationDialog(
-          patientName: widget.patient.name,
-          patientId: widget.patient.id,
+          patientName: _patient.name,
+          patientId: _patient.id,
+          patientFcmToken: _patient.fcmToken,
           medication: medication,
           isEditMode: medication != null,
         ),
       ),
     );
+
+    if (!mounted || result == null) {
+      return;
+    }
+
+    setState(() {
+      final updatedMedication = result.medication;
+      final medications = List<MedicationModel>.from(_patient.medications);
+
+      if (result.isEditMode) {
+        final index = medications.indexWhere((item) => item.id == updatedMedication.id);
+        if (index >= 0) {
+          medications[index] = updatedMedication;
+        } else {
+          medications.add(updatedMedication);
+        }
+      } else {
+        medications.add(updatedMedication);
+      }
+
+      _patient = _patient.copyWith(medications: medications);
+    });
   }
 
   Future<void> _handleDeleteMedication(MedicationModel medication) async {
@@ -278,6 +303,8 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
     final result = await cubit.deleteMedication(
       medicationId: medication.id,
       patientId: widget.patient.id,
+      deletedMedicationName: medication.name,
+      recipientFcmToken: _patient.fcmToken,
     );
 
     if (!mounted) return;
@@ -289,6 +316,14 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
           ..showSnackBar(SnackBar(content: Text(error.message)));
       },
       (message) {
+        setState(() {
+          _patient = _patient.copyWith(
+            medications: _patient.medications
+                .where((item) => item.id != medication.id)
+                .toList(),
+          );
+        });
+
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(SnackBar(content: Text(message)));
@@ -316,7 +351,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     PatientProfileHeader(
-                      patient: widget.patient,
+                      patient: _patient,
                       selectedTabIndex: _selectedTabIndex,
                       onTabChanged: (index) {
                         setState(() {
@@ -330,7 +365,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                     ],
                     SizedBox(height: AppSizes.h20),
                     if (_selectedTabIndex == 0) ...[
-                      PatientOverviewTab(patient: widget.patient),
+                      PatientOverviewTab(patient: _patient),
                     ],
                     if (_selectedTabIndex == 1) ...[
                       PatientMedicationsTab(
@@ -340,13 +375,13 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
                         onDeleteMedication: (medication) {
                           _handleDeleteMedication(medication);
                         },
-                        patient: widget.patient,
+                        patient: _patient,
                         showAddMedicationAction: widget.showAddMedicationAction,
                         onAddMedication: _openAddMedicationDialog,
                       ),
                     ],
                     if (_selectedTabIndex == 2) ...[
-                      PatientHealthReportsTab(patient: widget.patient),
+                      PatientHealthReportsTab(patient: _patient),
                     ],
                   ],
                 ),

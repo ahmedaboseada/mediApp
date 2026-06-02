@@ -47,8 +47,9 @@ class PatientOverviewTab extends StatelessWidget {
               SizedBox(height: AppSizes.h14),
               PatientIconInfoRow(
                 icon: Icons.mail_outline,
-                text:
-                    '${patient.name.toLowerCase().replaceAll(' ', '.')}@email.com',
+                text:patient.email.isNotEmpty
+                    ? patient.email :"email not provided", 
+                    //'${patient.email.toLowerCase().replaceAll(' ', '.')}@email.com',
               ),
             ],
           ),

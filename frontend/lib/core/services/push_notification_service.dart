@@ -3,9 +3,10 @@ import 'dart:developer';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:medi/core/services/local_notification_service.dart';
 import 'package:medi/core/services/notification_inbox_service.dart';
-
+import 'package:medi/core/core.dart';
+import 'package:medi/core/services/app_logger.dart';
+  
 class PushNotificationService {
   static FirebaseMessaging messaging = FirebaseMessaging.instance;
   static Future<void> initialize() async {
@@ -13,7 +14,7 @@ class PushNotificationService {
     await messaging.requestPermission();
     messaging.getToken().then((token) {
       log('Firebase Messaging Token: $token');
-      sendTokenToServer(token !);
+      //sendTokenToServer(token !);
     });
     messaging.onTokenRefresh.listen((newToken) {
       log('Firebase Messaging Token refreshed: $newToken');
@@ -66,5 +67,19 @@ class PushNotificationService {
       data: data,
     );
   }
-  static void sendTokenToServer(String token) {}
+  static Future<void> sendTokenToServer(String token) async {
+    try {
+      AppLogger.instance.i('Sending FCM token to server');
+      final api = getIt<ApiService>();
+      final result = await api.patch('/users/fcm-token', {'fcmToken': token});
+      log('FCM token update result: $result');
+      if (result is ServerFailure) {
+        AppLogger.instance.w('Failed to update FCM token on server: ${result.message}');
+      } else {
+        AppLogger.instance.i('FCM token updated on server successfully');
+      }
+    } catch (e, st) {
+      AppLogger.instance.w('Exception while sending FCM token to server', e, st);
+    }
+  }
 }

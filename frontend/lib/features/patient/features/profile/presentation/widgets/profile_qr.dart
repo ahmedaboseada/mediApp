@@ -1,10 +1,25 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 class ProfileQR extends StatelessWidget {
   final String qrData;
+  final String? fcmToken;
 
-  const ProfileQR({super.key, required this.qrData});
+  const ProfileQR({super.key, required this.qrData, this.fcmToken});
+
+  String get _qrPayload {
+    final token = fcmToken?.trim() ?? '';
+    if (token.isEmpty) {
+      return qrData;
+    }
+
+    return jsonEncode({
+      'userId': qrData,
+      'fcmToken': token,
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +31,7 @@ class ProfileQR extends StatelessWidget {
         child: GestureDetector(
           onTap: () => _showQrDialog(context),
           child: QrImageView(
-            data: qrData,
+            data: _qrPayload,
             size: 60,
           ),
         ),
@@ -29,7 +44,7 @@ class ProfileQR extends StatelessWidget {
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (_) => QrDialog(qrData: qrData),
+      builder: (_) => QrDialog(qrData: _qrPayload),
     );
   }
 }

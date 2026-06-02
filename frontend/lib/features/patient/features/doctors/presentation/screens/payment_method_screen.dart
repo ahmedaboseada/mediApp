@@ -8,7 +8,7 @@ import 'package:medi/features/patient/features/doctors/data/models/appointment_r
 import 'package:medi/features/patient/features/doctors/presentation/cubits/booking_cubit.dart';
 import 'package:medi/features/patient/features/doctors/presentation/widgets/payment_option_tile.dart';
 
-enum _PaymentMethod { card, paypal, applePay }
+enum _PaymentMethod { card, cash }
 
 class PaymentMethodScreen extends StatefulWidget {
   const PaymentMethodScreen({super.key, this.initialData});
@@ -22,34 +22,48 @@ class PaymentMethodScreen extends StatefulWidget {
 class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
   bool _announced = false;
 
-  void _handleNext(BuildContext context, BookingState state) {
-    final paymentMethod = _getPaymentMethod(state.selectedPaymentMethod);
-    switch (paymentMethod) {
-      case _PaymentMethod.card:
-        context.read<BookingCubit>().updatePaymentMethod('Card');
-        context.push(
-          AppRouter.patientReviewSummaryScreen,
-          extra: state.appointmentReviewData.copyWith(paymentMethod: 'Card'),
-        );
-        break;
-      case _PaymentMethod.paypal:
-      case _PaymentMethod.applePay:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('This payment method is coming soon')),
-        );
-        break;
-    }
+  bool _isOfflinePackage(String packageName) {
+    final normalized = packageName.trim().toLowerCase();
+    return normalized == 'offline' || normalized == 'in-person';
   }
 
   _PaymentMethod _getPaymentMethod(String value) {
-    switch (value) {
-      case 'paypal':
-        return _PaymentMethod.paypal;
-      case 'applePay':
-        return _PaymentMethod.applePay;
+    final normalized = value.trim().toLowerCase();
+    switch (normalized) {
+      case 'cash':
+        return _PaymentMethod.cash;
+      case 'card':
       default:
         return _PaymentMethod.card;
     }
+  }
+
+  String _getPaymentMethodValue(_PaymentMethod method) {
+    return method == _PaymentMethod.cash ? 'cash' : 'card';
+  }
+
+  void _handleNext(BuildContext context, BookingState state) {
+    final isOffline = _isOfflinePackage(state.appointmentReviewData.packageName);
+    final paymentMethod = _getPaymentMethod(state.selectedPaymentMethod);
+
+    if (paymentMethod == _PaymentMethod.cash && !isOffline) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Cash payment is only available for offline appointments'),
+        ),
+      );
+      return;
+    }
+
+    final paymentMethodLabel = paymentMethod == _PaymentMethod.cash
+        ? 'Cash'
+        : 'Card';
+
+    context.read<BookingCubit>().updatePaymentMethod(paymentMethodLabel);
+    context.push(
+      AppRouter.patientReviewSummaryScreen,
+      extra: state.appointmentReviewData.copyWith(paymentMethod: paymentMethodLabel),
+    );
   }
 
   @override
@@ -63,7 +77,12 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
 
     return BlocBuilder<BookingCubit, BookingState>(
       builder: (context, state) {
+        final isOffline = _isOfflinePackage(state.appointmentReviewData.packageName);
         final selectedMethod = _getPaymentMethod(state.selectedPaymentMethod);
+        final groupValue = !isOffline && selectedMethod == _PaymentMethod.cash
+            ? _PaymentMethod.card
+            : selectedMethod;
+
         return Scaffold(
           appBar: const CustomAppBar(title: 'Payment Method'),
           backgroundColor: AppColors.background,
@@ -77,16 +96,11 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   RadioGroup<_PaymentMethod>(
-                    groupValue: selectedMethod,
+                    groupValue: groupValue,
                     onChanged: (value) {
                       if (value == null) return;
-                      final methodString = value == _PaymentMethod.card
-                          ? 'card'
-                          : value == _PaymentMethod.paypal
-                          ? 'paypal'
-                          : 'applePay';
                       context.read<BookingCubit>().updatePaymentMethod(
-                        methodString,
+                        _getPaymentMethodValue(value),
                       );
                     },
                     child: Column(
@@ -108,46 +122,28 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                           value: _PaymentMethod.card,
                           semanticLabel: 'Add new card payment option',
                         ),
-                        SizedBox(height: AppSizes.h20),
-                        Text(
-                          'More Payment Options',
-                          style: AppStyles.black18500,
-                        ),
-                        SizedBox(height: AppSizes.h12),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceColor,
-                            borderRadius: BorderRadius.circular(AppSizes.r12),
-                            border: Border.all(color: AppColors.borderColor),
+                        if (isOffline) ...[
+                          SizedBox(height: AppSizes.h20),
+                          Text(
+                            'More Payment Options',
+                            style: AppStyles.black18500,
                           ),
-                          child: Column(
-                            children: [
-                              PaymentOptionTile<_PaymentMethod>(
-                                title: 'Paypal',
-                                leading: SvgPicture.asset(
-                                  AppAssets.paypal,
-                                  width: AppSizes.w20,
-                                  height: AppSizes.h20,
-                                ),
-                                value: _PaymentMethod.paypal,
-                                hasBorder: true,
-                                semanticLabel: 'PayPal payment option',
-                              ),
-                              Divider(color: AppColors.borderColor),
-                              PaymentOptionTile<_PaymentMethod>(
-                                leading: SvgPicture.asset(
-                                  AppAssets.apple,
-                                  width: AppSizes.w20,
-                                  height: AppSizes.h20,
-                                ),
-                                hasBorder: true,
-                                title: 'Apple Pay',
-                                value: _PaymentMethod.applePay,
-                                semanticLabel: 'Apple Pay payment option',
-                              ),
-                            ],
+                          SizedBox(height: AppSizes.h12),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: AppColors.surfaceColor,
+                              borderRadius: BorderRadius.circular(AppSizes.r12),
+                              border: Border.all(color: AppColors.borderColor),
+                            ),
+                            child: PaymentOptionTile<_PaymentMethod>(
+                              title: 'Cash',
+                              leading: const Icon(Icons.payments_outlined),
+                              value: _PaymentMethod.cash,
+                              hasBorder: true,
+                              semanticLabel: 'Cash payment option',
+                            ),
                           ),
-                        ),
+                        ],
                       ],
                     ),
                   ),

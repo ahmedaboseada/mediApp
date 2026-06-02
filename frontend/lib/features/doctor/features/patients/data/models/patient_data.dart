@@ -15,11 +15,46 @@ class PatientData {
     required this.avatarAsset,
     required this.email,
     required this.phone,
+    this.fcmToken,
     this.allergies = const [],
     this.chronicConditions = const [],
     this.medications = const [],
     this.measurements = const [],
   });
+
+  PatientData copyWith({
+    String? id,
+    String? name,
+    int? age,
+    String? gender,
+    String? email,
+    String? bloodType,
+    PatientStatus? status,
+    String? avatarAsset,
+    String? phone,
+    String? fcmToken,
+    List<String>? allergies,
+    List<String>? chronicConditions,
+    List<MedicationModel>? medications,
+    List<MeasurementModel>? measurements,
+  }) {
+    return PatientData(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      age: age ?? this.age,
+      gender: gender ?? this.gender,
+      email: email ?? this.email,
+      bloodType: bloodType ?? this.bloodType,
+      status: status ?? this.status,
+      avatarAsset: avatarAsset ?? this.avatarAsset,
+      phone: phone ?? this.phone,
+      fcmToken: fcmToken ?? this.fcmToken,
+      allergies: allergies ?? this.allergies,
+      chronicConditions: chronicConditions ?? this.chronicConditions,
+      medications: medications ?? this.medications,
+      measurements: measurements ?? this.measurements,
+    );
+  }
 
   final String id;
   final String name;
@@ -30,6 +65,7 @@ class PatientData {
   final PatientStatus status;
   final String avatarAsset;
   final String phone;
+  final String? fcmToken;
   final List<String> allergies;
   final List<String> chronicConditions;
   final List<MedicationModel> medications;
@@ -52,6 +88,7 @@ class PatientData {
         avatarAsset: (user['profilePicture'] ?? AppAssets.avatar1).toString(),
         phone: (user['phone'] ?? 'Unknown').toString(),
         email: (user['email'] ?? 'Unknown').toString(),
+        fcmToken: _cleanToken(user['fcmToken']) ?? _cleanToken(json['fcmToken']),
         allergies: List<String>.from(json['allergies'] ?? []),
         chronicConditions: List<String>.from(json['chronicConditions'] ?? []),
         medications:
@@ -84,6 +121,7 @@ class PatientData {
               .toString(),
       phone: (json['phone'] ?? 'Unknown').toString(),
       email: (json['email'] ?? 'Unknown').toString(),
+      fcmToken: _cleanToken(json['fcmToken']) ?? _cleanToken((json['userId'] as Map<String, dynamic>?)?['fcmToken']),
       allergies: List<String>.from(json['allergies'] ?? []),
       chronicConditions: List<String>.from(json['chronicConditions'] ?? []),
       medications:
@@ -138,6 +176,15 @@ class PatientData {
       default:
         return PatientStatus.normal;
     }
+  }
+
+  static String? _cleanToken(dynamic value) {
+    final token = value?.toString().trim();
+    if (token == null || token.isEmpty) {
+      return null;
+    }
+
+    return token;
   }
 
   String get statusLabel {

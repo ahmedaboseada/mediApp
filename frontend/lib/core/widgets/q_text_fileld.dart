@@ -78,6 +78,7 @@ class QTextField extends StatelessWidget {
 
             searchEnabled: search ?? true,
             dropdownDecoration: DropdownDecoration(
+              backgroundColor: AppColors.whiteText,
               borderRadius: BorderRadius.circular(8),
             ),
             items: updatedItems,

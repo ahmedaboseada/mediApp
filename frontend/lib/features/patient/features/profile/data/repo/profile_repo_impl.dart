@@ -15,6 +15,8 @@ import 'package:path_provider/path_provider.dart';
 
 class ProfileRepoImpl implements ProfileRepo {
   final ApiService apiService;
+  final NotificationDispatchService _notificationDispatchService =
+      NotificationDispatchService();
 
   ProfileRepoImpl(this.apiService);
 
@@ -437,6 +439,7 @@ class ProfileRepoImpl implements ProfileRepo {
   @override
   Future<Either<ApiError, String>> acceptDoctorRequest({
     required String doctorId,
+    String? doctorFcmToken,
   }) async {
     try {
       final token = await HiveService.getAccessToken();
@@ -453,6 +456,14 @@ class ProfileRepoImpl implements ProfileRepo {
       log('Accept Doctor Request Response: ${response.toString()}');
       if (response is ServerFailure) {
         return Left(response);
+      }
+
+      if (doctorFcmToken != null && doctorFcmToken.trim().isNotEmpty) {
+        await _notificationDispatchService.sendPatientAcceptedDoctorRequest(
+          recipientFcmToken: doctorFcmToken,
+          recipientUserId: doctorId,
+          entityId: doctorId,
+        );
       }
 
       final message = response['message'] ?? 'Doctor request accepted';

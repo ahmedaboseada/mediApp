@@ -22,7 +22,11 @@ abstract class DoctorsRepository {
     String date,
     String time,
   );
-  Future<Either<ApiError, void>> sendConnectionRequest(String doctorId);
+  Future<Either<ApiError, void>> createReview(String doctorId, int rating,);
+  Future<Either<ApiError, void>> sendConnectionRequest(
+    String doctorId, {
+    String? recipientFcmToken,
+  });
   Future<Either<ApiError, void>> cancelConnectionRequest(String doctorId);
   Future<Either<ApiError, List<Doctordata>>> getConnectedDoctors();
   Future<List<Doctordata>> getCachedConnectedDoctors();

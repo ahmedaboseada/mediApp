@@ -62,27 +62,27 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                 DoctorProfileHeader(
                   doctor: profileDoctor,
                   onBack: () => context.pop(),
-                 onInsightsTap: () {
-  final peerUserID = profileDoctor.user.id.isNotEmpty
-      ? profileDoctor.user.id
-      : profileDoctor.id;
+                  onInsightsTap: () {
+                    final peerUserID = profileDoctor.user.id.isNotEmpty
+                        ? profileDoctor.user.id
+                        : profileDoctor.id;
 
-  final peerName =
-      '${profileDoctor.user.firstName} ${profileDoctor.user.lastName}'
-          .trim();
+                    final peerName =
+                        '${profileDoctor.user.firstName} ${profileDoctor.user.lastName}'
+                            .trim();
 
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) {
-        return ZIMKitMessageListPage(
-          conversationID: peerUserID,
-          conversationType: ZIMConversationType.peer,
-        );
-      },
-    ),
-  );
-},
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return ZIMKitMessageListPage(
+                            conversationID: peerUserID,
+                            conversationType: ZIMConversationType.peer,
+                          );
+                        },
+                      ),
+                    );
+                  },
                 ),
                 Expanded(
                   child: SingleChildScrollView(

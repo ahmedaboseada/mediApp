@@ -8,6 +8,7 @@ abstract class ManageMedsRepo {
     required String type,
     required String dosage,
     required String frequency,
+    String? recipientFcmToken,
     List<String>? daily,
     List<Map<String, dynamic>>? weekly,
     List<Map<String, dynamic>>? specific,
@@ -20,6 +21,7 @@ abstract class ManageMedsRepo {
     String? type,
     String? dosage,
     String? frequency,
+    String? recipientFcmToken,
     List<String>? daily,
     List<Map<String, dynamic>>? weekly,
     List<Map<String, dynamic>>? specific,
@@ -29,5 +31,7 @@ abstract class ManageMedsRepo {
   Future<Either<ApiError, String>> deleteMedication({
     required String medicationId,
     required String patientId,
+    required String deletedMedicationName,
+    String? recipientFcmToken,
   });
 }

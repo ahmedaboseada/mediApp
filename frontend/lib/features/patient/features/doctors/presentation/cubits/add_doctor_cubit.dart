@@ -7,7 +7,7 @@ class AddDoctorCubit extends Cubit<AddDoctorState> {
 
   final DoctorsRepository _repository;
 
-  Future<void> sendAddRequest(String doctorId) async {
+  Future<void> sendAddRequest(String doctorId, {String? recipientFcmToken}) async {
     emit(
       state.copyWith(
         status: AddDoctorStatus.loading,
@@ -16,7 +16,10 @@ class AddDoctorCubit extends Cubit<AddDoctorState> {
       ),
     );
 
-    final result = await _repository.sendConnectionRequest(doctorId);
+    final result = await _repository.sendConnectionRequest(
+      doctorId,
+      recipientFcmToken: recipientFcmToken,
+    );
 
     result.fold(
       (error) {

@@ -175,13 +175,24 @@ class BookingCubit extends Cubit<BookingState> {
     emit(state.copyWith(appointmentReviewData: updatedData));
   }
 
+  String _mapPaymentMethodForApi(String paymentMethod) {
+    final normalized = paymentMethod.trim().toLowerCase();
+    return normalized == 'cash' ? 'cash' : 'card';
+  }
+
   Future<void> createBooking() async {
     if (state.appointmentReviewData.doctor == null ||
         state.selectedTimeSlot == null) {
       return;
     }
 
-    emit(state.copyWith(isBooking: true, bookingSuccess: false));
+    emit(
+      state.copyWith(
+        isBooking: true,
+        bookingSuccess: false,
+        bookingErrorMessage: null,
+      ),
+    );
 
     final data = state.appointmentReviewData;
     final body = {
@@ -195,17 +206,26 @@ class BookingCubit extends Cubit<BookingState> {
       "patientAge": data.patientAge,
       "patientGender": data.patientGender.toLowerCase(),
       "problem": data.problem,
-      "paymentMethod": data.paymentMethod.toLowerCase() == 'card'
-          ? 'card'
-          : 'cash_on_site',
+      "paymentMethod": _mapPaymentMethodForApi(data.paymentMethod),
     };
 
     final result = await doctorsRepository.createBooking(body);
 
     result.fold(
-      (failure) =>
-          emit(state.copyWith(isBooking: false, bookingSuccess: false)),
-      (success) => emit(state.copyWith(isBooking: false, bookingSuccess: true)),
+      (failure) => emit(
+        state.copyWith(
+          isBooking: false,
+          bookingSuccess: false,
+          bookingErrorMessage: failure.message,
+        ),
+      ),
+      (success) => emit(
+        state.copyWith(
+          isBooking: false,
+          bookingSuccess: true,
+          bookingErrorMessage: null,
+        ),
+      ),
     );
   }
 
@@ -215,7 +235,13 @@ class BookingCubit extends Cubit<BookingState> {
       return;
     }
 
-    emit(state.copyWith(isBooking: true));
+    emit(
+      state.copyWith(
+        isBooking: true,
+        bookingSuccess: false,
+        bookingErrorMessage: null,
+      ),
+    );
 
     final data = state.appointmentReviewData;
     final body = {
@@ -229,16 +255,20 @@ class BookingCubit extends Cubit<BookingState> {
       "patientAge": data.patientAge,
       "patientGender": data.patientGender.toLowerCase(),
       "problem": data.problem,
-      "paymentMethod": data.paymentMethod.toLowerCase() == 'card'
-          ? 'card'
-          : 'cash_on_site',
+      "paymentMethod": _mapPaymentMethodForApi(data.paymentMethod),
     };
 
     final result = await doctorsRepository.createBooking(body);
 
     result.fold(
       (failure) {
-        emit(state.copyWith(isBooking: false, paymentUrl: null));
+        emit(
+          state.copyWith(
+            isBooking: false,
+            paymentUrl: null,
+            bookingErrorMessage: failure.message,
+          ),
+        );
       },
       (successResponse) {
         // Extract paymentUrl from response
@@ -251,7 +281,13 @@ class BookingCubit extends Cubit<BookingState> {
           // Handle parsing error silently
         }
 
-        emit(state.copyWith(isBooking: false, paymentUrl: paymentUrl));
+        emit(
+          state.copyWith(
+            isBooking: false,
+            paymentUrl: paymentUrl,
+            bookingErrorMessage: null,
+          ),
+        );
       },
     );
   }

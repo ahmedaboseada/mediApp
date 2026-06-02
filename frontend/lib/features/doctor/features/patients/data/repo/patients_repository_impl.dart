@@ -14,6 +14,8 @@ class PatientsRepositoryImpl implements PatientsRepository {
   final ApiService _apiService;
   final PatientsLocalDataSource _local;
   final PendingPatientRequestsLocalDataSource _pending;
+  final NotificationDispatchService _notificationDispatchService =
+      NotificationDispatchService();
   // Mock data - replace with API calls when backend is ready
 
   @override
@@ -84,7 +86,10 @@ class PatientsRepositoryImpl implements PatientsRepository {
   //   }
   // }
   @override
-  Future<Either<ApiError, void>> sendAddRequest(String patientId) async {
+  Future<Either<ApiError, void>> sendAddRequest(
+    String patientId, {
+    String? recipientFcmToken,
+  }) async {
     try {
       final response = await _apiService.post(
         '/doctors/patients/connect-patient',
@@ -97,6 +102,20 @@ class PatientsRepositoryImpl implements PatientsRepository {
         // Save to pending queue for later sync
         await _pending.addPendingRequest({'patientId': patientId, 'createdAt': DateTime.now().toIso8601String()});
         return Left(response);
+      }
+
+      if (recipientFcmToken != null && recipientFcmToken.trim().isNotEmpty) {
+        final notificationResult = await _notificationDispatchService.sendDoctorRequestToPatient(
+          recipientFcmToken: recipientFcmToken,
+          recipientUserId: patientId,
+          entityId: patientId,
+        );
+        notificationResult.fold(
+          (error) => log('Doctor->Patient notification failed: ${error.message}'),
+          (message) => log('Doctor->Patient notification sent: $message'),
+        );
+      } else {
+        log('Doctor->Patient notification skipped: missing recipientFcmToken for $patientId');
       }
 
       return const Right(null);

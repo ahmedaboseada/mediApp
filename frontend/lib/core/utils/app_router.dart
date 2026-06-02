@@ -86,6 +86,8 @@ import 'package:medi/features/doctor/features/complete_profile/presentation/scre
 import 'package:medi/features/doctor/features/complete_profile/presentation/screens/upload_license_screen.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/widgets/q_flow.dart';
 import 'package:medi/features/doctor/features/home/presentation/screens/main_layout.dart';
+import 'package:medi/features/doctor/features/home/presentation/screens/doctor_notification_screen.dart';
+import 'package:medi/features/doctor/features/patients/presentation/screens/incoming_patient_requests_screen.dart';
 import 'package:medi/features/doctor/features/patients/presentation/screens/add_patient_screen.dart';
 import 'package:medi/features/doctor/features/settings/presentation/controller/cubit/schedule_cubit.dart';
 import 'package:medi/features/doctor/features/settings/presentation/screens/account_information_screen.dart';
@@ -173,6 +175,7 @@ class AppRouter {
   static const String patientAccountInfoScreen = '/patient/accountInfo';
   static const String patientCaregiverModeScreen = '/patient/caregiverMode';
   static const String notificationsScreen = '/patient/notifications';
+  static const String doctorNotificationsScreen = '/doctor/notifications';
   static const String changeEmailScreen = '/patient/changeEmail';
   static const String changePasswordScreen = '/patient/changePassword';
   static const String chooseMethodScreen =
@@ -190,6 +193,8 @@ class AppRouter {
   static const String medicineInfoScreen = '/patient/medicineInfo';
   static const String doctorProfileScreen = '/doctors/profile';
   static const String doctorBookAppointmentScreen = '/doctors/profile/book';
+  static const String doctorIncomingPatientRequestsScreen =
+      '/doctors/profile/incoming-patient-requests';
   static const String patientDetailsScreen =
       '/doctors/profile/book/patient-details';
   static const String patientPaymentMethodScreen =
@@ -496,6 +501,11 @@ class AppRouter {
         builder: (context, state) => const NotificationScreen(),
       ),
 
+      GoRoute(
+        path: doctorNotificationsScreen,
+        builder: (context, state) => const DoctorNotificationScreen(),
+      ),
+
       /// ================= PATIENT SHELL =================
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) {
@@ -615,6 +625,11 @@ class AppRouter {
                           doctor: state.extra as Doctordata,
                         ),
                         routes: [
+                          GoRoute(
+                            path: 'incoming-patient-requests',
+                            builder: (context, state) =>
+                                const IncomingPatientRequestsScreen(),
+                          ),
                           GoRoute(
                             path: 'book',
                             builder: (context, state) => SelectPackageScreen(
@@ -794,7 +809,7 @@ class AppRouter {
         path: doctorAllSetScreen,
         builder: (context, state) => const DoctorAllSetScreen(),
       ),
-    
+
       GoRoute(
         path: exportHealthPassportScreen,
         builder: (context, state) => const HealthPassportScreen(),
@@ -809,7 +824,9 @@ class AppRouter {
             return ExportHealthReportScreen(patient: extra);
           }
 
-          throw StateError('ExportHealthReportScreen requires PatientData in extra');
+          throw StateError(
+            'ExportHealthReportScreen requires PatientData in extra',
+          );
         },
       ),
 

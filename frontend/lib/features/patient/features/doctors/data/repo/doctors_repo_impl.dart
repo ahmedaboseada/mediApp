@@ -14,6 +14,8 @@ class DoctorsRepositoryImpl implements DoctorsRepository {
   final ApiService apiService;
   final BookingLocalDataSource _bookingLocal = BookingLocalDataSource();
   final DoctorsLocalDataSource _doctorsLocal = DoctorsLocalDataSource();
+  final NotificationDispatchService _notificationDispatchService =
+      NotificationDispatchService();
 
   DoctorsRepositoryImpl(this.apiService);
 
@@ -232,11 +234,47 @@ class DoctorsRepositoryImpl implements DoctorsRepository {
   }
 
   @override
-  Future<Either<ApiError, void>> sendConnectionRequest(String doctorId) async {
+  Future<Either<ApiError, void>> createReview(String doctorId, int rating, ) async {
+    try {
+      final payload = <String, dynamic>{'doctorId': doctorId, 'rating': rating};
+
+      final dynamic response = await apiService.post('/reviews', payload);
+      log('Create Review Response: ${response.toString()}');
+
+      if (response is ServerFailure) return Left(response);
+
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(ServerFailure.fromDioError(e));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<ApiError, void>> sendConnectionRequest(
+    String doctorId, {
+    String? recipientFcmToken,
+  }) async {
     try {
       final response = await apiService.post('/patients/connect-doctor', {'doctorId': doctorId});
       log('sendConnectionRequest response: $response');
       if (response is ServerFailure) return Left(response);
+
+      if (recipientFcmToken != null && recipientFcmToken.trim().isNotEmpty) {
+        final notificationResult = await _notificationDispatchService.sendDoctorRequestToPatient(
+          recipientFcmToken: recipientFcmToken,
+          recipientUserId: doctorId,
+          entityId: doctorId,
+        );
+        notificationResult.fold(
+          (error) => log('Patient->Doctor notification failed: ${error.message}'),
+          (message) => log('Patient->Doctor notification sent: $message'),
+        );
+      } else {
+        log('Patient->Doctor notification skipped: missing recipientFcmToken for $doctorId');
+      }
+
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure(e.toString()));

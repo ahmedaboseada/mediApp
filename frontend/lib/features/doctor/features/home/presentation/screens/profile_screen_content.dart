@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/features/doctor/features/home/presentation/widgets/connected_patients_section.dart';
 import 'package:medi/features/doctor/features/home/presentation/widgets/notification_section.dart';
 import 'package:medi/features/doctor/features/home/presentation/widgets/settings_section.dart';
 import 'package:medi/features/doctor/features/home/presentation/widgets/support_section.dart';
@@ -29,6 +30,8 @@ class ProfileScreenContent extends StatelessWidget {
           child: Column(
             children: [
               const _UserHeaderSection(),
+              SizedBox(height: AppSizes.h24),
+              const ConnectedPatientsSection(),
               SizedBox(height: AppSizes.h24),
               const _SettingsSectionWrapper(),
               SizedBox(height: AppSizes.h24),
@@ -80,6 +83,7 @@ class _UserHeaderSection extends StatelessWidget {
           networkImageUrl: imageUrl,
           isLoading: isLoading,
           userId: profile?.user.id ?? '',
+          fcmToken: user?.fcmToken,
         );
       },
     );

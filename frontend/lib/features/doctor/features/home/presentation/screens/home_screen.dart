@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/home/presentation/cubit/appointments_cubit.dart';
@@ -146,6 +147,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           specialization: specialization,
                           id: id,
                           imageUrl: imageUrl,
+                          onInsightsTap: () {
+                            context.push(AppRouter.doctorNotificationsScreen);
+                          },
                           onQRScan: () => _openQRScanner(context),
                         ),
                       ),

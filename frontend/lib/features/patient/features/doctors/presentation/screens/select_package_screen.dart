@@ -53,8 +53,8 @@ class _SelectPackageScreenState extends State<SelectPackageScreen> {
                     icon: AppAssets.video,
                     packageTitle: 'Online appointment',
                     packsubTitle: 'Video call with doctor',
-                    priceTitle: '\$60',
-                    pricesubTitle: '/30 mins',
+                    priceTitle: '100 EGP',
+                    pricesubTitle: '',
                     selected: state.selectedPackageIndex == 0,
                     onTap: () =>
                         context.read<BookingCubit>().updatePackageSelection(0),
@@ -64,8 +64,8 @@ class _SelectPackageScreenState extends State<SelectPackageScreen> {
                     icon: AppAssets.offline,
                     packageTitle: 'Offline appointment',
                     packsubTitle: 'In Person visit with doctor',
-                    priceTitle: '\$100',
-                    pricesubTitle: '/30 mins',
+                    priceTitle: '100 EGP',
+                    pricesubTitle: '',
                     selected: state.selectedPackageIndex == 1,
                     onTap: () =>
                         context.read<BookingCubit>().updatePackageSelection(1),

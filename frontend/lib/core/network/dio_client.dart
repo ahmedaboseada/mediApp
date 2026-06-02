@@ -271,7 +271,7 @@ typedef OnAuthenticationFailure = Future<void> Function();
 class DioClient {
   final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: "http://35.246.202.219:8000/",
+      baseUrl: "http://34.40.64.197:8000",
       headers: {
         //"Content-Type": "application/json",
       },
@@ -304,10 +304,11 @@ class DioClient {
         onError: (DioException error, handler) async {
           final statusCode = error.response?.statusCode;
 
-          // Treat 401 and 403 similarly: attempt a refresh and retry once.
-          if ((statusCode == 401 || statusCode == 403) &&
+          // Only treat 401 as an auth failure that should trigger refresh.
+          // 403 is a permission/business-rule failure and should surface to the caller.
+          if (statusCode == 401 &&
               error.requestOptions.path != "/users/refreshToken") {
-            log('[DioClient] $statusCode Unauthorized/Forbidden - Attempting token refresh');
+            log('[DioClient] $statusCode Unauthorized - Attempting token refresh');
             final requestOptions = error.requestOptions;
 
             if (_isRefreshing) {
@@ -382,6 +383,25 @@ class DioClient {
     _onAuthFailure = callback;
   }
 
+  /// Test-only helper to manually trigger the refresh token flow.
+  Future<bool> testRefreshToken() async {
+    if (_isRefreshing) {
+      log('[DioClient] testRefreshToken ignored because refresh is already running');
+      return false;
+    }
+
+    _isRefreshing = true;
+    try {
+      final refreshed = await _refreshToken();
+      if (!refreshed) {
+        await _handleAuthenticationFailure();
+      }
+      return refreshed;
+    } finally {
+      _isRefreshing = false;
+    }
+  }
+
   /// Handle authentication failure
   Future<void> _handleAuthenticationFailure() async {
     try {
@@ -414,8 +434,8 @@ class DioClient {
 
       final dio = Dio(
         BaseOptions(
-          baseUrl: "http://35.246.202.219:8000",
-          headers: {"Authorization": "Bearer $refreshToken"},
+          baseUrl: "http://34.40.64.197:8000",
+          headers: {"Authorization": "bearer $refreshToken"},
         ),
       );
 
@@ -444,10 +464,8 @@ class DioClient {
 
         log('[DioClient] Token refreshed successfully');
         return true;
-      } else if (response.statusCode == 401 || response.statusCode == 403) {
-        log(
-          '[DioClient] Refresh token invalid (${response.statusCode}) - logout required',
-        );
+      } else if (response.statusCode == 401) {
+        log('[DioClient] Refresh token invalid (401) - logout required');
         log('[DioClient] Response: ${response.data}');
         return false;
       } else {

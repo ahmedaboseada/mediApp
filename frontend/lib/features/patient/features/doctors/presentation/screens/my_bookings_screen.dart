@@ -6,6 +6,8 @@ import 'package:medi/features/patient/features/doctors/data/models/booking_model
 import 'package:medi/features/patient/features/doctors/data/repo/doctors_repo.dart';
 import 'package:medi/features/patient/features/doctors/presentation/cubits/booking_qr_cubit.dart';
 import 'package:medi/features/patient/features/doctors/presentation/cubits/booking_qr_state.dart';
+import 'package:medi/features/patient/features/doctors/presentation/cubits/review_cubit.dart';
+import 'package:medi/features/patient/features/doctors/presentation/cubits/review_state.dart';
 import 'package:medi/features/patient/features/doctors/presentation/cubits/my_bookings_cubit.dart';
 import 'package:medi/features/patient/features/doctors/presentation/cubits/my_bookings_state.dart';
 import 'package:medi/features/patient/features/doctors/presentation/widgets/add_review_dialog.dart';
@@ -50,9 +52,15 @@ class _MyBookingsScreenState extends State<MyBookingsScreen>
                 ..fetchBookings(),
         ),
         BlocProvider(create: (context) => getIt<BookingQrCubit>()),
+        BlocProvider(
+          create: (context) =>
+              ReviewCubit(doctorsRepository: getIt<DoctorsRepository>()),
+        ),
       ],
-      child: BlocListener<BookingQrCubit, BookingQrState>(
-        listener: (context, state) {
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<BookingQrCubit, BookingQrState>(
+            listener: (context, state) {
           if (state is BookingQrFailure) {
             ScaffoldMessenger.of(
               context,
@@ -66,6 +74,32 @@ class _MyBookingsScreenState extends State<MyBookingsScreen>
             );
           }
         },
+          ),
+          BlocListener<ReviewCubit, ReviewState>(
+            listener: (context, state) {
+              if (state is ReviewSubmitting) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Submitting rating...')),
+                );
+              }
+
+              if (state is ReviewFailure) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(state.message)),
+                );
+              }
+
+              if (state is ReviewSuccess) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(state.message ?? 'Rating submitted')),
+                );
+                try {
+                  context.read<MyBookingsCubit>().fetchBookings();
+                } catch (_) {}
+              }
+            },
+          ),
+        ],
         child: Builder(
           builder: (context) {
             return Scaffold(
@@ -243,9 +277,17 @@ class _MyBookingsScreenState extends State<MyBookingsScreen>
 
     showDialog<void>(
       context: context,
-      builder: (context) {
-        return AddReviewDialog(onRate: (_) {});
-      },
+      builder: (dialogContext) {
+          return AddReviewDialog(onRate: (rating) async {
+            final doctorId = appointment.doctor.id;
+
+            // Delegate submission to the ReviewCubit.
+            context.read<ReviewCubit>().submitReview(
+                  doctorId,
+                  rating,
+                );
+          });
+        },
     );
   }
 

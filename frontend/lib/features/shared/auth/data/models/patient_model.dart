@@ -68,13 +68,14 @@ class PatientModel {
               return item;
             }
 
-            if (item is Map<String, dynamic>) {
-              final name = item['name'];
+            if (item is Map) {
+              final mapItem = Map<String, dynamic>.from(item);
+              final name = mapItem['name'];
               if (name != null) {
                 return name.toString();
               }
 
-              final id = item['_id'] ?? item['id'];
+              final id = mapItem['_id'] ?? mapItem['id'];
               if (id != null) {
                 return id.toString();
               }
@@ -86,6 +87,29 @@ class PatientModel {
           .toList();
     }
 
+    Map<String, dynamic>? parseMap(dynamic value) {
+      if (value is Map<String, dynamic>) {
+        return value;
+      }
+
+      if (value is Map) {
+        return Map<String, dynamic>.from(value);
+      }
+
+      return null;
+    }
+
+    List<Medication> parseMedications(dynamic value) {
+      if (value is! List) {
+        return const [];
+      }
+
+      return value
+          .whereType<Map>()
+          .map((item) => Medication.fromJson(Map<String, dynamic>.from(item)))
+          .toList();
+    }
+
     return PatientModel(
       patientId: (json['_id'] ?? '').toString(),
       userId: (json['userId'] ?? '').toString(),
@@ -93,23 +117,20 @@ class PatientModel {
       allergies: parseStringList(json['allergies']),
       activeIngredients: parseStringList(json['activeIngredients']),
       longTermMedication: parseStringList(json['longTermMedication']),
-      medications: List<Medication>.from(
-        (json['medications'] as List? ?? []).map(
-          (e) => Medication.fromJson(e as Map<String, dynamic>),
-        ),
-      ),
+      medications: parseMedications(json['medications']),
       saveOption: json['saveOption'] as bool? ?? false,
       connectedDoctors: parseStringList(json['connectedDoctors']),
       createdAt: (json['createdAt'] ?? '').toString(),
       updatedAt: (json['updatedAt'] ?? '').toString(),
       allergyAlerts: json['allergyAlerts'] as bool? ?? false,
       reactionToMedication: json['reactionToMedication'] as bool? ?? false,
-      caregiver: json['caregiver'] != null
-          ? CaregiverModel.fromJson(json['caregiver'] as Map<String, dynamic>)
+      caregiver: parseMap(json['caregiver']) != null
+          ? CaregiverModel.fromJson(parseMap(json['caregiver'])!)
           : null,
-        emergencyContact: json['emergencyContact'] != null
+      emergencyContact: parseMap(json['emergencyContact']) != null
           ? EmergencyContactModel.fromJson(
-            json['emergencyContact'] as Map<String, dynamic>)
+              parseMap(json['emergencyContact'])!,
+            )
           : null,
     );
   }

@@ -15,19 +15,46 @@ class ReviewSummaryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<BookingCubit, BookingState>(
-      listenWhen: (previous, current) =>
-          previous.paymentUrl != current.paymentUrl &&
-          current.paymentUrl != null,
-      listener: (context, state) {
-        getIt<PaymentFlowCache>().setPendingReviewData(
-          state.appointmentReviewData,
-        );
-        _launchPaymentUrl(context, state.paymentUrl!);
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<BookingCubit, BookingState>(
+          listenWhen: (previous, current) =>
+              previous.paymentUrl != current.paymentUrl &&
+              current.paymentUrl != null,
+          listener: (context, state) {
+            getIt<PaymentFlowCache>().setPendingReviewData(
+              state.appointmentReviewData,
+            );
+            _launchPaymentUrl(context, state.paymentUrl!);
+          },
+        ),
+        BlocListener<BookingCubit, BookingState>(
+          listenWhen: (previous, current) =>
+              previous.isBooking &&
+              !current.isBooking &&
+              current.appointmentReviewData.paymentMethod.toLowerCase() ==
+                  'cash',
+          listener: (context, state) {
+            if (state.bookingSuccess) {
+              context.go(
+                AppRouter.patientPaymentSuccessScreen,
+                extra: state.appointmentReviewData,
+              );
+              return;
+            }
+
+            context.go(
+              AppRouter.patientPaymentFailureScreen,
+              extra: state.bookingErrorMessage ??
+                  'Booking could not be completed. Please try again.',
+            );
+          },
+        ),
+      ],
       child: BlocBuilder<BookingCubit, BookingState>(
         builder: (context, state) {
           final data = state.appointmentReviewData;
+          final isCashPayment = data.paymentMethod.toLowerCase() == 'cash';
 
           return Scaffold(
             appBar: const CustomAppBar(title: 'Review Summary'),
@@ -74,13 +101,9 @@ class ReviewSummaryScreen extends StatelessWidget {
                             SizedBox(height: AppSizes.h6),
                             _SummaryRow(
                               title: 'Amount',
-                              value: '\$${data.amount.toStringAsFixed(0)}',
+                              value: '${data.amount.toStringAsFixed(0)} EGP',
                             ),
-                            _SummaryRow(
-                              title: 'Duration (30 mins)',
-                              value:
-                                  '1 X \$${data.unitPrice.toStringAsFixed(0)}',
-                            ),
+                           
                             _SummaryRow(
                               title: 'Duration',
                               value: data.duration,
@@ -90,7 +113,7 @@ class ReviewSummaryScreen extends StatelessWidget {
                             SizedBox(height: AppSizes.h6),
                             _SummaryRow(
                               title: 'Total',
-                              value: '\$${data.amount.toStringAsFixed(0)}',
+                              value: '${data.amount.toStringAsFixed(0)} EGP',
                             ),
                             SizedBox(height: AppSizes.h12),
                             Row(
@@ -131,9 +154,15 @@ class ReviewSummaryScreen extends StatelessWidget {
                       isLoading: state.isBooking,
                       onPressed: state.isBooking
                           ? null
-                          : () =>
-                                context.read<BookingCubit>().initiatePayment(),
-                      text: 'Pay Now',
+                          : () {
+                              if (isCashPayment) {
+                                context.read<BookingCubit>().createBooking();
+                                return;
+                              }
+
+                              context.read<BookingCubit>().initiatePayment();
+                            },
+                      text: isCashPayment ? 'Confirm' : 'Pay Now',
                     ),
                   ],
                 ),

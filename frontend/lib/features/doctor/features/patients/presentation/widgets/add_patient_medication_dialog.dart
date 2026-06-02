@@ -21,17 +21,29 @@ class _SpecificDateReminders {
   final List<String> times;
 }
 
+class PatientMedicationDialogResult {
+  const PatientMedicationDialogResult({
+    required this.medication,
+    required this.isEditMode,
+  });
+
+  final MedicationModel medication;
+  final bool isEditMode;
+}
+
 class AddPatientMedicationDialog extends StatefulWidget {
   const AddPatientMedicationDialog({
     super.key,
     required this.patientName,
     required this.patientId,
+    this.patientFcmToken,
     this.medication,
     this.isEditMode = false,
   });
 
   final String patientName;
   final String patientId;
+  final String? patientFcmToken;
   final MedicationModel? medication;
   final bool isEditMode;
 
@@ -448,6 +460,7 @@ class _AddPatientMedicationDialogState
             type: type,
             dosage: dosage,
             frequency: frequency,
+            recipientFcmToken: widget.patientFcmToken,
             daily: daily,
             weekly: weekly,
             specific: specific,
@@ -458,6 +471,7 @@ class _AddPatientMedicationDialogState
             type: type,
             dosage: dosage,
             frequency: frequency,
+            recipientFcmToken: widget.patientFcmToken,
             daily: daily,
             weekly: weekly,
             specific: specific,
@@ -479,7 +493,23 @@ class _AddPatientMedicationDialogState
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(SnackBar(content: Text(message)));
-        Navigator.of(context).pop();
+        final medication = MedicationModel(
+          id: widget.medication?.id ?? 'temp-${DateTime.now().microsecondsSinceEpoch}',
+          name: name,
+          frequency: frequency,
+          dosage: dosage,
+          type: type,
+          stock: widget.medication?.stock ?? 0,
+          isChronic: widget.medication?.isChronic ?? false,
+          status: widget.medication?.status ?? 'normal',
+        );
+
+        Navigator.of(context).pop(
+          PatientMedicationDialogResult(
+            medication: medication,
+            isEditMode: widget.isEditMode,
+          ),
+        );
       },
     );
   }

@@ -42,13 +42,15 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       gender: isLegacyLayout ? field8 as String? : field5 as String?,
       dob: fields[9] as String?,
       age: fields[10] as int?,
+      phone: fields[11] as String?,
+      fcmToken: fields[12] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, UserModel obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(13)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -70,7 +72,11 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       ..writeByte(9)
       ..write(obj.dob)
       ..writeByte(10)
-      ..write(obj.age);
+        ..write(obj.age)
+        ..writeByte(11)
+        ..write(obj.phone)
+        ..writeByte(12)
+        ..write(obj.fcmToken);
   }
 
   @override

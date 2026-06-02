@@ -88,7 +88,7 @@ class PaymentSuccessScreen extends StatelessWidget {
                       children: [
                         _InfoItem(
                           assetPath: AppAssets.dollarCircle,
-                          text: '\$${reviewData.amount.toStringAsFixed(0)}',
+                          text: '${reviewData.amount.toStringAsFixed(0)} EGP',
                         ),
                         SizedBox(height: AppSizes.h24),
                         _InfoItem(assetPath: AppAssets.timer, text: time),

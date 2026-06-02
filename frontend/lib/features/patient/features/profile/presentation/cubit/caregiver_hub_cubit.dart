@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/features/patient/features/profile/data/models/caregiver_request_model.dart';
+import 'package:medi/features/patient/features/profile/data/models/doctor_request_model.dart';
 import 'package:medi/features/patient/features/profile/data/models/managed_patient_summary.dart';
 import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
 
@@ -9,6 +10,7 @@ class CaregiverHubState extends Equatable {
     this.isLoading = false,
     this.isActionLoading = false,
     this.requests = const <CaregiverRequestModel>[],
+    this.doctorRequests = const <DoctorRequestModel>[],
     this.managedPatients = const <ManagedPatientSummary>[],
     this.error,
     this.message,
@@ -17,6 +19,7 @@ class CaregiverHubState extends Equatable {
   final bool isLoading;
   final bool isActionLoading;
   final List<CaregiverRequestModel> requests;
+  final List<DoctorRequestModel> doctorRequests;
   final List<ManagedPatientSummary> managedPatients;
   final String? error;
   final String? message;
@@ -25,6 +28,7 @@ class CaregiverHubState extends Equatable {
     bool? isLoading,
     bool? isActionLoading,
     List<CaregiverRequestModel>? requests,
+    List<DoctorRequestModel>? doctorRequests,
     List<ManagedPatientSummary>? managedPatients,
     String? error,
     String? message,
@@ -33,6 +37,7 @@ class CaregiverHubState extends Equatable {
       isLoading: isLoading ?? this.isLoading,
       isActionLoading: isActionLoading ?? this.isActionLoading,
       requests: requests ?? this.requests,
+      doctorRequests: doctorRequests ?? this.doctorRequests,
       managedPatients: managedPatients ?? this.managedPatients,
       error: error,
       message: message,
@@ -44,6 +49,7 @@ class CaregiverHubState extends Equatable {
     isLoading,
     isActionLoading,
     requests,
+    doctorRequests,
     managedPatients,
     error,
     message,
@@ -59,24 +65,98 @@ class CaregiverHubCubit extends Cubit<CaregiverHubState> {
     emit(state.copyWith(isLoading: true, error: null, message: null));
 
     final requestsResult = await _profileRepo.listCaregiverRequests();
+    final doctorRequestsResult = await _profileRepo.listDoctorRequests();
     final patientsResult = await _profileRepo.listManagedPatients();
 
     if (isClosed) return;
 
+    var caregiverRequests = state.requests;
+    var doctorRequests = state.doctorRequests;
+    var managedPatients = state.managedPatients;
+    String? errorMessage;
+
     requestsResult.fold(
-      (failure) => emit(state.copyWith(isLoading: false, error: failure.message)),
-      (requests) => emit(state.copyWith(requests: requests)),
+      (failure) => errorMessage ??= failure.message,
+      (requests) => caregiverRequests = requests,
+    );
+
+    doctorRequestsResult.fold(
+      (failure) => errorMessage ??= failure.message,
+      (requests) => doctorRequests = requests,
     );
 
     patientsResult.fold(
-      (failure) => emit(state.copyWith(isLoading: false, error: failure.message)),
-      (patients) => emit(
+      (failure) => errorMessage ??= failure.message,
+      (patients) => managedPatients = patients,
+    );
+
+    emit(
+      state.copyWith(
+        isLoading: false,
+        requests: caregiverRequests,
+        doctorRequests: doctorRequests,
+        managedPatients: managedPatients,
+        error: errorMessage,
+        message: null,
+      ),
+    );
+  }
+
+  Future<void> acceptDoctorRequest({
+    required String doctorId,
+    String? doctorFcmToken,
+  }) async {
+    emit(state.copyWith(isActionLoading: true, error: null, message: null));
+
+    final result = await _profileRepo.acceptDoctorRequest(
+      doctorId: doctorId,
+      doctorFcmToken: doctorFcmToken,
+    );
+
+    if (isClosed) return;
+
+    result.fold(
+      (failure) => emit(
         state.copyWith(
-          isLoading: false,
-          managedPatients: patients,
-          error: null,
+          isActionLoading: false,
+          error: failure.message,
         ),
       ),
+      (message) async {
+        emit(
+          state.copyWith(
+            isActionLoading: false,
+            message: message,
+          ),
+        );
+        await loadHubData();
+      },
+    );
+  }
+
+  Future<void> rejectDoctorRequest({required String doctorId}) async {
+    emit(state.copyWith(isActionLoading: true, error: null, message: null));
+
+    final result = await _profileRepo.rejectDoctorRequest(doctorId: doctorId);
+
+    if (isClosed) return;
+
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          isActionLoading: false,
+          error: failure.message,
+        ),
+      ),
+      (message) async {
+        emit(
+          state.copyWith(
+            isActionLoading: false,
+            message: message,
+          ),
+        );
+        await loadHubData();
+      },
     );
   }
 

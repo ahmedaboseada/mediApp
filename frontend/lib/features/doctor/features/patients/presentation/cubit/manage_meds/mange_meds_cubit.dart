@@ -17,6 +17,7 @@ class ManageMedsCubit extends Cubit<ManageMedsState> {
     required String type,
     required String dosage,
     required String frequency,
+    String? recipientFcmToken,
     List<String>? daily,
     List<Map<String, dynamic>>? weekly,
     List<Map<String, dynamic>>? specific,
@@ -29,6 +30,7 @@ class ManageMedsCubit extends Cubit<ManageMedsState> {
       type: type,
       dosage: dosage,
       frequency: frequency,
+      recipientFcmToken: recipientFcmToken,
       daily: daily,
       weekly: weekly,
       specific: specific,
@@ -64,6 +66,7 @@ class ManageMedsCubit extends Cubit<ManageMedsState> {
     String? type,
     String? dosage,
     String? frequency,
+    String? recipientFcmToken,
     List<String>? daily,
     List<Map<String, dynamic>>? weekly,
     List<Map<String, dynamic>>? specific,
@@ -78,6 +81,7 @@ class ManageMedsCubit extends Cubit<ManageMedsState> {
       type: type,
       dosage: dosage,
       frequency: frequency,
+      recipientFcmToken: recipientFcmToken,
       daily: daily,
       weekly: weekly,
       specific: specific,
@@ -110,12 +114,16 @@ class ManageMedsCubit extends Cubit<ManageMedsState> {
   Future<Either<ApiError, String>> deleteMedication({
     required String medicationId,
     required String patientId,
+    required String deletedMedicationName,
+    String? recipientFcmToken,
   }) async {
     emit(state.copyWith(status: ManageMedsStatus.loading, clearError: true));
 
-    final result = await _repository.deleteMedication(
+    final result = await _deleteMedicationFromRepository(
       medicationId: medicationId,
       patientId: patientId,
+      deletedMedicationName: deletedMedicationName,
+      recipientFcmToken: recipientFcmToken,
     );
 
     result.fold(
@@ -139,6 +147,20 @@ class ManageMedsCubit extends Cubit<ManageMedsState> {
     );
 
     return result;
+  }
+
+  Future<Either<ApiError, String>> _deleteMedicationFromRepository({
+    required String medicationId,
+    required String patientId,
+    required String deletedMedicationName,
+    String? recipientFcmToken,
+  }) {
+    return _repository.deleteMedication(
+      medicationId: medicationId,
+      patientId: patientId,
+      deletedMedicationName: deletedMedicationName,
+      recipientFcmToken: recipientFcmToken,
+    );
   }
 
   void resetState() {

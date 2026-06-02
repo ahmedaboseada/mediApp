@@ -41,7 +41,7 @@ class DoctorHomeHeader extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 _CircleIconButton(
-                  icon: Icons.chat_bubble_outline_outlined,
+                  icon: Icons.notifications_outlined,
                   iconColor: AppColors.primary,
                   onTap: onInsightsTap,
                 ),

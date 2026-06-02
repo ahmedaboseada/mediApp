@@ -51,7 +51,12 @@ class PaymentFailureScreen extends StatelessWidget {
               const Spacer(flex: 3),
               AppButton(
                 onPressed: () {
-                  context.pop();
+                  if (context.canPop()) {
+                    context.pop();
+                    return;
+                  }
+
+                  context.go(AppRouter.patientPaymentMethodScreen);
                 },
                 text: 'Try Again',
               ),

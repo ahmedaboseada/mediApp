@@ -110,7 +110,7 @@ class MyAppointmentScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          '\$${data.amount.toStringAsFixed(0)}',
+                          '${data.amount.toStringAsFixed(0)} EGP',
                           style: AppStyles.black14500,
                         ),
                         const Text(

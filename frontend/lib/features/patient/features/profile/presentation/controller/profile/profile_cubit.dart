@@ -157,10 +157,16 @@ class ProfileCubit extends Cubit<ProfileState> {
     );
   }
 
-  Future<void> acceptDoctorRequest({required String doctorId}) async {
+  Future<void> acceptDoctorRequest({
+    required String doctorId,
+    String? doctorFcmToken,
+  }) async {
     emit(DoctorRequestActionLoading());
 
-    final result = await profileRepo.acceptDoctorRequest(doctorId: doctorId);
+    final result = await profileRepo.acceptDoctorRequest(
+      doctorId: doctorId,
+      doctorFcmToken: doctorFcmToken,
+    );
 
     await result.fold(
       (failure) async {

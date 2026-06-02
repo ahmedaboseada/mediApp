@@ -39,6 +39,7 @@ abstract class ProfileRepo {
 
   Future<Either<ApiError, String>> acceptDoctorRequest({
     required String doctorId,
+    String? doctorFcmToken,
   });
 
   Future<Either<ApiError, String>> rejectDoctorRequest({
