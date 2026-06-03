@@ -106,13 +106,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         //       _isTestingRefreshToken = true;
                         //     });
 
-                        //     final success = await getIt<ApiService>()
-                        //         .dioClient
-                        //         .testRefreshToken();
+                            // final success = await getIt<ApiService>()
+                            //     .dioClient
+                            //     .testRefreshToken();
 
-                        //     if (!mounted) {
-                        //       return;
-                        //     }
+                            // if (!mounted) {
+                            //   return;
+                            // }
 
                         //     setState(() {
                         //       _isTestingRefreshToken = false;
@@ -131,7 +131,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         //   text: 'Test Refresh Token',
                         // ),
 
-                        // SizedBox(height: AppSizes.h16),
+                       // SizedBox(height: AppSizes.h16),
 
                         SupportSection(),
                         SizedBox(height: AppSizes.h16),

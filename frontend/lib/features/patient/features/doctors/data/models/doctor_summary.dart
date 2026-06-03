@@ -17,6 +17,7 @@ class Doctordata extends Equatable {
   final int consultationDuration;
   final int maxDailyPatients;
   final int reviewsCount;
+  final double averageRating;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -36,6 +37,7 @@ class Doctordata extends Equatable {
     required this.consultationDuration,
     required this.maxDailyPatients,
     required this.reviewsCount,
+    required this.averageRating,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -81,6 +83,8 @@ class Doctordata extends Equatable {
       maxDailyPatients:
           int.tryParse(json['maxDailyPatients']?.toString() ?? '0') ?? 0,
       reviewsCount: int.tryParse(json['reviewsCount']?.toString() ?? '0') ?? 0,
+        averageRating:
+          double.tryParse(json['averageRating']?.toString() ?? '0') ?? 0.0,
       createdAt:
           DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
           DateTime.now(),
@@ -107,6 +111,7 @@ class Doctordata extends Equatable {
     consultationDuration,
     maxDailyPatients,
     reviewsCount,
+    averageRating,
     createdAt,
     updatedAt,
   ];

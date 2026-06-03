@@ -7,7 +7,7 @@ class DoctorHoverCard extends StatefulWidget {
     super.key,
     required this.name,
     required this.specialty,
-    required this.rating,
+    required this.averageRating,
     required this.reviewsCount,
     required this.imageAsset,
     this.onTap,
@@ -15,7 +15,7 @@ class DoctorHoverCard extends StatefulWidget {
 
   final String name;
   final String specialty;
-  final double rating;
+  final double averageRating;
   final int reviewsCount;
   final String imageAsset;
   final VoidCallback? onTap;
@@ -134,7 +134,7 @@ class _DoctorHoverCardState extends State<DoctorHoverCard> {
                             ),
                             SizedBox(width: AppSizes.w8),
                             Text(
-                              widget.rating.toStringAsFixed(1),
+                              widget.averageRating.toStringAsFixed(1),
                               style: AppStyles.black14500.copyWith(
                                 color: titleColor,
                               ),

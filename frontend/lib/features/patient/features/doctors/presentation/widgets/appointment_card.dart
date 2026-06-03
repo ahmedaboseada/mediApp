@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import 'package:medi/core/core.dart';
+import 'package:medi/core/utils/map_launcher_helper.dart';
 import 'package:medi/features/patient/features/doctors/data/models/booking_model.dart';
 import 'package:medi/features/patient/features/doctors/presentation/cubits/booking_qr_cubit.dart';
 
@@ -186,23 +187,44 @@ class _AppointmentCardState extends State<AppointmentCard> {
                         ],
                       ),
                       SizedBox(height: AppSizes.h4),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.location_on_outlined,
-                            size: AppSizes.w16,
-                            color: AppColors.secondaryText,
+                      InkWell(
+                        borderRadius: BorderRadius.circular(AppSizes.r8),
+                        onTap: () {
+                          final clinicLocation =
+                              widget.appointment.doctor.clinicLocation;
+
+                          openMapLocation(
+                            context,
+                            latitude: clinicLocation.lat,
+                            longitude: clinicLocation.lng,
+                            address: widget.appointment.clinicAddress,
+                          );
+                        },
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            vertical: AppSizes.h4,
                           ),
-                          SizedBox(width: AppSizes.w4),
-                          Expanded(
-                            child: Text(
-                              widget.appointment.clinicAddress,
-                              style: AppStyles.secondary12400,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.location_on_outlined,
+                                size: AppSizes.w16,
+                                color: AppColors.secondaryText,
+                              ),
+                              SizedBox(width: AppSizes.w4),
+                              Expanded(
+                                child: Text(
+                                  widget.appointment.clinicAddress,
+                                  style: AppStyles.secondary12400.copyWith(
+                                    color: AppColors.primary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
                       SizedBox(height: AppSizes.h4),
                       Row(

@@ -123,7 +123,7 @@ class DoctorProfileHeader extends StatelessWidget {
                               ),
                               SizedBox(width: AppSizes.w4),
                               Text(
-                                'Rating ${doctor.reviewsCount.toStringAsFixed(1)}',
+                                'Rating ${doctor.averageRating.toStringAsFixed(1)}',
                                 style: AppStyles.white12400.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),

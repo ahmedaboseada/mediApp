@@ -83,7 +83,7 @@ class BrowseDoctorsScreen extends StatelessWidget {
                                   name:
                                       'Dr. ${doctor.user.firstName}\n${doctor.user.lastName}',
                                   specialty: doctor.specialization,
-                                  rating: 0,
+                                  averageRating: doctor.averageRating,
                                   reviewsCount: doctor.reviewsCount,
                                   imageAsset: doctor.user.profilePicture.isNotEmpty
                                       ? doctor.user.profilePicture
