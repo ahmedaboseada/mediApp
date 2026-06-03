@@ -74,6 +74,15 @@ class AuthLocalDataSource {
     await box.delete(_refreshTokenKey);
     await box.delete(_challengeTokenKey);
   }
+   Future<void> saveFcmToken(String token) async {
+    try {
+      final box = await boxManager.openBox(_authBox);
+      await box.put('fcmToken', token);
+    } catch (e, st) {
+      AppLogger.instance.e('saveFcmToken failed', e, st);
+    }
+  }
+  
 
   Future<void> saveAuthResponse(AuthResponseModel response) async {
     try {

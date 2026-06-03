@@ -480,6 +480,7 @@ class AuthRepoImpl implements AuthRepo {
     required String lastName,
     required String confirmPassword,
     required UserRole type,
+    String? fcmToken,
   }) async {
     try {
       final data = {
@@ -489,6 +490,7 @@ class AuthRepoImpl implements AuthRepo {
         'email': email,
         'password': password,
         'confirmPassword': confirmPassword,
+        "fcmToken": fcmToken,
       };
 
       final dynamic response = await apiService.post('/users/signup', data);

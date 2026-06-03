@@ -15,6 +15,7 @@ class RegisterCubit extends Cubit<RegisterState> {
     required String firstName,
     required String lastName,
     required UserRole type,
+    String? fcmToken,
   }) async {
     emit(RegisterLoading());
     final result = await authRepo.signUpWithEmailAndPassword(
@@ -22,9 +23,9 @@ class RegisterCubit extends Cubit<RegisterState> {
       password: password,
       confirmPassword: confirmPassword,
       firstName: firstName,
-
       lastName: lastName,
       type: type,
+      fcmToken: fcmToken,
     );
     result.fold(
       (failure) => emit(RegisterFailure(failure.message, failure.errors)),

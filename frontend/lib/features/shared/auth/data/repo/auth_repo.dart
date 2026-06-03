@@ -13,6 +13,7 @@ abstract class AuthRepo {
     required String lastName,
     required String confirmPassword,
     required UserRole type,
+    String? fcmToken,
   });
 
   Future<Either<ApiError, String>> signInWithEmailAndPassword({

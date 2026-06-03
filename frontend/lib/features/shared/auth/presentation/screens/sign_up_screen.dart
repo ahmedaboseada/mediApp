@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/core/utils/safe_go_router.dart';
@@ -29,16 +30,18 @@ class SignUpScreen extends StatelessWidget {
       email: _emailController.text.trim(),
     );
 
-    // if (role == UserRole.doctor) {
-    //   context.go(AppRouter.doctorCompleteProfile);
-    // }
-    // if (role == UserRole.patient) {
-    //   context.go(AppRouter.completeProfile);
-    // }
     if (!_formKey.currentState!.validate()) return;
     if (!_agreeToTerms.value) {
       context.showSafeSnackBar(AppStrings.agreeToTermsMessage);
       return;
+    }
+
+    // Get FCM token for push notifications
+    String? fcmToken;
+    try {
+      fcmToken = await FirebaseMessaging.instance.getToken();
+    } catch (e) {
+      debugPrint('Failed to get FCM token: $e');
     }
 
     context.read<RegisterCubit>().register(
@@ -48,6 +51,7 @@ class SignUpScreen extends StatelessWidget {
       firstName: _nameController.text.trim(),
       lastName: _lastNameController.text.trim(),
       type: role,
+      fcmToken: fcmToken,
     );
   }
 

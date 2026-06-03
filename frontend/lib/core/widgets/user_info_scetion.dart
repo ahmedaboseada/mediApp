@@ -15,6 +15,8 @@ class UserInfoScetion extends StatelessWidget {
     this.networkImageUrl,
     this.localImagePath,
     this.isLoading = false,
+    this.onImageTap,
+
   });
 
   final String name;
@@ -24,6 +26,7 @@ class UserInfoScetion extends StatelessWidget {
   final bool isLoading;
   final String userId;
   final String? fcmToken;
+  final VoidCallback? onImageTap;
   @override
   Widget build(BuildContext context) {
     return Skeletonizer(
@@ -33,14 +36,17 @@ class UserInfoScetion extends StatelessWidget {
           SizedBox(
             width: AppSizes.w80,
             height: AppSizes.h80,
-            child: ClipOval(
-              child: isLoading
-                  ? Container(color: Colors.white)
-                  : Semantics(
-                      image: true,
-                      label: '$name profile photo',
-                      child: _buildAvatarImageWith(networkImageUrl),
-                    ),
+            child: GestureDetector(
+              onTap: onImageTap,
+              child: ClipOval(
+                child: isLoading
+                    ? Container(color: Colors.white)
+                    : Semantics(
+                        image: true,
+                        label: '$name profile photo',
+                        child: _buildAvatarImageWith(networkImageUrl),
+                      ),
+              ),
             ),
           ),
           SizedBox(width: 16),

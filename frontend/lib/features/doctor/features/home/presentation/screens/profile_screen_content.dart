@@ -84,6 +84,7 @@ class _UserHeaderSection extends StatelessWidget {
           isLoading: isLoading,
           userId: profile?.user.id ?? '',
           fcmToken: user?.fcmToken,
+
         );
       },
     );
