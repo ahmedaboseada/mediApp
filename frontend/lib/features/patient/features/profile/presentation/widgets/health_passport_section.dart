@@ -6,10 +6,14 @@ class HealthPassportSection extends StatelessWidget {
     super.key,
     required this.title,
     required this.children,
+    this.controller,
+    this.onAddPressed,
   });
 
   final String title;
   final List<Widget> children;
+  final TextEditingController? controller;
+  final VoidCallback? onAddPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -26,13 +30,18 @@ class HealthPassportSection extends StatelessWidget {
               runSpacing: AppSizes.h8,
               children: children,
             ),
+            SizedBox(height: AppSizes.h16),
             CustomTextField(
               label: '',
               hintText: 'Add new $title',
-              onChanged: (value) {
-                // Handle adding new item
-              },
-              maxLines: 4,
+              controller: controller,
+              maxLines: 1,
+              suffixIcon: onAddPressed != null
+                  ? IconButton(
+                      icon: const Icon(Icons.add_circle, color: AppColors.primary),
+                      onPressed: onAddPressed,
+                    )
+                  : null,
             ),
           ],
         ),

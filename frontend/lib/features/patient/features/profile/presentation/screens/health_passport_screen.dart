@@ -14,8 +14,80 @@ import 'package:open_filex/open_filex.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
 
-class HealthPassportScreen extends StatelessWidget {
+class HealthPassportScreen extends StatefulWidget {
   const HealthPassportScreen({super.key});
+
+  @override
+  State<HealthPassportScreen> createState() => _HealthPassportScreenState();
+}
+
+class _HealthPassportScreenState extends State<HealthPassportScreen> {
+  final TextEditingController _allergiesController = TextEditingController();
+  final TextEditingController _medicationsController = TextEditingController();
+  final TextEditingController _conditionsController = TextEditingController();
+
+  @override
+  void dispose() {
+    _allergiesController.dispose();
+    _medicationsController.dispose();
+    _conditionsController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submitData(BuildContext context, dynamic patient, {String? newAllergy, String? newMedication, String? newCondition}) async {
+    final existingConditions = List<String>.from(patient?.chronicConditions ?? []);
+    final existingAllergies = List<String>.from(patient?.allergies ?? []);
+    final existingMedications = List<String>.from(patient?.longTermMedication ?? []);
+
+    if (newAllergy != null && newAllergy.trim().isNotEmpty) {
+      existingAllergies.add(newAllergy.trim());
+    }
+    if (newMedication != null && newMedication.trim().isNotEmpty) {
+      existingMedications.add(newMedication.trim());
+    }
+    if (newCondition != null && newCondition.trim().isNotEmpty) {
+      existingConditions.add(newCondition.trim());
+    }
+
+    final hasNewData = (newAllergy != null && newAllergy.trim().isNotEmpty) ||
+                       (newMedication != null && newMedication.trim().isNotEmpty) ||
+                       (newCondition != null && newCondition.trim().isNotEmpty);
+
+    final localUser = await HiveService.getUserData();
+    final dob = localUser?.dob;
+    final age = localUser?.age;
+
+    int? yearOfBirth;
+    if (dob != null) {
+      final parsedDate = DateTime.tryParse(dob);
+      if (parsedDate != null) {
+        yearOfBirth = parsedDate.year;
+      } else {
+        final match = RegExp(r'\d{4}').firstMatch(dob);
+        if (match != null) {
+          yearOfBirth = int.tryParse(match.group(0)!);
+        }
+      }
+    }
+    if (yearOfBirth == null && age != null) {
+      yearOfBirth = DateTime.now().year - age;
+    }
+
+    if (mounted) {
+      context.read<HealthPassportExportCubit>().exportHealthPassport(
+            apiEndpoint: '/export/health-passport',
+            shouldUpdateProfile: hasNewData,
+            phone: localUser?.phone ?? '',
+            gender: localUser?.gender ?? '',
+            yearOfBirth: yearOfBirth ?? 1990,
+            chronicConditions: existingConditions,
+            longTermMedication: existingMedications,
+            allergies: existingAllergies,
+            reactionToMedication: patient?.reactionToMedication,
+            allergyAlerts: patient?.allergyAlerts,
+          );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +141,12 @@ class HealthPassportScreen extends StatelessWidget {
                         SizedBox(height: AppSizes.h16),
                         HealthPassportSection(
                           title: 'Allergies',
+                          controller: _allergiesController,
+                          onAddPressed: () {
+                            if (_allergiesController.text.trim().isNotEmpty) {
+                              _submitData(context, patient, newAllergy: _allergiesController.text);
+                            }
+                          },
                           children: _buildChips(
                             patient?.allergies ?? const <String>[],
                             emptyText: 'No allergies found',
@@ -77,6 +155,12 @@ class HealthPassportScreen extends StatelessWidget {
                         SizedBox(height: AppSizes.h16),
                         HealthPassportSection(
                           title: 'Medications',
+                          controller: _medicationsController,
+                          onAddPressed: () {
+                            if (_medicationsController.text.trim().isNotEmpty) {
+                              _submitData(context, patient, newMedication: _medicationsController.text);
+                            }
+                          },
                           children: _buildChips(
                             patient?.medications
                                     .map(
@@ -91,6 +175,12 @@ class HealthPassportScreen extends StatelessWidget {
                         SizedBox(height: AppSizes.h16),
                         HealthPassportSection(
                           title: 'Conditions',
+                          controller: _conditionsController,
+                          onAddPressed: () {
+                            if (_conditionsController.text.trim().isNotEmpty) {
+                              _submitData(context, patient, newCondition: _conditionsController.text);
+                            }
+                          },
                           children: _buildChips(
                             patient?.chronicConditions ?? const <String>[],
                             emptyText: 'No conditions found',
@@ -150,6 +240,10 @@ class HealthPassportScreen extends StatelessWidget {
                                   backgroundColor: Colors.green,
                                 ),
                               );
+                              _allergiesController.clear();
+                              _medicationsController.clear();
+                              _conditionsController.clear();
+                              context.read<UserProfileCubit>().getMe();
                               OpenFilex.open(exportState.filePath);
                             } else if (exportState
                                 is HealthPassportExportFailure) {
@@ -164,11 +258,13 @@ class HealthPassportScreen extends StatelessWidget {
                           },
                           child: ExportActions(
                             onExport: () {
-                              context
-                                  .read<HealthPassportExportCubit>()
-                                  .exportHealthPassport(
-                                    apiEndpoint: '/export/health-passport',
-                                  );
+                              _submitData(
+                                context,
+                                patient,
+                                newAllergy: _allergiesController.text,
+                                newMedication: _medicationsController.text,
+                                newCondition: _conditionsController.text,
+                              );
                             },
                             onShowQR: () {
                               showDialog(

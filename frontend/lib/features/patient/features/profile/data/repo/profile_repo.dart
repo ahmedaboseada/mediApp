@@ -55,4 +55,15 @@ abstract class ProfileRepo {
   Future<Either<ApiError, String>> downloadSharedRecord({
     required String qrToken,
   });
+
+  Future<Either<ApiError, String>> completePatientProfile({
+    required String phone,
+    required int yearOfBirth,
+    required String gender,
+    List<String>? chronicConditions,
+    List<String>? longTermMedication,
+    List<String>? allergies,
+    bool? reactionToMedication,
+    bool? allergyAlerts,
+  });
 }

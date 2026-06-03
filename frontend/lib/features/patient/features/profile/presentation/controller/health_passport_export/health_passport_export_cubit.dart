@@ -11,8 +11,50 @@ class HealthPassportExportCubit extends Cubit<HealthPassportExportState> {
 
   Future<void> exportHealthPassport({
     required String apiEndpoint,
+    String? phone,
+    int? yearOfBirth,
+    String? gender,
+    List<String>? chronicConditions,
+    List<String>? longTermMedication,
+    List<String>? allergies,
+    bool? reactionToMedication,
+    bool? allergyAlerts,
+    bool shouldUpdateProfile = false,
   }) async {
     emit(HealthPassportExportLoading());
+
+    if (shouldUpdateProfile) {
+      if (phone == null || yearOfBirth == null || gender == null) {
+        emit(HealthPassportExportFailure("Missing required profile fields (phone, yearOfBirth, gender)."));
+        return;
+      }
+
+      final updateResult = await profileRepo.completePatientProfile(
+        phone: phone,
+        yearOfBirth: yearOfBirth,
+        gender: gender,
+        chronicConditions: chronicConditions,
+        longTermMedication: longTermMedication,
+        allergies: allergies,
+        reactionToMedication: reactionToMedication,
+        allergyAlerts: allergyAlerts,
+      );
+
+      bool hasError = false;
+      String errorMsg = '';
+      updateResult.fold(
+        (failure) {
+          hasError = true;
+          errorMsg = failure.message;
+        },
+        (_) => null,
+      );
+
+      if (hasError) {
+        emit(HealthPassportExportFailure(errorMsg));
+        return;
+      }
+    }
 
     final result = await profileRepo.exportHealthPassportPDF(
       apiEndpoint: apiEndpoint,

@@ -604,6 +604,57 @@ class ProfileRepoImpl implements ProfileRepo {
     }
   }
 
+  @override
+  Future<Either<ApiError, String>> completePatientProfile({
+    required String phone,
+    required int yearOfBirth,
+    required String gender,
+    List<String>? chronicConditions,
+    List<String>? longTermMedication,
+    List<String>? allergies,
+    bool? reactionToMedication,
+    bool? allergyAlerts,
+  }) async {
+    try {
+      final token = await HiveService.getAccessToken();
+      final data = {
+        'phone': phone,
+        'yearOfBirth': yearOfBirth,
+        'gender': gender,
+        'chronicConditions': chronicConditions,
+        'longTermMedication': longTermMedication,
+        'allergies': allergies,
+        'reactionToMedication': reactionToMedication,
+        'allergyAlerts': allergyAlerts,
+      }..removeWhere((key, value) => value == null);
+
+      final headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      };
+
+      final dynamic response = await apiService.patch(
+        '/patients/complete',
+        data,
+        headers: headers,
+      );
+
+      log('Complete Patient Profile Response: ${response.toString()}');
+
+      if (response is ServerFailure) {
+        return Left(response);
+      }
+
+      final message = response['message'] ?? 'Patient profile completed successfully';
+      return Right(message);
+    } on DioException catch (e) {
+      final serverFailure = ServerFailure.fromDioError(e);
+      return Left(serverFailure);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
   Future<Directory> _resolveDownloadsDirectory() async {
   if (Platform.isAndroid) {
 
