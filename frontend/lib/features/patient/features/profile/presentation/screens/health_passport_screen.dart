@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/profile/presentation/controller/health_passport_export/health_passport_export_cubit.dart';
 import 'package:medi/features/patient/features/profile/presentation/controller/health_passport_export/health_passport_export_state.dart';
@@ -188,6 +189,24 @@ class _HealthPassportScreenState extends State<HealthPassportScreen> {
                         ),
                         SizedBox(height: AppSizes.h16),
                         HealthPassportSection(
+                          onAddPressed :() async {
+                                          final emergency = await HiveService.getEmergencyContact();
+
+                                          if (emergency == null ||
+                                              (emergency['name'] as String?)?.isEmpty == true) {
+                                            context.push(AppRouter.setEmergencyContactscreen);
+                                          } else {
+                                            final name = emergency['name'] as String? ?? '';
+                                            final method = emergency['contactMethod'] as String? ?? 'whatsapp';
+                                            context.push(
+                                              AppRouter.confirmEmergencyAlertScreen,
+                                              extra: {
+                                                'contactName': name,
+                                                'contactMethod': method,
+                                              },
+                                            );
+                                          }
+                                        },
                           title: 'Emergency Contacts',
                           children: patient?.emergencyContact != null
                               ? [
@@ -206,11 +225,13 @@ class _HealthPassportScreenState extends State<HealthPassportScreen> {
                                     ),
                                   ),
                                 ]
+                                
                               : _buildChips(
                                   patient?.caregiver?.giving ??
                                       const <String>[],
                                   emptyText: 'No emergency contacts found',
                                 ),
+                                
                         ),
                         SizedBox(height: AppSizes.h24),
                         BlocListener<HealthPassportExportCubit,

@@ -26,7 +26,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   bool _announced = false;
-  bool _isTestingRefreshToken = false;
+  final bool _isTestingRefreshToken = false;
 
   @override
   Widget build(BuildContext context) {

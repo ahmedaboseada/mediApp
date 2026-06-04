@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/core/services/hive_service.dart';
 import 'package:medi/features/patient/features/add_medication/data/models/medication.dart';
 import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_state.dart';
 import 'package:medi/features/patient/features/add_medication/data/repo/medicine_repo.dart';

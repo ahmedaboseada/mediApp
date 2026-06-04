@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:medi/core/core.dart';
-import 'package:medi/core/utils/service_locator.dart';
 import 'package:medi/features/doctor/features/patients/data/local/pending_patient_requests_local_data_source.dart';
 
 class PendingPatientRequestsSyncService {

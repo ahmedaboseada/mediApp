@@ -3,7 +3,7 @@ import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/complete_profile/presentation/widgets/permission_sheet.dart';
 
 class AllowNotificationScreen extends StatelessWidget {
-  AllowNotificationScreen({super.key});
+  const AllowNotificationScreen({super.key});
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<UserRole?>(

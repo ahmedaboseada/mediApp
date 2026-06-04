@@ -29,7 +29,9 @@ class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
   }
 
   void _openCaregiverForm() {
-    context.push('${AppRouter.onboardingFlow}${AppRouter.caregiverFormScreen}?fromCaregiverMode=true');
+    context.push(
+      '${AppRouter.onboardingFlow}${AppRouter.caregiverFormScreen}?fromCaregiverMode=true',
+    );
   }
 
   String _formatRequestedOn(DateTime? date) {
@@ -45,6 +47,11 @@ class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: PrimaryButton(
+        onPressed: _openCaregiverForm,
+        text: '+ Add Caregiver',
+        
+      ),
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
@@ -86,10 +93,10 @@ class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    PrimaryButton(
-                      onPressed: _openCaregiverForm,
-                      child: const Text('Add Caregiver'),
-                    ),
+                    // PrimaryButton(
+                    //   onPressed: _openCaregiverForm,
+                    //   text: 'Add Caregiver',
+                    // ),
                     Text('Pending requests', style: AppStyles.black18500),
                     SizedBox(height: AppSizes.h16),
                     if (state.isLoading)
@@ -132,10 +139,10 @@ class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
                                         onPressed: state.isActionLoading
                                             ? null
                                             : () => context
-                                                .read<CaregiverHubCubit>()
-                                                .rejectCaregiverRequest(
-                                                  requestId: request.id,
-                                                ),
+                                                  .read<CaregiverHubCubit>()
+                                                  .rejectCaregiverRequest(
+                                                    requestId: request.id,
+                                                  ),
                                         child: const Text('Reject'),
                                       ),
                                     ),
@@ -145,10 +152,10 @@ class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
                                         onPressed: state.isActionLoading
                                             ? null
                                             : () => context
-                                                .read<CaregiverHubCubit>()
-                                                .acceptCaregiverRequest(
-                                                  requestId: request.id,
-                                                ),
+                                                  .read<CaregiverHubCubit>()
+                                                  .acceptCaregiverRequest(
+                                                    requestId: request.id,
+                                                  ),
                                         child: const Text('Accept'),
                                       ),
                                     ),
@@ -185,18 +192,18 @@ class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
                           onAccept: state.isActionLoading
                               ? () {}
                               : () => context
-                                  .read<CaregiverHubCubit>()
-                                  .acceptDoctorRequest(
-                                    doctorId: request.userId,
-                                    doctorFcmToken: request.fcmToken,
-                                  ),
+                                    .read<CaregiverHubCubit>()
+                                    .acceptDoctorRequest(
+                                      doctorId: request.userId,
+                                      doctorFcmToken: request.fcmToken,
+                                    ),
                           onReject: state.isActionLoading
                               ? () {}
                               : () => context
-                                  .read<CaregiverHubCubit>()
-                                  .rejectDoctorRequest(
-                                    doctorId: request.userId,
-                                  ),
+                                    .read<CaregiverHubCubit>()
+                                    .rejectDoctorRequest(
+                                      doctorId: request.userId,
+                                    ),
                         ),
                       ),
                     SizedBox(height: AppSizes.h24),
@@ -215,14 +222,16 @@ class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
                         (patient) => Card(
                           child: ListTile(
                             contentPadding: EdgeInsets.all(AppSizes.w16),
-                            onTap: () => _enterManagedPatientMode(patient.userId),
+                            onTap: () =>
+                                _enterManagedPatientMode(patient.userId),
                             leading: CircleAvatar(
                               backgroundColor: AppColors.secondary,
                               child: ClipOval(
                                 child: SizedBox(
                                   width: AppSizes.w40,
                                   height: AppSizes.w40,
-                                  child: patient.profilePicture.isNotEmpty &&
+                                  child:
+                                      patient.profilePicture.isNotEmpty &&
                                           patient.profilePicture
                                               .toLowerCase()
                                               .startsWith('http')
@@ -233,14 +242,16 @@ class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
                                           placeholder: (_, __) => Center(
                                             child: Text(
                                               patient.name.isNotEmpty
-                                                  ? patient.name[0].toUpperCase()
+                                                  ? patient.name[0]
+                                                        .toUpperCase()
                                                   : 'P',
                                             ),
                                           ),
                                           errorWidget: (_, __, ___) => Center(
                                             child: Text(
                                               patient.name.isNotEmpty
-                                                  ? patient.name[0].toUpperCase()
+                                                  ? patient.name[0]
+                                                        .toUpperCase()
                                                   : 'P',
                                             ),
                                           ),
@@ -255,7 +266,10 @@ class _CaregiverModeScreenState extends State<CaregiverModeScreen> {
                                 ),
                               ),
                             ),
-                            title: Text(patient.name, style: AppStyles.black16400),
+                            title: Text(
+                              patient.name,
+                              style: AppStyles.black16400,
+                            ),
                             subtitle: Text(
                               [
                                 if (patient.email.isNotEmpty) patient.email,

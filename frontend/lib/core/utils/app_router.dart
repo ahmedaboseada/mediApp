@@ -170,7 +170,7 @@ class AppRouter {
   static const String notificationSoundScreen = '/notificationSound';
   static const String chooseSoundScreen = '/chooseSound';
   static const String takeInfoScreen = '/takeInfo';
-  static const String caregiverModeScreen = '/CaregiverModeScreen';
+  //static const String caregiverModeScreen = '/CaregiverModeScreen';
   static const String allSetScreen = '/AllSetScreen';
   static const String patientAccountInfoScreen = '/patient/accountInfo';
   static const String patientCaregiverModeScreen = '/patient/caregiverMode';

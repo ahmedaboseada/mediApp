@@ -67,7 +67,7 @@ class _MainPatientViewState extends State<MainPatientView> {
                   : '${profile.user.firstName} ${profile.user.lastName}'.trim();
                 final bannerText = patientName == null
                   ? 'Loading patient profile...'
-                  : 'You are viewing ${patientName}\'s profile';
+                  : 'You are viewing $patientName\'s profile';
 
               return Positioned(
                 top: 0,

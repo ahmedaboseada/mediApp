@@ -117,10 +117,12 @@ class IncomingPatientRequestsCubit extends Cubit<IncomingPatientRequestsState> {
 
   List<dynamic> _extractList(dynamic response) {
     if (response is Map<String, dynamic>) {
-      if (response['requests'] is List)
+      if (response['requests'] is List) {
         return response['requests'] as List<dynamic>;
-      if (response['patients'] is List)
+      }
+      if (response['patients'] is List) {
         return response['patients'] as List<dynamic>;
+      }
       if (response['data'] is List) return response['data'] as List<dynamic>;
     }
 

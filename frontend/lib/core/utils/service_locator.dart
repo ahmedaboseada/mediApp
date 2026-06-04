@@ -12,6 +12,9 @@ import 'package:medi/features/doctor/features/complete_profile/data/repo/doctor_
 import 'package:medi/features/doctor/features/settings/data/repo/wallet_repo.dart';
 import 'package:medi/features/doctor/features/settings/data/repo/wallet_repo_impl.dart';
 import 'package:medi/features/doctor/features/settings/presentation/controller/cubit/wallet_cubit.dart';
+import 'package:medi/features/doctor/features/settings/data/repo/notification_settings_repo.dart';
+import 'package:medi/features/doctor/features/settings/data/repo/notification_settings_repo_impl.dart';
+import 'package:medi/features/doctor/features/settings/presentation/controller/cubit/notification_settings_cubit.dart';
 import 'package:medi/features/doctor/features/home/data/repo/appointments_repository.dart';
 import 'package:medi/features/doctor/features/home/data/repo/appointments_repository_impl.dart';
 import 'package:medi/features/doctor/features/home/presentation/cubit/appointments_cubit.dart';
@@ -202,6 +205,16 @@ Future<void> setupServiceLocator() async {
   }
   if (!getIt.isRegistered<WalletCubit>()) {
     getIt.registerFactory<WalletCubit>(() => WalletCubit(getIt<WalletRepo>()));
+  }
+  if (!getIt.isRegistered<NotificationSettingsRepo>()) {
+    getIt.registerLazySingleton<NotificationSettingsRepo>(
+      () => NotificationSettingsRepoImpl(getIt<ApiService>()),
+    );
+  }
+  if (!getIt.isRegistered<NotificationSettingsCubit>()) {
+    getIt.registerFactory<NotificationSettingsCubit>(
+      () => NotificationSettingsCubit(getIt<NotificationSettingsRepo>()),
+    );
   }
   final sharedPreferences = await SharedPreferences.getInstance();
   if (!getIt.isRegistered<SharedPreferences>()) {

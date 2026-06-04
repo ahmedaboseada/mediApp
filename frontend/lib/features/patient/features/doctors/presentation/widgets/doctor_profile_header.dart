@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/doctors/data/models/doctor_summary.dart';
@@ -81,23 +82,34 @@ class DoctorProfileHeader extends StatelessWidget {
                             ),
                             SizedBox(width: AppSizes.w8),
                             Flexible(
-                              child: Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: AppSizes.w10,
-                                  vertical: AppSizes.h6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.surfaceColor,
-                                  borderRadius: BorderRadius.circular(
-                                    AppSizes.r20,
+                              child: GestureDetector(
+                                onLongPress: () {
+                                  Clipboard.setData(ClipboardData(text: doctor.id));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Doctor ID copied to clipboard'),
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: AppSizes.w10,
+                                    vertical: AppSizes.h6,
                                   ),
-                                ),
-                                child: Text(
-                                  'ID:${doctor.id}',
-                                  style: AppStyles.tertiary40012.copyWith(
-                                    color: AppColors.secondaryText,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.surfaceColor,
+                                    borderRadius: BorderRadius.circular(
+                                      AppSizes.r20,
+                                    ),
                                   ),
-                                  overflow: TextOverflow.ellipsis,
+                                  child: Text(
+                                    'ID:${doctor.id}',
+                                    style: AppStyles.tertiary40012.copyWith(
+                                      color: AppColors.secondaryText,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               ),
                             ),
