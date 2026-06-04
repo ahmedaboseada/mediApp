@@ -14,6 +14,7 @@ class AppointmentReviewData {
     this.patientAge = 0,
     this.patientGender = '',
     this.problem = '',
+    this.patientName = '',
   });
 
   final Doctordata? doctor;
@@ -21,6 +22,7 @@ class AppointmentReviewData {
   final String packageName;
   final String duration;
   final String bookingFor;
+  final String patientName;
   final double amount;
   final double unitPrice;
   final String paymentMethod;
@@ -42,6 +44,7 @@ class AppointmentReviewData {
     int? patientAge,
     String? patientGender,
     String? problem,
+    String? patientName,
   }) {
     return AppointmentReviewData(
       doctor: doctor ?? this.doctor,
@@ -56,6 +59,7 @@ class AppointmentReviewData {
       patientAge: patientAge ?? this.patientAge,
       patientGender: patientGender ?? this.patientGender,
       problem: problem ?? this.problem,
+      patientName: patientName ?? this.patientName,
     );
   }
 }

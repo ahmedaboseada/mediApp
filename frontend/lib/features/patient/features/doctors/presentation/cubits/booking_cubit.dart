@@ -166,11 +166,12 @@ class BookingCubit extends Cubit<BookingState> {
     fetchAvailableSlots(doctor.id, state.selectedDate);
   }
 
-  void updatePatientDetails({int? age, String? gender, String? problem}) {
+  void updatePatientDetails({int? age, String? gender, String? problem, String? patientName}) {
     final updatedData = state.appointmentReviewData.copyWith(
       patientAge: age,
       patientGender: gender,
       problem: problem,
+      patientName: patientName,
     );
     emit(state.copyWith(appointmentReviewData: updatedData));
   }

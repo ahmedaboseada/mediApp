@@ -55,6 +55,22 @@ class PatientDetailsScreen extends StatelessWidget {
                           hint: 'Self',
                           search: false,
                         ),
+                        
+                        if (state.appointmentReviewData.bookingFor != 'self' && state.appointmentReviewData.patientName.isEmpty)
+                          Column(
+                            children: [
+                              SizedBox(height: AppSizes.h18),
+                              CustomTextField(
+                                label: 'Person Name',
+                                hintText: 'Enter person name',
+                                onChanged: (value) {
+                                  context
+                                      .read<BookingCubit>()
+                                      .updatePatientDetails(patientName: value);
+                                },
+                              ),
+                            ],
+                          ),
                         SizedBox(height: AppSizes.h18),
                         CustomTextField(
                           label: 'your Age',
