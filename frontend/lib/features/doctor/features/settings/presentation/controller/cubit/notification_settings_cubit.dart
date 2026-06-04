@@ -1,12 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:medi/core/core.dart';
+import 'package:medi/features/doctor/features/home/data/repo/appointments_repository.dart';
 import 'package:medi/features/doctor/features/settings/data/repo/notification_settings_repo.dart';
 import 'notification_settings_state.dart';
 
 class NotificationSettingsCubit extends Cubit<NotificationSettingsState> {
   final NotificationSettingsRepo _repo;
+  final AppointmentsRepository _appointmentsRepo;
 
-  NotificationSettingsCubit(this._repo) : super(const NotificationSettingsState());
+  NotificationSettingsCubit(this._repo, this._appointmentsRepo) : super(const NotificationSettingsState());
 
   Future<void> loadSettings() async {
     final email = await _repo.getLocalToggle('email');
@@ -47,6 +50,31 @@ class NotificationSettingsCubit extends Cubit<NotificationSettingsState> {
   Future<void> toggleAppointment(bool value) async {
     emit(state.copyWith(appointmentReminders: value));
     await _repo.saveLocalToggle('appointment', value);
+    
+    try {
+      final now = DateTime.now();
+      final result = await _appointmentsRepo.getAppointmentsForDate(now);
+      result.fold(
+        (error) => debugPrint('Error fetching appointments for notifications: $error'),
+        (appointments) {
+          for (final appt in appointments) {
+            final appointmentId = appt.userId ?? appt.name;
+            if (value) {
+              LocalNotificationService.scheduleAppointmentReminder(
+                appointmentId,
+                appt.name,
+                now,
+                appt.visitTime,
+              );
+            } else {
+              LocalNotificationService.cancelAppointmentReminder(appointmentId);
+            }
+          }
+        },
+      );
+    } catch (e) {
+      debugPrint('Error handling appointment reminders: $e');
+    }
   }
 
   Future<void> togglePatient(bool value) async {

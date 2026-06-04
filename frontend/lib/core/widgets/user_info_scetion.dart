@@ -55,11 +55,12 @@ class UserInfoScetion extends StatelessWidget {
             children: [
               Text(
                 isLoading ? 'Loading Name' : name,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
+              SizedBox(height: 8),
               Text(
                 isLoading ? 'Loading Specialty' : specialty,
-                style: TextStyle(fontSize: 14, color: Colors.grey),
+                style: TextStyle(fontSize: 12, color: Colors.grey),
               ),
             ],
           ),

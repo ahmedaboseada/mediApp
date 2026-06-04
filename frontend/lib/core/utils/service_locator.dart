@@ -213,7 +213,10 @@ Future<void> setupServiceLocator() async {
   }
   if (!getIt.isRegistered<NotificationSettingsCubit>()) {
     getIt.registerFactory<NotificationSettingsCubit>(
-      () => NotificationSettingsCubit(getIt<NotificationSettingsRepo>()),
+      () => NotificationSettingsCubit(
+        getIt<NotificationSettingsRepo>(),
+        getIt<AppointmentsRepository>(),
+      ),
     );
   }
   final sharedPreferences = await SharedPreferences.getInstance();

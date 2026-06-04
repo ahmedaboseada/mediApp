@@ -99,8 +99,8 @@ class InvitationSendScreen extends StatelessWidget {
                                   }
 
                                   if (fromCaregiverMode) {
-                                    context.pop(
-                                      // '/onboardingFlow/caregiverMode',
+                                    context.go(
+                                      AppRouter.patientCaregiverModeScreen,
                                     );
                                   } else {
                                     context.go(

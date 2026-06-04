@@ -262,9 +262,13 @@ class DoctorsRepositoryImpl implements DoctorsRepository {
       if (response is ServerFailure) return Left(response);
 
       if (recipientFcmToken != null && recipientFcmToken.trim().isNotEmpty) {
-        final notificationResult = await _notificationDispatchService.sendDoctorRequestToPatient(
+        final user = await HiveService.getUserData();
+        final notificationResult = await _notificationDispatchService.sendDoctorRequestSent(
           recipientFcmToken: recipientFcmToken,
+          doctorName: 'Doctor',
           recipientUserId: doctorId,
+          senderName: '${user?.firstName ?? ''} ${user?.lastName ?? ''}'.trim(),
+          senderUserId: user?.id,
           entityId: doctorId,
         );
         notificationResult.fold(

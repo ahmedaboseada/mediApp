@@ -110,11 +110,19 @@ class ProfileCubit extends Cubit<ProfileState> {
     );
   }
 
-  Future<void> acceptCaregiverRequest({required String requestId}) async {
+  Future<void> acceptCaregiverRequest({
+    required String requestId,
+    String? caregiverFcmToken,
+    String? caregiverId,
+    String? caregiverName,
+  }) async {
     emit(CaregiverRequestActionLoading());
 
     final result = await profileRepo.acceptCaregiverRequest(
       requestId: requestId,
+      caregiverFcmToken: caregiverFcmToken,
+      caregiverId: caregiverId,
+      caregiverName: caregiverName,
     );
 
     await result.fold(

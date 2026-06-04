@@ -29,6 +29,9 @@ abstract class ProfileRepo {
 
   Future<Either<ApiError, String>> acceptCaregiverRequest({
     required String requestId,
+    String? caregiverFcmToken,
+    String? caregiverId,
+    String? caregiverName,
   });
 
   Future<Either<ApiError, String>> rejectCaregiverRequest({

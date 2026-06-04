@@ -306,6 +306,9 @@ class ProfileRepoImpl implements ProfileRepo {
   @override
   Future<Either<ApiError, String>> acceptCaregiverRequest({
     required String requestId,
+    String? caregiverFcmToken,
+    String? caregiverId,
+    String? caregiverName,
   }) async {
     try {
       final token = await HiveService.getAccessToken();
@@ -322,6 +325,18 @@ class ProfileRepoImpl implements ProfileRepo {
 
       if (response is ServerFailure) {
         return Left(response);
+      }
+
+      if (caregiverFcmToken != null && caregiverFcmToken.trim().isNotEmpty) {
+        final user = await HiveService.getUserData();
+        await _notificationDispatchService.sendCaregiverRequestAccepted(
+          recipientFcmToken: caregiverFcmToken,
+          caregiverName: '${user?.firstName ?? ''} ${user?.lastName ?? ''}'.trim(),
+          recipientUserId: caregiverId ?? '',
+          senderName: '${user?.firstName ?? ''} ${user?.lastName ?? ''}'.trim(),
+          senderUserId: user?.id,
+          entityId: requestId,
+        );
       }
 
       final message = response['message'] ?? 'Request accepted';
@@ -459,9 +474,13 @@ class ProfileRepoImpl implements ProfileRepo {
       }
 
       if (doctorFcmToken != null && doctorFcmToken.trim().isNotEmpty) {
-        await _notificationDispatchService.sendPatientAcceptedDoctorRequest(
+        final user = await HiveService.getUserData();
+        await _notificationDispatchService.sendDoctorRequestAccepted(
           recipientFcmToken: doctorFcmToken,
+          doctorName: '${user?.firstName ?? ''} ${user?.lastName ?? ''}'.trim(),
           recipientUserId: doctorId,
+          senderName: '${user?.firstName ?? ''} ${user?.lastName ?? ''}'.trim(),
+          senderUserId: user?.id,
           entityId: doctorId,
         );
       }

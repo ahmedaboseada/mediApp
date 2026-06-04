@@ -14,7 +14,7 @@ class PushNotificationService {
     await messaging.requestPermission();
     messaging.getToken().then((token) {
       log('Firebase Messaging Token: $token');
-      //sendTokenToServer(token !);
+      sendTokenToServer(token !);
     });
     messaging.onTokenRefresh.listen((newToken) {
       log('Firebase Messaging Token refreshed: $newToken');

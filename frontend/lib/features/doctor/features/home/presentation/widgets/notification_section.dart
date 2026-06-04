@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:medi/core/core.dart';
-import 'package:medi/features/doctor/features/home/presentation/cubit/appointments_cubit.dart';
 import 'package:medi/features/doctor/features/settings/presentation/controller/cubit/notification_settings_cubit.dart';
 import 'package:medi/features/doctor/features/settings/presentation/controller/cubit/notification_settings_state.dart';
 
@@ -28,27 +28,6 @@ class _NotificationSectionView extends StatefulWidget {
 class _NotificationSectionViewState extends State<_NotificationSectionView> {
   void _handleAppointmentReminders(bool enable, BuildContext context) {
     context.read<NotificationSettingsCubit>().toggleAppointment(enable);
-
-    try {
-      final cubit = context.read<AppointmentsCubit>();
-      final state = cubit.state;
-
-      for (final appt in state.appointments) {
-        final appointmentId = appt.userId ?? appt.name;
-        if (enable) {
-          LocalNotificationService.scheduleAppointmentReminder(
-            appointmentId,
-            appt.name,
-            state.selectedDate,
-            appt.visitTime,
-          );
-        } else {
-          LocalNotificationService.cancelAppointmentReminder(appointmentId);
-        }
-      }
-    } catch (e) {
-      debugPrint('Error handling appointment reminders: $e');
-    }
   }
 
   @override

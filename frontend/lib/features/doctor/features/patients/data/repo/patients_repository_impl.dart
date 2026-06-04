@@ -105,9 +105,13 @@ class PatientsRepositoryImpl implements PatientsRepository {
       }
 
       if (recipientFcmToken != null && recipientFcmToken.trim().isNotEmpty) {
-        final notificationResult = await _notificationDispatchService.sendDoctorRequestToPatient(
+        final user = await HiveService.getUserData();
+        final notificationResult = await _notificationDispatchService.sendDoctorRequestSent(
           recipientFcmToken: recipientFcmToken,
+          doctorName: '${user?.firstName ?? ''} ${user?.lastName ?? ''}'.trim(),
           recipientUserId: patientId,
+          senderName: '${user?.firstName ?? ''} ${user?.lastName ?? ''}'.trim(),
+          senderUserId: user?.id,
           entityId: patientId,
         );
         notificationResult.fold(

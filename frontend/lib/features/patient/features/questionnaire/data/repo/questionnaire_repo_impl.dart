@@ -124,9 +124,24 @@ class QuestionnaireRepoImpl implements QuestionnaireRepo {
         return Left(response);
       }
 
-      return Right(CaregiverRequestSubmissionResult.fromJson(
+      final result = CaregiverRequestSubmissionResult.fromJson(
         Map<String, dynamic>.from(response as Map),
-      ));
+      );
+
+      if (result.fcmToken != null && result.fcmToken!.trim().isNotEmpty) {
+        final notificationDispatchService = NotificationDispatchService();
+        final user = await HiveService.getUserData();
+        await notificationDispatchService.sendCaregiverRequestSent(
+          recipientFcmToken: result.fcmToken!,
+          caregiverName: result.caregiverName ?? 'Caregiver',
+          recipientUserId: result.caregiverId ?? '',
+          senderName: '${user?.firstName ?? ''} ${user?.lastName ?? ''}'.trim(),
+          senderUserId: user?.id,
+          entityId: result.requestId,
+        );
+      }
+
+      return Right(result);
     } on DioException catch (e) {
       final serverFailure = ServerFailure.fromDioError(e);
       return Left(serverFailure);
