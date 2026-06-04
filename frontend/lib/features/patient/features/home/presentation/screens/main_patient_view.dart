@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/patient/features/home/presentation/controller/schedule/home_schedule_refresh_bus.dart';
+import 'package:medi/features/patient/features/add_medication/presentation/cubit/medicine_cubit.dart';
 
 class MainPatientView extends StatefulWidget {
   const MainPatientView({super.key, required this.shell});
@@ -52,9 +53,13 @@ class _MainPatientViewState extends State<MainPatientView> {
     }
 
     return Scaffold(
-      body: Stack(
-        children: [
-          widget.shell,
+      body: BlocListener<CaregiverModeCubit, String?>(
+        listener: (context, state) {
+          context.read<MedicineCubit>().loadMedications();
+        },
+        child: Stack(
+          children: [
+            widget.shell,
           BlocBuilder<ManagedPatientDashboardCubit, ManagedPatientDashboardState>(
             builder: (context, state) {
               if (!getIt<CaregiverModeCubit>().isManagingPatient) {
@@ -72,12 +77,13 @@ class _MainPatientViewState extends State<MainPatientView> {
               return Positioned(
                 top: 0,
                 left: 0,
-                right: 0,
+               // right: 0,
                 child: SafeArea(
                   bottom: false,
                   child: Padding(
                     padding: EdgeInsets.all(AppSizes.w12),
                     child: Container(
+                      
                       padding: EdgeInsets.symmetric(
                         horizontal: AppSizes.w16,
                         vertical: AppSizes.h12,
@@ -94,17 +100,18 @@ class _MainPatientViewState extends State<MainPatientView> {
                           ),
                         ],
                       ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                                bannerText,
-                              style: AppStyles.black14500,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          TextButton(
+                      // child: Row(
+                      //   mainAxisSize: MainAxisSize.min,
+                      //   children: [
+                          // Expanded(
+                          //   child: Text(
+                          //       bannerText,
+                          //     style: AppStyles.black14500,
+                          //     maxLines: 2,
+                          //     overflow: TextOverflow.ellipsis,
+                          //   ),
+                          // ),
+                        child:  TextButton(
                             onPressed: () => _exitCaregiverMode(context),
                             child: Text(
                               'Exit',
@@ -113,8 +120,8 @@ class _MainPatientViewState extends State<MainPatientView> {
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                      //   ],
+                      // ),
                     ),
                   ),
                 ),
@@ -122,6 +129,7 @@ class _MainPatientViewState extends State<MainPatientView> {
             },
           ),
         ],
+      ),
       ),
       extendBody: true,
       bottomNavigationBar: AdvancedBottomNavBar(

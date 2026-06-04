@@ -143,13 +143,19 @@ class HealthMeasurementsCubit extends Cubit<HealthMeasurementsState> {
 
   Future<void> loadMeasurements() async {
     try {
-      final cachedMetricData = await _loadCachedMetricData();
-      if (isClosed) {
-        return;
-      }
+      final isCaregiver = getIt<CaregiverModeCubit>().isManagingPatient;
+      
+      if (!isCaregiver) {
+        final cachedMetricData = await _loadCachedMetricData();
+        if (isClosed) {
+          return;
+        }
 
-      _applyMeasurementData(cachedMetricData);
-      unawaited(_syncMeasurementsFromServer());
+        _applyMeasurementData(cachedMetricData);
+        unawaited(_syncMeasurementsFromServer());
+      } else {
+        await _syncMeasurementsFromServer();
+      }
     } catch (e) {
       log('Error loading cached measurements: $e');
     }
@@ -553,12 +559,18 @@ class HealthMeasurementsCubit extends Cubit<HealthMeasurementsState> {
 
   Future<void> loadSymptoms() async {
     try {
-      final cached = await _localDataSource.getSymptomResponse();
-      if (cached != null && !isClosed) {
-        _applySymptomsFromResponse(cached);
-      }
+      final isCaregiver = getIt<CaregiverModeCubit>().isManagingPatient;
+      
+      if (!isCaregiver) {
+        final cached = await _localDataSource.getSymptomResponse();
+        if (cached != null && !isClosed) {
+          _applySymptomsFromResponse(cached);
+        }
 
-      unawaited(_syncSymptomsFromServer(hadCachedData: cached != null));
+        unawaited(_syncSymptomsFromServer(hadCachedData: cached != null));
+      } else {
+        await _syncSymptomsFromServer(hadCachedData: false);
+      }
     } catch (e) {
       log('Error loading cached symptoms: $e');
     }

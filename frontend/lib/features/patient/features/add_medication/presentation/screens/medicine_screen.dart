@@ -54,35 +54,41 @@ class _MedicineView extends StatelessWidget {
                   ),
                   SizedBox(height: AppSizes.h16),
                   Expanded(
-                    child:
-                        BlocSelector<
-                          MedicineCubit,
-                          MedicineState,
-                          List<Medication>
-                        >(
-                          selector: (state) => state.medications,
-                          builder: (context, medications) {
-                            return ListView.separated(
-                              itemCount: medications.length,
-                              padding: EdgeInsets.only(bottom: AppSizes.h120),
-                              separatorBuilder: (_, _) =>
-                                  SizedBox(height: AppSizes.h12),
-                              itemBuilder: (context, index) {
-                                final medication = medications[index];
-                                return MedicineCard(
-                                  medication: medication,
-                                  onTap: () async {
-                                    await context.push(
-                                      '/medicine/info',
-                                      extra: medication,
-                                    );
-                                    cubit.loadMedications();
-                                  },
-                                );
+                    child: BlocBuilder<MedicineCubit, MedicineState>(
+                      builder: (context, state) {
+                        if (state.isLoading) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+
+                        final medications = state.medications;
+
+                        if (medications.isEmpty) {
+                          return Center(
+                            child: Text(
+                              'No medications found.',
+                              style: AppStyles.secondary12400,
+                            ),
+                          );
+                        }
+
+                        return ListView.separated(
+                          itemCount: medications.length,
+                          padding: EdgeInsets.only(bottom: AppSizes.h120),
+                          separatorBuilder: (_, _) => SizedBox(height: AppSizes.h12),
+                          itemBuilder: (context, index) {
+                            final medication = medications[index];
+                            return MedicineCard(
+                              medication: medication,
+                              onTap: () async {
+                                await context.push('/medicine/info', extra: medication);
+                                if (!context.mounted) return;
+                                context.read<MedicineCubit>().loadMedications();
                               },
                             );
                           },
-                        ),
+                        );
+                      },
+                    ),
                   ),
                 ],
               ),

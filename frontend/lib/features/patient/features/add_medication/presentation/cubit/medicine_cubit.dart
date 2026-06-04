@@ -23,18 +23,8 @@ class MedicineCubit extends Cubit<MedicineState> {
       final isCaregiverMode = getIt<CaregiverModeCubit>().isManagingPatient;
 
       if (isCaregiverMode) {
-        final managedProfile = getIt<ManagedPatientDashboardCubit>().state.profile;
-        final managedMedications = managedProfile?.patient?.medications ?? const <Medication>[];
-        _allMedications = managedMedications;
-
-        emit(
-          state.copyWith(
-            medications: _filterByTab(managedMedications, state.selectedTab),
-            isLoading: false,
-          ),
-        );
-
-        _syncFromServerSilently();
+        await _syncFromServerSilently();
+        emit(state.copyWith(isLoading: false));
         return;
       }
 

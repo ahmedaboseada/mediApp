@@ -31,19 +31,25 @@ class ScheduleCubit extends Cubit<ScheduleState> {
       ),
     );
 
-    final cachedSchedule = await HiveService.getMedicationSchedule(_isoDate(date));
-    if (cachedSchedule != null && !isClosed) {
-      final medications = _extractMedicationSchedule(cachedSchedule, date);
-      emit(
-        ScheduleSuccess(
-          selectedDate: date,
-          mutedReminderKeys: state.mutedReminderKeys,
-          medications: medications,
-        ),
-      );
+    final isCaregiver = getIt<CaregiverModeCubit>().isManagingPatient;
+
+    if (!isCaregiver) {
+      final cachedSchedule = await HiveService.getMedicationSchedule(_isoDate(date));
+      if (cachedSchedule != null && !isClosed) {
+        final medications = _extractMedicationSchedule(cachedSchedule, date);
+        emit(
+          ScheduleSuccess(
+            selectedDate: date,
+            mutedReminderKeys: state.mutedReminderKeys,
+            medications: medications,
+          ),
+        );
+        unawaited(_syncFromServerSilently(date, hadCachedData: true));
+        return;
+      }
     }
 
-    unawaited(_syncFromServerSilently(date, hadCachedData: cachedSchedule != null));
+    await _syncFromServerSilently(date, hadCachedData: false);
   }
 
   Future<void> _syncFromServerSilently(
