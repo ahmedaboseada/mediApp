@@ -281,6 +281,11 @@ export const getMyBookingsAsDoctor = async (req, res) => {
         .sort({ 'date.date': -1, 'date.time': -1 })
         .lean();
 
+    const patientIds = bookings.map(b => b.patientId?._id).filter(Boolean);
+    const allMeasurements = await healthMeasurementModel.find({ patientId: { $in: patientIds } })
+        .sort({ date: -1 })
+        .lean();
+
     const formattedBookings = bookings.map(b => {
         const pUser = b.patientId?.userId;
         let reserverName = b.reserverName;
@@ -291,6 +296,12 @@ export const getMyBookingsAsDoctor = async (req, res) => {
             reserverName = `${pUser.firstName} ${pUser.lastName}`;
             pAge = pUser.age;
             pGender = pUser.gender;
+        }
+
+        if (b.patientId) {
+            const pMeasurements = allMeasurements.filter(m => String(m.patientId) === String(b.patientId._id));
+            b.patientId.measurements = pMeasurements;
+            b.patientId.healthMeasurements = pMeasurements;
         }
 
         return {
