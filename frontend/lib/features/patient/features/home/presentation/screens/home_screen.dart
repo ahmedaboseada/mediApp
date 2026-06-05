@@ -9,6 +9,7 @@ import 'package:medi/features/patient/features/home/presentation/widgets/notific
 import 'package:medi/features/patient/features/home/presentation/widgets/upcoming_booking.dart';
 import 'package:medi/features/patient/features/home/presentation/widgets/user_widget.dart';
 import 'package:medi/features/patient/features/home/presentation/widgets/your_schedule.dart';
+import 'package:medi/features/patient/features/home/presentation/widgets/low_stock_alerts.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -124,6 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                             YourSchedule(key: ValueKey('schedule_${caregiverModeCubit.state}')),
+                            LowStockAlerts(key: ValueKey('alerts_${caregiverModeCubit.state}')),
                             HealthSummary(key: ValueKey('health_${caregiverModeCubit.state}')),
                             UpcomingBooking(key: ValueKey('booking_${caregiverModeCubit.state}')),
                             SizedBox(height: AppSizes.h120),
