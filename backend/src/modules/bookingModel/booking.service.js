@@ -272,9 +272,11 @@ export const getMyBookingsAsDoctor = async (req, res) => {
     const bookings = await bookingModel.find(filter)
         .populate({
             path: 'patientId',
-            populate: {
-                path: 'userId'
-            }
+            populate: [
+                { path: 'userId' },
+                { path: 'medications' },
+                { path: 'longTermMedication' }
+            ]
         })
         .sort({ 'date.date': -1, 'date.time': -1 })
         .lean();
