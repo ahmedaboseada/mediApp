@@ -739,6 +739,7 @@ export const completeProfile = async (req, res) => {
     }
 
     if (req.body.bloodTypes !== undefined) patch.bloodTypes = req.body.bloodTypes;
+    if (req.body.bloodType !== undefined) patch.bloodTypes = req.body.bloodType;
     if (req.body.emergencyContact !== undefined) {
         let ec = req.body.emergencyContact;
         if (typeof ec === 'string') {

@@ -787,6 +787,11 @@
                       "key": "allergyAlerts",
                       "value": "true",
                       "type": "text"
+                    },
+                    {
+                      "key": "bloodType",
+                      "value": "A+",
+                      "type": "text"
                     }
                   ]
                 },
@@ -833,6 +838,11 @@
                     {
                       "key": "gender",
                       "value": "male",
+                      "type": "text"
+                    },
+                    {
+                      "key": "bloodType",
+                      "value": "A+",
                       "type": "text"
                     }
                   ]
@@ -1431,6 +1441,11 @@
                           "key": "gender",
                           "value": "male",
                           "type": "text"
+                        },
+                        {
+                          "key": "bloodType",
+                          "value": "A+",
+                          "type": "text"
                         }
                       ]
                     },
@@ -1472,6 +1487,11 @@
                         {
                           "key": "gender",
                           "value": "male",
+                          "type": "text"
+                        },
+                        {
+                          "key": "bloodType",
+                          "value": "A+",
                           "type": "text"
                         }
                       ]
@@ -1920,6 +1940,36 @@
                   }
                 },
                 {
+                  "name": "Create Booking (For Someone Else)",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"doctorId\": \"{{doctor_object_id}}\",\n  \"date\": \"2026-06-15T00:00:00.000Z\",\n  \"time\": \"10:00\",\n  \"packageType\": \"in-person\",\n  \"bookingFor\": \"Someone Else\",\n  \"patientAge\": 30,\n  \"patientGender\": \"female\",\n  \"problem\": \"Checkup\",\n  \"paymentMethod\": \"cash_on_site\",\n  \"reserverName\": \"Jane Doe\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{BASE_URL}}/bookings",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "bookings"
+                      ]
+                    }
+                  }
+                },
+                {
                   "name": "Create Booking Reservation (Online Payment)",
                   "request": {
                     "method": "POST",
@@ -1932,6 +1982,36 @@
                     "body": {
                       "mode": "raw",
                       "raw": "{\n  \"doctorId\": \"{{doctor_object_id}}\",\n  \"date\": \"2026-06-15T00:00:00.000Z\",\n  \"time\": \"10:00\",\n  \"packageType\": \"online\",\n  \"bookingFor\": \"Self\",\n  \"patientAge\": 24,\n  \"patientGender\": \"male\",\n  \"problem\": \"Online Consultation\",\n  \"paymentMethod\": \"card\"\n}",
+                      "options": {
+                        "raw": {
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{BASE_URL}}/bookings",
+                      "host": [
+                        "{{BASE_URL}}"
+                      ],
+                      "path": [
+                        "bookings"
+                      ]
+                    }
+                  }
+                },
+                {
+                  "name": "Create Booking (For Someone Else)",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "bearer {{ACCESS_TOKEN}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"doctorId\": \"{{doctor_object_id}}\",\n  \"date\": \"2026-06-15T00:00:00.000Z\",\n  \"time\": \"10:00\",\n  \"packageType\": \"online\",\n  \"bookingFor\": \"Someone Else\",\n  \"patientAge\": 30,\n  \"patientGender\": \"female\",\n  \"problem\": \"Online Consultation\",\n  \"paymentMethod\": \"card\",\n  \"reserverName\": \"Jane Doe\"\n}",
                       "options": {
                         "raw": {
                           "language": "json"
@@ -3180,6 +3260,36 @@
               }
             },
             {
+              "name": "Add Medicine (As Needed)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Aspirin (As Needed)\",\n  \"type\": \"tablet\",\n  \"frequency\": \"as needed\",\n  \"dosage\": \"10mg\",\n  \"stock\": 30\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL}}/medications",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "medications"
+                  ]
+                }
+              }
+            },
+            {
               "name": "Add Critical Weekly Medicine",
               "request": {
                 "method": "POST",
@@ -3923,6 +4033,41 @@
               ]
             },
             {
+              "name": "Generate Report QR Token (Success)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "bearer {{ACCESS_TOKEN}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{BASE_URL}}/export/qr-token/report",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "export",
+                    "qr-token",
+                    "report"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+                      "var jsonData = pm.response.json();",
+                      "if(jsonData.qrReportToken) pm.collectionVariables.set('qrReportToken', jsonData.qrReportToken);"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "Access Shared Record (Success)",
               "request": {
                 "method": "GET",
@@ -3951,6 +4096,35 @@
               ]
             },
             {
+              "name": "Access Shared Report (Success)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{BASE_URL}}/export/shared/report/{{qrReportToken}}",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "export",
+                    "shared",
+                    "report",
+                    "{{qrReportToken}}"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
               "name": "Access Shared Record (Invalid Token)",
               "request": {
                 "method": "GET",
@@ -3963,6 +4137,35 @@
                   "path": [
                     "export",
                     "shared",
+                    "invalid_token_123"
+                  ]
+                }
+              },
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Status code is 401', function () { pm.response.to.have.status(401); });"
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "name": "Access Shared Report (Success)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{BASE_URL}}/export/shared/report/invalid_token_123",
+                  "host": [
+                    "{{BASE_URL}}"
+                  ],
+                  "path": [
+                    "export",
+                    "shared",
+                    "report",
                     "invalid_token_123"
                   ]
                 }
@@ -4691,6 +4894,10 @@
     },
     {
       "key": "CAREGIVER_ACCESS_TOKEN",
+      "value": ""
+    },
+    {
+      "key": "qrReportToken",
       "value": ""
     }
   ]

@@ -369,6 +369,23 @@ export const getSchedule = async (req, res, next) => {
         } else if (med.frequency === medicineFrequency.specific) {
             const block = med.specific.find(b => new Date(b.day).getTime() === targetDate.getTime());
             if (block) scheduledTimes = block.times;
+        } else if (med.frequency === medicineFrequency.asNeeded) {
+            const dateLog = med.dates.find(d => new Date(d.date).getTime() === targetDate.getTime());
+            const timesWithStatus = dateLog ? dateLog.times.map(t => ({
+                time: t.time,
+                taken: t.taken
+            })) : [];
+
+            schedule.push({
+                medicineId: med._id,
+                name: med.name || 'Unnamed Medicine',
+                criticalMode: med.criticalMode,
+                type: med.type,
+                dosage: med.dosage,
+                frequency: med.frequency,
+                times: timesWithStatus
+            });
+            return;
         }
 
         if (scheduledTimes.length > 0) {

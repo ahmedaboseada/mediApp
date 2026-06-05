@@ -77,10 +77,13 @@ export const getDoctorSlots = async (req, res) => {
 export const createBooking = async (req, res) => {
     // 1. Context Resolution
     const patientUserId = req.user.id;
+    const user = await userModel.findById(patientUserId);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
     const patient = await patientModel.findOne({ userId: patientUserId });
     if (!patient) return res.status(404).json({ message: 'Patient profile required' });
 
-    const { doctorId, date, time, packageType, bookingFor, patientAge, patientGender, problem, paymentMethod } = req.body;
+    const { doctorId, date, time, packageType, bookingFor, patientAge, patientGender, problem, paymentMethod, reserverName } = req.body;
 
     const doc = await doctorModel.findById(doctorId).lean();
     if (!doc) return res.status(404).json({ message: 'Doctor not found' });
@@ -118,6 +121,21 @@ export const createBooking = async (req, res) => {
         return res.status(409).json({ message: 'This slot is already reserved.' });
     }
 
+    let finalBookingFor = bookingFor || 'Self';
+    let finalReserverName = reserverName;
+    let finalAge = patientAge;
+    let finalGender = patientGender;
+
+    if (finalBookingFor.toLowerCase() === 'self') {
+        finalReserverName = `${user.firstName} ${user.lastName}`;
+        finalAge = user.age;
+        finalGender = user.gender;
+    } else {
+        if (!finalReserverName) {
+            finalReserverName = 'Someone Else';
+        }
+    }
+
     // 4. Booking Object Creation
     const booking = await bookingModel.create({
         patientId: patient._id,
@@ -125,9 +143,10 @@ export const createBooking = async (req, res) => {
         date: { date: startOfDay, time },
         duration: doc.consultationDuration || 30,
         packageType,
-        bookingFor,
-        patientAge,
-        patientGender,
+        bookingFor: finalBookingFor,
+        reserverName: finalReserverName,
+        patientAge: finalAge,
+        patientGender: finalGender,
         problem,
         paymentMethod: paymentMethod || 'cash_on_site',
         price: doc.consultationPrice || 0, // Fallback if schema doesn't have it defined
@@ -140,7 +159,6 @@ export const createBooking = async (req, res) => {
     let intentionId = null;
 
     if (paymentMethod === 'card' || paymentMethod === 'online' || paymentMethod === 'paymob') {
-        const user = await userModel.findById(patientUserId);
         const billingData = {
             first_name: user?.firstName || 'Patient',
             last_name: user?.lastName || 'Name',
@@ -177,7 +195,12 @@ export const createBooking = async (req, res) => {
 
     return res.status(201).json({
         message: 'Booking confirmed!',
-        booking,
+        booking: {
+            ...booking.toObject(),
+            reserverName: finalReserverName,
+            patientAge: finalAge,
+            patientGender: finalGender
+        },
         paymentUrl,
         clientSecret,
         intentionId
@@ -196,10 +219,36 @@ export const getMyBookingsAsPatient = async (req, res) => {
                 path: 'userId'
             }
         })
+        .populate({
+            path: 'patientId',
+            populate: {
+                path: 'userId'
+            }
+        })
         .sort({ 'date.date': -1, 'date.time': -1 })
         .lean();
 
-    return res.status(200).json({ bookings });
+    const formattedBookings = bookings.map(b => {
+        const pUser = b.patientId?.userId;
+        let reserverName = b.reserverName;
+        let pAge = b.patientAge;
+        let pGender = b.patientGender;
+
+        if ((b.bookingFor || 'Self').toLowerCase() === 'self' && pUser) {
+            reserverName = `${pUser.firstName} ${pUser.lastName}`;
+            pAge = pUser.age;
+            pGender = pUser.gender;
+        }
+
+        return {
+            ...b,
+            reserverName,
+            patientAge: pAge,
+            patientGender: pGender
+        };
+    });
+
+    return res.status(200).json({ bookings: formattedBookings });
 };
 
 export const getMyBookingsAsDoctor = async (req, res) => {
@@ -221,11 +270,36 @@ export const getMyBookingsAsDoctor = async (req, res) => {
     }
 
     const bookings = await bookingModel.find(filter)
-        .populate('patientId')
+        .populate({
+            path: 'patientId',
+            populate: {
+                path: 'userId'
+            }
+        })
         .sort({ 'date.date': -1, 'date.time': -1 })
         .lean();
 
-    return res.status(200).json({ bookings });
+    const formattedBookings = bookings.map(b => {
+        const pUser = b.patientId?.userId;
+        let reserverName = b.reserverName;
+        let pAge = b.patientAge;
+        let pGender = b.patientGender;
+
+        if ((b.bookingFor || 'Self').toLowerCase() === 'self' && pUser) {
+            reserverName = `${pUser.firstName} ${pUser.lastName}`;
+            pAge = pUser.age;
+            pGender = pUser.gender;
+        }
+
+        return {
+            ...b,
+            reserverName,
+            patientAge: pAge,
+            patientGender: pGender
+        };
+    });
+
+    return res.status(200).json({ bookings: formattedBookings });
 };
 
 export const getBookingDetails = async (req, res) => {
@@ -233,7 +307,12 @@ export const getBookingDetails = async (req, res) => {
     const { id } = req.params;
 
     const booking = await bookingModel.findById(id)
-        .populate('patientId')
+        .populate({
+            path: 'patientId',
+            populate: {
+                path: 'userId'
+            }
+        })
         .populate('doctorId')
         .lean();
 
@@ -244,15 +323,33 @@ export const getBookingDetails = async (req, res) => {
 
     // Check if user is the patient
     const patient = await patientModel.findOne({ userId });
-    if (patient && String(booking.patientId._id || booking.patientId) === String(patient._id)) authorized = true;
+    if (patient && String(booking.patientId?._id || booking.patientId) === String(patient._id)) authorized = true;
 
     // Check if user is the doctor
     const doc = await doctorModel.findOne({ userId });
-    if (doc && String(booking.doctorId._id || booking.doctorId) === String(doc._id)) authorized = true;
+    if (doc && String(booking.doctorId?._id || booking.doctorId) === String(doc._id)) authorized = true;
 
     if (!authorized) return res.status(403).json({ message: 'Access denied' });
 
-    return res.status(200).json({ booking });
+    const pUser = booking.patientId?.userId;
+    let reserverName = booking.reserverName;
+    let pAge = booking.patientAge;
+    let pGender = booking.patientGender;
+
+    if ((booking.bookingFor || 'Self').toLowerCase() === 'self' && pUser) {
+        reserverName = `${pUser.firstName} ${pUser.lastName}`;
+        pAge = pUser.age;
+        pGender = pUser.gender;
+    }
+
+    const formattedBooking = {
+        ...booking,
+        reserverName,
+        patientAge: pAge,
+        patientGender: pGender
+    };
+
+    return res.status(200).json({ booking: formattedBooking });
 };
 
 export const cancelBooking = async (req, res) => {
@@ -440,6 +537,13 @@ export const startSession = async (req, res) => {
     // Decrypt fcmToken if possible
     if (patient.userId && patient.userId.fcmToken) {
         try { patient.userId.fcmToken = await ET.decrypt(patient.userId.fcmToken); } catch (e) {}
+    }
+
+    if ((booking.bookingFor || 'Self').toLowerCase() !== 'self' && patient.userId) {
+        patient.userId.firstName = booking.reserverName || 'Someone Else';
+        patient.userId.lastName = '';
+        patient.userId.age = booking.patientAge;
+        patient.userId.gender = booking.patientGender;
     }
 
     if (['online', 'card', 'paymob'].includes(booking.paymentMethod) && booking.paymentStatus !== 'paid') {

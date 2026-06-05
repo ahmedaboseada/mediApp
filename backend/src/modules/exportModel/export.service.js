@@ -243,3 +243,99 @@ export const getSharedRecord = async (req, res) => {
         return res.status(401).json({ message: 'Invalid or expired QR token' });
     }
 };
+
+// Generate QR Token for Health Report
+export const generateReportQRToken = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const patient = await patientModel.findOne({ userId });
+        if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+        // Create a JWT valid for 24 hours
+        const qrToken = jwt.sign(
+            { patientId: patient._id, type: 'report' },
+            process.env.JWT_SECRET || 'fallback_secret',
+            { expiresIn: '24h' }
+        );
+
+        const baseUrl = process.env.APP_BASE_URL || process.env.BASE_URL || 'http://localhost:8000';
+        const shareUrl = `${baseUrl}/export/shared/report/${qrToken}`;
+        const qrCodeBase64 = await QRCode.toDataURL(shareUrl);
+
+        return res.status(200).json({
+            message: 'Report QR Token generated',
+            qrToken,
+            shareUrl,
+            qrCodeBase64
+        });
+
+    } catch (error) {
+        return res.status(500).json({ message: 'Error generating Report QR token' });
+    }
+};
+
+// Access Shared Report via QR token
+export const getSharedReport = async (req, res) => {
+    try {
+        const { qrToken } = req.params;
+        const decoded = jwt.verify(qrToken, process.env.JWT_SECRET || 'fallback_secret');
+
+        const patient = await patientModel.findById(decoded.patientId)
+            .populate('userId', 'firstName lastName age DOB bloodTypes email phone')
+            .populate('medications')
+            .populate('longTermMedication')
+            .lean();
+
+        if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+        const measurements = await healthMeasurementModel.find({ patientId: patient._id }).sort({ date: -1 }).limit(20).lean();
+
+        const doc = new PDFDocument({ margin: 50, size: 'A4' });
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=Patient_Record_${patient.userId.firstName}.pdf`);
+        doc.pipe(res);
+
+        // Header
+        doc.fontSize(24).fillColor('#2c3e50').text('Comprehensive Patient Record', { align: 'center' });
+        doc.moveDown();
+
+        // Basic Info
+        doc.fontSize(14).text(`Name: ${patient.userId.firstName} ${patient.userId.lastName}`);
+        doc.text(`Date of Birth: ${patient.userId.DOB ? new Date(patient.userId.DOB).toLocaleDateString() : 'N/A'}`);
+        doc.text(`Blood Type: ${patient.bloodTypes || 'Unknown'}`);
+        doc.moveDown();
+
+        // Medications
+        doc.fontSize(16).fillColor('#34495e').text('Current Medications', { underline: true }).moveDown(0.5);
+        doc.fontSize(12).fillColor('#000');
+        if (patient.medications?.length > 0) {
+            patient.medications.forEach(m => {
+                doc.text(`• ${m.name || m.activeIngredient} - ${m.dosage || 'N/A'} (${m.frequency})`);
+            });
+        } else {
+            doc.text('No active medications.');
+        }
+        doc.moveDown();
+
+        // Recent Measurements
+        doc.fontSize(16).fillColor('#34495e').text('Recent Health Measurements', { underline: true }).moveDown(0.5);
+        doc.fontSize(12).fillColor('#000');
+        if (measurements.length > 0) {
+            measurements.forEach(m => {
+                const date = new Date(m.date).toLocaleDateString();
+                if (m.type === 'blood_pressure') {
+                    doc.text(`• [${date}] Blood Pressure: ${m.systolic}/${m.diastolic} mmHg`);
+                } else {
+                    doc.text(`• [${date}] ${m.type}: ${m.value}`);
+                }
+            });
+        } else {
+            doc.text('No recent measurements.');
+        }
+
+        doc.end();
+    } catch (error) {
+        return res.status(401).json({ message: 'Invalid or expired QR token' });
+    }
+};

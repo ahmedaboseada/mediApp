@@ -96,6 +96,11 @@ medicineSchema.pre('validate', function () {
         this.weekly = [];
         if (!this.specific?.length) throw new Error('specific required for specific frequency');
     }
+    if (this.frequency === medicineFrequency.asNeeded) {
+        this.daily = [];
+        this.weekly = [];
+        this.specific = [];
+    }
 });
 
 export default mongoose.model('Medicine', medicineSchema);

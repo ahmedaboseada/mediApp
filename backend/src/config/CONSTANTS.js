@@ -78,6 +78,7 @@ export const medicineFrequency = Object.freeze({
     daily: 'daily',
     weekly: 'weekly',
     specific: 'specific',
+    asNeeded: 'as needed',
 });
 
 export const medicineStatus = Object.freeze({

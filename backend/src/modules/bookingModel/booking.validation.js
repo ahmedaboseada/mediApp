@@ -17,6 +17,7 @@ export const createBookingSchema = {
 
         packageType: Joi.string().valid('online', 'in-person').required(),
         bookingFor: Joi.string().default('Self'),
+        reserverName: Joi.string().allow('').optional(),
         patientAge: Joi.number().min(0).max(120),
         patientGender: Joi.string(),
 

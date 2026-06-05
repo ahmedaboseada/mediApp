@@ -23,6 +23,7 @@ const bookingSchema = new Schema(
 
         packageType: { type: String, enum: ['online', 'in-person'] }, // strict validation
         bookingFor: { type: String, trim: true, default: 'Self' },
+        reserverName: { type: String, trim: true },
         patientAge: { type: Number },
         patientGender: { type: String },
 

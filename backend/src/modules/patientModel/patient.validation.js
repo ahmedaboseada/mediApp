@@ -1,4 +1,5 @@
 import joi from 'joi';
+import { bloodTypes } from '../../config/CONSTANTS.js';
 
 export const completeBasicSchema = {
     body: joi.object({
@@ -39,6 +40,7 @@ export const completeProfileSchema = {
         allergies: joi.array().items(joi.string()).default([]),
         reactionToMedication: joi.boolean().required(),
         allergyAlerts: joi.boolean().required(),
+        bloodType: joi.string().valid(...Object.values(bloodTypes)).optional(),
     }).unknown(true),
 };
 
