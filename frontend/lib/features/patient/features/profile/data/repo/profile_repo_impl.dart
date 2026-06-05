@@ -633,6 +633,7 @@ class ProfileRepoImpl implements ProfileRepo {
     List<String>? allergies,
     bool? reactionToMedication,
     bool? allergyAlerts,
+    String? bloodType,
   }) async {
     try {
       final token = await HiveService.getAccessToken();
@@ -645,13 +646,14 @@ class ProfileRepoImpl implements ProfileRepo {
         'allergies': allergies,
         'reactionToMedication': reactionToMedication,
         'allergyAlerts': allergyAlerts,
+        'bloodType': bloodType,
       }..removeWhere((key, value) => value == null);
 
       final headers = {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token",
       };
-
+ log('Complete Patient Profile Request Data: ${data.toString()}');
       final dynamic response = await apiService.patch(
         '/patients/complete',
         data,

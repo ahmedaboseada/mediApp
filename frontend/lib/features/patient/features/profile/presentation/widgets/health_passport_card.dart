@@ -8,11 +8,15 @@ class HealthPassportCard extends StatefulWidget {
     required this.identity,
     required this.dateOfBirth,
     required this.bloodGroup,
+    this.onDateOfBirthChanged,
+    this.onBloodGroupChanged,
   });
 
   final String identity;
   final String dateOfBirth;
   final String bloodGroup;
+  final ValueChanged<String>? onDateOfBirthChanged;
+  final ValueChanged<String>? onBloodGroupChanged;
 
   @override
   State<HealthPassportCard> createState() => _HealthPassportCardState();
@@ -27,6 +31,10 @@ class _HealthPassportCardState extends State<HealthPassportCard> {
     super.initState();
     dateOfBirthController.text = widget.dateOfBirth;
     identityController.text = widget.identity;
+    
+    dateOfBirthController.addListener(() {
+      widget.onDateOfBirthChanged?.call(dateOfBirthController.text);
+    });
   }
 
   @override
@@ -62,7 +70,11 @@ class _HealthPassportCardState extends State<HealthPassportCard> {
                 DropdownItem(label: 'O+', value: 'O+'),
                 DropdownItem(label: 'O-', value: 'O-'),
               ],
-              onSelectionChange: (selected) {},
+              onSelectionChange: (selected) {
+                if (selected.isNotEmpty) {
+                  widget.onBloodGroupChanged?.call(selected.first);
+                }
+              },
             ),
           ],
         ),

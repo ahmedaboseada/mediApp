@@ -26,6 +26,8 @@ class _HealthPassportScreenState extends State<HealthPassportScreen> {
   final TextEditingController _allergiesController = TextEditingController();
   final TextEditingController _medicationsController = TextEditingController();
   final TextEditingController _conditionsController = TextEditingController();
+  String? _editedDateOfBirth;
+  String? _editedBloodGroup;
 
   @override
   void dispose() {
@@ -52,10 +54,12 @@ class _HealthPassportScreenState extends State<HealthPassportScreen> {
 
     final hasNewData = (newAllergy != null && newAllergy.trim().isNotEmpty) ||
                        (newMedication != null && newMedication.trim().isNotEmpty) ||
-                       (newCondition != null && newCondition.trim().isNotEmpty);
+                       (newCondition != null && newCondition.trim().isNotEmpty) ||
+                       _editedDateOfBirth != null ||
+                       _editedBloodGroup != null;
 
     final localUser = await HiveService.getUserData();
-    final dob = localUser?.dob;
+    final dob = _editedDateOfBirth ?? localUser?.dob;
     final age = localUser?.age;
 
     int? yearOfBirth;
@@ -86,6 +90,7 @@ class _HealthPassportScreenState extends State<HealthPassportScreen> {
             allergies: existingAllergies,
             reactionToMedication: patient?.reactionToMedication,
             allergyAlerts: patient?.allergyAlerts,
+            bloodType: _editedBloodGroup,
           );
     }
   }
@@ -138,6 +143,8 @@ class _HealthPassportScreenState extends State<HealthPassportScreen> {
                           identity: _fullName(user),
                           dateOfBirth: user?.dob ?? 'N/A',
                           bloodGroup: _bloodGroup(profile),
+                          onDateOfBirthChanged: (val) => _editedDateOfBirth = val,
+                          onBloodGroupChanged: (val) => _editedBloodGroup = val,
                         ),
                         SizedBox(height: AppSizes.h16),
                         HealthPassportSection(

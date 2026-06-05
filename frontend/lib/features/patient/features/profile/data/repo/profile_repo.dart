@@ -68,5 +68,6 @@ abstract class ProfileRepo {
     List<String>? allergies,
     bool? reactionToMedication,
     bool? allergyAlerts,
+    String? bloodType,
   });
 }

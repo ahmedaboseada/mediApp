@@ -19,6 +19,7 @@ class HealthPassportExportCubit extends Cubit<HealthPassportExportState> {
     List<String>? allergies,
     bool? reactionToMedication,
     bool? allergyAlerts,
+    String? bloodType,
     bool shouldUpdateProfile = false,
   }) async {
     emit(HealthPassportExportLoading());
@@ -38,6 +39,7 @@ class HealthPassportExportCubit extends Cubit<HealthPassportExportState> {
         allergies: allergies,
         reactionToMedication: reactionToMedication,
         allergyAlerts: allergyAlerts,
+        bloodType: bloodType,
       );
 
       bool hasError = false;
