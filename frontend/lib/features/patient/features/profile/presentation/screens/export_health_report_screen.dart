@@ -8,6 +8,10 @@ import 'package:medi/features/patient/features/profile/presentation/widgets/expo
 import 'package:medi/features/patient/features/profile/presentation/widgets/health_report_body.dart';
 import 'package:medi/features/patient/features/profile/presentation/widgets/health_report_header.dart';
 import 'package:open_filex/open_filex.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:medi/features/patient/features/profile/data/repo/profile_repo.dart';
+import 'package:medi/features/patient/features/profile/presentation/controller/health_passport_export/health_passport_export_cubit.dart';
+import 'package:medi/features/patient/features/profile/presentation/controller/health_passport_export/health_passport_export_state.dart';
 
 class ExportHealthReportScreen extends StatelessWidget {
   const ExportHealthReportScreen({super.key, required this.patient});
@@ -87,7 +91,15 @@ class ExportHealthReportScreen extends StatelessWidget {
                                 );
                           },
                           onShowQR: () {
-                            // Handle QR code display
+                            showDialog(
+                              context: context,
+                              builder: (_) => BlocProvider(
+                                create: (_) => QRTokenCubit(
+                                  getIt<ProfileRepo>(),
+                                )..generateQRToken(),
+                                child: _buildQRDialog(context),
+                              ),
+                            );
                           },
                         ),
                       ],
@@ -99,6 +111,91 @@ class ExportHealthReportScreen extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildQRDialog(BuildContext context) {
+    return BlocConsumer<QRTokenCubit, QRTokenState>(
+      listener: (context, state) {
+        if (state is QRTokenFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to generate QR: ${state.error}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          Navigator.pop(context);
+        }
+      },
+      builder: (context, state) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.r16),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(AppSizes.w24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'Health Report QR Code',
+                  style: AppStyles.black18500,
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: AppSizes.h16),
+                if (state is QRTokenLoading)
+                  const SizedBox(
+                    height: 200,
+                    width: 200,
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                else if (state is QRTokenSuccess)
+                  QrImageView(
+                    data: state.qrToken,
+                    version: QrVersions.auto,
+                    size: 200.0,
+                    gapless: false,
+                  )
+                else
+                  const SizedBox(
+                    height: 200,
+                    width: 200,
+                    child: Center(
+                      child: Text('Failed to load QR code'),
+                    ),
+                  ),
+                SizedBox(height: AppSizes.h16),
+                Text(
+                  'Share this QR code with your doctor to access your health report',
+                  style: AppStyles.secondary12400,
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: AppSizes.h24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Close'),
+                    ),
+                    if (state is QRTokenSuccess)
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Regenerate'),
+                        onPressed: () {
+                          context.read<QRTokenCubit>().generateQRToken();
+                        },
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

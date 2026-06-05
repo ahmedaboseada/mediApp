@@ -57,6 +57,7 @@ abstract class ProfileRepo {
 
   Future<Either<ApiError, String>> downloadSharedRecord({
     required String qrToken,
+    String? endpointPath,
   });
 
   Future<Either<ApiError, String>> completePatientProfile({

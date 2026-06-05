@@ -62,11 +62,35 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     if (qrToken != null && qrToken.isNotEmpty && mounted) {
-      _downloadSharedRecord(context, qrToken);
+      final choice = await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Download Options'),
+          content: const Text('What would you like to download?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop('passport'),
+              child: const Text('Health Passport'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop('report'),
+              child: const Text('Health Report'),
+            ),
+          ],
+        ),
+      );
+
+      if (choice != null && mounted) {
+        if (choice == 'report') {
+          _downloadSharedRecord(context, qrToken, endpointPath: '/export/shared/report/$qrToken');
+        } else {
+          _downloadSharedRecord(context, qrToken);
+        }
+      }
     }
   }
 
-  void _downloadSharedRecord(BuildContext context, String qrToken) {
+  void _downloadSharedRecord(BuildContext context, String qrToken, {String? endpointPath}) {
     final downloadCubit = SharedRecordDownloadCubit(getIt<ProfileRepo>());
 
     showDialog(
@@ -103,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     // Trigger download
-    downloadCubit.downloadSharedRecord(qrToken);
+    downloadCubit.downloadSharedRecord(qrToken, endpointPath: endpointPath);
   }
 
   @override

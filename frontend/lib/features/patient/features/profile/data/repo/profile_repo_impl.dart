@@ -594,10 +594,11 @@ class ProfileRepoImpl implements ProfileRepo {
   @override
   Future<Either<ApiError, String>> downloadSharedRecord({
     required String qrToken,
+    String? endpointPath,
   }) async {
     try {
       final response = await apiService.downloadFile(
-        '/export/shared/$qrToken',
+        endpointPath ?? '/export/shared/$qrToken',
       );
 
       log('Shared record download status: ${response.statusCode}');

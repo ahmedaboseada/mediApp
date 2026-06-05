@@ -208,6 +208,8 @@ class BookingCubit extends Cubit<BookingState> {
       "patientGender": data.patientGender.toLowerCase(),
       "problem": data.problem,
       "paymentMethod": _mapPaymentMethodForApi(data.paymentMethod),
+      if (data.bookingFor.toLowerCase() != 'self' && data.patientName.isNotEmpty)
+        "reserverName": data.patientName,
     };
 
     final result = await doctorsRepository.createBooking(body);
@@ -257,6 +259,8 @@ class BookingCubit extends Cubit<BookingState> {
       "patientGender": data.patientGender.toLowerCase(),
       "problem": data.problem,
       "paymentMethod": _mapPaymentMethodForApi(data.paymentMethod),
+      if (data.bookingFor.toLowerCase() != 'self' && data.patientName.isNotEmpty)
+        "reserverName": data.patientName,
     };
 
     final result = await doctorsRepository.createBooking(body);

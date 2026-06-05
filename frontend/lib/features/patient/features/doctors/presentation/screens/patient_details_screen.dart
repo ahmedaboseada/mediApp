@@ -56,9 +56,7 @@ class PatientDetailsScreen extends StatelessWidget {
                           search: false,
                         ),
                         
-                        if (state.appointmentReviewData.bookingFor != 'self' && state.appointmentReviewData.patientName.isEmpty)
-                          Column(
-                            children: [
+                       
                               SizedBox(height: AppSizes.h18),
                               CustomTextField(
                                 label: 'Person Name',
@@ -69,8 +67,7 @@ class PatientDetailsScreen extends StatelessWidget {
                                       .updatePatientDetails(patientName: value);
                                 },
                               ),
-                            ],
-                          ),
+                           
                         SizedBox(height: AppSizes.h18),
                         CustomTextField(
                           label: 'your Age',

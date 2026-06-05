@@ -93,7 +93,8 @@ class PatientData {
         chronicConditions: List<String>.from(json['chronicConditions'] ?? []),
         medications:
             (json['medications'] as List<dynamic>?)
-                ?.map(
+                ?.where((m) => m is Map<String, dynamic>)
+                .map(
                   (m) => MedicationModel.fromJson(m as Map<String, dynamic>),
                 )
                 .toList() ??
@@ -126,7 +127,8 @@ class PatientData {
       chronicConditions: List<String>.from(json['chronicConditions'] ?? []),
       medications:
           (json['medications'] as List<dynamic>?)
-              ?.map((m) => MedicationModel.fromJson(m as Map<String, dynamic>))
+              ?.where((m) => m is Map<String, dynamic>)
+              .map((m) => MedicationModel.fromJson(m as Map<String, dynamic>))
               .toList() ??
           [],
       measurements: _parseAndFilterMeasurements(

@@ -95,11 +95,12 @@ class SharedRecordDownloadCubit extends Cubit<SharedRecordDownloadState> {
   SharedRecordDownloadCubit(this.profileRepo)
       : super(SharedRecordDownloadInitial());
 
-  Future<void> downloadSharedRecord(String qrToken) async {
+  Future<void> downloadSharedRecord(String qrToken, {String? endpointPath}) async {
     emit(SharedRecordDownloadLoading());
 
     final result = await profileRepo.downloadSharedRecord(
       qrToken: qrToken,
+      endpointPath: endpointPath,
     );
 
     result.fold(

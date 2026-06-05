@@ -1,4 +1,5 @@
 import 'package:medi/core/core.dart';
+import 'package:medi/features/doctor/features/patients/data/models/patient_data.dart';
 
 class DoctorAppointmentModel {
   const DoctorAppointmentModel({
@@ -7,6 +8,9 @@ class DoctorAppointmentModel {
     required this.avatarAsset,
     this.userId,
     this.patientName,
+    this.bookingFor = 'self',
+    this.reserverName,
+    this.patientData,
   });
 
   final String name;
@@ -14,6 +18,9 @@ class DoctorAppointmentModel {
   final String avatarAsset;
   final String? userId;
   final String? patientName;
+  final String bookingFor;
+  final String? reserverName;
+  final PatientData? patientData;
 
   factory DoctorAppointmentModel.fromJson(Map<String, dynamic> json) {
     String time = '';
@@ -26,9 +33,16 @@ class DoctorAppointmentModel {
     String name = '';
     String? userId;
     String? patientName;
+    PatientData? patientData;
     
     if (json['patientId'] != null && json['patientId'] is Map) {
       final patient = json['patientId'] as Map<String, dynamic>;
+      
+      try {
+        patientData = PatientData.fromJson(patient);
+      } catch (e) {
+        // Fallback if parsing fails
+      }
       
       // Extract userId
       if (patient['userId'] != null) {
@@ -61,6 +75,9 @@ class DoctorAppointmentModel {
       }
     }
 
+    final bookingFor = json['bookingFor']?.toString() ?? 'self';
+    final reserverName = json['reserverName']?.toString();
+
     return DoctorAppointmentModel(
       name: name,
       visitTime: time,
@@ -68,6 +85,9 @@ class DoctorAppointmentModel {
           .toString(),
       userId: userId,
       patientName: patientName ?? name,
+      bookingFor: bookingFor,
+      reserverName: reserverName,
+      patientData: patientData,
     );
   }
 }

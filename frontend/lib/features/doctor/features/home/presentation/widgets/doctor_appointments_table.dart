@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:medi/core/core.dart';
 import 'package:medi/features/doctor/features/home/data/models/doctor_appointment_model.dart';
+import 'package:medi/features/doctor/features/patients/presentation/screens/patient_profile_screen.dart';
 import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 import 'package:zego_uikit/zego_uikit.dart';
 
@@ -93,7 +94,9 @@ class DoctorAppointmentsDataRow extends StatelessWidget {
                 SizedBox(width: AppSizes.w8),
                 Expanded(
                   child: Text(
-                    appointment.name,
+                    appointment.bookingFor.toLowerCase() == 'self'
+                        ? (appointment.patientName ?? appointment.name)
+                        : (appointment.reserverName ?? appointment.name),
                     style: AppStyles.black14400,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -142,12 +145,29 @@ class DoctorAppointmentsDataRow extends StatelessWidget {
                 //     // Handle play arrow icon tap
                 //   },
                 // ),
-                // SizedBox(width: AppSizes.w8),
-                // _actionIcon(
-                //   icon: Icons.visibility_outlined,
-                //   bgColor: const Color(0xFFD7F7DD),
-                //   iconColor: const Color(0xFF22C55E),
-                // ),
+                 SizedBox(width: AppSizes.w8),
+               if (appointment.bookingFor.toLowerCase() == 'self') 
+                _actionIcon(
+                  icon: Icons.visibility_outlined,
+                  bgColor: const Color(0xFFD7F7DD),
+                  iconColor: const Color(0xFF22C55E),
+                  onTap: () {
+                    if (appointment.patientData != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PatientProfileScreen(
+                            patient: appointment.patientData!,
+                          ),
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Patient data not available')),
+                      );
+                    }
+                  },
+                ),
                 // SizedBox(width: AppSizes.w8),
                 // _actionIcon(
                 //   icon: Icons.close_rounded,
@@ -171,10 +191,10 @@ class DoctorAppointmentsDataRow extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: AppSizes.w24,
-        height: AppSizes.h24,
+        width: AppSizes.w40,
+        height: AppSizes.h40,
         decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
-        child: Icon(icon, size: AppSizes.h18, color: iconColor),
+        child: Icon(icon, size: AppSizes.h24, color: iconColor),
       ),
     );
   }
