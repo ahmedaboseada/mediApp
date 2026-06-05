@@ -472,8 +472,9 @@ class MedicineRepoImpl implements MedicineRepo {
       case 'every day':
       case 'every 2 days':
       case 'every 3 days':
-      case 'as needed':
         return 'daily';
+      case 'as needed':
+        return 'as needed';
       case 'weekly':
       case 'every week':
       case 'every 2 weeks':
@@ -481,7 +482,7 @@ class MedicineRepoImpl implements MedicineRepo {
       case 'specific':
         return 'specific';
       default:
-        // Backend currently validates frequency against: daily, weekly, specific.
+        // Backend currently validates frequency against: daily, weekly, specific, as needed.
         return 'daily';
     }
   }
@@ -508,6 +509,11 @@ class MedicineRepoImpl implements MedicineRepo {
 
     final normalizedFrequency = frequency.trim().toLowerCase();
     switch (normalizedFrequency) {
+      case 'as needed':
+        data['daily'] = <String>[];
+        data['weekly'] = <Map<String, dynamic>>[];
+        data['specific'] = <Map<String, dynamic>>[];
+        break;
       case 'daily':
         data['daily'] = _normalizeTimes(daily ?? const <String>[]);
         data['weekly'] = <Map<String, dynamic>>[];

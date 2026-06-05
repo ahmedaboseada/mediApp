@@ -65,16 +65,17 @@ class _HomeScreenState extends State<HomeScreen> {
       final choice = await showDialog<String>(
         context: context,
         builder: (context) => AlertDialog(
+          backgroundColor: Colors.white,
           title: const Text('Download Options'),
           content: const Text('What would you like to download?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop('passport'),
-              child: const Text('Health Passport'),
+              child: const Text('Health Passport', style: TextStyle(color: AppColors.primary)),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop('report'),
-              child: const Text('Health Report'),
+              child: const Text('Health Report', style: TextStyle(color: AppColors.primary)),
             ),
           ],
         ),

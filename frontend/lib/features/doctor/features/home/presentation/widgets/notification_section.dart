@@ -60,30 +60,30 @@ class _NotificationSectionViewState extends State<_NotificationSectionView> {
                   value: state.emailNotifications,
                   onChanged: (value) => context.read<NotificationSettingsCubit>().toggleEmail(value),
                 ),
-                ToggleTile(
-                  title: 'SMS Notifications',
-                  subtitle: 'Receive notifications via text message',
-                  value: state.smsNotifications,
-                  onChanged: (value) => context.read<NotificationSettingsCubit>().toggleSms(value),
-                ),
+                // ToggleTile(
+                //   title: 'SMS Notifications',
+                //   subtitle: 'Receive notifications via text message',
+                //   value: state.smsNotifications,
+                //   onChanged: (value) => context.read<NotificationSettingsCubit>().toggleSms(value),
+                // ),
                 ToggleTile(
                   title: 'Appointment Reminders',
                   subtitle: 'Get reminded about upcoming appointments',
                   value: state.appointmentReminders,
                   onChanged: (value) => _handleAppointmentReminders(value, context),
                 ),
-                ToggleTile(
-                  title: 'Patient Updates',
-                  subtitle: 'Notifications about patient status changes',
-                  value: state.patientUpdates,
-                  onChanged: (value) => context.read<NotificationSettingsCubit>().togglePatient(value),
-                ),
-                ToggleTile(
-                  title: 'Medication Alerts',
-                  subtitle: 'Alerts when patients miss medications',
-                  value: state.medicationAlerts,
-                  onChanged: (value) => context.read<NotificationSettingsCubit>().toggleMedication(value),
-                ),
+                // ToggleTile(
+                //   title: 'Patient Updates',
+                //   subtitle: 'Notifications about patient status changes',
+                //   value: state.patientUpdates,
+                //   onChanged: (value) => context.read<NotificationSettingsCubit>().togglePatient(value),
+                // ),
+                // ToggleTile(
+                //   title: 'Medication Alerts',
+                //   subtitle: 'Alerts when patients miss medications',
+                //   value: state.medicationAlerts,
+                //   onChanged: (value) => context.read<NotificationSettingsCubit>().toggleMedication(value),
+                // ),
                 ToggleTile(
                   title: 'System Updates',
                   subtitle: 'Important system and security updates',
